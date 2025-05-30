@@ -22,6 +22,7 @@ class AuthRepositoryImpl implements AuthRepository {
     this._googleSignIn,
     this._firebaseAuth,
     this._userDataSource,
+
   );
 
   @override
