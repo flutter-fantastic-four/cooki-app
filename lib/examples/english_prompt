@@ -1,0 +1,42 @@
+Given the next image, generate a recipe **in English**, using only the fields listed in the format below. The output must strictly follow this structure with no extra fields or missing values.
+
+The value for "category" must be **exactly one** of the following predefined values:
+
+[
+  "Asia",
+  "Africa",
+  "Europe",
+  "North America",
+  "South America",
+  "Oceania/Australia"
+]
+
+The final result must be returned in this exact JSON format:
+
+```
+{
+"recipeName": "Classic Spaghetti Carbonara",
+"description": "Classic Spaghetti Carbonara is a traditional Roman pasta dish featuring al dente spaghetti tossed in a creamy sauce made from eggs, Pecorino Romano cheese, crispy pancetta, and freshly ground black pepper. This simple yet satisfying recipe comes together in just 20 minutes, making it perfect for a quick and elegant meal.",
+"ingredients": \[
+"400g spaghetti",
+"150g pancetta, diced",
+"3 large eggs",
+"100g Pecorino Romano cheese, finely grated",
+"Freshly ground black pepper, to taste",
+"Salt, for pasta water",
+"1 tablespoon extra virgin olive oil"
+],
+"steps": \[
+"Bring a large pot of salted water to a boil. Add the spaghetti and cook until al dente, about 8–9 minutes, stirring occasionally.",
+"While the pasta cooks, heat the olive oil in a large skillet over medium heat. Add the diced pancetta and cook until crispy and golden, about 5–7 minutes. Remove from heat and set aside.",
+"In a mixing bowl, whisk together the eggs, grated Pecorino Romano cheese, and a generous amount of freshly ground black pepper until well combined.",
+"Once the pasta is al dente, reserve about 1 cup of the pasta cooking water and then drain the spaghetti.",
+"Immediately add the hot spaghetti to the skillet with pancetta (off the heat to avoid scrambling the eggs). Pour the egg and cheese mixture over the pasta, tossing quickly and continuously to create a creamy sauce that coats the spaghetti.",
+"If the sauce is too thick, gradually add reserved pasta water, a little at a time, until you reach a smooth, silky consistency.",
+"Adjust seasoning with additional black pepper if desired. Serve immediately with extra Pecorino Romano cheese sprinkled on top."
+],
+"cookTime": 10,
+"calories": 680,
+"category": "Europe"
+}
+```
