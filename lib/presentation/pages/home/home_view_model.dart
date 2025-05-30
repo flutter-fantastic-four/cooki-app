@@ -1,7 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../user_global_view_model.dart';
-
 class HomeViewModel extends AutoDisposeNotifier<int> {
   @override
   int build() {

@@ -19,8 +19,6 @@ class LoginState {
 }
 
 class LoginViewModel extends Notifier<LoginState> {
-  static const String _agreementKey = 'user_agreed_to_terms';
-
   @override
   LoginState build() {
     return const LoginState();
