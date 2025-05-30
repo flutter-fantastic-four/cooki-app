@@ -1,0 +1,41 @@
+{
+  "type": "object",
+  "properties": {
+    "recipeName": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "ingredients": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "cookTime": {
+      "type": "integer"
+    },
+    "calories": {
+      "type": "integer"
+    },
+    "categories": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "recipeName",
+    "description",
+    "ingredients",
+    "steps",
+    "cookTime",
+    "calories",
+    "categories"
+  ]
+}
