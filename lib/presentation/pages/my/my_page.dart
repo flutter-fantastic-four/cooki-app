@@ -107,20 +107,12 @@ class MyPage extends ConsumerWidget {
               SettingsTile(
                 leading: const Icon(Icons.article_outlined),
                 title: Text('이용약관'),
-                onPressed:
-                    (context) => _launchUrl(
-                      context,
-                      'https://englim.me/share-lingo-page/terms',
-                    ),
+                onPressed: (context) => _launchUrl(context, ''),
               ),
               SettingsTile(
                 leading: const Icon(Icons.vpn_key),
                 title: Text('개인정보처리방침'),
-                onPressed:
-                    (context) => _launchUrl(
-                      context,
-                      'https://englim.me/share-lingo-page',
-                    ),
+                onPressed: (context) => _launchUrl(context, ''),
               ),
               SettingsTile(
                 leading: const Icon(Icons.email),
