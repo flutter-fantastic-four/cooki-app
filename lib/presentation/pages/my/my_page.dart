@@ -12,8 +12,8 @@ import '../../user_global_view_model.dart';
 import '../login/login_page.dart';
 
 /// Settings page that allows users to configure app preferences.
-class SettingsPage extends ConsumerWidget {
-  const SettingsPage({super.key});
+class MyPage extends ConsumerWidget {
+  const MyPage({super.key});
 
   /// Launches the default email client to contact the developer.
   ///
@@ -107,18 +107,20 @@ class SettingsPage extends ConsumerWidget {
               SettingsTile(
                 leading: const Icon(Icons.article_outlined),
                 title: Text('이용약관'),
-                onPressed: (context) => _launchUrl(
-                  context,
-                  'https://englim.me/share-lingo-page/terms',
-                ),
+                onPressed:
+                    (context) => _launchUrl(
+                      context,
+                      'https://englim.me/share-lingo-page/terms',
+                    ),
               ),
               SettingsTile(
                 leading: const Icon(Icons.vpn_key),
                 title: Text('개인정보처리방침'),
-                onPressed: (context) => _launchUrl(
-                  context,
-                  'https://englim.me/share-lingo-page',
-                ),
+                onPressed:
+                    (context) => _launchUrl(
+                      context,
+                      'https://englim.me/share-lingo-page',
+                    ),
               ),
               SettingsTile(
                 leading: const Icon(Icons.email),
