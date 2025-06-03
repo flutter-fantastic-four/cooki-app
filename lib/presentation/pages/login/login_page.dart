@@ -10,9 +10,13 @@ import 'login_view_model.dart';
 class LoginPage extends ConsumerWidget {
   const LoginPage({super.key});
 
-  void _login(WidgetRef ref, BuildContext context) async {
+  void _login(
+    WidgetRef ref,
+    BuildContext context,
+    SignInMethod signInmeethod,
+  ) async {
     final loginViewModel = ref.read(loginViewModelProvider.notifier);
-    final appUser = await loginViewModel.signIn();
+    final appUser = await loginViewModel.signIn(signInmeethod);
 
     if (appUser != null && appUser.id.isNotEmpty && context.mounted) {
       ref.read(userGlobalViewModelProvider.notifier).setUser(appUser);
@@ -55,11 +59,13 @@ class LoginPage extends ConsumerWidget {
               ),
               const SizedBox(height: 50),
 
+              //
+              // TODO : 버튼 위젯 리팩토링
               Center(
                 child: SizedBox(
                   width: 310,
                   child: OutlinedButton(
-                    onPressed: () => _login(ref, context),
+                    onPressed: () => _login(ref, context, SignInMethod.google),
                     style: ElevatedButton.styleFrom(
                       // backgroundColor: Colors.white,
                       foregroundColor: Colors.black87,
@@ -73,10 +79,72 @@ class LoginPage extends ConsumerWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Image.asset('assets/icons/google.png', height: 18),
+                        // Image.asset('assets/icons/google.png', height: 18),
                         const SizedBox(width: 16),
                         Text(
                           loginState.isLoading ? '로그인 중...' : '구글 계정으로 시작하기',
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 30),
+
+              // TODO : 애플 개발자 이후 로그인 작성
+              // Center(
+              //   child: SizedBox(
+              //     width: 310,
+              //     child: OutlinedButton(
+              //       onPressed: () => _login(ref, context),
+              //       style: ElevatedButton.styleFrom(
+              //         // backgroundColor: Colors.white,
+              //         foregroundColor: Colors.black87,
+              //         side: BorderSide(color: Colors.grey[400]!),
+              //         shape: RoundedRectangleBorder(
+              //           borderRadius: BorderRadius.circular(24),
+              //           // side: const BorderSide(color: Colors.grey),
+              //         ),
+              //         minimumSize: const Size(double.infinity, 53),
+              //       ),
+              //       child: Row(
+              //         mainAxisAlignment: MainAxisAlignment.center,
+              //         children: [
+              //           // Image.asset('assets/icons/google.png', height: 18),
+              //           const SizedBox(width: 16),
+              //           Text(
+              //             loginState.isLoading ? '로그인 중...' : '애플 계정으로 시작하기',
+              //             style: const TextStyle(fontSize: 16),
+              //           ),
+              //         ],
+              //       ),
+              //     ),
+              //   ),
+              // ),
+              // const SizedBox(height: 30),
+              Center(
+                child: SizedBox(
+                  width: 310,
+                  child: OutlinedButton(
+                    onPressed: () => _login(ref, context, SignInMethod.kakao),
+                    style: ElevatedButton.styleFrom(
+                      // backgroundColor: Colors.white,
+                      foregroundColor: Colors.black87,
+                      side: BorderSide(color: Colors.grey[400]!),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24),
+                        // side: const BorderSide(color: Colors.grey),
+                      ),
+                      minimumSize: const Size(double.infinity, 53),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Image.asset('assets/icons/google.png', height: 18),
+                        const SizedBox(width: 16),
+                        Text(
+                          loginState.isLoading ? '로그인 중...' : '카카오 계정으로 시작하기',
                           style: const TextStyle(fontSize: 16),
                         ),
                       ],

@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cooki/data/data_source/firebase_auth_data_source.dart';
-import 'package:cooki/data/data_source/google_sign_in_data_source.dart';
+import 'package:cooki/data/data_source/sign_in_data_source.dart';
 import 'package:cooki/data/data_source/user_data_source.dart';
 import 'package:cooki/data/dto/user_dto.dart';
 import 'package:cooki/data/repository/auth_repository.dart';

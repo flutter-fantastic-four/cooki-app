@@ -10,21 +10,33 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app/constants/app_constants.dart';
 import 'app/theme.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 
 void main() async {
   runZonedGuarded(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
+
+      // env 파일 로드
+      await dotenv.load(fileName: '.env');
+
+      // Firebase 초기화
       try {
         await Firebase.initializeApp(
           options: DefaultFirebaseOptions.currentPlatform,
         );
       } catch (_) {} // Firebase가 이미 초기화된 경우 무시
-      // await dotenv.load(fileName: '.env');
+
+      // 카카오 SDK 초기화
+      String a = dotenv.get('KAKAO_SDK_NATIVE_APP_KEY');
+      print(a);
+      KakaoSdk.init(nativeAppKey: dotenv.get('KAKAO_SDK_NATIVE_APP_KEY'));
+
       // 플러터 프레임워크 내부에서 발생하는 에러
       FlutterError.onError = (errorDetails) {
         FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
       };
+
       runApp(const ProviderScope(child: MyApp()));
     },
     (error, stack) {
