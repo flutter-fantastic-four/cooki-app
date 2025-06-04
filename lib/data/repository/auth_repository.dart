@@ -34,7 +34,7 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<AppUser?> signInWithKakao() async {
     final kakaoToken = await _kakaoDataSource.signIn();
-    if (kakaoToken == null) throw Exception('Kakao 로그인 실패');
+    if (kakaoToken == null) return null;
 
     return _handleSignIn(() => _firebaseAuth.signInWithKakao(kakaoToken));
   }

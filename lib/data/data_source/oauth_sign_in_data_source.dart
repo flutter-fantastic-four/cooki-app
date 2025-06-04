@@ -4,12 +4,12 @@ import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 
-abstract class OAuthSignInDataSource {
-  Future signIn();
+abstract class OAuthSignInDataSource<T> {
+  Future<T?> signIn();
   Future<void> signOut();
 }
 
-class GoogleOAuthDataSourceImpl implements OAuthSignInDataSource {
+class GoogleOAuthDataSourceImpl implements OAuthSignInDataSource<GoogleSignInAuthentication> {
   final GoogleSignIn _googleSignIn;
 
   GoogleOAuthDataSourceImpl(this._googleSignIn);
@@ -25,7 +25,7 @@ class GoogleOAuthDataSourceImpl implements OAuthSignInDataSource {
   Future<void> signOut() => _googleSignIn.signOut();
 }
 
-class KakaoOAuthDataSourceImpl implements OAuthSignInDataSource {
+class KakaoOAuthDataSourceImpl implements OAuthSignInDataSource<String> {
   final UserApi _kakaoUserApi;
 
   KakaoOAuthDataSourceImpl(this._kakaoUserApi);
