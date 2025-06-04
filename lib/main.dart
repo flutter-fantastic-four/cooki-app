@@ -22,14 +22,10 @@ void main() async {
 
       // Firebase 초기화
       try {
-        await Firebase.initializeApp(
-          options: DefaultFirebaseOptions.currentPlatform,
-        );
+        await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
       } catch (_) {} // Firebase가 이미 초기화된 경우 무시
 
       // 카카오 SDK 초기화
-      String a = dotenv.get('KAKAO_SDK_NATIVE_APP_KEY');
-      print(a);
       KakaoSdk.init(nativeAppKey: dotenv.get('KAKAO_SDK_NATIVE_APP_KEY'));
 
       // 플러터 프레임워크 내부에서 발생하는 에러

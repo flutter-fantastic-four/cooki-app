@@ -4,15 +4,15 @@ import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 
-abstract class SignInDataSource {
+abstract class OAuthSignInDataSource {
   Future signIn();
   Future<void> signOut();
 }
 
-class GoogleSignInDataSourceImpl implements SignInDataSource {
+class GoogleOAuthDataSourceImpl implements OAuthSignInDataSource {
   final GoogleSignIn _googleSignIn;
 
-  GoogleSignInDataSourceImpl(this._googleSignIn);
+  GoogleOAuthDataSourceImpl(this._googleSignIn);
 
   @override
   Future<GoogleSignInAuthentication?> signIn() async {
@@ -25,18 +25,18 @@ class GoogleSignInDataSourceImpl implements SignInDataSource {
   Future<void> signOut() => _googleSignIn.signOut();
 }
 
-class KakaoSignInDataSourceImpl implements SignInDataSource {
+class KakaoOAuthDataSourceImpl implements OAuthSignInDataSource {
   final UserApi _kakaoUserApi;
 
-  KakaoSignInDataSourceImpl(this._kakaoUserApi);
+  KakaoOAuthDataSourceImpl(this._kakaoUserApi);
 
   @override
-  Future<OAuthToken?> signIn() async {
+  Future<String?> signIn() async {
     if (await isKakaoTalkInstalled()) {
       try {
         final kakaoUser = await _kakaoUserApi.loginWithKakaoTalk();
         log('카카오톡으로 로그인 성공');
-        return kakaoUser;
+        return kakaoUser.accessToken;
       } catch (error) {
         log('카카오톡으로 로그인 실패 $error');
 
@@ -49,7 +49,7 @@ class KakaoSignInDataSourceImpl implements SignInDataSource {
         try {
           final kakaoUser = await _kakaoUserApi.loginWithKakaoAccount();
           log('카카오계정으로 로그인 성공');
-          return kakaoUser;
+          return kakaoUser.accessToken;
         } catch (error) {
           log('카카오계정으로 로그인 실패 $error');
 
@@ -60,7 +60,7 @@ class KakaoSignInDataSourceImpl implements SignInDataSource {
       try {
         final kakaoUser = await _kakaoUserApi.loginWithKakaoAccount();
         log('카카오계정으로 로그인 성공');
-        return kakaoUser;
+        return kakaoUser.accessToken;
       } catch (error) {
         log('카카오계정으로 로그인 실패 $error');
 

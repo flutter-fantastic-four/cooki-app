@@ -1,4 +1,4 @@
-import 'package:cooki/data/data_source/sign_in_data_source.dart';
+import 'package:cooki/data/data_source/oauth_sign_in_data_source.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mocktail/mocktail.dart';
@@ -7,33 +7,28 @@ class MockGoogleSignIn extends Mock implements GoogleSignIn {}
 
 class MockGoogleSignInAccount extends Mock implements GoogleSignInAccount {}
 
-class MockGoogleSignInAuthentication extends Mock
-    implements GoogleSignInAuthentication {}
+class MockGoogleSignInAuthentication extends Mock implements GoogleSignInAuthentication {}
 
 void main() {
   late MockGoogleSignIn mockGoogleSignIn;
-  late GoogleSignInDataSourceImpl googleSignInDataSource;
+  late GoogleOAuthDataSourceImpl googleSignInDataSource;
   late MockGoogleSignInAccount mockGoogleSignInAccount;
   late MockGoogleSignInAuthentication mockGoogleSignInAuthentication;
 
   setUp(() {
     mockGoogleSignIn = MockGoogleSignIn();
-    googleSignInDataSource = GoogleSignInDataSourceImpl(mockGoogleSignIn);
+    googleSignInDataSource = GoogleOAuthDataSourceImpl(mockGoogleSignIn);
     mockGoogleSignInAccount = MockGoogleSignInAccount();
     mockGoogleSignInAuthentication = MockGoogleSignInAuthentication();
 
     // Set up default mock behavior
-    when(
-      () => mockGoogleSignInAccount.authentication,
-    ).thenAnswer((_) async => mockGoogleSignInAuthentication);
+    when(() => mockGoogleSignInAccount.authentication).thenAnswer((_) async => mockGoogleSignInAuthentication);
   });
 
   group('GoogleSignInDataSourceImpl', () {
     test('signIn returns authentication when sign in succeeds', () async {
       // Arrange
-      when(
-        () => mockGoogleSignIn.signIn(),
-      ).thenAnswer((_) async => mockGoogleSignInAccount);
+      when(() => mockGoogleSignIn.signIn()).thenAnswer((_) async => mockGoogleSignInAccount);
 
       // Act
       final result = await googleSignInDataSource.signIn();
@@ -59,9 +54,7 @@ void main() {
 
     test('signOut calls Google signOut', () async {
       // Arrange
-      when(
-        () => mockGoogleSignIn.signOut(),
-      ).thenAnswer((_) async => mockGoogleSignInAccount);
+      when(() => mockGoogleSignIn.signOut()).thenAnswer((_) async => mockGoogleSignInAccount);
 
       // Act
       await googleSignInDataSource.signOut();

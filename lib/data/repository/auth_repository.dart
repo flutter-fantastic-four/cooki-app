@@ -1,10 +1,10 @@
-import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
+import 'package:cooki/data/dto/user_dto.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../domain/entity/app_user.dart';
 import '../data_source/firebase_auth_data_source.dart';
-import '../data_source/sign_in_data_source.dart';
+import '../data_source/oauth_sign_in_data_source.dart';
 import '../data_source/user_data_source.dart';
-import '../dto/user_dto.dart';
 
 abstract class AuthRepository {
   Future<AppUser?> signInWithGoogle();
@@ -16,78 +16,58 @@ abstract class AuthRepository {
 }
 
 class AuthRepositoryImpl implements AuthRepository {
-  final SignInDataSource _googleSignIn;
-  final SignInDataSource _kakaoSignIn;
+  final OAuthSignInDataSource _googleDataSource;
+  final OAuthSignInDataSource _kakaoDataSource;
   final FirebaseAuthDataSource _firebaseAuth;
   final UserDataSource _userDataSource;
 
-  AuthRepositoryImpl(
-    this._googleSignIn,
-    this._kakaoSignIn,
-    this._firebaseAuth,
-    this._userDataSource,
-  );
+  AuthRepositoryImpl(this._googleDataSource, this._kakaoDataSource, this._firebaseAuth, this._userDataSource);
 
   @override
   Future<AppUser?> signInWithGoogle() async {
-    final googleAuth = await _googleSignIn.signIn();
+    final googleAuth = await _googleDataSource.signIn();
     if (googleAuth == null) return null;
 
-    final firebaseUser = await _firebaseAuth.signInWithGoogle(googleAuth);
+    return _handleSignIn(() => _firebaseAuth.signInWithGoogle(googleAuth));
+  }
+
+  @override
+  Future<AppUser?> signInWithKakao() async {
+    final kakaoToken = await _kakaoDataSource.signIn();
+    if (kakaoToken == null) throw Exception('Kakao 로그인 실패');
+
+    return _handleSignIn(() => _firebaseAuth.signInWithKakao(kakaoToken));
+  }
+
+  Future<AppUser?> _handleSignIn(Future<User?> Function() firebaseSignIn) async {
+    final User? firebaseUser = await firebaseSignIn();
     if (firebaseUser == null) return null;
 
     final partialUser = AppUser(
       id: firebaseUser.uid,
       name: firebaseUser.displayName ?? 'User',
       profileImage: firebaseUser.photoURL,
-      email: firebaseUser.email,
+      email: firebaseUser.email ?? '',
     );
 
-    final fullUserDto = await _userDataSource.getUserById(partialUser.id);
-    if (fullUserDto != null) {
-      // User exists in backend
-      return fullUserDto.toEntity(); // Return existing user in backend
+    final existingUser = await _userDataSource.getUserById(partialUser.id);
+    if (existingUser != null) {
+      return existingUser.toEntity();
     } else {
-      // User is new sign up. Add to backend
       await _userDataSource.saveUser(UserDto.fromEntity(partialUser));
-      return partialUser; // Return newly added user
+      return partialUser;
     }
   }
 
   @override
   Future<void> signOut() async {
-    await _googleSignIn.signOut();
+    await _googleDataSource.signOut();
+    await _kakaoDataSource.signOut();
     await _firebaseAuth.signOut();
   }
 
   @override
   Stream<String?> authStateChanges() {
     return _firebaseAuth.authStateChanges().map((user) => user?.uid);
-  }
-
-  @override
-  Future<AppUser?> signInWithKakao() async {
-    final OAuthToken? kakaoAuth = await _kakaoSignIn.signIn();
-    if (kakaoAuth == null) return null;
-
-    final firebaseUser = await _firebaseAuth.signInWithKakao(kakaoAuth);
-    if (firebaseUser == null) return null;
-
-    final partialUser = AppUser(
-      id: firebaseUser.uid,
-      name: firebaseUser.displayName ?? 'User',
-      profileImage: firebaseUser.photoURL,
-      email: firebaseUser.email,
-    );
-
-    final fullUserDto = await _userDataSource.getUserById(partialUser.id);
-    if (fullUserDto != null) {
-      // User exists in backend
-      return fullUserDto.toEntity(); // Return existing user in backend
-    } else {
-      // User is new sign up. Add to backend
-      await _userDataSource.saveUser(UserDto.fromEntity(partialUser));
-      return partialUser; // Return newly added user
-    }
   }
 }

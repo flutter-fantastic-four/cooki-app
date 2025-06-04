@@ -10,8 +10,7 @@ class MockUserCredential extends Mock implements UserCredential {}
 
 class MockUser extends Mock implements User {}
 
-class MockGoogleSignInAuthentication extends Mock
-    implements GoogleSignInAuthentication {}
+class MockGoogleSignInAuthentication extends Mock implements GoogleSignInAuthentication {}
 
 class FakeAuthCredential extends Fake implements AuthCredential {}
 
@@ -42,14 +41,10 @@ void main() {
   group('FirebaseAuthDataSourceImpl', () {
     test('signInWithGoogle returns user when sign in succeeds', () async {
       // Arrange
-      when(
-        () => mockFirebaseAuth.signInWithCredential(any()),
-      ).thenAnswer((_) async => mockUserCredential);
+      when(() => mockFirebaseAuth.signInWithCredential(any())).thenAnswer((_) async => mockUserCredential);
 
       // Act
-      final result = await firebaseAuthDataSource.signInWithGoogle(
-        mockGoogleAuth,
-      );
+      final result = await firebaseAuthDataSource.signInWithGoogle(mockGoogleAuth);
 
       // Assert
       expect(result, equals(mockUser));
