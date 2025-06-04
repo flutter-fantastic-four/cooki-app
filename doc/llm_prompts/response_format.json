@@ -19,5 +19,15 @@
     "calories",
     "category",
     "tags"
+  ],
+  "propertyOrdering": [
+    "recipeName",
+    "description",
+    "ingredients",
+    "steps",
+    "cookTime",
+    "calories",
+    "category",
+    "tags"
   ]
 }
