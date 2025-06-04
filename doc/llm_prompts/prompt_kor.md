@@ -46,7 +46,6 @@ Here is an example of a valid output format for a different recipe:
 ```json
 {
   "recipeName": "김치볶음밥",
-  "description": "김치의 깊은 맛과 밥이 어우러진 한국의 대표적인 볶음밥 요리입니다. 간단하면서도 맛있어서 언제든지 쉽게 만들 수 있는 집밥 메뉴예요.",
   "ingredients": [
     "밥 2공기",
     "김치 200g",
@@ -89,7 +88,6 @@ If the input is invalid or unrelated to food, return the following fallback json
 ```json
 {
   "recipeName": "__ERROR__",
-  "description": "__ERROR__",
   "ingredients": [],
   "steps": [],
   "cookTime": -1,
