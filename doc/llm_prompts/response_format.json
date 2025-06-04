@@ -1,41 +1,30 @@
 {
   "type": "object",
   "properties": {
-    "recipeName": {
-      "type": "string"
-    },
-    "description": {
-      "type": "string"
-    },
-    "ingredients": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "steps": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "cookTime": {
-      "type": "integer"
-    },
-    "calories": {
-      "type": "integer"
-    },
-    "categories": {
-      "type": "string"
-    }
+    "recipeName": { "type": "string" },
+    "ingredients": { "type": "array", "items": { "type": "string" } },
+    "steps": { "type": "array", "items": { "type": "string" } },
+    "cookTime": { "type": "integer" },
+    "calories": { "type": "integer" },
+    "category": { "type": "string" },
+    "tags": { "type": "array", "items": { "type": "string" } }
   },
   "required": [
     "recipeName",
-    "description",
     "ingredients",
     "steps",
     "cookTime",
     "calories",
-    "categories"
+    "category",
+    "tags"
+  ],
+  "propertyOrdering": [
+    "recipeName",
+    "ingredients",
+    "steps",
+    "cookTime",
+    "calories",
+    "category",
+    "tags"
   ]
 }
