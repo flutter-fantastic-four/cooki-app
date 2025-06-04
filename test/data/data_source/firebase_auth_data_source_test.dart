@@ -1,3 +1,4 @@
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:cooki/data/data_source/firebase_auth_data_source.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -5,6 +6,8 @@ import 'package:mocktail/mocktail.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class MockFirebaseAuth extends Mock implements FirebaseAuth {}
+
+class MockFirebaseFunction extends Mock implements FirebaseFunctions {}
 
 class MockUserCredential extends Mock implements UserCredential {}
 
@@ -16,6 +19,7 @@ class FakeAuthCredential extends Fake implements AuthCredential {}
 
 void main() {
   late MockFirebaseAuth mockFirebaseAuth;
+  late MockFirebaseFunction mockFirebaseFunction;
   late FirebaseAuthDataSourceImpl firebaseAuthDataSource;
   late MockUserCredential mockUserCredential;
   late MockUser mockUser;
@@ -27,7 +31,8 @@ void main() {
 
   setUp(() {
     mockFirebaseAuth = MockFirebaseAuth();
-    firebaseAuthDataSource = FirebaseAuthDataSourceImpl(mockFirebaseAuth);
+    mockFirebaseFunction = MockFirebaseFunction();
+    firebaseAuthDataSource = FirebaseAuthDataSourceImpl(mockFirebaseAuth, mockFirebaseFunction);
     mockUserCredential = MockUserCredential();
     mockUser = MockUser();
     mockGoogleAuth = MockGoogleSignInAuthentication();

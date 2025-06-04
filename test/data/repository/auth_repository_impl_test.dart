@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cooki/data/data_source/firebase_auth_data_source.dart';
-import 'package:cooki/data/data_source/sign_in_data_source.dart';
+import 'package:cooki/data/data_source/oauth_sign_in_data_source.dart';
 import 'package:cooki/data/data_source/user_data_source.dart';
 import 'package:cooki/data/dto/user_dto.dart';
 import 'package:cooki/data/repository/auth_repository.dart';
@@ -10,7 +10,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mocktail/mocktail.dart';
 
-class MockGoogleSignInDataSource extends Mock implements GoogleSignInDataSource {}
+class MockGoogleOAuthDataSource extends Mock implements OAuthSignInDataSource {}
+
+class MockKakaoOAuthDataSource extends Mock implements OAuthSignInDataSource {}
 
 class MockFirebaseAuthDataSource extends Mock implements FirebaseAuthDataSource {}
 
@@ -27,7 +29,8 @@ class FakeGoogleSignInAuthentication extends Fake implements GoogleSignInAuthent
 class FakeStream<T> extends Fake implements Stream<T> {}
 
 void main() {
-  late MockGoogleSignInDataSource mockGoogleSignInDataSource;
+  late MockGoogleOAuthDataSource mockGoogleSignInDataSource;
+  late MockKakaoOAuthDataSource mockKakaoSignInDataSource;
   late MockFirebaseAuthDataSource mockFirebaseAuthDataSource;
   late MockUserDataSource mockUserDataSource;
   late AuthRepositoryImpl authRepository;
@@ -40,10 +43,11 @@ void main() {
   });
 
   setUp(() {
-    mockGoogleSignInDataSource = MockGoogleSignInDataSource();
+    mockGoogleSignInDataSource = MockGoogleOAuthDataSource();
+    mockKakaoSignInDataSource = MockKakaoOAuthDataSource();
     mockFirebaseAuthDataSource = MockFirebaseAuthDataSource();
     mockUserDataSource = MockUserDataSource();
-    authRepository = AuthRepositoryImpl(mockGoogleSignInDataSource, mockFirebaseAuthDataSource, mockUserDataSource);
+    authRepository = AuthRepositoryImpl(mockGoogleSignInDataSource, mockKakaoSignInDataSource, mockFirebaseAuthDataSource, mockUserDataSource);
     mockGoogleAuth = MockGoogleSignInAuthentication();
     mockFirebaseUser = MockFirebaseUser();
 
@@ -55,7 +59,7 @@ void main() {
 
     // Set up mock behavior for void methods
     when(() => mockGoogleSignInDataSource.signOut()).thenAnswer((_) async {
-      return null;
+      return;
     });
     when(() => mockFirebaseAuthDataSource.signOut()).thenAnswer((_) async {});
 
