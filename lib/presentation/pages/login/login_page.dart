@@ -40,24 +40,26 @@ class LoginPage extends ConsumerWidget {
   }
 
   Widget _termsAgreementText() {
-    return Text.rich(
-      TextSpan(
-        style: const TextStyle(color: Colors.black, height: 1.4),
-        children: [
-          const TextSpan(text: '회원가입 시 Cooki의 '),
-          TextSpan(
-            text: '서비스 이용 약관',
-            style: const TextStyle(decoration: TextDecoration.underline, decorationColor: Colors.black, decorationThickness: 0.5),
-          ),
-          const TextSpan(text: '과\n'),
-          TextSpan(
-            text: '개인정보 보호 정책',
-            style: const TextStyle(decoration: TextDecoration.underline, decorationColor: Colors.black, decorationThickness: 0.5),
-          ),
-          const TextSpan(text: '에 동의하게 됩니다.'),
-        ],
-      ),
-      textAlign: TextAlign.center,
+    return Column(
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('회원가입 시 Cooki의 '),
+            Container(decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Colors.black))), child: Text('서비스 이용 약관')),
+            Text('과'),
+          ],
+        ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Colors.black))), child: Text('개인정보 보호 정책')),
+            Text('에 동의하게 됩니다.'),
+          ],
+        ),
+      ],
     );
   }
 }
