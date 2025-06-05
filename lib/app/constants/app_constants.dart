@@ -1,6 +1,21 @@
 abstract class AppConstants {
   static const appTitle = 'Cooki';
 
+  static const List<String> recipePreferences = [
+    '다이어트',
+    '채식',
+    '비건',
+    '매운맛 없이',
+    '땅콩 제외',
+    '간단요리',
+    '15분 이내',
+    '고기 없이',
+    '유제품 제외',
+    '고단백',
+    '저탄수화물',
+    '아이들이 먹기 좋은',
+  ];
+
   /// Complete validation prompt template for determining if user input is valid for recipe generation.
   /// Replace {TEXT_INPUT} placeholder with actual user input.
   static const String validationPrompt = '''
