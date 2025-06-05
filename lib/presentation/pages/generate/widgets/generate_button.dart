@@ -1,10 +1,7 @@
-import 'dart:developer';
-
+import 'package:cooki/core/utils/general_util.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/constants/app_colors.dart';
-import '../../../../data/repository/providers.dart';
 
 class GenerateButton extends StatelessWidget {
   final VoidCallback onTap;
@@ -27,7 +24,7 @@ class GenerateButton extends StatelessWidget {
           icon: Icon(Icons.auto_awesome, size: 21, color: Colors.white),
           iconAlignment: IconAlignment.end,
           label: Text(
-            '레시피 생성하기',
+            strings(context).generateRecipe,
             style: TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.bold,

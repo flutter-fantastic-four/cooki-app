@@ -2,5 +2,27 @@
   "appName": "Cooki",
   "startWithGoogle": "구글 계정으로 시작하기",
   "loginAdSubtitle": "레시피들을 뭐뭐... 홍보 문장",
-  "cancel": "취소"
+  "cancel": "취소",
+  "generateRecipe": "레시피 생성하기",
+  "generateRecipeAppBarTitle": "AI 레시피 생성",
+  "generatePageMainTitle": "어떤 요리를 만들고 싶으신가요?",
+  "generatePageSubtitle": "사진 또는 텍스트만으로 레시피를 만들 수 있어요.\n사진을 사용할 경우, 어떤 음식인지 간단히 설명해 주세요.",
+  "generateTextFieldHint": "예: 감자, 양파, 베이컨으로 만들 수 있는 간단한 요리",
+
+  "recipePreferences_diet": "다이어트",
+  "recipePreferences_vegetarian": "채식",
+  "recipePreferences_vegan": "비건",
+  "recipePreferences_noSpicy": "매운맛 없이",
+  "recipePreferences_noPeanuts": "땅콩 제외",
+  "recipePreferences_simple": "간단요리",
+  "recipePreferences_under15Min": "15분 이내",
+  "recipePreferences_noMeat": "고기 없이",
+  "recipePreferences_noDairy": "유제품 제외",
+  "recipePreferences_highProtein": "고단백",
+  "recipePreferences_lowCarb": "저탄수화물",
+  "recipePreferences_kidFriendly": "아이들이 먹기 좋은",
+  "recipeGenerationTip": "팁: 더 나은 결과를 위해 주재료, 조리 방법 또는 요리 유형을 포함하면 더 정확한 결과를 얻을 수 있어요.",
+  "imageSelection": "이미지 선택",
+  "takeWithCamera": "카메라로 찍기",
+  "chooseInGallery": "갤러리에서 선택"
 }

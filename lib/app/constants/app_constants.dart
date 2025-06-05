@@ -1,20 +1,27 @@
-abstract class AppConstants {
+import 'package:flutter/material.dart';
+
+import '../../core/utils/general_util.dart';
+
+class AppConstants {
   static const appTitle = 'Cooki';
 
-  static const List<String> recipePreferences = [
-    '다이어트',
-    '채식',
-    '비건',
-    '매운맛 없이',
-    '땅콩 제외',
-    '간단요리',
-    '15분 이내',
-    '고기 없이',
-    '유제품 제외',
-    '고단백',
-    '저탄수화물',
-    '아이들이 먹기 좋은',
-  ];
+  static List<String> recipePreferences(BuildContext context) {
+    final s = strings(context); // your custom helper
+    return [
+      s.recipePreferences_diet,
+      s.recipePreferences_vegetarian,
+      s.recipePreferences_vegan,
+      s.recipePreferences_noSpicy,
+      s.recipePreferences_noPeanuts,
+      s.recipePreferences_simple,
+      s.recipePreferences_under15Min,
+      s.recipePreferences_noMeat,
+      s.recipePreferences_noDairy,
+      s.recipePreferences_highProtein,
+      s.recipePreferences_lowCarb,
+      s.recipePreferences_kidFriendly,
+    ];
+  }
 
   /// Complete validation prompt template for determining if user input is valid for recipe generation.
   /// Replace {TEXT_INPUT} placeholder with actual user input.
