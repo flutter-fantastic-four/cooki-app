@@ -47,7 +47,7 @@ class LoginPage extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('회원가입 시 Cooki의 ', style: TextStyle(color: Colors.grey[500])),
+            Text('회원가입 시 Cooki의 ', style: TextStyle(color: Colors.grey[500], fontSize: 15)),
             GestureDetector(
               onTap: () {},
               child: Container(
@@ -55,13 +55,13 @@ class LoginPage extends ConsumerWidget {
                 decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Colors.grey[500]!, width: 1))),
                 child: Text(
                   '서비스 이용 약관',
-                  style: TextStyle(height: 1.0, color: Colors.grey[500]),
+                  style: TextStyle(height: 1.0, color: Colors.grey[500], fontSize: 15),
                   textAlign: TextAlign.center,
                   textHeightBehavior: TextHeightBehavior(applyHeightToFirstAscent: false),
                 ),
               ),
             ),
-            Text('과', style: TextStyle(color: Colors.grey[500])),
+            Text('과', style: TextStyle(color: Colors.grey[500], fontSize: 15)),
           ],
         ),
         Row(
@@ -75,14 +75,14 @@ class LoginPage extends ConsumerWidget {
                 decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Colors.grey[500]!, width: 1))),
                 child: Text(
                   '개인정보 보호 정책',
-                  style: TextStyle(height: 1.0, color: Colors.grey[500]),
+                  style: TextStyle(height: 1.0, color: Colors.grey[500], fontSize: 15),
                   textAlign: TextAlign.center,
                   textHeightBehavior: TextHeightBehavior(applyHeightToFirstAscent: false),
                 ),
               ),
             ),
 
-            Text('에 동의하게 됩니다.', style: TextStyle(color: Colors.grey[500])),
+            Text('에 동의하게 됩니다.', style: TextStyle(color: Colors.grey[500], fontSize: 15)),
           ],
         ),
       ],
