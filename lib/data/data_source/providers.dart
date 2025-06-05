@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cloud_functions/cloud_functions.dart';
-
 import 'package:cooki/data/data_source/recipe_generation_data_source.dart';
 import 'package:firebase_ai/firebase_ai.dart';
+import 'package:cloud_functions/cloud_functions.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,7 +33,7 @@ final firebaseAuthDataSourceProvider = Provider<FirebaseAuthDataSource>(
   (ref) => FirebaseAuthDataSourceImpl(ref.read(firebaseAuthProvider), ref.read(firebaseFunctionsProvider)),
 );
 
-final userFirestoreDataSourceProvider = Provider<UserFirestoreDataSource>((ref) => UserFirestoreDataSource(ref.read(firestoreProvider)));
+final userFirestoreDataSourceProvider = Provider<UserDataSource>((ref) => UserFirestoreDataSource(ref.read(firestoreProvider)));
 
 final imageStorageDataSourceProvider = Provider<ImageStorageDataSource>((ref) => FirebaseImageStorageDataSource(FirebaseStorage.instance));
 

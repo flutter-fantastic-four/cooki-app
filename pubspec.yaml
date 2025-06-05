@@ -33,6 +33,10 @@ dependencies:
   cloud_functions: ^5.5.1
   firebase_ai: ^2.0.0
 
+  kakao_flutter_sdk_user: ^1.9.7+3
+  cloud_functions: ^5.5.1
+  firebase_ai: ^2.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -41,6 +45,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  generate: true
   assets:
     - .env
     - assets/

@@ -12,10 +12,13 @@ import 'app/constants/app_constants.dart';
 import 'app/theme.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'gen/l10n/app_localizations.dart';
+
 void main() async {
   runZonedGuarded(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
+
       await dotenv.load(fileName: '.env');
 
       // Firebase 초기화
@@ -49,7 +52,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.light,
       theme: AppTheme.buildTheme(),
-      localizationsDelegates: const [
+      localizationsDelegates: [
+        AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
