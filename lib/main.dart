@@ -7,17 +7,15 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'app/constants/app_constants.dart';
 import 'app/theme.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 
 void main() async {
   runZonedGuarded(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
-
-      // env 파일 로드
       await dotenv.load(fileName: '.env');
 
       // Firebase 초기화
