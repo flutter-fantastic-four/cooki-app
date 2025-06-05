@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:cooki/core/utils/prompt_util.dart';
 import 'package:cooki/data/dto/generated_recipe_dto.dart';
 import 'package:firebase_ai/firebase_ai.dart';
+import '../../app/constants/app_constants.dart';
 import '../dto/validation_dto.dart';
 
 abstract class RecipeGenerationDataSource {
@@ -58,8 +58,10 @@ class GeminiRecipeGenerationDataSource implements RecipeGenerationDataSource {
 
   @override
   Future<ValidationDto> validateUserInput(String textInput) async {
-    final String prompt = PromptUtil.buildValidatePrompt(textInput);
-
+    final String prompt = AppConstants.validationPrompt.replaceAll(
+      AppConstants.textInputPlaceholder,
+      textInput,
+    );
     final response = await _validationModel.generateContent([
       Content.text(prompt),
     ]);
@@ -74,7 +76,7 @@ class GeminiRecipeGenerationDataSource implements RecipeGenerationDataSource {
     Uint8List? imageBytes,
     List<String>? preferences,
   }) async {
-    final prompt = PromptUtil.buildRecipePrompt(
+    final prompt = _buildRecipePrompt(
       textInput: textInput,
       preferences: preferences,
       hasImage: imageBytes != null,
@@ -99,5 +101,58 @@ class GeminiRecipeGenerationDataSource implements RecipeGenerationDataSource {
     final response = await _recipeGenerationModel.generateContent(content);
     final jsonResponse = json.decode(response.text ?? '{}');
     return GeneratedRecipeDto.fromJson(jsonResponse);
+  }
+
+  String _buildRecipePrompt({
+    String? textInput,
+    List<String>? preferences,
+    required bool hasImage,
+  }) {
+    if (hasImage) {
+      String imagePrompt = AppConstants.imageRecipePrompt;
+
+      final textContextSection =
+          textInput?.isNotEmpty == true
+              ? AppConstants.textContextTemplate.replaceAll(
+                AppConstants.textInputPlaceholder,
+                textInput!,
+              )
+              : '';
+      imagePrompt = imagePrompt.replaceAll(
+        AppConstants.textContextSectionPlaceholder,
+        textContextSection,
+      );
+      final preferencesSection = _buildPreferencesSection(preferences);
+      imagePrompt = imagePrompt.replaceAll(
+        AppConstants.preferencesSectionPlaceholder,
+        preferencesSection,
+      );
+
+      return imagePrompt;
+    } else {
+      String textOnlyPrompt = AppConstants.textOnlyRecipePrompt;
+
+      textOnlyPrompt = textOnlyPrompt.replaceAll(
+        AppConstants.textInputPlaceholder,
+        textInput!,
+      );
+      final preferencesSection = _buildPreferencesSection(preferences);
+      textOnlyPrompt = textOnlyPrompt.replaceAll(
+        AppConstants.preferencesSectionPlaceholder,
+        preferencesSection,
+      );
+
+      return textOnlyPrompt;
+    }
+  }
+
+  String _buildPreferencesSection(List<String>? preferences) {
+    if (preferences?.isNotEmpty == true) {
+      return AppConstants.preferencesTemplate.replaceAll(
+        AppConstants.preferencesListPlaceholder,
+        preferences!.join(', '),
+      );
+    }
+    return '';
   }
 }
