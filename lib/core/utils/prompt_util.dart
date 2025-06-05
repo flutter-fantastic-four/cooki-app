@@ -8,11 +8,11 @@ class PromptUtil {
     );
   }
 
-  static String buildRecipePrompt(
+  static String buildRecipePrompt({
     String? textInput,
     List<String>? preferences,
-    bool hasImage,
-  ) {
+    required bool hasImage,
+  }) {
     if (hasImage) {
       String imagePrompt = AppConstants.imageRecipePrompt;
 
@@ -35,19 +35,19 @@ class PromptUtil {
 
       return imagePrompt;
     } else {
-      String textPrompt = AppConstants.textOnlyRecipePrompt;
+      String textOnlyPrompt = AppConstants.textOnlyRecipePrompt;
 
-      textPrompt = textPrompt.replaceAll(
+      textOnlyPrompt = textOnlyPrompt.replaceAll(
         AppConstants.textInputPlaceholder,
         textInput!,
       );
       final preferencesSection = _buildPreferencesSection(preferences);
-      textPrompt = textPrompt.replaceAll(
+      textOnlyPrompt = textOnlyPrompt.replaceAll(
         AppConstants.preferencesSectionPlaceholder,
         preferencesSection,
       );
 
-      return textPrompt;
+      return textOnlyPrompt;
     }
   }
 
