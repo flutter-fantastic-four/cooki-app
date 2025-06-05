@@ -1,3 +1,4 @@
+import 'package:cooki/app/constants/app_colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -35,19 +36,19 @@ class HomeBottomNavigationBar extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
             unselectedLabelStyle: const TextStyle(fontSize: 12),
-            selectedItemColor: Colors.blueAccent,
+            selectedItemColor: AppColors.primary,
             items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home_outlined),
+                activeIcon: Icon(Icons.home_filled),
+                label: '나의 레시피',
+                tooltip: '나의 레시피',
+              ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.people_outline),
                 activeIcon: Icon(Icons.people),
-                label: '저장한 레시피',
-                tooltip: '저장한 레시피',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(CupertinoIcons.chat_bubble_2),
-                activeIcon: Icon(CupertinoIcons.chat_bubble_2_fill),
-                label: '발견',
-                tooltip: '발견',
+                label: '커뮤니티',
+                tooltip: '커뮤니티',
               ),
               BottomNavigationBarItem(
                 icon: Icon(CupertinoIcons.person_circle),
