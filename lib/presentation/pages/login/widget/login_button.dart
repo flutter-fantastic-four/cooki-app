@@ -1,3 +1,4 @@
+import 'package:cooki/app/constants/app_colors.dart';
 import 'package:cooki/core/utils/navigation_util.dart';
 import 'package:cooki/presentation/pages/login/login_view_model.dart';
 import 'package:cooki/presentation/user_global_view_model.dart';
@@ -12,28 +13,25 @@ class LoginButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Center(
       child: SizedBox(
-        width: 310,
-        child: OutlinedButton(
-          onPressed: () => _login(ref, context, signInMethod),
-          style: ElevatedButton.styleFrom(
-            // backgroundColor: Colors.white,
-            foregroundColor: Colors.black87,
-            side: BorderSide(color: Colors.grey[400]!),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              // side: const BorderSide(color: Colors.grey),
-            ),
-            minimumSize: const Size(double.infinity, 53),
+        width: 350,
+        child: ElevatedButton(
+          onPressed: () => _login(ref, context),
+          style: _getButtonStyle(),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Align(alignment: Alignment.centerLeft, child: Padding(padding: const EdgeInsets.only(left: 16), child: _signInMethodIcon())),
+              _signInMethodText(),
+            ],
           ),
-          child: signInMethodText(signInMethod),
         ),
       ),
     );
   }
 
-  void _login(WidgetRef ref, BuildContext context, SignInMethod signInmeethod) async {
+  void _login(WidgetRef ref, BuildContext context) async {
     final loginViewModel = ref.read(loginViewModelProvider.notifier);
-    final appUser = await loginViewModel.signIn(signInmeethod);
+    final appUser = await loginViewModel.signIn(signInMethod);
 
     if (appUser != null && appUser.id.isNotEmpty && context.mounted) {
       ref.read(userGlobalViewModelProvider.notifier).setUser(appUser);
@@ -42,17 +40,50 @@ class LoginButton extends ConsumerWidget {
     }
   }
 
-  Text signInMethodText(SignInMethod signInMethod) {
-    String signInMethodText = '';
+  Text _signInMethodText() {
+    String signInMethodText = switch (signInMethod) {
+      SignInMethod.google => 'Google',
+      SignInMethod.kakao => 'Kakao',
+      SignInMethod.apple => 'Apple',
+    };
+    return Text('$signInMethodText로 시작하기', style: const TextStyle(fontSize: 16));
+  }
+
+  Image _signInMethodIcon() {
+    String signInMethodText = switch (signInMethod) {
+      SignInMethod.google => 'google',
+      SignInMethod.kakao => 'kakao',
+      SignInMethod.apple => 'apple',
+    };
+    return Image.asset('assets/icons/${signInMethodText}_login_logo.png');
+  }
+
+  ButtonStyle _getButtonStyle() {
+    Color backgroundColor;
+    Color textColor;
 
     switch (signInMethod) {
       case SignInMethod.google:
-        signInMethodText = '구글';
+        backgroundColor = AppColors.googleLoginBackgroundColor;
+        textColor = AppColors.googleLogintextColor;
+        break;
       case SignInMethod.kakao:
-        signInMethodText = '카카오';
+        backgroundColor = AppColors.kakaoLoginBackgroundColor;
+        textColor = AppColors.kakaoLogintextColor;
+        break;
       case SignInMethod.apple:
-        signInMethodText = '애플';
+        backgroundColor = AppColors.appleLoginBackgroundColor;
+        textColor = AppColors.appleLogintextColor;
+        break;
     }
-    return Text('$signInMethodText계정으로 시작하기', style: const TextStyle(fontSize: 16));
+
+    return ElevatedButton.styleFrom(
+      foregroundColor: textColor,
+      backgroundColor: backgroundColor,
+      side: BorderSide(color: backgroundColor),
+      elevation: 6,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      minimumSize: const Size(double.infinity, 53),
+    );
   }
 }

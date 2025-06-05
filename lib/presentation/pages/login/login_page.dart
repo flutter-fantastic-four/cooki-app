@@ -18,7 +18,7 @@ class LoginPage extends ConsumerWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   LoginButton(signInMethod: SignInMethod.google),
                   SizedBox(height: 16),
