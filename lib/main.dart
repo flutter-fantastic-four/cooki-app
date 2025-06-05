@@ -9,9 +9,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app/constants/app_constants.dart';
 import 'app/theme.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'firebase_options.dart';
+import 'gen/l10n/app_localizations.dart';
 
 void main() async {
   runZonedGuarded(
