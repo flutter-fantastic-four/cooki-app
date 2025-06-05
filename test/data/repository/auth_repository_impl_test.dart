@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cooki/app/enum/sign_in_method.dart';
 import 'package:cooki/data/data_source/firebase_auth_data_source.dart';
 import 'package:cooki/data/data_source/oauth_sign_in_data_source.dart';
 import 'package:cooki/data/data_source/user_data_source.dart';
@@ -72,12 +73,12 @@ void main() {
   });
 
   group('AuthRepositoryImpl', () {
-    test('signInWithGoogle returns null when GoogleSignIn returns null', () async {
+    test('signIn returns null when GoogleSignIn returns null', () async {
       // Arrange
       when(() => mockGoogleSignInDataSource.signIn()).thenAnswer((_) async => null);
 
       // Act
-      final result = await authRepository.signInWithGoogle();
+      final result = await authRepository.signIn(SignInMethod.google);
 
       // Assert
       expect(result, isNull);
@@ -85,12 +86,12 @@ void main() {
       verifyNever(() => mockFirebaseAuthDataSource.signInWithGoogle(any()));
     });
 
-    test('signInWithKakao returns null when GoogleSignIn returns null', () async {
+    test('signIn returns null when KakaoSignIn returns null', () async {
       // Arrange
       when(() => mockKakaoSignInDataSource.signIn()).thenAnswer((_) async => null);
 
       // Act
-      final result = await authRepository.signInWithKakao();
+      final result = await authRepository.signIn(SignInMethod.kakao);
 
       // Assert
       expect(result, isNull);
@@ -98,13 +99,13 @@ void main() {
       verifyNever(() => mockFirebaseAuthDataSource.signInWithKakao(any()));
     });
 
-    test('signInWithGoogle returns null when FirebaseAuth returns null', () async {
+    test('signIn returns null when FirebaseAuth returns null', () async {
       // Arrange
       when(() => mockGoogleSignInDataSource.signIn()).thenAnswer((_) async => mockGoogleAuth);
       when(() => mockFirebaseAuthDataSource.signInWithGoogle(any())).thenAnswer((_) async => null);
 
       // Act
-      final result = await authRepository.signInWithGoogle();
+      final result = await authRepository.signIn(SignInMethod.google);
 
       // Assert
       expect(result, isNull);
@@ -112,13 +113,13 @@ void main() {
       verify(() => mockFirebaseAuthDataSource.signInWithGoogle(any())).called(1);
       verifyNever(() => mockUserDataSource.getUserById(any()));
     });
-    test('signInWithKakao returns null when FirebaseAuth returns null', () async {
+    test('signIn returns null when FirebaseAuth returns null', () async {
       // Arrange
       when(() => mockKakaoSignInDataSource.signIn()).thenAnswer((_) async => "kakaoUserAccessToken");
       when(() => mockFirebaseAuthDataSource.signInWithKakao(any())).thenAnswer((_) async => null);
 
       // Act
-      final result = await authRepository.signInWithKakao();
+      final result = await authRepository.signIn(SignInMethod.kakao);
 
       // Assert
       expect(result, isNull);
@@ -127,16 +128,22 @@ void main() {
       verifyNever(() => mockUserDataSource.getUserById(any()));
     });
 
-    test('signInWithGoogle returns existing user when user found in database', () async {
+    test('signIn returns existing user when user found in database', () async {
       // Arrange
-      final existingUserDto = UserDto(id: 'test-user-id', name: 'Existing User', createdAt: Timestamp.now(), email: 'existing@example.com');
+      final existingUserDto = UserDto(
+        id: 'test-user-id',
+        name: 'Existing User',
+        createdAt: Timestamp.now(),
+        email: 'existing@example.com',
+        signInProvider: 'google',
+      );
 
       when(() => mockGoogleSignInDataSource.signIn()).thenAnswer((_) async => mockGoogleAuth);
       when(() => mockFirebaseAuthDataSource.signInWithGoogle(any())).thenAnswer((_) async => mockFirebaseUser);
       when(() => mockUserDataSource.getUserById('test-user-id')).thenAnswer((_) async => existingUserDto);
 
       // Act
-      final result = await authRepository.signInWithGoogle();
+      final result = await authRepository.signIn(SignInMethod.google);
 
       // Assert
       expect(result, isA<AppUser>());
@@ -151,16 +158,22 @@ void main() {
       verifyNever(() => mockUserDataSource.saveUser(any()));
     });
 
-    test('signInWithKaKao returns existing user when user found in database', () async {
+    test('signIn returns existing user when user found in database', () async {
       // Arrange
-      final existingUserDto = UserDto(id: 'test-user-id', name: 'Existing User', createdAt: Timestamp.now(), email: 'existing@example.com');
+      final existingUserDto = UserDto(
+        id: 'test-user-id',
+        name: 'Existing User',
+        createdAt: Timestamp.now(),
+        email: 'existing@example.com',
+        signInProvider: 'kakao',
+      );
 
       when(() => mockKakaoSignInDataSource.signIn()).thenAnswer((_) async => "kakaoUserAccessToken");
       when(() => mockFirebaseAuthDataSource.signInWithKakao(any())).thenAnswer((_) async => mockFirebaseUser);
       when(() => mockUserDataSource.getUserById('test-user-id')).thenAnswer((_) async => existingUserDto);
 
       // Act
-      final result = await authRepository.signInWithKakao();
+      final result = await authRepository.signIn(SignInMethod.kakao);
 
       // Assert
       expect(result, isA<AppUser>());
@@ -183,7 +196,7 @@ void main() {
       when(() => mockUserDataSource.saveUser(any())).thenAnswer((_) async {});
 
       // Act
-      final result = await authRepository.signInWithGoogle();
+      final result = await authRepository.signIn(SignInMethod.google);
 
       // Assert
       expect(result, isA<AppUser>());
@@ -207,7 +220,7 @@ void main() {
       when(() => mockUserDataSource.saveUser(any())).thenAnswer((_) async {});
 
       // Act
-      final result = await authRepository.signInWithKakao();
+      final result = await authRepository.signIn(SignInMethod.kakao);
 
       // Assert
       expect(result, isA<AppUser>());
