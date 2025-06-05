@@ -1,6 +1,5 @@
-import 'package:cooki/app/constants/app_colors.dart';
+import 'package:cooki/app/enum/sign_in_method.dart';
 import 'package:cooki/presentation/pages/login/widget/login_button.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'login_view_model.dart';

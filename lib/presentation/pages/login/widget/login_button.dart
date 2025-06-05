@@ -1,4 +1,5 @@
 import 'package:cooki/app/constants/app_colors.dart';
+import 'package:cooki/app/enum/sign_in_method.dart';
 import 'package:cooki/core/utils/navigation_util.dart';
 import 'package:cooki/presentation/pages/login/login_view_model.dart';
 import 'package:cooki/presentation/user_global_view_model.dart';

@@ -1,3 +1,4 @@
+import 'package:cooki/app/enum/sign_in_method.dart';
 import 'package:cooki/data/dto/user_dto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -7,8 +8,7 @@ import '../data_source/oauth_sign_in_data_source.dart';
 import '../data_source/user_data_source.dart';
 
 abstract class AuthRepository {
-  Future<AppUser?> signInWithGoogle();
-  Future<AppUser?> signInWithKakao();
+  Future<AppUser?> signIn(SignInMethod signInmethod);
 
   Future<void> signOut();
 
@@ -24,23 +24,24 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl(this._googleDataSource, this._kakaoDataSource, this._firebaseAuth, this._userDataSource);
 
   @override
-  Future<AppUser?> signInWithGoogle() async {
-    final googleAuth = await _googleDataSource.signIn();
-    if (googleAuth == null) return null;
+  Future<AppUser?> signIn(SignInMethod signInmethod) async {
+    dynamic auth;
+    User? firebaseUser;
+    switch (signInmethod) {
+      case SignInMethod.google:
+        auth = await _googleDataSource.signIn();
+        firebaseUser = await _firebaseAuth.signInWithGoogle(auth);
+        break;
+      case SignInMethod.kakao:
+        auth = await _kakaoDataSource.signIn();
+        firebaseUser = await _firebaseAuth.signInWithKakao(auth);
+        break;
+      case SignInMethod.apple:
+      // auth = await _appleDataSource.signIn();
+      // break;
+    }
 
-    return _handleSignIn(() => _firebaseAuth.signInWithGoogle(googleAuth));
-  }
-
-  @override
-  Future<AppUser?> signInWithKakao() async {
-    final kakaoToken = await _kakaoDataSource.signIn();
-    if (kakaoToken == null) return null;
-
-    return _handleSignIn(() => _firebaseAuth.signInWithKakao(kakaoToken));
-  }
-
-  Future<AppUser?> _handleSignIn(Future<User?> Function() firebaseSignIn) async {
-    final User? firebaseUser = await firebaseSignIn();
+    if (auth == null) return null;
     if (firebaseUser == null) return null;
 
     final partialUser = AppUser(
@@ -48,6 +49,7 @@ class AuthRepositoryImpl implements AuthRepository {
       name: firebaseUser.displayName ?? 'User',
       profileImage: firebaseUser.photoURL,
       email: firebaseUser.email ?? '',
+      signInProvider: signInmethod,
     );
 
     final existingUser = await _userDataSource.getUserById(partialUser.id);
@@ -61,8 +63,22 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> signOut() async {
-    await _googleDataSource.signOut();
-    await _kakaoDataSource.signOut();
+    if (_firebaseAuth.currentUser() == null) return;
+
+    final user = await _userDataSource.getUserById(_firebaseAuth.currentUser()!.uid);
+
+    if (user == null) return;
+    switch (user.signInProvider) {
+      case "google":
+        await _googleDataSource.signOut();
+        break;
+      case "kakao":
+        await _kakaoDataSource.signOut();
+        break;
+      // case "apple":
+      //   await _googleDataSource.signOut();
+      //   break;
+    }
     await _firebaseAuth.signOut();
   }
 

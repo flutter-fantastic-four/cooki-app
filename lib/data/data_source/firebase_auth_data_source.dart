@@ -10,6 +10,8 @@ abstract class FirebaseAuthDataSource {
   Future<void> signOut();
 
   Stream<User?> authStateChanges();
+
+  User? currentUser();
 }
 
 class FirebaseAuthDataSourceImpl implements FirebaseAuthDataSource {
@@ -39,5 +41,10 @@ class FirebaseAuthDataSourceImpl implements FirebaseAuthDataSource {
 
     final userCredential = await _auth.signInWithCustomToken(customToken);
     return userCredential.user;
+  }
+
+  @override
+  User? currentUser() {
+    return _auth.currentUser;
   }
 }
