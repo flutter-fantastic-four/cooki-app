@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cooki/app/enum/sign_in_method.dart';
 import 'package:cooki/data/dto/user_dto.dart';
 import 'package:cooki/domain/entity/app_user.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -32,10 +33,7 @@ void main() {
     test('fromMap handles missing optional fields', () {
       // Arrange
       final String id = 'test-user-id';
-      final Map<String, dynamic> userData = {
-        'name': 'Test User',
-        'createdAt': testTimestamp,
-      };
+      final Map<String, dynamic> userData = {'name': 'Test User', 'createdAt': testTimestamp};
 
       // Act
       final userDto = UserDto.fromMap(id, userData);
@@ -56,6 +54,7 @@ void main() {
         createdAt: testDate,
         email: 'test@example.com',
         profileImage: 'https://example.com/profile.jpg',
+        signInProvider: SignInMethod.google,
       );
 
       // Act
@@ -77,6 +76,7 @@ void main() {
         createdAt: testTimestamp,
         email: 'test@example.com',
         profileImage: 'https://example.com/profile.jpg',
+        signInProvider: 'google',
       );
 
       // Act
@@ -105,6 +105,7 @@ void main() {
         createdAt: testTimestamp,
         email: 'test@example.com',
         profileImage: 'https://example.com/profile.jpg',
+        signInProvider: 'google',
       );
 
       // Act

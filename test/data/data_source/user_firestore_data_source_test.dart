@@ -7,16 +7,13 @@ import 'package:mocktail/mocktail.dart';
 class MockFirestore extends Mock implements FirebaseFirestore {}
 
 // ignore: subtype_of_sealed_class
-class MockCollectionReference extends Mock
-    implements CollectionReference<Map<String, dynamic>> {}
+class MockCollectionReference extends Mock implements CollectionReference<Map<String, dynamic>> {}
 
 // ignore: subtype_of_sealed_class
-class MockDocumentReference extends Mock
-    implements DocumentReference<Map<String, dynamic>> {}
+class MockDocumentReference extends Mock implements DocumentReference<Map<String, dynamic>> {}
 
 // ignore: subtype_of_sealed_class
-class MockDocumentSnapshot extends Mock
-    implements DocumentSnapshot<Map<String, dynamic>> {}
+class MockDocumentSnapshot extends Mock implements DocumentSnapshot<Map<String, dynamic>> {}
 
 void main() {
   late MockFirestore mockFirestore;
@@ -33,27 +30,17 @@ void main() {
     mockDocumentSnapshot = MockDocumentSnapshot();
 
     // Set up default mock behavior
-    when(
-      () => mockFirestore.collection('users'),
-    ).thenReturn(mockCollectionReference);
-    when(
-      () => mockCollectionReference.doc(any()),
-    ).thenReturn(mockDocumentReference);
+    when(() => mockFirestore.collection('users')).thenReturn(mockCollectionReference);
+    when(() => mockCollectionReference.doc(any())).thenReturn(mockDocumentReference);
   });
 
   group('UserFirestoreDataSource', () {
     test('getUserById returns UserDto when document exists', () async {
       // Arrange
       final testUserId = 'test-user-id';
-      final testUserData = {
-        'name': 'Test User',
-        'createdAt': Timestamp.now(),
-        'email': 'test@example.com',
-      };
+      final testUserData = {'name': 'Test User', 'createdAt': Timestamp.now(), 'email': 'test@example.com'};
 
-      when(
-        () => mockDocumentReference.get(),
-      ).thenAnswer((_) async => mockDocumentSnapshot);
+      when(() => mockDocumentReference.get()).thenAnswer((_) async => mockDocumentSnapshot);
       when(() => mockDocumentSnapshot.exists).thenReturn(true);
       when(() => mockDocumentSnapshot.data()).thenReturn(testUserData);
 
@@ -75,9 +62,7 @@ void main() {
       // Arrange
       final testUserId = 'test-user-id';
 
-      when(
-        () => mockDocumentReference.get(),
-      ).thenAnswer((_) async => mockDocumentSnapshot);
+      when(() => mockDocumentReference.get()).thenAnswer((_) async => mockDocumentSnapshot);
       when(() => mockDocumentSnapshot.exists).thenReturn(false);
 
       // Act
@@ -98,6 +83,7 @@ void main() {
         name: 'Test User',
         createdAt: Timestamp.now(),
         email: 'test@example.com',
+        signInProvider: 'google',
       );
 
       when(() => mockDocumentReference.set(any())).thenAnswer((_) async {});

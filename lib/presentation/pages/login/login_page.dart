@@ -1,94 +1,90 @@
-import 'package:flutter/cupertino.dart';
+import 'package:cooki/app/enum/sign_in_method.dart';
+import 'package:cooki/presentation/pages/login/widget/login_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../../../app/constants/app_constants.dart';
-import '../../../core/utils/navigation_util.dart';
-import '../../user_global_view_model.dart';
 import 'login_view_model.dart';
 
 class LoginPage extends ConsumerWidget {
   const LoginPage({super.key});
-
-  void _login(WidgetRef ref, BuildContext context) async {
-    final loginViewModel = ref.read(loginViewModelProvider.notifier);
-    final appUser = await loginViewModel.signIn();
-
-    if (appUser != null && appUser.id.isNotEmpty && context.mounted) {
-      ref.read(userGlobalViewModelProvider.notifier).setUser(appUser);
-      if (!context.mounted) return;
-      NavigationUtil.navigateBasedOnProfile(context, appUser);
-    }
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final loginState = ref.watch(loginViewModelProvider);
+
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(18),
-                child: Image.asset('assets/icons/app_icon.png', height: 130),
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  LoginButton(signInMethod: SignInMethod.google),
+                  SizedBox(height: 16),
+                  LoginButton(signInMethod: SignInMethod.apple),
+                  SizedBox(height: 16),
+                  LoginButton(signInMethod: SignInMethod.kakao),
+                  const SizedBox(height: 30),
+                  _termsAgreementText(),
+                ],
               ),
-              const SizedBox(height: 15),
-
-              const Text(
-                AppConstants.appTitle,
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-              const SizedBox(height: 15),
-
-              Text(
-                '레시피들을 뭐뭐... 홍보 문장',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 17, color: Colors.black),
-              ),
-              const SizedBox(height: 50),
-
-              Center(
-                child: SizedBox(
-                  width: 310,
-                  child: OutlinedButton(
-                    onPressed: () => _login(ref, context),
-                    style: ElevatedButton.styleFrom(
-                      // backgroundColor: Colors.white,
-                      foregroundColor: Colors.black87,
-                      side: BorderSide(color: Colors.grey[400]!),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
-                        // side: const BorderSide(color: Colors.grey),
-                      ),
-                      minimumSize: const Size(double.infinity, 53),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Image.asset('assets/icons/google.png', height: 18),
-                        const SizedBox(width: 16),
-                        Text(
-                          loginState.isLoading ? '로그인 중...' : '구글 계정으로 시작하기',
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 30),
-            ],
+            ),
           ),
-        ),
+
+          // 로딩 오버레이
+          if (loginState.isLoading) Container(color: Colors.black.withValues(alpha: 0.3), child: const Center(child: CircularProgressIndicator())),
+        ],
       ),
+    );
+  }
+
+  Widget _termsAgreementText() {
+    return Column(
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('회원가입 시 Cooki의 ', style: TextStyle(color: Colors.grey[500], fontSize: 15)),
+            GestureDetector(
+              onTap: () {},
+              child: Container(
+                padding: const EdgeInsets.only(bottom: 1), // 약간만 여백 주기
+                decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Colors.grey[500]!, width: 1))),
+                child: Text(
+                  '서비스 이용 약관',
+                  style: TextStyle(height: 1.0, color: Colors.grey[500], fontSize: 15),
+                  textAlign: TextAlign.center,
+                  textHeightBehavior: TextHeightBehavior(applyHeightToFirstAscent: false),
+                ),
+              ),
+            ),
+            Text('과', style: TextStyle(color: Colors.grey[500], fontSize: 15)),
+          ],
+        ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            GestureDetector(
+              onTap: () {},
+              child: Container(
+                padding: const EdgeInsets.only(bottom: 1), // 약간만 여백 주기
+                decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Colors.grey[500]!, width: 1))),
+                child: Text(
+                  '개인정보 보호 정책',
+                  style: TextStyle(height: 1.0, color: Colors.grey[500], fontSize: 15),
+                  textAlign: TextAlign.center,
+                  textHeightBehavior: TextHeightBehavior(applyHeightToFirstAscent: false),
+                ),
+              ),
+            ),
+
+            Text('에 동의하게 됩니다.', style: TextStyle(color: Colors.grey[500], fontSize: 15)),
+          ],
+        ),
+      ],
     );
   }
 }

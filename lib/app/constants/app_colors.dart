@@ -11,4 +11,12 @@ abstract class AppColors {
   static const backgroundGrey = Color(0xFFF2F2F7);
 
   static const Color inactiveButton = Color(0xFFBDBDBD);
+
+  static const Color kakaoLoginBackgroundColor = Color(0xFFFEE500);
+  static const Color googleLoginBackgroundColor = Colors.white;
+  static const Color appleLoginBackgroundColor = Colors.black;
+
+  static const Color kakaoLogintextColor = Colors.black;
+  static const Color googleLogintextColor = Colors.black;
+  static const Color appleLogintextColor = Colors.white;
 }
