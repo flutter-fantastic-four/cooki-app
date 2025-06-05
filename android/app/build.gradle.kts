@@ -1,3 +1,5 @@
+import java.util.Properties
+import java.io.FileInputStream
 plugins {
     id("com.android.application")
     // START: FlutterFire Configuration
@@ -7,6 +9,10 @@ plugins {
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+}
+
+val properties = Properties().apply {
+    load(FileInputStream(rootProject.file("key.properties")))
 }
 
 android {
@@ -35,9 +41,14 @@ android {
     }
 
     buildTypes {
+         debug {
+            isMinifyEnabled = false
+            manifestPlaceholders["KAKAO_API_KEY"] = properties["KAKAO_API_KEY"] as String
+        }
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
+            manifestPlaceholders["KAKAO_API_KEY"] = properties["KAKAO_API_KEY"] as String
             signingConfig = signingConfigs.getByName("debug")
         }
     }
