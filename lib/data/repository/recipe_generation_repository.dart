@@ -10,7 +10,7 @@ abstract class RecipeGenerationRepository {
   Future<GeneratedRecipe> generateRecipe({
     String? textInput,
     Uint8List? imageBytes,
-    List<String>? preferences,
+    Set<String>? preferences,
   });
 }
 
@@ -29,7 +29,7 @@ class RecipeGenerationRepositoryImpl implements RecipeGenerationRepository {
   Future<GeneratedRecipe> generateRecipe({
     String? textInput,
     Uint8List? imageBytes,
-    List<String>? preferences,
+    Set<String>? preferences,
   }) async {
     final dto = await _recipeGenerationDataSource.generateRecipe(
       textInput: textInput,

@@ -12,7 +12,7 @@ abstract class RecipeGenerationDataSource {
   Future<GeneratedRecipeDto> generateRecipe({
     String? textInput,
     Uint8List? imageBytes,
-    List<String>? preferences,
+    Set<String>? preferences,
   });
 }
 
@@ -81,7 +81,7 @@ class GeminiRecipeGenerationDataSource implements RecipeGenerationDataSource {
   Future<GeneratedRecipeDto> generateRecipe({
     String? textInput,
     Uint8List? imageBytes,
-    List<String>? preferences,
+    Set<String>? preferences,
   }) async {
     final prompt = _buildRecipePrompt(
       textInput: textInput,
@@ -118,7 +118,7 @@ class GeminiRecipeGenerationDataSource implements RecipeGenerationDataSource {
 
   String _buildRecipePrompt({
     String? textInput,
-    List<String>? preferences,
+    Set<String>? preferences,
     required bool hasImage,
   }) {
     if (hasImage) {
@@ -159,7 +159,7 @@ class GeminiRecipeGenerationDataSource implements RecipeGenerationDataSource {
     }
   }
 
-  String _buildPreferencesSection(List<String>? preferences) {
+  String _buildPreferencesSection(Set<String>? preferences) {
     if (preferences?.isNotEmpty == true) {
       return AppConstants.preferencesTemplate.replaceAll(
         AppConstants.preferencesListPlaceholder,
