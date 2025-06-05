@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../domain/entity/app_user.dart';
 import '../../presentation/pages/home/home_page.dart';
 
-abstract class NavigationUtil {
+class NavigationUtil {
   static void navigateBasedOnProfile(BuildContext context, AppUser? appUser) {
     Navigator.pushReplacement(
       context,

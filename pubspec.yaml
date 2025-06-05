@@ -29,6 +29,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   url_launcher: ^6.3.1
+  firebase_ai: ^2.0.0
 
 dev_dependencies:
   flutter_test:
