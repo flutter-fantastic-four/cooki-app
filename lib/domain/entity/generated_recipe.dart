@@ -17,6 +17,15 @@ class GeneratedRecipe {
     required this.tags,
   });
 
+  bool get isError {
+    return recipeName == "__ERROR__" ||
+        recipeName.isEmpty ||
+        calories == -1 ||
+        cookTime == -1 ||
+        ingredients.isEmpty ||
+        steps.isEmpty;
+  }
+
   GeneratedRecipe copyWith({
     String? recipeName,
     List<String>? ingredients,

@@ -1,3 +1,5 @@
+import '../../domain/entity/generated_recipe.dart';
+
 class GeneratedRecipeDto {
   final String recipeName;
   final List<String> ingredients;
@@ -17,15 +19,6 @@ class GeneratedRecipeDto {
     required this.tags,
   });
 
-  bool get isError {
-    return recipeName == "__ERROR__" ||
-        recipeName.isEmpty ||
-        calories == -1 ||
-        cookTime == -1 ||
-        ingredients.isEmpty ||
-        steps.isEmpty;
-  }
-
   factory GeneratedRecipeDto.fromJson(Map<String, dynamic> json) {
     return GeneratedRecipeDto(
       recipeName: json['recipeName'] as String,
@@ -35,6 +28,18 @@ class GeneratedRecipeDto {
       calories: json['calories'] as int,
       category: json['category'] as String,
       tags: List<String>.from(json['tags'] ?? []),
+    );
+  }
+
+  GeneratedRecipe toEntity() {
+    return GeneratedRecipe(
+      recipeName: recipeName,
+      ingredients: ingredients,
+      steps: steps,
+      cookTime: cookTime,
+      calories: calories,
+      category: category,
+      tags: tags,
     );
   }
 }
