@@ -1,3 +1,4 @@
+import 'package:cooki/app/enum/sign_in_method.dart';
 import 'package:cooki/data/repository/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -11,10 +12,7 @@ class LoginState {
   const LoginState({this.isLoading = false, this.errorMessage});
 
   LoginState copyWith({bool? isLoading, String? errorMessage}) {
-    return LoginState(
-      isLoading: isLoading ?? this.isLoading,
-      errorMessage: errorMessage,
-    );
+    return LoginState(isLoading: isLoading ?? this.isLoading, errorMessage: errorMessage);
   }
 }
 
@@ -24,27 +22,21 @@ class LoginViewModel extends Notifier<LoginState> {
     return const LoginState();
   }
 
-  Future<AppUser?> signIn() async {
+  Future<AppUser?> signIn(SignInMethod signInMethod) async {
     state = state.copyWith(isLoading: true);
     try {
-      final user = await ref.read(authRepositoryProvider).signInWithGoogle();
-      if (user == null) {
-        state = state.copyWith(isLoading: false);
-        return null;
-      }
+      final AppUser? user;
+
+      user = await ref.read(authRepositoryProvider).signIn(signInMethod);
+
       state = state.copyWith(isLoading: false);
       return user;
     } catch (e, stack) {
       logError(e, stack);
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: "Login failed\n${e.toString()}",
-      );
+      state = state.copyWith(isLoading: false, errorMessage: "Login failed\n${e.toString()}");
       rethrow;
     }
   }
 }
 
-final loginViewModelProvider = NotifierProvider<LoginViewModel, LoginState>(
-  () => LoginViewModel(),
-);
+final loginViewModelProvider = NotifierProvider<LoginViewModel, LoginState>(() => LoginViewModel());

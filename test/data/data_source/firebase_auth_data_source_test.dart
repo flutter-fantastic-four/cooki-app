@@ -1,3 +1,4 @@
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:cooki/data/data_source/firebase_auth_data_source.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -6,17 +7,19 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 class MockFirebaseAuth extends Mock implements FirebaseAuth {}
 
+class MockFirebaseFunction extends Mock implements FirebaseFunctions {}
+
 class MockUserCredential extends Mock implements UserCredential {}
 
 class MockUser extends Mock implements User {}
 
-class MockGoogleSignInAuthentication extends Mock
-    implements GoogleSignInAuthentication {}
+class MockGoogleSignInAuthentication extends Mock implements GoogleSignInAuthentication {}
 
 class FakeAuthCredential extends Fake implements AuthCredential {}
 
 void main() {
   late MockFirebaseAuth mockFirebaseAuth;
+  late MockFirebaseFunction mockFirebaseFunction;
   late FirebaseAuthDataSourceImpl firebaseAuthDataSource;
   late MockUserCredential mockUserCredential;
   late MockUser mockUser;
@@ -28,7 +31,8 @@ void main() {
 
   setUp(() {
     mockFirebaseAuth = MockFirebaseAuth();
-    firebaseAuthDataSource = FirebaseAuthDataSourceImpl(mockFirebaseAuth);
+    mockFirebaseFunction = MockFirebaseFunction();
+    firebaseAuthDataSource = FirebaseAuthDataSourceImpl(mockFirebaseAuth, mockFirebaseFunction);
     mockUserCredential = MockUserCredential();
     mockUser = MockUser();
     mockGoogleAuth = MockGoogleSignInAuthentication();
@@ -42,14 +46,10 @@ void main() {
   group('FirebaseAuthDataSourceImpl', () {
     test('signInWithGoogle returns user when sign in succeeds', () async {
       // Arrange
-      when(
-        () => mockFirebaseAuth.signInWithCredential(any()),
-      ).thenAnswer((_) async => mockUserCredential);
+      when(() => mockFirebaseAuth.signInWithCredential(any())).thenAnswer((_) async => mockUserCredential);
 
       // Act
-      final result = await firebaseAuthDataSource.signInWithGoogle(
-        mockGoogleAuth,
-      );
+      final result = await firebaseAuthDataSource.signInWithGoogle(mockGoogleAuth);
 
       // Assert
       expect(result, equals(mockUser));

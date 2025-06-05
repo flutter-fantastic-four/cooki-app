@@ -9,6 +9,7 @@ import 'image_repository.dart';
 final authRepositoryProvider = Provider<AuthRepository>(
   (ref) => AuthRepositoryImpl(
     ref.read(googleSignInDataSourceProvider),
+    ref.read(kakaoSignInDataSourceProvider),
     ref.read(firebaseAuthDataSourceProvider),
     ref.read(userFirestoreDataSourceProvider),
   ),

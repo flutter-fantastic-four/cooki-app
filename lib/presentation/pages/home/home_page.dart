@@ -1,4 +1,5 @@
 import 'package:cooki/presentation/pages/home/widgets/home_bottom_navigation_bar.dart';
+import 'package:cooki/presentation/pages/my/my_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -16,10 +17,7 @@ class HomePage extends StatelessWidget {
           final currentIndex = ref.watch(homeViewModelProvider);
           return IndexedStack(
             index: currentIndex,
-            children: [
-              // SavedPostsTab(),
-              // Tab2(),
-            ],
+            children: [SizedBox(), SizedBox(), MyPage()],
           );
         },
       ),
