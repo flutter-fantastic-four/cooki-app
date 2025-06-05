@@ -45,4 +45,17 @@ class GeneratedRecipe {
       tags: tags ?? List.from(this.tags),
     );
   }
+
+  @override
+  String toString() {
+    return '{\n'
+        '  "recipeName": "$recipeName",\n'
+        '  "ingredients": [${ingredients.map((e) => '"$e"').join(', ')}],\n'
+        '  "steps": [${steps.map((e) => '"$e"').join(', ')}],\n'
+        '  "cookTime": $cookTime,\n'
+        '  "calories": $calories,\n'
+        '  "category": "$category",\n'
+        '  "tags": [${tags.map((e) => '"$e"').join(', ')}]\n'
+        '}';
+  }
 }

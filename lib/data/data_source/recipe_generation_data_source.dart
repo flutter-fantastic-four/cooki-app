@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:typed_data';
 import 'package:cooki/data/dto/generated_recipe_dto.dart';
 import 'package:firebase_ai/firebase_ai.dart';
@@ -62,9 +63,15 @@ class GeminiRecipeGenerationDataSource implements RecipeGenerationDataSource {
       AppConstants.textInputPlaceholder,
       textInput,
     );
-    final response = await _validationModel.generateContent([
-      Content.text(prompt),
-    ]);
+    final content = Content.text(prompt);
+    final response = await _validationModel.generateContent([content]);
+
+    final stats = await printGeminiFreeTierUsageStats(
+      content: content,
+      model: _validationModel,
+      estimatedOutputTokens: 5
+    );
+    log('\n검증 프롬프트 토큰 통계:\n$stats');
 
     final jsonResponse = json.decode(response.text ?? '{"isValid": false}');
     return ValidationDto.fromJson(jsonResponse);
@@ -97,6 +104,12 @@ class GeminiRecipeGenerationDataSource implements RecipeGenerationDataSource {
     } else {
       throw ArgumentError('Either textInput or imageBytes must be provided');
     }
+
+    final stats = await printGeminiFreeTierUsageStats(
+      content: content.first,
+      model: _recipeGenerationModel,
+    );
+    log('\n레시피 생성 프롬프트 토큰 통계:\n$stats');
 
     final response = await _recipeGenerationModel.generateContent(content);
     final jsonResponse = json.decode(response.text ?? '{}');
@@ -155,4 +168,73 @@ class GeminiRecipeGenerationDataSource implements RecipeGenerationDataSource {
     }
     return '';
   }
+
+  Future<String> printGeminiFreeTierUsageStats({
+    required Content content,
+    required GenerativeModel model,
+    int estimatedOutputTokens = 500,
+  }) async {
+    const int dailyTokenLimit = 1000000;
+    const int dailyRequestLimit = 1500;
+    const int maxRequestsPerMinute = 15;
+
+    final tokenCount = await model.countTokens([content]);
+
+    final int totalInputTokens = tokenCount.totalTokens;
+    final int totalTokens = totalInputTokens + estimatedOutputTokens;
+
+    final double percentOfDailyLimit = (totalTokens / dailyTokenLimit) * 100;
+    final int maxRequestsPerDayByTokens =
+    (dailyTokenLimit / totalTokens).floor();
+
+    return '''
+프롬프트 내용:
+- 과금 대상 문자 수: ${tokenCount.totalBillableCharacters}
+- 실제 입력 토큰 수: $totalInputTokens
+- 예상 출력 토큰 수: $estimatedOutputTokens
+- 총 예상 토큰 수: $totalTokens
+
+무료 등급의 하루 토큰 한도: 1,000,000 토큰
+이 프롬프트가 사용하는 하루 토큰 한도 비율: ${percentOfDailyLimit.toStringAsFixed(2)}%
+이 요청을 하루에 보낼 수 있는 최대 횟수 (토큰 기준): $maxRequestsPerDayByTokens 회
+
+무료 등급의 하루 요청 한도: $dailyRequestLimit 회
+분당 요청 한도: 분당 $maxRequestsPerMinute 회
+''';
+  }
+
+  Future<String> printGeminiFreeTierUsageStatsAccurateEnglish({
+    required Content content,
+    required GenerativeModel model,
+    int estimatedOutputTokens = 500,
+  }) async {
+    const int dailyTokenLimit = 1000000;
+    const int dailyRequestLimit = 1500;
+    const int maxRequestsPerMinute = 15;
+
+    final tokenCount = await model.countTokens([content]);
+
+    final int totalInputTokens = tokenCount.totalTokens;
+    final int totalTokens = totalInputTokens + estimatedOutputTokens;
+
+    final double percentOfDailyLimit = (totalTokens / dailyTokenLimit) * 100;
+    final int maxRequestsPerDayByTokens =
+    (dailyTokenLimit / totalTokens).floor();
+
+    return '''
+Prompt content:
+- Billable characters: ${tokenCount.totalBillableCharacters}
+- Actual input tokens: $totalInputTokens
+- Estimated output tokens: $estimatedOutputTokens
+- Estimated total tokens: $totalTokens
+
+Free tier daily token limit: $dailyTokenLimit tokens
+Percentage of daily token limit the prompt used: ${percentOfDailyLimit.toStringAsFixed(2)}%
+Maximum number of such requests per day (by tokens): $maxRequestsPerDayByTokens
+
+Free tier request limit: $dailyRequestLimit requests per day
+Request rate limit: $maxRequestsPerMinute requests per minute
+''';
+  }
+
 }
