@@ -32,6 +32,8 @@ dependencies:
   kakao_flutter_sdk_user: ^1.9.7+3
   cloud_functions: ^5.5.1
   firebase_ai: ^2.0.0
+  flutter_image_compress: ^2.4.0
+  easy_image_viewer: ^1.5.1
 
 dev_dependencies:
   flutter_test:

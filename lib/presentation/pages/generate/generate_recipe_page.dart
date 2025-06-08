@@ -1,67 +1,43 @@
-import 'dart:developer';
-
 import 'package:cooki/core/utils/dialogue_util.dart';
+import 'package:cooki/core/utils/error_mappers.dart';
 import 'package:cooki/core/utils/general_util.dart';
 import 'package:cooki/presentation/pages/generate/widgets/generate_button.dart';
+import 'package:cooki/presentation/pages/generate/widgets/image_selector.dart';
 import 'package:cooki/presentation/pages/generate/widgets/preference_chip.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/constants/app_constants.dart';
-
-import '../../../data/repository/providers.dart';
 import '../../widgets/input_decorations.dart';
+import 'generate_recipe_view_model.dart';
 
-class GenerateRecipePage extends StatefulWidget {
+class GenerateRecipePage extends ConsumerWidget {
   const GenerateRecipePage({super.key});
 
-  @override
-  State<GenerateRecipePage> createState() => _GenerateRecipePageState();
-}
+  Future<void> _generateRecipe(WidgetRef ref, BuildContext context) async {
+    await ref.read(generateRecipeViewModelProvider.notifier).generateRecipe();
+    final state = ref.read(generateRecipeViewModelProvider);
 
-class _GenerateRecipePageState extends State<GenerateRecipePage> {
-  late final TextEditingController _textController;
-
-  @override
-  void initState() {
-    super.initState();
-    _textController = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    _textController.dispose();
-    super.dispose();
-  }
-
-  void _showImageSourceActionSheet(BuildContext context) {
-    DialogueUtil.showCustomCupertinoActionSheet(
-      context,
-      title: strings(context).imageSelection,
-      option1Text: strings(context).takeWithCamera,
-      option2Text: strings(context).chooseInGallery,
-      onOption1: () {},
-      onOption2: () {},
-    );
-  }
-
-  Future<void> testApi(WidgetRef ref) async {
-    final validationResult = await ref
-        .read(recipeGenerationRepositoryProvider)
-        .validateUserInput(_textController.text);
-    log("IsValid: ${validationResult.isValid}");
-
-    if (validationResult.isValid) {
-      final recipe = await ref
-          .read(recipeGenerationRepositoryProvider)
-          .generateRecipe(textInput: _textController.text);
-      log('Generated recipe: \n$recipe');
+    if (state.errorKey != null) {
+      if (!context.mounted) return;
+      DialogueUtil.showAppCupertinoDialog(
+        context: context,
+        title: strings(context).generationFailed,
+        content: ErrorMapper.mapGenerateRecipeError(context, state.errorKey!),
+      );
+      ref.read(generateRecipeViewModelProvider.notifier).clearError();
+    } else if (state.generatedRecipe != null) {
+      if (!context.mounted) return;
+      showGeneratedRecipeDialogTemp(
+        recipe: state.generatedRecipe!,
+        context: context,
+        ref: ref,
+      );
     }
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return GestureDetector(
       onTap: FocusScope.of(context).unfocus,
       child: Scaffold(
@@ -70,33 +46,42 @@ class _GenerateRecipePageState extends State<GenerateRecipePage> {
           elevation: 1,
           leading: IconButton(
             onPressed: () => Navigator.of(context).pop(),
-            icon: Icon(Icons.close, size: 27),
+            icon: const Icon(Icons.close, size: 27),
           ),
           title: Text(
             strings(context).generateRecipeAppBarTitle,
-            style: TextStyle(color: Colors.black),
+            style: const TextStyle(color: Colors.black),
           ),
         ),
         bottomNavigationBar: Consumer(
           builder: (BuildContext context, WidgetRef ref, Widget? child) {
-            return GenerateButton(onTap: () => testApi(ref));
+            final state = ref.watch(generateRecipeViewModelProvider);
+            return GenerateButton(
+              onTap:
+                  state.canGenerate
+                      ? () => _generateRecipe(ref, context)
+                      : null,
+              isLoading: state.isGenerating,
+            );
           },
         ),
-        body: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 18),
-          child: _buildLayout(context),
+        body: SelectionArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 18),
+            child: _buildLayout(context, ref),
+          ),
         ),
       ),
     );
   }
 
-  ListView _buildLayout(BuildContext context) {
+  ListView _buildLayout(BuildContext context, WidgetRef ref) {
     return ListView(
       children: [
         const SizedBox(height: 10),
         Text(
           strings(context).generatePageMainTitle,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.w800,
             color: Color(0xFF1E1E1E),
@@ -108,12 +93,15 @@ class _GenerateRecipePageState extends State<GenerateRecipePage> {
           style: TextStyle(fontSize: 15, color: Colors.grey[700], height: 1.5),
         ),
         const SizedBox(height: 22),
-        _buildImageSelector(context),
+        ImageSelector(),
         const SizedBox(height: 19),
         TextField(
           maxLines: 4,
           maxLength: 300,
-          controller: _textController,
+          onChanged:
+              (text) => ref
+                  .read(generateRecipeViewModelProvider.notifier)
+                  .updateTextInput(text),
           decoration: getInputDecoration(
             strings(context).generateTextFieldHint,
           ),
@@ -123,13 +111,32 @@ class _GenerateRecipePageState extends State<GenerateRecipePage> {
           height: 36,
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                ...AppConstants.recipePreferences(
-                  context,
-                ).map((label) => PreferenceChip(label: '+ $label')),
-                // SizedBox(width: 4),
-              ],
+            child: Consumer(
+              builder: (context, ref, child) {
+                final selectedPreferences = ref.watch(
+                  generateRecipeViewModelProvider.select(
+                    (state) => state.selectedPreferences,
+                  ),
+                );
+                return Row(
+                  children:
+                      AppConstants.recipePreferences(context)
+                          .map(
+                            (label) => PreferenceChip(
+                              label: label,
+                              isSelected: selectedPreferences.contains(label),
+                              onTap:
+                                  () => ref
+                                      .read(
+                                        generateRecipeViewModelProvider
+                                            .notifier,
+                                      )
+                                      .togglePreference(label),
+                            ),
+                          )
+                          .toList(),
+                );
+              },
             ),
           ),
         ),
@@ -145,27 +152,6 @@ class _GenerateRecipePageState extends State<GenerateRecipePage> {
           ),
         ),
       ],
-    );
-  }
-
-  GestureDetector _buildImageSelector(BuildContext context) {
-    return GestureDetector(
-      onTap: () => _showImageSourceActionSheet(context),
-      child: Container(
-        height: 160,
-        decoration: BoxDecoration(
-          color: Colors.grey[100]!,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade300),
-        ),
-        child: const Center(
-          child: Icon(
-            CupertinoIcons.photo_on_rectangle,
-            size: 48,
-            color: Colors.grey,
-          ),
-        ),
-      ),
     );
   }
 }
