@@ -178,19 +178,36 @@ class GeminiRecipeGenerationDataSource implements RecipeGenerationDataSource {
     const int dailyRequestLimit = 1500;
     const int maxRequestsPerMinute = 15;
 
-    final tokenCount = await model.countTokens([content]);
+    int textTokens = 0;
+    int imageTokens = 0;
+    int? billableChars;
+    final List<Part> parts = content.parts;
 
-    final int totalInputTokens = tokenCount.totalTokens;
+    for (final part in parts) {
+      final singlePartContent = Content.multi([part]);
+      final count = await model.countTokens([singlePartContent]);
+
+      if (part is TextPart) {
+        textTokens += count.totalTokens;
+      } else if (part is InlineDataPart) {
+        imageTokens += count.totalTokens;
+      }
+      if (count.totalBillableCharacters != null) {
+        billableChars = (billableChars ?? 0) + count.totalBillableCharacters!;
+      }
+    }
+
+    final int totalInputTokens = textTokens + imageTokens;
     final int totalTokens = totalInputTokens + estimatedOutputTokens;
-
     final double percentOfDailyLimit = (totalTokens / dailyTokenLimit) * 100;
-    final int maxRequestsPerDayByTokens =
-    (dailyTokenLimit / totalTokens).floor();
+    final int maxRequestsPerDayByTokens = (dailyTokenLimit / totalTokens).floor();
 
     return '''
 프롬프트 내용:
-- 과금 대상 문자 수: ${tokenCount.totalBillableCharacters}
-- 실제 입력 토큰 수: $totalInputTokens
+- 과금 대상 문자 수 (현재 해당 없음): $billableChars
+- 텍스트 입력 토큰 수: $textTokens
+- 이미지 입력 토큰 수: $imageTokens
+- 실제 입력 토큰 수 (합계): $totalInputTokens
 - 예상 출력 토큰 수: $estimatedOutputTokens
 - 총 예상 토큰 수: $totalTokens
 
@@ -202,39 +219,4 @@ class GeminiRecipeGenerationDataSource implements RecipeGenerationDataSource {
 분당 요청 한도: 분당 $maxRequestsPerMinute 회
 ''';
   }
-
-  Future<String> printGeminiFreeTierUsageStatsAccurateEnglish({
-    required Content content,
-    required GenerativeModel model,
-    int estimatedOutputTokens = 500,
-  }) async {
-    const int dailyTokenLimit = 1000000;
-    const int dailyRequestLimit = 1500;
-    const int maxRequestsPerMinute = 15;
-
-    final tokenCount = await model.countTokens([content]);
-
-    final int totalInputTokens = tokenCount.totalTokens;
-    final int totalTokens = totalInputTokens + estimatedOutputTokens;
-
-    final double percentOfDailyLimit = (totalTokens / dailyTokenLimit) * 100;
-    final int maxRequestsPerDayByTokens =
-    (dailyTokenLimit / totalTokens).floor();
-
-    return '''
-Prompt content:
-- Billable characters: ${tokenCount.totalBillableCharacters}
-- Actual input tokens: $totalInputTokens
-- Estimated output tokens: $estimatedOutputTokens
-- Estimated total tokens: $totalTokens
-
-Free tier daily token limit: $dailyTokenLimit tokens
-Percentage of daily token limit the prompt used: ${percentOfDailyLimit.toStringAsFixed(2)}%
-Maximum number of such requests per day (by tokens): $maxRequestsPerDayByTokens
-
-Free tier request limit: $dailyRequestLimit requests per day
-Request rate limit: $maxRequestsPerMinute requests per minute
-''';
-  }
-
 }
