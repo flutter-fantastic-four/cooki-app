@@ -29,5 +29,9 @@
   "invalidUserInputError": "유효하지 않은 입력입니다.\n명확한 요리 설명 또는 재료를 입력해 주세요.",
   "invalidImageError": "레시피 생성에 실패했습니다.\n이미지에 음식이나 재료가 포함되어 있는지 확인해 주세요.",
   "generationFailedError": "레시피 생성에 실패했습니다.\n다시 시도해 주세요",
-  "generateRecipeLoading": "레시피 생성 중..."
+  "generateRecipeLoading": "레시피 생성 중...",
+
+  "textOnlyRecipePromptPath": "ko/text_only_recipe.md",
+  "imageRecipePromptPath": "ko/image_recipe.md"
+
 }

@@ -11,6 +11,8 @@ abstract class RecipeGenerationRepository {
     String? textInput,
     Uint8List? imageBytes,
     Set<String>? preferences,
+    required String textOnlyRecipePromptPath,
+    required String imageRecipePromptPath,
   });
 }
 
@@ -30,11 +32,15 @@ class RecipeGenerationRepositoryImpl implements RecipeGenerationRepository {
     String? textInput,
     Uint8List? imageBytes,
     Set<String>? preferences,
+    required String textOnlyRecipePromptPath,
+    required String imageRecipePromptPath,
   }) async {
     final dto = await _recipeGenerationDataSource.generateRecipe(
       textInput: textInput,
       imageBytes: imageBytes,
       preferences: preferences,
+      textOnlyRecipePromptPath: textOnlyRecipePromptPath,
+      imageRecipePromptPath: imageRecipePromptPath
     );
     return dto.toEntity();
   }

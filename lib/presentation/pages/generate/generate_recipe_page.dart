@@ -15,7 +15,12 @@ class GenerateRecipePage extends ConsumerWidget {
   const GenerateRecipePage({super.key});
 
   Future<void> _generateRecipe(WidgetRef ref, BuildContext context) async {
-    await ref.read(generateRecipeViewModelProvider.notifier).generateRecipe();
+    await ref
+        .read(generateRecipeViewModelProvider.notifier)
+        .generateRecipe(
+          textOnlyRecipePromptPath: strings(context).textOnlyRecipePromptPath,
+          imageRecipePromptPath: strings(context).imageRecipePromptPath,
+        );
     final state = ref.read(generateRecipeViewModelProvider);
 
     if (state.errorKey != null) {

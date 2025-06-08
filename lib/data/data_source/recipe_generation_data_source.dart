@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:developer';
-import 'dart:typed_data';
 import 'package:cooki/data/dto/generated_recipe_dto.dart';
 import 'package:firebase_ai/firebase_ai.dart';
+import 'package:flutter/services.dart';
 import '../../app/constants/app_constants.dart';
 import '../dto/validation_dto.dart';
 
@@ -13,6 +13,8 @@ abstract class RecipeGenerationDataSource {
     String? textInput,
     Uint8List? imageBytes,
     Set<String>? preferences,
+    required String textOnlyRecipePromptPath,
+    required String imageRecipePromptPath,
   });
 }
 
@@ -59,7 +61,10 @@ class GeminiRecipeGenerationDataSource implements RecipeGenerationDataSource {
 
   @override
   Future<ValidationDto> validateUserInput(String textInput) async {
-    final String prompt = AppConstants.validationPrompt.replaceAll(
+    final String promptTemplate = await rootBundle.loadString(
+      AppConstants.validationPromptPath,
+    );
+    final prompt = promptTemplate.replaceAll(
       AppConstants.textInputPlaceholder,
       textInput,
     );
@@ -69,7 +74,7 @@ class GeminiRecipeGenerationDataSource implements RecipeGenerationDataSource {
     final stats = await printGeminiFreeTierUsageStats(
       content: content,
       model: _validationModel,
-      estimatedOutputTokens: 5
+      estimatedOutputTokens: 5,
     );
     log('\n검증 프롬프트 토큰 통계:\n$stats');
 
@@ -82,11 +87,15 @@ class GeminiRecipeGenerationDataSource implements RecipeGenerationDataSource {
     String? textInput,
     Uint8List? imageBytes,
     Set<String>? preferences,
+    required String textOnlyRecipePromptPath,
+    required String imageRecipePromptPath,
   }) async {
-    final prompt = _buildRecipePrompt(
+    final prompt = await _buildRecipePrompt(
       textInput: textInput,
       preferences: preferences,
       hasImage: imageBytes != null,
+      textOnlyRecipePromptPath: textOnlyRecipePromptPath,
+      imageRecipePromptPath: imageRecipePromptPath,
     );
     final content = <Content>[];
 
@@ -116,52 +125,62 @@ class GeminiRecipeGenerationDataSource implements RecipeGenerationDataSource {
     return GeneratedRecipeDto.fromJson(jsonResponse);
   }
 
-  String _buildRecipePrompt({
+  Future<String> _buildRecipePrompt({
     String? textInput,
     Set<String>? preferences,
     required bool hasImage,
-  }) {
+    required String textOnlyRecipePromptPath,
+    required String imageRecipePromptPath,
+  }) async {
     if (hasImage) {
-      String imagePrompt = AppConstants.imageRecipePrompt;
-
-      final textContextSection =
-          textInput?.isNotEmpty == true
-              ? AppConstants.textContextTemplate.replaceAll(
-                AppConstants.textInputPlaceholder,
-                textInput!,
-              )
-              : '';
-      imagePrompt = imagePrompt.replaceAll(
-        AppConstants.textContextSectionPlaceholder,
-        textContextSection,
-      );
-      final preferencesSection = _buildPreferencesSection(preferences);
-      imagePrompt = imagePrompt.replaceAll(
-        AppConstants.preferencesSectionPlaceholder,
-        preferencesSection,
+      String imagePrompt = await rootBundle.loadString(
+        'assets/prompts/$imageRecipePromptPath',
       );
 
-      return imagePrompt;
+      String textContextSection = '';
+      if (textInput?.isNotEmpty == true) {
+        final textContextTemplate = await rootBundle.loadString(
+          AppConstants.textContextTemplatePath,
+        );
+        textContextSection = textContextTemplate.replaceAll(
+          AppConstants.textInputPlaceholder,
+          textInput!,
+        );
+      }
+
+      final preferencesSection = await _buildPreferencesSection(preferences);
+
+      return imagePrompt
+          .replaceAll(
+            AppConstants.textContextSectionPlaceholder,
+            textContextSection,
+          )
+          .replaceAll(
+            AppConstants.preferencesSectionPlaceholder,
+            preferencesSection,
+          );
     } else {
-      String textOnlyPrompt = AppConstants.textOnlyRecipePrompt;
-
-      textOnlyPrompt = textOnlyPrompt.replaceAll(
-        AppConstants.textInputPlaceholder,
-        textInput!,
-      );
-      final preferencesSection = _buildPreferencesSection(preferences);
-      textOnlyPrompt = textOnlyPrompt.replaceAll(
-        AppConstants.preferencesSectionPlaceholder,
-        preferencesSection,
+      String textOnlyPrompt = await rootBundle.loadString(
+        'assets/prompts/$textOnlyRecipePromptPath',
       );
 
-      return textOnlyPrompt;
+      final preferencesSection = await _buildPreferencesSection(preferences);
+
+      return textOnlyPrompt
+          .replaceAll(AppConstants.textInputPlaceholder, textInput!)
+          .replaceAll(
+            AppConstants.preferencesSectionPlaceholder,
+            preferencesSection,
+          );
     }
   }
 
-  String _buildPreferencesSection(Set<String>? preferences) {
+  Future<String> _buildPreferencesSection(Set<String>? preferences) async {
     if (preferences?.isNotEmpty == true) {
-      return AppConstants.preferencesTemplate.replaceAll(
+      final preferencesTemplate = await rootBundle.loadString(
+        AppConstants.preferencesTemplatePath,
+      );
+      return preferencesTemplate.replaceAll(
         AppConstants.preferencesListPlaceholder,
         preferences!.join(', '),
       );
@@ -200,7 +219,8 @@ class GeminiRecipeGenerationDataSource implements RecipeGenerationDataSource {
     final int totalInputTokens = textTokens + imageTokens;
     final int totalTokens = totalInputTokens + estimatedOutputTokens;
     final double percentOfDailyLimit = (totalTokens / dailyTokenLimit) * 100;
-    final int maxRequestsPerDayByTokens = (dailyTokenLimit / totalTokens).floor();
+    final int maxRequestsPerDayByTokens =
+        (dailyTokenLimit / totalTokens).floor();
 
     return '''
 프롬프트 내용:

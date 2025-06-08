@@ -64,7 +64,10 @@ class GenerateRecipeViewModel extends AutoDisposeNotifier<GenerateRecipeState> {
     return const GenerateRecipeState();
   }
 
-  Future<void> generateRecipe() async {
+  Future<void> generateRecipe({
+    required String textOnlyRecipePromptPath,
+    required String imageRecipePromptPath,
+  }) async {
     if (!state.canGenerate) return;
 
     state = state.copyWith(isGenerating: true);
@@ -97,6 +100,8 @@ class GenerateRecipeViewModel extends AutoDisposeNotifier<GenerateRecipeState> {
                 state.selectedPreferences.isNotEmpty
                     ? state.selectedPreferences
                     : null,
+            textOnlyRecipePromptPath: textOnlyRecipePromptPath,
+            imageRecipePromptPath: imageRecipePromptPath,
           );
       if (generatedRecipe.isError) {
         state = state.copyWith(

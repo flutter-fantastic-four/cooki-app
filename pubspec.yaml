@@ -48,3 +48,6 @@ flutter:
     - .env
     - assets/
     - assets/icons/
+    - assets/prompts/
+    - assets/prompts/ko/
+
