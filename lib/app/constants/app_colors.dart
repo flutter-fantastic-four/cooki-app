@@ -23,4 +23,7 @@ abstract class AppColors {
   static const Color appleLogintext = Colors.white;
 
   static const Color googleLoginBorder = Colors.black;
+
+  // From Figma design
+ static const greyScale50 = Color(0XFFF5F5F5);
 }

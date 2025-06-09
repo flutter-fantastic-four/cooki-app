@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../../app/constants/app_colors.dart';
 import '../../../../core/utils/dialogue_util.dart';
-import '../../../../core/utils/general_util.dart';
 import '../../../../core/utils/logger.dart';
 import '../generate_recipe_view_model.dart';
 
@@ -21,13 +21,10 @@ class ImageSelector extends ConsumerWidget {
     BuildContext context,
     GenerateRecipeViewModel vm,
   ) {
-    DialogueUtil.showCustomCupertinoActionSheet(
+    DialogueUtil.showImagePickerModal(
       context,
-      title: strings(context).imageSelection,
-      option1Text: strings(context).takeWithCamera,
-      option2Text: strings(context).chooseInGallery,
-      onOption1: () => _pickImage(vm, ImageSource.camera),
-      onOption2: () => _pickImage(vm, ImageSource.gallery),
+      onCamera: () => _pickImage(vm, ImageSource.camera),
+      onGallery: () => _pickImage(vm, ImageSource.gallery),
     );
   }
 
@@ -74,14 +71,14 @@ class ImageSelector extends ConsumerWidget {
                       imageProvider,
                       swipeDismissible: true,
                       doubleTapZoomable: true,
-                      useSafeArea: true
+                      useSafeArea: true,
                     );
                   }
                   : () => _showImageSourceActionSheet(context, vm),
           child: Container(
             height: 160,
             decoration: BoxDecoration(
-              color: const Color(0XFFF5F5F5),
+              color: AppColors.greyScale50,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.grey.shade300),
             ),
