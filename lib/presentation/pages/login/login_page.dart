@@ -20,7 +20,7 @@ class LoginPage extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset("assets/icons/vertical_logo_white_bg.png"),
+                  Image.asset("assets/icons/cooki_logo_green.png", width: 164),
                   Text('맛있는 그 순간, cooki와 함께'),
                   const SizedBox(height: 100),
                   LoginButton(signInMethod: SignInMethod.kakao),
@@ -36,7 +36,11 @@ class LoginPage extends ConsumerWidget {
           ),
 
           // 로딩 오버레이
-          if (loginState.isLoading) Container(color: Colors.black.withValues(alpha: 0.3), child: const Center(child: CircularProgressIndicator())),
+          if (loginState.isLoading)
+            Container(
+              color: Colors.black.withValues(alpha: 0.3),
+              child: const Center(child: CircularProgressIndicator()),
+            ),
         ],
       ),
     );
@@ -49,17 +53,30 @@ class LoginPage extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('회원가입 시 Cooki의 ', style: TextStyle(color: Colors.grey[500], fontSize: 15)),
+            Text(
+              '회원가입 시 Cooki의 ',
+              style: TextStyle(color: Colors.grey[500], fontSize: 15),
+            ),
             GestureDetector(
               onTap: () {},
               child: Container(
                 padding: const EdgeInsets.only(bottom: 1), // 약간만 여백 주기
-                decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Colors.grey[500]!, width: 1))),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: Colors.grey[500]!, width: 1),
+                  ),
+                ),
                 child: Text(
                   '서비스 이용 약관',
-                  style: TextStyle(height: 1.0, color: Colors.grey[500], fontSize: 15),
+                  style: TextStyle(
+                    height: 1.0,
+                    color: Colors.grey[500],
+                    fontSize: 15,
+                  ),
                   textAlign: TextAlign.center,
-                  textHeightBehavior: TextHeightBehavior(applyHeightToFirstAscent: false),
+                  textHeightBehavior: TextHeightBehavior(
+                    applyHeightToFirstAscent: false,
+                  ),
                 ),
               ),
             ),
@@ -74,17 +91,30 @@ class LoginPage extends ConsumerWidget {
               onTap: () {},
               child: Container(
                 padding: const EdgeInsets.only(bottom: 1), // 약간만 여백 주기
-                decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Colors.grey[500]!, width: 1))),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: Colors.grey[500]!, width: 1),
+                  ),
+                ),
                 child: Text(
                   '개인정보 보호 정책',
-                  style: TextStyle(height: 1.0, color: Colors.grey[500], fontSize: 15),
+                  style: TextStyle(
+                    height: 1.0,
+                    color: Colors.grey[500],
+                    fontSize: 15,
+                  ),
                   textAlign: TextAlign.center,
-                  textHeightBehavior: TextHeightBehavior(applyHeightToFirstAscent: false),
+                  textHeightBehavior: TextHeightBehavior(
+                    applyHeightToFirstAscent: false,
+                  ),
                 ),
               ),
             ),
 
-            Text('에 동의하게 됩니다.', style: TextStyle(color: Colors.grey[500], fontSize: 15)),
+            Text(
+              '에 동의하게 됩니다.',
+              style: TextStyle(color: Colors.grey[500], fontSize: 15),
+            ),
           ],
         ),
       ],
