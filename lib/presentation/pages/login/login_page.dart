@@ -1,4 +1,5 @@
 import 'package:cooki/app/enum/sign_in_method.dart';
+import 'package:cooki/core/utils/general_util.dart';
 import 'package:cooki/presentation/pages/login/widget/login_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,7 +22,7 @@ class LoginPage extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Image.asset("assets/icons/vertical_logo_white_bg.png"),
-                  Text('맛있는 그 순간, cooki와 함께'),
+                  Text(strings(context).loginPageLogoTitle),
                   const SizedBox(height: 100),
                   LoginButton(signInMethod: SignInMethod.kakao),
                   const SizedBox(height: 16),
