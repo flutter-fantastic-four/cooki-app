@@ -21,7 +21,7 @@ class LoginPage extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset("assets/icons/vertical_logo_white_bg.png"),
+                  Image.asset("assets/icons/vertical_logo_white_bg.png", width: 164),
                   Text(strings(context).loginPageLogoTitle),
                   const SizedBox(height: 100),
                   LoginButton(signInMethod: SignInMethod.kakao),

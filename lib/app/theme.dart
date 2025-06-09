@@ -35,7 +35,7 @@ abstract class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           elevation: 0,
-          backgroundColor: AppColors.buttonsBlue,
+          backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -49,8 +49,8 @@ abstract class AppTheme {
           style: ElevatedButton.styleFrom(
             elevation: 0,
             // backgroundColor: AppColors.buttonsBlue,
-            foregroundColor: AppColors.buttonsBlue,
-            side: BorderSide(color: AppColors.buttonsBlue),
+            foregroundColor: AppColors.primary,
+            side: BorderSide(color: AppColors.primary),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),

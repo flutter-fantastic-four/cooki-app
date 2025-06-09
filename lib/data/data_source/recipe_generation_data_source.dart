@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:developer';
-import 'dart:typed_data';
 import 'package:cooki/data/dto/generated_recipe_dto.dart';
 import 'package:firebase_ai/firebase_ai.dart';
+import 'package:flutter/services.dart';
 import '../../app/constants/app_constants.dart';
 import '../dto/validation_dto.dart';
 
@@ -12,7 +12,9 @@ abstract class RecipeGenerationDataSource {
   Future<GeneratedRecipeDto> generateRecipe({
     String? textInput,
     Uint8List? imageBytes,
-    List<String>? preferences,
+    Set<String>? preferences,
+    required String textOnlyRecipePromptPath,
+    required String imageRecipePromptPath,
   });
 }
 
@@ -59,7 +61,10 @@ class GeminiRecipeGenerationDataSource implements RecipeGenerationDataSource {
 
   @override
   Future<ValidationDto> validateUserInput(String textInput) async {
-    final String prompt = AppConstants.validationPrompt.replaceAll(
+    final String promptTemplate = await rootBundle.loadString(
+      AppConstants.validationPromptPath,
+    );
+    final prompt = promptTemplate.replaceAll(
       AppConstants.textInputPlaceholder,
       textInput,
     );
@@ -69,7 +74,7 @@ class GeminiRecipeGenerationDataSource implements RecipeGenerationDataSource {
     final stats = await printGeminiFreeTierUsageStats(
       content: content,
       model: _validationModel,
-      estimatedOutputTokens: 5
+      estimatedOutputTokens: 5,
     );
     log('\n검증 프롬프트 토큰 통계:\n$stats');
 
@@ -81,12 +86,16 @@ class GeminiRecipeGenerationDataSource implements RecipeGenerationDataSource {
   Future<GeneratedRecipeDto> generateRecipe({
     String? textInput,
     Uint8List? imageBytes,
-    List<String>? preferences,
+    Set<String>? preferences,
+    required String textOnlyRecipePromptPath,
+    required String imageRecipePromptPath,
   }) async {
-    final prompt = _buildRecipePrompt(
+    final prompt = await _buildRecipePrompt(
       textInput: textInput,
       preferences: preferences,
       hasImage: imageBytes != null,
+      textOnlyRecipePromptPath: textOnlyRecipePromptPath,
+      imageRecipePromptPath: imageRecipePromptPath,
     );
     final content = <Content>[];
 
@@ -116,52 +125,62 @@ class GeminiRecipeGenerationDataSource implements RecipeGenerationDataSource {
     return GeneratedRecipeDto.fromJson(jsonResponse);
   }
 
-  String _buildRecipePrompt({
+  Future<String> _buildRecipePrompt({
     String? textInput,
-    List<String>? preferences,
+    Set<String>? preferences,
     required bool hasImage,
-  }) {
+    required String textOnlyRecipePromptPath,
+    required String imageRecipePromptPath,
+  }) async {
     if (hasImage) {
-      String imagePrompt = AppConstants.imageRecipePrompt;
-
-      final textContextSection =
-          textInput?.isNotEmpty == true
-              ? AppConstants.textContextTemplate.replaceAll(
-                AppConstants.textInputPlaceholder,
-                textInput!,
-              )
-              : '';
-      imagePrompt = imagePrompt.replaceAll(
-        AppConstants.textContextSectionPlaceholder,
-        textContextSection,
-      );
-      final preferencesSection = _buildPreferencesSection(preferences);
-      imagePrompt = imagePrompt.replaceAll(
-        AppConstants.preferencesSectionPlaceholder,
-        preferencesSection,
+      String imagePrompt = await rootBundle.loadString(
+        'assets/prompts/$imageRecipePromptPath',
       );
 
-      return imagePrompt;
+      String textContextSection = '';
+      if (textInput?.isNotEmpty == true) {
+        final textContextTemplate = await rootBundle.loadString(
+          AppConstants.textContextTemplatePath,
+        );
+        textContextSection = textContextTemplate.replaceAll(
+          AppConstants.textInputPlaceholder,
+          textInput!,
+        );
+      }
+
+      final preferencesSection = await _buildPreferencesSection(preferences);
+
+      return imagePrompt
+          .replaceAll(
+            AppConstants.textContextSectionPlaceholder,
+            textContextSection,
+          )
+          .replaceAll(
+            AppConstants.preferencesSectionPlaceholder,
+            preferencesSection,
+          );
     } else {
-      String textOnlyPrompt = AppConstants.textOnlyRecipePrompt;
-
-      textOnlyPrompt = textOnlyPrompt.replaceAll(
-        AppConstants.textInputPlaceholder,
-        textInput!,
-      );
-      final preferencesSection = _buildPreferencesSection(preferences);
-      textOnlyPrompt = textOnlyPrompt.replaceAll(
-        AppConstants.preferencesSectionPlaceholder,
-        preferencesSection,
+      String textOnlyPrompt = await rootBundle.loadString(
+        'assets/prompts/$textOnlyRecipePromptPath',
       );
 
-      return textOnlyPrompt;
+      final preferencesSection = await _buildPreferencesSection(preferences);
+
+      return textOnlyPrompt
+          .replaceAll(AppConstants.textInputPlaceholder, textInput!)
+          .replaceAll(
+            AppConstants.preferencesSectionPlaceholder,
+            preferencesSection,
+          );
     }
   }
 
-  String _buildPreferencesSection(List<String>? preferences) {
+  Future<String> _buildPreferencesSection(Set<String>? preferences) async {
     if (preferences?.isNotEmpty == true) {
-      return AppConstants.preferencesTemplate.replaceAll(
+      final preferencesTemplate = await rootBundle.loadString(
+        AppConstants.preferencesTemplatePath,
+      );
+      return preferencesTemplate.replaceAll(
         AppConstants.preferencesListPlaceholder,
         preferences!.join(', '),
       );
@@ -178,19 +197,37 @@ class GeminiRecipeGenerationDataSource implements RecipeGenerationDataSource {
     const int dailyRequestLimit = 1500;
     const int maxRequestsPerMinute = 15;
 
-    final tokenCount = await model.countTokens([content]);
+    int textTokens = 0;
+    int imageTokens = 0;
+    int? billableChars;
+    final List<Part> parts = content.parts;
 
-    final int totalInputTokens = tokenCount.totalTokens;
+    for (final part in parts) {
+      final singlePartContent = Content.multi([part]);
+      final count = await model.countTokens([singlePartContent]);
+
+      if (part is TextPart) {
+        textTokens += count.totalTokens;
+      } else if (part is InlineDataPart) {
+        imageTokens += count.totalTokens;
+      }
+      if (count.totalBillableCharacters != null) {
+        billableChars = (billableChars ?? 0) + count.totalBillableCharacters!;
+      }
+    }
+
+    final int totalInputTokens = textTokens + imageTokens;
     final int totalTokens = totalInputTokens + estimatedOutputTokens;
-
     final double percentOfDailyLimit = (totalTokens / dailyTokenLimit) * 100;
     final int maxRequestsPerDayByTokens =
-    (dailyTokenLimit / totalTokens).floor();
+        (dailyTokenLimit / totalTokens).floor();
 
     return '''
 프롬프트 내용:
-- 과금 대상 문자 수: ${tokenCount.totalBillableCharacters}
-- 실제 입력 토큰 수: $totalInputTokens
+- 과금 대상 문자 수 (현재 해당 없음): $billableChars
+- 텍스트 입력 토큰 수: $textTokens
+- 이미지 입력 토큰 수: $imageTokens
+- 실제 입력 토큰 수 (합계): $totalInputTokens
 - 예상 출력 토큰 수: $estimatedOutputTokens
 - 총 예상 토큰 수: $totalTokens
 
@@ -202,39 +239,4 @@ class GeminiRecipeGenerationDataSource implements RecipeGenerationDataSource {
 분당 요청 한도: 분당 $maxRequestsPerMinute 회
 ''';
   }
-
-  Future<String> printGeminiFreeTierUsageStatsAccurateEnglish({
-    required Content content,
-    required GenerativeModel model,
-    int estimatedOutputTokens = 500,
-  }) async {
-    const int dailyTokenLimit = 1000000;
-    const int dailyRequestLimit = 1500;
-    const int maxRequestsPerMinute = 15;
-
-    final tokenCount = await model.countTokens([content]);
-
-    final int totalInputTokens = tokenCount.totalTokens;
-    final int totalTokens = totalInputTokens + estimatedOutputTokens;
-
-    final double percentOfDailyLimit = (totalTokens / dailyTokenLimit) * 100;
-    final int maxRequestsPerDayByTokens =
-    (dailyTokenLimit / totalTokens).floor();
-
-    return '''
-Prompt content:
-- Billable characters: ${tokenCount.totalBillableCharacters}
-- Actual input tokens: $totalInputTokens
-- Estimated output tokens: $estimatedOutputTokens
-- Estimated total tokens: $totalTokens
-
-Free tier daily token limit: $dailyTokenLimit tokens
-Percentage of daily token limit the prompt used: ${percentOfDailyLimit.toStringAsFixed(2)}%
-Maximum number of such requests per day (by tokens): $maxRequestsPerDayByTokens
-
-Free tier request limit: $dailyRequestLimit requests per day
-Request rate limit: $maxRequestsPerMinute requests per minute
-''';
-  }
-
 }
