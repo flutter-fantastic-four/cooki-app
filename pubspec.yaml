@@ -34,6 +34,8 @@ dependencies:
   firebase_ai: ^2.0.0
   flutter_image_compress: ^2.4.0
   easy_image_viewer: ^1.5.1
+  path_provider: ^2.1.5
+  share_plus: ^11.0.0
 
 dev_dependencies:
   flutter_test:
