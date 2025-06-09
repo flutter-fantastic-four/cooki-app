@@ -50,7 +50,7 @@ flutter:
   assets:
     - .env
     - assets/
-    - assets/icons/    
+    - assets/icons/
     - assets/prompts/
     - assets/prompts/ko/
 
@@ -58,4 +58,3 @@ flutter_native_splash:
   color: "#1D8163"
   image: "assets/icons/cooki_logo_white.png"
   color_ios: "#1D8163"
-
