@@ -8,4 +8,7 @@ abstract class AppStyles {
       fontSize: 15,
       fontWeight: FontWeight.bold
   );
+
+  static const cupertinoSheetTitle = TextStyle(fontSize: 17, color: Colors.black87);
+  static const cupertinoSheetActionText = TextStyle(color: Colors.blueAccent);
 }

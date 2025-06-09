@@ -4,7 +4,6 @@ import '../dto/user_dto.dart';
 
 abstract class UserDataSource {
   Future<UserDto?> getUserById(String uid);
-
   Future<void> saveUser(UserDto user);
 }
 

@@ -1,3 +1,4 @@
+import 'package:cooki/data/repository/recipe_generation_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/repository/auth_repository.dart';
@@ -8,6 +9,7 @@ import 'image_repository.dart';
 final authRepositoryProvider = Provider<AuthRepository>(
   (ref) => AuthRepositoryImpl(
     ref.read(googleSignInDataSourceProvider),
+    ref.read(kakaoSignInDataSourceProvider),
     ref.read(firebaseAuthDataSourceProvider),
     ref.read(userFirestoreDataSourceProvider),
   ),
@@ -24,3 +26,7 @@ final userRepositoryProvider = Provider<UserRepository>(
 final imageRepositoryProvider = Provider<ImageRepository>(
   (ref) => ImageRepositoryImpl(ref.read(imageStorageDataSourceProvider)),
 );
+
+final recipeGenerationRepositoryProvider = Provider<RecipeGenerationRepository>((ref) {
+  return RecipeGenerationRepositoryImpl(ref.read(recipeGenerationDataSourceProvider));
+});

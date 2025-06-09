@@ -1,6 +1,6 @@
 name: cooki
 description: "A new Flutter project."
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 version: 1.0.0+1
 
@@ -29,6 +29,13 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   url_launcher: ^6.3.1
+  kakao_flutter_sdk_user: ^1.9.7+3
+  cloud_functions: ^5.5.1
+  firebase_ai: ^2.0.0
+  flutter_image_compress: ^2.4.0
+  easy_image_viewer: ^1.5.1
+  path_provider: ^2.1.5
+  share_plus: ^11.0.0
 
 dev_dependencies:
   flutter_test:
@@ -36,11 +43,13 @@ dev_dependencies:
 
   flutter_lints: ^5.0.0
 
-
 flutter:
   uses-material-design: true
-
+  generate: true
   assets:
     - .env
     - assets/
     - assets/icons/
+    - assets/prompts/
+    - assets/prompts/ko/
+

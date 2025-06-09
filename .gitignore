@@ -139,3 +139,5 @@ app.*.map.json
 *.tmp
 *.lock
 firebase.json
+
+lib/gen
