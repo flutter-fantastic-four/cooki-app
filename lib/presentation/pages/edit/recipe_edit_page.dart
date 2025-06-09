@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:easy_image_viewer/easy_image_viewer.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/constants/app_colors.dart';
@@ -292,11 +293,25 @@ class _RecipeEditPageState extends State<RecipeEditPage> {
   }
 
   Widget _buildImageSelector() {
-    return Image.memory(
-      _imageBytes!,
-      fit: BoxFit.cover,
-      height: 230,
-      width: double.infinity,
+    return GestureDetector(
+      onTap: () {
+        final imageProvider = MemoryImage(
+          _imageBytes!,
+        );
+        showImageViewer(
+            context,
+            imageProvider,
+            swipeDismissible: true,
+            doubleTapZoomable: true,
+            useSafeArea: true
+        );
+      },
+      child: Image.memory(
+        _imageBytes!,
+        fit: BoxFit.cover,
+        height: 230,
+        width: double.infinity,
+      ),
     );
   }
 
