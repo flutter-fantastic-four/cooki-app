@@ -12,11 +12,13 @@ abstract class AppColors {
 
   static const Color inactiveButton = Color(0xFFBDBDBD);
 
-  static const Color kakaoLoginBackgroundColor = Color(0xFFFEE500);
-  static const Color googleLoginBackgroundColor = Colors.white;
-  static const Color appleLoginBackgroundColor = Colors.black;
+  static const Color kakaoLoginBackground = Color(0xFFFEE500);
+  static const Color googleLoginBackground = Colors.white;
+  static const Color appleLoginBackground = Colors.black;
 
-  static const Color kakaoLogintextColor = Colors.black;
-  static const Color googleLogintextColor = Colors.black;
-  static const Color appleLogintextColor = Colors.white;
+  static const Color kakaoLogintext = Colors.black;
+  static const Color googleLogintext = Colors.black;
+  static const Color appleLogintext = Colors.white;
+
+  static const Color googleLoginBorder = Colors.black;
 }
