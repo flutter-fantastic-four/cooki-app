@@ -50,5 +50,9 @@ flutter:
 
 flutter_native_splash:
   color: "#1D8163"
+<<<<<<< HEAD
   image: "assets/icons/cookilogo-white.png"
+=======
+  image: "assets/icons/cookilogo_green.png"
+>>>>>>> 87f5fda07625cda8b349233b9ba5bd70a89bf81e
   color_ios: "#1D8163"
