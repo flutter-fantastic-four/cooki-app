@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:easy_image_viewer/easy_image_viewer.dart';
@@ -338,7 +339,7 @@ class _RecipeEditPageState extends State<RecipeEditPage> {
           Expanded(
             child: OutlinedButton.icon(
               onPressed: () {
-                // handle delete later
+                log(widget.generatedRecipe.toString());
               },
               icon: const Icon(Icons.delete, color: Colors.red),
               label: Text(

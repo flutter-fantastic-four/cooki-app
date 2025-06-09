@@ -100,9 +100,16 @@ class GenerateRecipePage extends ConsumerWidget {
           strings(context).generatePageSubtitle,
           style: TextStyle(fontSize: 15, color: Colors.grey[700], height: 1.5),
         ),
+
         const SizedBox(height: 22),
         ImageSelector(),
-        const SizedBox(height: 19),
+
+        const SizedBox(height: 22),
+        Text(
+          strings(context).aiTextInputLabel,
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
         TextField(
           maxLines: 4,
           maxLength: 300,

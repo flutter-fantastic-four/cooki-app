@@ -81,7 +81,7 @@ class ImageSelector extends ConsumerWidget {
           child: Container(
             height: 160,
             decoration: BoxDecoration(
-              color: Colors.grey[100]!,
+              color: const Color(0XFFF5F5F5),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.grey.shade300),
             ),
