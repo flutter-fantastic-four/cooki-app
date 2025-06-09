@@ -88,49 +88,52 @@ class _RecipeEditPageState extends State<RecipeEditPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const SizedBox(height: 8),
-                          _buildSectionTitle("제목"),
+                          _buildSectionTitle(strings(context).recipeTitleLabel),
                           const SizedBox(height: 8),
-                          _buildTextField(_titleController, hint: "레시피 이름"),
+                          _buildTextField(
+                            _titleController,
+                            hint: strings(context).recipeTitleHint,
+                          ),
 
                           const SizedBox(height: 24),
-                          _buildSectionTitle("태그"),
+                          _buildSectionTitle(strings(context).tagsLabel),
                           const SizedBox(height: 8),
                           if (widget.generatedRecipe != null)
                             _buildTagChips(widget.generatedRecipe!.tags),
 
                           const SizedBox(height: 24),
-                          _buildSectionTitle("카테고리"),
+                          _buildSectionTitle(strings(context).categoryLabel),
                           const SizedBox(height: 8),
                           _buildCategorySelector(),
 
                           const SizedBox(height: 24),
-                          _buildSubTitle("재료 (1인분 기준)"),
+                          _buildSubTitle(strings(context).ingredientsLabel),
                           const SizedBox(height: 8),
                           _buildTextField(
                             _ingredientsController,
-                            hint: "한 줄에 하나씩 입력",
+                            hint: strings(context).ingredientsHint,
                             maxLines: 6,
                           ),
 
                           const SizedBox(height: 24),
-                          _buildSubTitle("조리과정"),
+                          _buildSubTitle(strings(context).stepsLabel),
                           const SizedBox(height: 8),
                           _buildTextField(
                             _stepsController,
-                            hint: "단계를 나눠 작성",
+                            hint: strings(context).stepsHint,
                             maxLines: 8,
                           ),
 
                           const SizedBox(height: 24),
-                          _buildSubTitle("조리 시간"),
+                          _buildSubTitle(strings(context).cookTimeLabel),
                           const SizedBox(height: 8),
                           _buildTextFieldWithUnit(
                             controller: _cookTimeController,
-                            unit: "분",
+                            unit: strings(context).minutes,
                           ),
 
                           const SizedBox(height: 24),
-                          _buildSubTitle("칼로리"),
+                          _buildSubTitle(strings(context).caloriesLabel),
                           const SizedBox(height: 8),
                           _buildTextFieldWithUnit(
                             controller: _caloriesController,
@@ -138,7 +141,7 @@ class _RecipeEditPageState extends State<RecipeEditPage> {
                           ),
 
                           const SizedBox(height: 24),
-                          _buildSubTitle("공개 여부"),
+                          _buildSubTitle(strings(context).isPublicLabel),
                           _buildPublicToggle(),
                         ],
                       ),
@@ -240,7 +243,7 @@ class _RecipeEditPageState extends State<RecipeEditPage> {
           children: [
             Expanded(
               child: Text(
-                _selectedCategory ?? "카테고리를 선택해 주세여",
+                _selectedCategory ?? strings(context).categoryPlaceholder,
                 style: TextStyle(
                   fontSize: 16,
                   color: _selectedCategory == null ? Colors.grey : Colors.black,
@@ -323,7 +326,10 @@ class _RecipeEditPageState extends State<RecipeEditPage> {
                 // handle delete later
               },
               icon: const Icon(Icons.delete, color: Colors.red),
-              label: const Text("레시피 삭제", style: TextStyle(color: Colors.red)),
+              label: Text(
+                strings(context).deleteRecipeButton,
+                style: TextStyle(color: Colors.red),
+              ),
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: Colors.red),
                 shape: RoundedRectangleBorder(
@@ -339,7 +345,7 @@ class _RecipeEditPageState extends State<RecipeEditPage> {
                 // handle save later
               },
               icon: const Icon(Icons.check),
-              label: const Text("저장"),
+              label: Text(strings(context).saveRecipeButton),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF1D8163),
                 foregroundColor: Colors.white,

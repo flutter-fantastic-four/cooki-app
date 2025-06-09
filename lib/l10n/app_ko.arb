@@ -49,5 +49,20 @@
   "recipeCategoryAfrican": "아프리카식",
   "recipeCategoryOther": "기타",
 
-  "editRecipeTitle": "레시피 수정"
+  "editRecipeTitle": "레시피 수정",
+  "recipeTitleLabel": "제목",
+  "recipeTitleHint": "레시피 이름",
+  "tagsLabel": "태그",
+  "categoryLabel": "카테고리",
+  "categoryPlaceholder": "카테고리를 선택해 주세요",
+  "ingredientsLabel": "재료 (1인분 기준)",
+  "ingredientsHint": "한 줄에 하나씩 입력",
+  "stepsLabel": "조리과정",
+  "stepsHint": "단계를 나눠 작성",
+  "cookTimeLabel": "조리 시간",
+  "caloriesLabel": "칼로리",
+  "isPublicLabel": "공개 여부",
+  "deleteRecipeButton": "레시피 삭제",
+  "saveRecipeButton": "저장",
+  "minutes": "분"
 }
