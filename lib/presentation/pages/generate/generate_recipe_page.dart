@@ -1,6 +1,7 @@
 import 'package:cooki/core/utils/dialogue_util.dart';
 import 'package:cooki/core/utils/error_mappers.dart';
 import 'package:cooki/core/utils/general_util.dart';
+import 'package:cooki/presentation/pages/edit/recipe_edit_page.dart';
 import 'package:cooki/presentation/pages/generate/widgets/generate_button.dart';
 import 'package:cooki/presentation/pages/generate/widgets/image_selector.dart';
 import 'package:cooki/presentation/pages/generate/widgets/preference_chip.dart';
@@ -33,10 +34,12 @@ class GenerateRecipePage extends ConsumerWidget {
       ref.read(generateRecipeViewModelProvider.notifier).clearError();
     } else if (state.generatedRecipe != null) {
       if (!context.mounted) return;
-      showGeneratedRecipeDialogTemp(
-        recipe: state.generatedRecipe!,
-        context: context,
-        ref: ref,
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder:
+              (context) =>
+                  RecipeEditPage(generatedRecipe: state.generatedRecipe),
+        ),
       );
     }
   }

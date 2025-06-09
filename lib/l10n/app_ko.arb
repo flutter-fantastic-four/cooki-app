@@ -32,6 +32,22 @@
   "generateRecipeLoading": "레시피 생성 중...",
 
   "textOnlyRecipePromptPath": "ko/text_only_recipe.md",
-  "imageRecipePromptPath": "ko/image_recipe.md"
+  "imageRecipePromptPath": "ko/image_recipe.md",
 
+  "recipeCategoryKorean": "한식",
+  "recipeCategoryChinese": "중식",
+  "recipeCategoryJapanese": "일식",
+  "recipeCategoryThai": "태국식",
+  "recipeCategoryIndian": "인도식",
+  "recipeCategoryAmerican": "미국식",
+  "recipeCategoryFrench": "프랑스식",
+  "recipeCategoryItalian": "이탈리아식",
+  "recipeCategoryMediterranean": "지중해식",
+  "recipeCategoryMiddleEastern": "중동식",
+  "recipeCategoryMexican": "멕시코식",
+  "recipeCategorySoutheastAsian": "동남아식",
+  "recipeCategoryAfrican": "아프리카식",
+  "recipeCategoryOther": "기타",
+
+  "editRecipeTitle": "레시피 수정"
 }

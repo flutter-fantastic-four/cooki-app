@@ -23,6 +23,28 @@ class AppConstants {
     ];
   }
 
+  static List<String> recipeCategories(BuildContext context) {
+    final s = strings(context);
+    return [
+      s.recipeCategoryKorean,
+      s.recipeCategoryChinese,
+      s.recipeCategoryJapanese,
+      s.recipeCategoryThai,
+      s.recipeCategoryIndian,
+      s.recipeCategoryAmerican,
+      s.recipeCategoryFrench,
+      s.recipeCategoryItalian,
+      s.recipeCategoryMediterranean,
+      s.recipeCategoryMiddleEastern,
+      s.recipeCategoryMexican,
+      s.recipeCategorySoutheastAsian,
+      s.recipeCategoryAfrican,
+      s.recipeCategoryOther,
+    ];
+  }
+
+
+
   // Placeholder constants
   /// Placeholder for user's text input in prompt templates.
   static const String textInputPlaceholder = '__COOKI_TEXT_INPUT_PLACEHOLDER__';

@@ -10,6 +10,7 @@ abstract class AppColors {
   static final greenTextColor = Color(0XFF3BBC7A);
   static final borderGrey = Colors.grey[400]!;
   static const backgroundGrey = Color(0xFFF2F2F7);
+  static const textFieldBackgroundGrey = Color(0XFFFAFAF8);
 
   static const Color inactiveButton = Color(0xFFEEEEEE);
 
