@@ -33,6 +33,10 @@ dependencies:
   cloud_functions: ^5.5.1
   firebase_ai: ^2.0.0
   flutter_native_splash: ^2.4.6
+  flutter_image_compress: ^2.4.0
+  easy_image_viewer: ^1.5.1
+  path_provider: ^2.1.5
+  share_plus: ^11.0.0
 
 dev_dependencies:
   flutter_test:
@@ -47,6 +51,8 @@ flutter:
     - .env
     - assets/
     - assets/icons/
+    - assets/prompts/
+    - assets/prompts/ko/
 
 flutter_native_splash:
   color: "#1D8163"

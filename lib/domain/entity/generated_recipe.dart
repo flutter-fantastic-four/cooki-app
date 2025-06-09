@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 class GeneratedRecipe {
   final String recipeName;
   final List<String> ingredients;
@@ -6,6 +8,7 @@ class GeneratedRecipe {
   final int calories;
   final String category;
   final List<String> tags;
+  final Uint8List? imageBytes;
 
   const GeneratedRecipe({
     required this.recipeName,
@@ -15,6 +18,7 @@ class GeneratedRecipe {
     required this.calories,
     required this.category,
     required this.tags,
+    this.imageBytes,
   });
 
   bool get isError {
@@ -34,6 +38,7 @@ class GeneratedRecipe {
     int? calories,
     String? category,
     List<String>? tags,
+    Uint8List? imageBytes,
   }) {
     return GeneratedRecipe(
       recipeName: recipeName ?? this.recipeName,
@@ -43,6 +48,7 @@ class GeneratedRecipe {
       calories: calories ?? this.calories,
       category: category ?? this.category,
       tags: tags ?? List.from(this.tags),
+      imageBytes: imageBytes ?? this.imageBytes,
     );
   }
 
