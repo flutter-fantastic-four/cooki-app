@@ -32,6 +32,7 @@ dependencies:
   kakao_flutter_sdk_user: ^1.9.7+3
   cloud_functions: ^5.5.1
   firebase_ai: ^2.0.0
+  flutter_native_splash: ^2.4.6
 
 dev_dependencies:
   flutter_test:
@@ -46,3 +47,8 @@ flutter:
     - .env
     - assets/
     - assets/icons/
+
+flutter_native_splash:
+  color: "#1D8163"
+  background_image: "assets/icons/vertical_logo_green_bg.png"
+  color_ios: "#1D8163"
