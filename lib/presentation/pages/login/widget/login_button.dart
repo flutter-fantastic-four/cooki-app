@@ -62,27 +62,29 @@ class LoginButton extends ConsumerWidget {
   ButtonStyle _getButtonStyle() {
     Color backgroundColor;
     Color textColor;
+    Color? border;
 
     switch (signInMethod) {
       case SignInMethod.google:
-        backgroundColor = AppColors.googleLoginBackgroundColor;
-        textColor = AppColors.googleLogintextColor;
+        backgroundColor = AppColors.googleLoginBackground;
+        textColor = AppColors.googleLogintext;
+        border = AppColors.googleLoginBorder;
         break;
       case SignInMethod.kakao:
-        backgroundColor = AppColors.kakaoLoginBackgroundColor;
-        textColor = AppColors.kakaoLogintextColor;
+        backgroundColor = AppColors.kakaoLoginBackground;
+        textColor = AppColors.kakaoLogintext;
         break;
       case SignInMethod.apple:
-        backgroundColor = AppColors.appleLoginBackgroundColor;
-        textColor = AppColors.appleLogintextColor;
+        backgroundColor = AppColors.appleLoginBackground;
+        textColor = AppColors.appleLogintext;
         break;
     }
 
     return ElevatedButton.styleFrom(
       foregroundColor: textColor,
       backgroundColor: backgroundColor,
-      side: BorderSide(color: backgroundColor),
-      elevation: 6,
+      side: BorderSide(color: border ?? backgroundColor),
+
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       minimumSize: const Size(double.infinity, 53),
     );
