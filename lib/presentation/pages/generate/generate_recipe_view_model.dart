@@ -90,7 +90,7 @@ class GenerateRecipeViewModel extends AutoDisposeNotifier<GenerateRecipeState> {
       final compressedImageBytes = await GeneralUtil.compressImageBytes(
         state.selectedImageBytes,
       );
-      final generatedRecipe = await ref
+      var generatedRecipe = await ref
           .read(recipeGenerationRepositoryProvider)
           .generateRecipe(
             textInput:
@@ -112,6 +112,9 @@ class GenerateRecipeViewModel extends AutoDisposeNotifier<GenerateRecipeState> {
                   : GenerateRecipeErrorKey.generationFailed,
         );
       } else {
+        generatedRecipe = generatedRecipe.copyWith(
+          imageBytes: state.selectedImageBytes,
+        );
         state = state.copyWith(
           isGenerating: false,
           generatedRecipe: generatedRecipe,
