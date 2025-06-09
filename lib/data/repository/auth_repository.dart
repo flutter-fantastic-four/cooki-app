@@ -25,23 +25,20 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<AppUser?> signIn(SignInMethod signInmethod) async {
-    dynamic auth;
-    User? firebaseUser;
-    switch (signInmethod) {
-      case SignInMethod.google:
-        auth = await _googleDataSource.signIn();
-        firebaseUser = await _firebaseAuth.signInWithGoogle(auth);
-        break;
-      case SignInMethod.kakao:
-        auth = await _kakaoDataSource.signIn();
-        firebaseUser = await _firebaseAuth.signInWithKakao(auth);
-        break;
-      case SignInMethod.apple:
-      // auth = await _appleDataSource.signIn();
-      // break;
-    }
+    final auth = switch (signInmethod) {
+      SignInMethod.google => await _googleDataSource.signIn(),
+      SignInMethod.kakao => await _kakaoDataSource.signIn(),
+      SignInMethod.apple => null,
+    };
 
     if (auth == null) return null;
+
+    final firebaseUser = switch (signInmethod) {
+      SignInMethod.google => await _firebaseAuth.signInWithGoogle(auth),
+      SignInMethod.kakao => await _firebaseAuth.signInWithKakao(auth),
+      SignInMethod.apple => null,
+    };
+
     if (firebaseUser == null) return null;
 
     final partialUser = AppUser(
