@@ -1,3 +1,5 @@
+import 'package:cooki/app/constants/app_styles.dart';
+import 'package:cooki/core/utils/general_util.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -6,13 +8,11 @@ enum AppDialogResult {
   cancel, // 아니오
 }
 
-abstract class DialogueUtil {
-  static
+class DialogueUtil {
   /// 앱 팝업 표시
   /// [showCancel]=true면 '네', '이니오' 버튼 2개 표시,
   /// false면 '확인' 버튼만 표시
-  Future<AppDialogResult?>
-  showAppCupertinoDialog({
+  static Future<AppDialogResult?> showAppCupertinoDialog({
     required BuildContext context,
     required String title,
     required String content,
@@ -54,5 +54,51 @@ abstract class DialogueUtil {
         builder: (_) => dialog,
       );
     }
+  }
+
+  static void showCustomCupertinoActionSheet(
+    BuildContext context, {
+    required String title,
+    required String option1Text,
+    required String option2Text,
+    required VoidCallback onOption1,
+    required VoidCallback onOption2,
+  }) {
+    showCupertinoModalPopup(
+      context: context,
+      builder:
+          (context) => CupertinoActionSheet(
+            title: Text(title, style: AppStyles.cupertinoSheetTitle),
+            actions: [
+              CupertinoActionSheetAction(
+                onPressed: () {
+                  onOption1();
+                  Navigator.pop(context);
+                },
+                child: Text(
+                  option1Text,
+                  style: AppStyles.cupertinoSheetActionText,
+                ),
+              ),
+              CupertinoActionSheetAction(
+                onPressed: () {
+                  onOption2();
+                  Navigator.pop(context);
+                },
+                child: Text(
+                  option2Text,
+                  style: AppStyles.cupertinoSheetActionText,
+                ),
+              ),
+            ],
+            cancelButton: CupertinoActionSheetAction(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                strings(context).cancel,
+                style: AppStyles.cupertinoSheetActionText,
+              ),
+            ),
+          ),
+    );
   }
 }
