@@ -50,5 +50,5 @@ flutter:
 
 flutter_native_splash:
   color: "#1D8163"
-  image: "assets/icons/cookilogo-white.png"
+  image: "assets/icons/cooki_logo_white.png"
   color_ios: "#1D8163"

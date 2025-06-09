@@ -20,7 +20,7 @@ class LoginPage extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset("assets/icons/cookilogo-green.png", width: 225, height: 225),
+                  Image.asset("assets/icons/cooki_logo_green.png", width: 225, height: 225),
                   Text('맛있는 그 순간, cooki와 함께'),
                   const SizedBox(height: 100),
                   LoginButton(signInMethod: SignInMethod.kakao),
