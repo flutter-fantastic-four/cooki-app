@@ -232,8 +232,9 @@ class _RecipeEditPageState extends State<RecipeEditPage> {
 
   Widget _buildCategorySelector() {
     return GestureDetector(
-      onTap: () {
-        // TODO: open modal to pick category
+      onTap: () async {
+        // ignore: unused_local_variable
+        final selectedCategory = await showCategorySelectionDialog(context);
       },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
