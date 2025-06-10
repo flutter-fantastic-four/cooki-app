@@ -73,6 +73,9 @@
   "deleteRecipeButton": "레시피 삭제",
   "saveRecipeButton": "저장",
   "minutes": "분",
+  "beforeMinutesLabel" : "약 ",
+  "afterMinutesLabel": " 분 소요",
+  "caloriesUnitAfter": " kcal",
 
   "shareRecipeSubjectSuffix": "레시피 공유합니다!",
   "recipe": "레시피"
