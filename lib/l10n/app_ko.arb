@@ -70,5 +70,8 @@
   "isPublicLabel": "공개 여부",
   "deleteRecipeButton": "레시피 삭제",
   "saveRecipeButton": "저장",
-  "minutes": "분"
+  "minutes": "분",
+
+  "shareRecipeSubjectSuffix": "레시피 공유합니다!",
+  "recipe": "레시피"
 }
