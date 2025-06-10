@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/repository/auth_repository.dart';
 import '../../data/repository/user_repository.dart';
 import '../data_source/providers.dart';
+import 'image_download_repository.dart';
 import 'image_repository.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>(
@@ -30,3 +31,7 @@ final imageRepositoryProvider = Provider<ImageRepository>(
 final recipeGenerationRepositoryProvider = Provider<RecipeGenerationRepository>((ref) {
   return RecipeGenerationRepositoryImpl(ref.read(recipeGenerationDataSourceProvider));
 });
+
+final imageDownloadRepositoryProvider = Provider<ImageDownloadRepository>(
+      (ref) => ImageDownloadRepositoryImpl(ref.read(imageDownloadDataSourceProvider)),
+);
