@@ -12,15 +12,18 @@ abstract class AppColors {
   static const backgroundGrey = Color(0xFFF2F2F7);
   static const textFieldBackgroundGrey = Color(0XFFFAFAF8);
 
-  static const Color inactiveButton = Color(0xFFEEEEEE);
+  static const defaultProfileIcon = Color(0XFF7B7B7B);
+  static const defaultProfilebackground = Color(0XFFD9D9D9);
 
-  static const Color kakaoLoginBackground = Color(0xFFFEE500);
-  static const Color googleLoginBackground = Colors.white;
-  static const Color appleLoginBackground = Colors.black;
+  static const inactiveButton = Color(0xFFEEEEEE);
 
-  static const Color kakaoLogintext = Colors.black;
-  static const Color googleLogintext = Colors.black;
-  static const Color appleLogintext = Colors.white;
+  static const kakaoLoginBackground = Color(0xFFFEE500);
+  static const googleLoginBackground = Colors.white;
+  static const appleLoginBackground = Colors.black;
 
-  static const Color googleLoginBorder = Colors.black;
+  static const kakaoLogintext = Colors.black;
+  static const googleLogintext = Colors.black;
+  static const appleLogintext = Colors.white;
+
+  static const googleLoginBorder = Colors.black;
 }
