@@ -45,8 +45,7 @@ class ImageSelector extends ConsumerWidget {
         vm.setImageBytes(imageBytes);
       }
     } catch (e, stack) {
-      log('Error picking image');
-      logError(e, stack);
+      logError(e, stack, reason: 'Error picking image');
     } finally {
       vm.setImageLoading(false);
     }
