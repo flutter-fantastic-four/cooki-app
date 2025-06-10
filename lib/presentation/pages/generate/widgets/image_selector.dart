@@ -99,21 +99,29 @@ class ImageSelector extends ConsumerWidget {
                             fit: BoxFit.cover,
                           ),
                         ),
+
+                        // Dark overlay to increase close icon visibility
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            color: Colors.black.withValues(alpha: 0.25),
+                          ),
+                        ),
+
+                        // Close icon button
                         Positioned(
-                          top: 8,
-                          right: 8,
-                          child: GestureDetector(
-                            onTap: vm.removeImage,
-                            child: Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: const BoxDecoration(
-                                color: Colors.black54,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.close,
+                          top: 13,
+                          right: 13,
+                          child: SizedBox(
+                            width: 27,
+                            height: 27,
+                            child: IconButton(
+                              padding: EdgeInsets.zero,
+                              onPressed: vm.removeImage,
+                              icon: const Icon(
+                                Icons.cancel,
                                 color: Colors.white,
-                                size: 20,
+                                size: 23,
                               ),
                             ),
                           ),

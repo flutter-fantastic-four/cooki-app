@@ -178,18 +178,17 @@ class _ModalOptionCard extends StatelessWidget {
   final String text;
   final IconData? icon;
   final VoidCallback onTap;
+  final bool isCenter;
   final Color? textColor;
   final Color? iconColor;
-  final bool isCenter;
 
   const _ModalOptionCard({
-    super.key,
     required this.text,
     this.icon,
     required this.onTap,
+    this.isCenter = false,
     this.textColor,
     this.iconColor,
-    this.isCenter = false,
   });
 
   @override
