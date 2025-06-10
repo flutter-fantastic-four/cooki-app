@@ -70,21 +70,5 @@
   "isPublicLabel": "공개 여부",
   "deleteRecipeButton": "레시피 삭제",
   "saveRecipeButton": "저장",
-  "minutes": "분",
-
-  "myPage" : "마이페이지",
-  "nickName": "닉네임",
-  "information": "정보",
-  "termsOfService" : "이용약관",
-  "privacyPolicy" : "개인정보처리방침",
-  "version" : "버전",
-  "contactTheDevelopersTeam" : "개발자들에게 문의",
-  "logout" : "로그아웃",
-  "deleteAccount":"회원탈퇴",
-
-  "logoutDialogTitle" : "로그아웃할까요?",
-  "logoutDialogSubTitle" : "로그아웃할까요?",
-  "logouterror" : "로그아웃 중 오류가 발생했습니다"
-  
+  "minutes": "분"
 }
-
