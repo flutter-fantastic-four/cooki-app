@@ -1,5 +1,6 @@
 import 'package:cooki/app/constants/app_colors.dart';
 import 'package:cooki/app/enum/sign_in_method.dart';
+import 'package:cooki/core/utils/general_util.dart';
 import 'package:cooki/core/utils/navigation_util.dart';
 import 'package:cooki/presentation/pages/login/login_view_model.dart';
 import 'package:cooki/presentation/user_global_view_model.dart';
@@ -22,7 +23,7 @@ class LoginButton extends ConsumerWidget {
             alignment: Alignment.center,
             children: [
               Align(alignment: Alignment.centerLeft, child: Padding(padding: const EdgeInsets.only(left: 16), child: _signInMethodIcon())),
-              _signInMethodText(),
+              _signInMethodText(context),
             ],
           ),
         ),
@@ -41,11 +42,11 @@ class LoginButton extends ConsumerWidget {
     }
   }
 
-  Text _signInMethodText() {
+  Text _signInMethodText(BuildContext context) {
     String signInMethodText = switch (signInMethod) {
-      SignInMethod.google => 'Google',
-      SignInMethod.kakao => 'Kakao',
-      SignInMethod.apple => 'Apple',
+      SignInMethod.google => strings(context).loginPageGoogleButton,
+      SignInMethod.kakao => strings(context).loginPageKaKaoButton,
+      SignInMethod.apple => strings(context).loginPageAppleButton,
     };
     return Text('$signInMethodText로 시작하기', style: const TextStyle(fontSize: 16));
   }
