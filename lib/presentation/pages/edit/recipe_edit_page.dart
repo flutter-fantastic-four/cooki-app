@@ -11,7 +11,11 @@ import '../../../core/utils/general_util.dart';
 import '../../../domain/entity/generated_recipe.dart';
 
 const sectionTitleStyle = TextStyle(fontSize: 20, fontWeight: FontWeight.bold);
-const cookTimeAndKcalTextStyle = TextStyle(fontWeight: FontWeight.bold, fontSize: 16);
+const servingsTitleStyle = TextStyle(fontSize: 17, fontWeight: FontWeight.bold);
+const cookTimeAndKcalTextStyle = TextStyle(
+  fontWeight: FontWeight.bold,
+  fontSize: 16,
+);
 
 class RecipeEditPage extends StatefulWidget {
   final GeneratedRecipe? generatedRecipe;
@@ -106,7 +110,7 @@ class _RecipeEditPageState extends State<RecipeEditPage> {
                                 child: IconButton(
                                   padding: EdgeInsets.zero,
                                   onPressed: () {},
-                                  icon: Icon(Icons.edit, size: 15,),
+                                  icon: Icon(Icons.edit, size: 15),
                                 ),
                               ),
                             ],
@@ -117,7 +121,6 @@ class _RecipeEditPageState extends State<RecipeEditPage> {
                           //   _titleController,
                           //   hint: strings(context).recipeTitleHint,
                           // ),
-
                           const SizedBox(height: 12),
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
@@ -126,9 +129,7 @@ class _RecipeEditPageState extends State<RecipeEditPage> {
                                 strings(context).beforeMinutesLabel,
                                 style: cookTimeAndKcalTextStyle,
                               ),
-                              NumberInputBox(
-                                controller: _cookTimeController,
-                              ),
+                              NumberInputBox(controller: _cookTimeController),
                               Text(
                                 strings(context).afterMinutesLabel,
                                 style: cookTimeAndKcalTextStyle,
@@ -149,7 +150,7 @@ class _RecipeEditPageState extends State<RecipeEditPage> {
                           if (widget.generatedRecipe != null)
                             _buildTagChips(widget.generatedRecipe!.tags),
 
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 28),
                           Text(
                             strings(context).categoryLabel,
                             style: sectionTitleStyle,
@@ -157,8 +158,20 @@ class _RecipeEditPageState extends State<RecipeEditPage> {
                           const SizedBox(height: 8),
                           _buildCategorySelector(),
 
-                          const SizedBox(height: 24),
-                          _buildSubTitle(strings(context).ingredientsLabel),
+                          const SizedBox(height: 28),
+                          Row(
+                            children: [
+                              Text(
+                                strings(context).ingredientsLabel,
+                                style: sectionTitleStyle,
+                              ),
+                              const SizedBox(width: 3),
+                              Text(
+                                strings(context).servingsLabel,
+                                style: servingsTitleStyle,
+                              ),
+                            ],
+                          ),
                           const SizedBox(height: 8),
                           _buildTextField(
                             _ingredientsController,
@@ -167,7 +180,10 @@ class _RecipeEditPageState extends State<RecipeEditPage> {
                           ),
 
                           const SizedBox(height: 24),
-                          _buildSubTitle(strings(context).stepsLabel),
+                          Text(
+                            strings(context).stepsLabel,
+                            style: sectionTitleStyle,
+                          ),
                           const SizedBox(height: 8),
                           _buildTextField(
                             _stepsController,
@@ -176,7 +192,13 @@ class _RecipeEditPageState extends State<RecipeEditPage> {
                           ),
 
                           const SizedBox(height: 24),
-                          _buildSubTitle(strings(context).isPublicLabel),
+                          Text(
+                            strings(context).isPublicLabel,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                           _buildPublicToggle(),
                         ],
                       ),
@@ -189,13 +211,6 @@ class _RecipeEditPageState extends State<RecipeEditPage> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildSubTitle(String text) {
-    return Text(
-      text,
-      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
     );
   }
 
@@ -257,7 +272,11 @@ class _RecipeEditPageState extends State<RecipeEditPage> {
                 ),
               ),
             ),
-            const Icon(Icons.arrow_drop_down, color: Colors.black87),
+            const Icon(
+              Icons.keyboard_arrow_down_outlined,
+              color: Colors.black54,
+              size: 23,
+            ),
           ],
         ),
       ),
@@ -266,32 +285,25 @@ class _RecipeEditPageState extends State<RecipeEditPage> {
 
   Widget _buildTagChips(List<String> tags) {
     return Wrap(
-      spacing: 8,
+      spacing: 6,
       runSpacing: 8,
       children:
           tags.map((tag) {
             return Container(
-              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+              padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 12),
               decoration: ShapeDecoration(
                 shape: RoundedRectangleBorder(
+                  side: BorderSide(color: AppColors.greyScale400),
                   borderRadius: BorderRadius.circular(18),
                 ),
-                color: AppColors.widgetBackgroundGreen,
+                color: Colors.white,
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.tag, size: 14, color: AppColors.greenTextColor),
-                  const SizedBox(width: 6),
-                  Text(
-                    tag,
-                    style: TextStyle(
-                      color: AppColors.greenTextColor,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ],
+              child: DefaultTextStyle(
+                style: TextStyle(color: Colors.black, fontSize: 13),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [Text(tag)],
+                ),
               ),
             );
           }).toList(),

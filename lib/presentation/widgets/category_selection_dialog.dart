@@ -1,3 +1,4 @@
+import 'package:cooki/app/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import '../../app/constants/app_constants.dart';
 import '../../core/utils/general_util.dart';
@@ -91,7 +92,7 @@ class CategorySelectionDialog extends StatelessWidget {
           bottom: 11,
         ),
         decoration: BoxDecoration(
-          color: Color(0XFFF4F4F4),
+          color: AppColors.cardGrey,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Text(
