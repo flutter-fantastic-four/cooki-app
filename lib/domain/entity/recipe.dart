@@ -9,7 +9,7 @@ class Recipe {
   final List<String> tags;
   final String userId;
   final String userName;
-  final String userProfileImage;
+  final String? userProfileImage;
   final bool isPublic;
   final String? imageUrl;
   final DateTime createdAt;
@@ -25,7 +25,7 @@ class Recipe {
     required this.tags,
     required this.userId,
     required this.userName,
-    required this.userProfileImage,
+    this.userProfileImage,
     required this.isPublic,
     this.imageUrl,
     DateTime? createdAt,

@@ -12,7 +12,7 @@ class RecipeFirestoreDto {
   final List<String> tags;
   final String userId;
   final String userName;
-  final String userProfileImage;
+  final String? userProfileImage;
   final bool isPublic;
   final String? imageUrl;
   final Timestamp createdAt;
@@ -28,7 +28,7 @@ class RecipeFirestoreDto {
     required this.tags,
     required this.userId,
     required this.userName,
-    required this.userProfileImage,
+    this.userProfileImage,
     required this.isPublic,
     required this.createdAt,
     this.imageUrl,
@@ -46,7 +46,7 @@ class RecipeFirestoreDto {
       tags: List<String>.from(map['tags'] ?? []),
       userId: map['userId'] ?? '',
       userName: map['userName'] ?? '',
-      userProfileImage: map['userProfileImage'] ?? '',
+      userProfileImage: map['userProfileImage'],
       isPublic: map['isPublic'] ?? false,
       imageUrl: map['imageUrl'],
       createdAt: map['createdAt'] ?? Timestamp.now(),
