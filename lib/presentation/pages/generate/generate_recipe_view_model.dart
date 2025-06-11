@@ -3,7 +3,6 @@ import 'package:cooki/core/utils/general_util.dart';
 import 'package:cooki/core/utils/logger.dart';
 import 'package:cooki/domain/entity/app_user.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../data/data_source/providers.dart';
 import '../../../data/repository/providers.dart';
 import '../../../domain/entity/generated_recipe.dart';
 import '../../../domain/entity/recipe.dart';
