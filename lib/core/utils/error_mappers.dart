@@ -16,6 +16,8 @@ class ErrorMapper {
         return s.invalidImageError;
       case GenerateRecipeErrorKey.generationFailed:
         return s.generationFailedError;
+      case GenerateRecipeErrorKey.saveFailed:
+        return s.recipeSaveFailedError;
     }
   }
 }

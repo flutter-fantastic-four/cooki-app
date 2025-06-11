@@ -1,5 +1,5 @@
+import 'package:cooki/domain/entity/recipe.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../domain/entity/generated_recipe.dart';
 
 /// How many items max to allow in either list
 const int recipeListMaxItems = 30;
@@ -22,9 +22,9 @@ class RecipeEditState {
 }
 
 class RecipeEditViewModel
-    extends AutoDisposeFamilyNotifier<RecipeEditState, GeneratedRecipe?> {
+    extends AutoDisposeFamilyNotifier<RecipeEditState, Recipe?> {
   @override
-  RecipeEditState build(GeneratedRecipe? arg) {
+  RecipeEditState build(Recipe? arg) {
     final ing = arg?.ingredients.length ?? 1;
     final stp = arg?.steps.length ?? 1;
     return RecipeEditState(
@@ -59,6 +59,6 @@ class RecipeEditViewModel
 }
 
 final recipeEditViewModelProvider = NotifierProvider.autoDispose
-    .family<RecipeEditViewModel, RecipeEditState, GeneratedRecipe?>(
+    .family<RecipeEditViewModel, RecipeEditState, Recipe?>(
   RecipeEditViewModel.new,
 );

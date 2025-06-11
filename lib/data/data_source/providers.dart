@@ -11,6 +11,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 
+import '../repository/providers.dart';
+import '../repository/recipe_repository.dart';
 import 'firebase_auth_data_source.dart';
 import 'oauth_sign_in_data_source.dart';
 import '../../data/data_source/user_data_source.dart';
@@ -65,4 +67,8 @@ final recipeGenerationDataSourceProvider = Provider<RecipeGenerationDataSource>(
 
 final imageDownloadDataSourceProvider = Provider<ImageDownloadDataSource>(
       (ref) => DioImageDownloadDataSource(ref.read(dioProvider)),
+);
+
+final recipeRepositoryProvider = Provider<RecipeRepository>(
+      (ref) => RecipeRepositoryImpl(ref.read(recipeDataSourceProvider)),
 );
