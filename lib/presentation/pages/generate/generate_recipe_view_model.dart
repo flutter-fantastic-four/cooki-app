@@ -3,7 +3,6 @@ import 'package:cooki/core/utils/general_util.dart';
 import 'package:cooki/core/utils/logger.dart';
 import 'package:cooki/domain/entity/app_user.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../data/data_source/providers.dart';
 import '../../../data/repository/providers.dart';
 import '../../../domain/entity/generated_recipe.dart';
 import '../../../domain/entity/recipe.dart';
@@ -43,7 +42,8 @@ class GenerateRecipeState {
     Set<String>? selectedPreferences,
   }) {
     return GenerateRecipeState(
-      isGeneratingAndSaving: isGeneratingAndSaving ?? this.isGeneratingAndSaving,
+      isGeneratingAndSaving:
+          isGeneratingAndSaving ?? this.isGeneratingAndSaving,
       isLoadingImage: isLoadingImage ?? this.isLoadingImage,
       errorKey: clearErrorKey ? null : errorKey ?? this.errorKey,
       selectedImageBytes:
@@ -82,10 +82,7 @@ class GenerateRecipeViewModel extends AutoDisposeNotifier<GenerateRecipeState> {
       );
       if (generated == null) return null;
 
-      final saved = await _saveRecipe(
-        generatedRecipe: generated,
-        user: user,
-      );
+      final saved = await _saveRecipe(generatedRecipe: generated, user: user);
       if (saved == null) return null;
 
       return saved;
@@ -152,6 +149,16 @@ class GenerateRecipeViewModel extends AutoDisposeNotifier<GenerateRecipeState> {
     required AppUser user,
   }) async {
     try {
+      String? imageUrl;
+      if (state.selectedImageBytes != null) {
+        imageUrl = await ref
+            .read(recipeRepositoryProvider)
+            .uploadImageBytes(
+              state.selectedImageBytes!,
+              user.id,
+              'recipe_images',
+            );
+      }
       final recipe = Recipe(
         id: '',
         // Firestore will generate
@@ -166,7 +173,7 @@ class GenerateRecipeViewModel extends AutoDisposeNotifier<GenerateRecipeState> {
         userName: user.name,
         userProfileImage: user.profileImage,
         isPublic: false,
-        imageUrl: null,
+        imageUrl: imageUrl,
       );
 
       final recipeId = await ref
