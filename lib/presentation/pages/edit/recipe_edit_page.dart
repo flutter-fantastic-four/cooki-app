@@ -382,31 +382,28 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
       child: Row(
         children: [
           Expanded(
-            child: OutlinedButton.icon(
+            child: OutlinedButton(
               onPressed: () {
                 log(widget.generatedRecipe.toString());
               },
-              icon: const Icon(Icons.delete, color: Colors.red),
-              label: Text(
-                strings(context).deleteRecipeButton,
-                style: const TextStyle(color: Colors.red),
-              ),
               style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: Colors.red),
+                side: const BorderSide(color: AppColors.primary),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
+              ),
+              child: Text(
+                strings(context).deleteRecipeButton,
+                style: const TextStyle(color: AppColors.primary),
               ),
             ),
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: ElevatedButton.icon(
+            child: ElevatedButton(
               onPressed: () {
                 // handle save later
               },
-              icon: const Icon(Icons.check),
-              label: Text(strings(context).saveRecipeButton),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF1D8163),
                 foregroundColor: Colors.white,
@@ -414,6 +411,7 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
+              child: Text(strings(context).saveRecipeButton),
             ),
           ),
         ],

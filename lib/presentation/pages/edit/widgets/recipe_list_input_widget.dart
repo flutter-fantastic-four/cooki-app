@@ -34,21 +34,18 @@ class InputListWidget extends StatelessWidget {
             children: [
               RecipePageWidgets.divider,
               Padding(
-                padding: const EdgeInsets.only(
+                padding: EdgeInsets.only(
                   top: 4,
                   bottom: 4,
-                  left: 14,
+                  left: isSteps ? 8 : 14,
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (isSteps)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 10, right: 6),
-                        child: Text(
-                          '${index + 1}.',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
+                      StepIndexLabel(
+                        '${index + 1}',
+                        ingredientsCount: controllers.length,
                       ),
                     Expanded(
                       child: Row(
