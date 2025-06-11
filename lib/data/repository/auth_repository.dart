@@ -11,8 +11,8 @@ abstract class AuthRepository {
   Future<AppUser?> signIn(SignInMethod signInmethod);
 
   Future<void> signOut();
-
-  Stream<String?> authStateChanges(); // returns user ID or null
+  Future<void> deleteAccount();
+  Stream<String?> authStateChanges();
 }
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -65,18 +65,50 @@ class AuthRepositoryImpl implements AuthRepository {
     final user = await _userDataSource.getUserById(_firebaseAuth.currentUser()!.uid);
 
     if (user == null) return;
-    switch (user.signInProvider) {
-      case "google":
-        await _googleDataSource.signOut();
-        break;
-      case "kakao":
-        await _kakaoDataSource.signOut();
-        break;
-      // case "apple":
-      //   await _googleDataSource.signOut();
-      //   break;
-    }
+
+    await _signOutFromSocialProvider(user.signInProvider);
     await _firebaseAuth.signOut();
+  }
+
+  @override
+  Future<void> deleteAccount() async {
+    try {
+      final currentUser = _firebaseAuth.currentUser();
+      if (currentUser == null) {
+        throw Exception('User not authenticated');
+      }
+
+      final user = await _userDataSource.getUserById(currentUser.uid);
+      if (user == null) {
+        throw Exception('User data not found');
+      }
+
+      await _userDataSource.deleteUser(user);
+
+      await _firebaseAuth.deleteUser();
+
+      await _signOutFromSocialProvider(user.signInProvider);
+    } catch (e) {
+      throw Exception('Failed to delete account: $e');
+    }
+  }
+
+  Future<void> _signOutFromSocialProvider(String signInProvider) async {
+    try {
+      switch (signInProvider) {
+        case "google":
+          await _googleDataSource.signOut();
+          break;
+        case "kakao":
+          await _kakaoDataSource.signOut();
+          break;
+        // case "apple":
+        //   await _appleDataSource.signOut();
+        //   break;
+      }
+    } catch (e) {
+      throw Exception('Failed to sign out from social provider: $e');
+    }
   }
 
   @override

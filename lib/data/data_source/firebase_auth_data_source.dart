@@ -12,6 +12,7 @@ abstract class FirebaseAuthDataSource {
   Stream<User?> authStateChanges();
 
   User? currentUser();
+  Future<void> deleteUser();
 }
 
 class FirebaseAuthDataSourceImpl implements FirebaseAuthDataSource {
@@ -46,5 +47,10 @@ class FirebaseAuthDataSourceImpl implements FirebaseAuthDataSource {
   @override
   User? currentUser() {
     return _auth.currentUser;
+  }
+
+  @override
+  Future<void> deleteUser() async {
+    _auth.currentUser!.delete();
   }
 }
