@@ -42,11 +42,7 @@ class InputListWidget extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (isSteps)
-                      StepIndexLabel(
-                        '${index + 1}',
-                        elementsCount: controllers.length,
-                      ),
+                    if (isSteps) StepIndexLabel(index + 1),
                     Expanded(
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -58,7 +54,9 @@ class InputListWidget extends StatelessWidget {
                               maxLines: isSteps ? 3 : 1,
                               decoration: InputDecoration(
                                 hintText: hintText,
-                                hintStyle: TextStyle(color: Colors.grey.shade600),
+                                hintStyle: TextStyle(
+                                  color: Colors.grey.shade600,
+                                ),
                                 contentPadding: const EdgeInsets.symmetric(
                                   vertical: 8,
                                   horizontal: 14,
@@ -80,11 +78,13 @@ class InputListWidget extends StatelessWidget {
                               icon: Icon(
                                 Icons.cancel,
                                 size: 18,
-                                color: canRemove
-                                    ? AppColors.greyScale500
-                                    : Colors.grey.shade300,
+                                color:
+                                    canRemove
+                                        ? AppColors.greyScale500
+                                        : Colors.grey.shade300,
                               ),
-                              onPressed: canRemove ? () => onRemove(index) : null,
+                              onPressed:
+                                  canRemove ? () => onRemove(index) : null,
                             ),
                           ),
                         ],
@@ -106,7 +106,7 @@ class InputListWidget extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 color: AppColors.primary700,
                 onPressed: onAdd,
-                icon: const Icon(Icons.add_circle_outline, size: 34,),
+                icon: const Icon(Icons.add_circle_outline, size: 34),
               ),
             ),
           ),
