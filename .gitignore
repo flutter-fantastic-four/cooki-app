@@ -141,3 +141,7 @@ app.*.map.json
 firebase.json
 
 lib/gen
+<<<<<<< Updated upstream
+macos/Runner/GoogleService-Info.plist
+=======
+>>>>>>> Stashed changes
