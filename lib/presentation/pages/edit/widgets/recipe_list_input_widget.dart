@@ -37,7 +37,7 @@ class InputListWidget extends StatelessWidget {
                 padding: EdgeInsets.only(
                   top: 4,
                   bottom: 4,
-                  left: isSteps ? 8 : 14,
+                  left: isSteps ? 1 : 14,
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
