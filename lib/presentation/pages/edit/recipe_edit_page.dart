@@ -1,11 +1,14 @@
 import 'dart:developer';
 import 'dart:typed_data';
 
+import 'package:cooki/presentation/pages/edit/recipe_edit_view_model.dart';
 import 'package:cooki/presentation/pages/edit/widgets/number_input_box.dart';
+import 'package:cooki/presentation/pages/edit/widgets/recipe_list_input_widget.dart';
 import 'package:cooki/presentation/widgets/category_selection_dialog.dart';
 import 'package:cooki/presentation/widgets/recipe_page_widgets.dart';
 import 'package:easy_image_viewer/easy_image_viewer.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/constants/app_colors.dart';
 import '../../../core/utils/general_util.dart';
@@ -17,16 +20,16 @@ const cookTimeAndKcalTextStyle = TextStyle(
   fontSize: 16,
 );
 
-class RecipeEditPage extends StatefulWidget {
+class RecipeEditPage extends ConsumerStatefulWidget {
   final GeneratedRecipe? generatedRecipe;
 
   const RecipeEditPage({super.key, this.generatedRecipe});
 
   @override
-  State<RecipeEditPage> createState() => _RecipeEditPageState();
+  ConsumerState<RecipeEditPage> createState() => _RecipeEditPageState();
 }
 
-class _RecipeEditPageState extends State<RecipeEditPage> {
+class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
   final _titleController = TextEditingController();
   final _ingredientsControllers = <TextEditingController>[];
   final _stepsControllers = <TextEditingController>[];
@@ -38,6 +41,34 @@ class _RecipeEditPageState extends State<RecipeEditPage> {
   bool _isPublic = true;
   Uint8List? _imageBytes;
 
+  void _addIngredient(RecipeEditViewModel vm) {
+    vm.addIngredient();
+    setState(() {
+      _ingredientsControllers.add(TextEditingController());
+    });
+  }
+
+  void _removeIngredient(RecipeEditViewModel vm, int index) {
+    vm.removeIngredient(index);
+    setState(() {
+      _ingredientsControllers.removeAt(index).dispose();
+    });
+  }
+
+  void _addStep(RecipeEditViewModel vm) {
+    vm.addStep();
+    setState(() {
+      _stepsControllers.add(TextEditingController());
+    });
+  }
+
+  void _removeStep(RecipeEditViewModel vm, int index) {
+    vm.removeStep(index);
+    setState(() {
+      _stepsControllers.removeAt(index).dispose();
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -45,23 +76,27 @@ class _RecipeEditPageState extends State<RecipeEditPage> {
 
     if (generatedRecipe != null) {
       _titleController.text = generatedRecipe.recipeName;
-
       _ingredientsControllers.addAll(
-        generatedRecipe.ingredients
-            .map((ingredient) => TextEditingController(text: ingredient))
-            .toList(),
+        generatedRecipe.ingredients.map(
+          (ingredient) => TextEditingController(text: ingredient),
+        ),
       );
       _stepsControllers.addAll(
-        generatedRecipe.steps
-            .map((step) => TextEditingController(text: step))
-            .toList(),
+        generatedRecipe.steps.map((step) => TextEditingController(text: step)),
       );
-
       _cookTimeController.text = generatedRecipe.cookTime.toString();
       _caloriesController.text = generatedRecipe.calories.toString();
       _tagsController.text = (generatedRecipe.tags).join(', ');
       _selectedCategory = generatedRecipe.category;
       _imageBytes = generatedRecipe.imageBytes;
+    }
+
+    // Ensure at least one field
+    if (_ingredientsControllers.isEmpty) {
+      _ingredientsControllers.add(TextEditingController());
+    }
+    if (_stepsControllers.isEmpty) {
+      _stepsControllers.add(TextEditingController());
     }
   }
 
@@ -82,6 +117,13 @@ class _RecipeEditPageState extends State<RecipeEditPage> {
 
   @override
   Widget build(BuildContext context) {
+    // final state = ref.watch(
+    //   recipeEditViewModelProvider(widget.generatedRecipe),
+    // );
+    final vm = ref.read(
+      recipeEditViewModelProvider(widget.generatedRecipe).notifier,
+    );
+
     return GestureDetector(
       onTap: FocusScope.of(context).unfocus,
       child: Scaffold(
@@ -118,13 +160,13 @@ class _RecipeEditPageState extends State<RecipeEditPage> {
                                 _titleController.text,
                                 style: RecipePageWidgets.sectionTitleStyle,
                               ),
-                              SizedBox(width: 7),
+                              const SizedBox(width: 7),
                               SizedBox.square(
                                 dimension: 20,
                                 child: IconButton(
                                   padding: EdgeInsets.zero,
                                   onPressed: () {},
-                                  icon: Icon(Icons.edit, size: 15),
+                                  icon: const Icon(Icons.edit, size: 15),
                                 ),
                               ),
                             ],
@@ -186,23 +228,31 @@ class _RecipeEditPageState extends State<RecipeEditPage> {
                               ),
                             ],
                           ),
+
                           const SizedBox(height: 8),
-                          RecipePageWidgets.divider,
-                          _buildIngredientsList(),
+                          InputListWidget(
+                            controllers: _ingredientsControllers,
+                            hintText: strings(context).ingredientsHint,
+                            onAdd: () => _addIngredient(vm),
+                            onRemove: (index) => _removeIngredient(vm, index),
+                          ),
 
                           const SizedBox(height: 24),
                           Text(
                             strings(context).stepsLabel,
                             style: RecipePageWidgets.sectionTitleStyle,
                           ),
-                          const SizedBox(height: 8),
 
-                          // _buildTextField(
-                          //   _stepsController,
-                          //   hint: strings(context).stepsHint,
-                          //   maxLines: 8,
-                          // ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 8),
+                          InputListWidget(
+                            controllers: _stepsControllers,
+                            isSteps: true,
+                            hintText: strings(context).stepsHint,
+                            onAdd: () => _addStep(vm),
+                            onRemove: (index) => _removeStep(vm, index),
+                          ),
+
+                          const SizedBox(height: 10),
                           Text(
                             strings(context).isPublicLabel,
                             style: const TextStyle(
@@ -225,79 +275,21 @@ class _RecipeEditPageState extends State<RecipeEditPage> {
     );
   }
 
-  Widget _buildIngredientsList() {
-    final ingredients = widget.generatedRecipe?.ingredients ?? [];
-
-    return Column(
-      children: List.generate(ingredients.length, (index) {
-        return Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              child: _buildTextField(
-                _ingredientsControllers[index],
-                hint: strings(context).ingredientsHint,
-                maxLines: 1,
-              ),
-            ),
-            if (index < ingredients.length - 1) RecipePageWidgets.divider,
-          ],
-        );
-      }),
-    );
-  }
-
-  Widget _buildTextField(
-    TextEditingController controller, {
-    String? hint,
-    int maxLines = 1,
-    bool readOnly = false,
-  }) {
-    return TextField(
-      controller: controller,
-      readOnly: readOnly,
-      maxLines: maxLines,
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: TextStyle(color: Colors.grey.shade600),
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 8,
-          horizontal: 16,
-        ),
-        filled: true,
-        fillColor: AppColors.appBarGrey,
-        border: WidgetStateInputBorder.resolveWith((_) {
-          return OutlineInputBorder(
-            borderSide: BorderSide.none,
-            borderRadius: BorderRadius.circular(12),
-          );
-        }),
-        suffixIcon: IconButton(
-          padding: EdgeInsets.zero,
-          icon: Icon(
-            Icons.delete,
-            size: 20,
-            color: AppColors.greyScale500,
-          ),
-          onPressed: () {
-            controller.clear();
-          },
-        ),
-      ),
-    );
-  }
-
   Widget _buildCategorySelector() {
     return GestureDetector(
       onTap: () async {
-        // ignore: unused_local_variable
         final selectedCategory = await showCategorySelectionDialog(context);
+        if (selectedCategory?.isNotEmpty == true) {
+          setState(() {
+            _selectedCategory = selectedCategory;
+          });
+        }
       },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
         decoration: BoxDecoration(
           color: AppColors.appBarGrey,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           children: [
@@ -337,7 +329,7 @@ class _RecipeEditPageState extends State<RecipeEditPage> {
                 color: Colors.white,
               ),
               child: DefaultTextStyle(
-                style: TextStyle(color: Colors.black, fontSize: 13),
+                style: const TextStyle(color: Colors.black, fontSize: 13),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [Text(tag)],
@@ -397,7 +389,7 @@ class _RecipeEditPageState extends State<RecipeEditPage> {
               icon: const Icon(Icons.delete, color: Colors.red),
               label: Text(
                 strings(context).deleteRecipeButton,
-                style: TextStyle(color: Colors.red),
+                style: const TextStyle(color: Colors.red),
               ),
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: Colors.red),

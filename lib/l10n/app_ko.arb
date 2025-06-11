@@ -67,7 +67,7 @@
   "servingsLabel": "(1인분 기준)",
   "ingredientsHint": "예: 양파 1개",
   "stepsLabel": "조리과정",
-  "stepsHint": "단계를 나눠 작성",
+  "stepsHint": "예: 양파를 잘게 썬다",
   "cookTimeLabel": "조리 시간",
   "caloriesLabel": "칼로리",
   "isPublicLabel": "공개 여부",
