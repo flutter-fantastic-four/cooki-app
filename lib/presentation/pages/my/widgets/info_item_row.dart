@@ -47,10 +47,10 @@ class _InfoItemRowState extends State<InfoItemRow> {
             onTap: () {
               switch (widget.infoItem) {
                 case InfoItem.termsOfService:
-                  _launchUrl(context, "");
+                  _launchUrl(context, "https://flutter-fantastic-four.github.io/terms_of_service.html");
                   break;
                 case InfoItem.privacyPolicy:
-                  _launchUrl(context, "");
+                  _launchUrl(context, "https://flutter-fantastic-four.github.io/privacy_policy.html");
                   break;
                 case InfoItem.contactTheDevelopersTeam:
                   _launchEmail();
