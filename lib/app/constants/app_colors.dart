@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 abstract class AppColors {
   static const primary = Color(0XFF1D8163);
-  static const chipGrey = Color(0XFFF7F7F7);
+  static const cardGrey = Color(0XFFF4F4F4);
   static const lightGrey = Color(0XFFF1F2F1);
   static const appBarGrey = Color(0xFFF8F9FA);
   static final widgetBackgroundGreen = Color(0XFFe2f3e9).withValues(alpha: 0.6);

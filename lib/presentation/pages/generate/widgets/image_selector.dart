@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../../app/constants/app_colors.dart';
 import '../../../../core/utils/dialogue_util.dart';
-import '../../../../core/utils/general_util.dart';
 import '../../../../core/utils/logger.dart';
 import '../generate_recipe_view_model.dart';
 
@@ -21,13 +21,10 @@ class ImageSelector extends ConsumerWidget {
     BuildContext context,
     GenerateRecipeViewModel vm,
   ) {
-    DialogueUtil.showCustomCupertinoActionSheet(
+    DialogueUtil.showImagePickerModal(
       context,
-      title: strings(context).imageSelection,
-      option1Text: strings(context).takeWithCamera,
-      option2Text: strings(context).chooseInGallery,
-      onOption1: () => _pickImage(vm, ImageSource.camera),
-      onOption2: () => _pickImage(vm, ImageSource.gallery),
+      onCamera: () => _pickImage(vm, ImageSource.camera),
+      onGallery: () => _pickImage(vm, ImageSource.gallery),
     );
   }
 
@@ -73,14 +70,14 @@ class ImageSelector extends ConsumerWidget {
                       imageProvider,
                       swipeDismissible: true,
                       doubleTapZoomable: true,
-                      useSafeArea: true
+                      useSafeArea: true,
                     );
                   }
                   : () => _showImageSourceActionSheet(context, vm),
           child: Container(
             height: 160,
             decoration: BoxDecoration(
-              color: Colors.grey[100]!,
+              color: AppColors.greyScale50,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.grey.shade300),
             ),
@@ -101,21 +98,29 @@ class ImageSelector extends ConsumerWidget {
                             fit: BoxFit.cover,
                           ),
                         ),
+
+                        // Dark overlay to increase close icon visibility
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            color: Colors.black.withValues(alpha: 0.25),
+                          ),
+                        ),
+
+                        // Close icon button
                         Positioned(
-                          top: 8,
-                          right: 8,
-                          child: GestureDetector(
-                            onTap: vm.removeImage,
-                            child: Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: const BoxDecoration(
-                                color: Colors.black54,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.close,
+                          top: 13,
+                          right: 13,
+                          child: SizedBox(
+                            width: 27,
+                            height: 27,
+                            child: IconButton(
+                              padding: EdgeInsets.zero,
+                              onPressed: vm.removeImage,
+                              icon: const Icon(
+                                Icons.cancel,
                                 color: Colors.white,
-                                size: 20,
+                                size: 23,
                               ),
                             ),
                           ),
