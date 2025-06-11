@@ -65,7 +65,7 @@
   "categoryPlaceholder": "카테고리를 선택해 주세요",
   "ingredientsLabel": "재료",
   "servingsLabel": "(1인분 기준)",
-  "ingredientsHint": "한 줄에 하나씩 입력",
+  "ingredientsHint": "예: 양파 1개",
   "stepsLabel": "조리과정",
   "stepsHint": "단계를 나눠 작성",
   "cookTimeLabel": "조리 시간",
