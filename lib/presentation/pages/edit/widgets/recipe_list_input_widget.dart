@@ -45,7 +45,7 @@ class InputListWidget extends StatelessWidget {
                     if (isSteps)
                       StepIndexLabel(
                         '${index + 1}',
-                        ingredientsCount: controllers.length,
+                        elementsCount: controllers.length,
                       ),
                     Expanded(
                       child: Row(

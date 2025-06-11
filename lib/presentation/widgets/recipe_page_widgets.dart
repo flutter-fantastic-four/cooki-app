@@ -9,16 +9,16 @@ class RecipePageWidgets {
 
 class StepIndexLabel extends StatelessWidget {
   final String text;
-  final int ingredientsCount;
+  final int elementsCount;
 
-  const StepIndexLabel(this.text, {super.key, required this.ingredientsCount});
+  const StepIndexLabel(this.text, {super.key, required this.elementsCount});
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: 32,
       child: Align(
-        alignment: ingredientsCount >= 10
+        alignment: elementsCount >= 10
             ? Alignment.center
             : Alignment.centerLeft,
         child: Padding(
