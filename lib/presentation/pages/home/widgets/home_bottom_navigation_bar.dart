@@ -18,9 +18,9 @@ class HomeBottomNavigationBar extends StatelessWidget {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.12),
-                blurRadius: 19,
-                offset: Offset(0, -6),
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 4,
+                offset: Offset(0, -1),
               ),
             ],
           ),
@@ -35,6 +35,7 @@ class HomeBottomNavigationBar extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
             unselectedLabelStyle: const TextStyle(fontSize: 12),
+<<<<<<< Updated upstream
             selectedItemColor: Colors.blueAccent,
             items: const [
               BottomNavigationBarItem(
@@ -48,12 +49,27 @@ class HomeBottomNavigationBar extends StatelessWidget {
                 activeIcon: Icon(CupertinoIcons.chat_bubble_2_fill),
                 label: '발견',
                 tooltip: '발견',
+=======
+            selectedItemColor: Colors.black,
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.bookmark_border),
+                activeIcon: Icon(Icons.bookmark),
+                label: '나의 레시피',
+                tooltip: '나의 레시피',
               ),
               BottomNavigationBarItem(
-                icon: Icon(CupertinoIcons.person_circle),
-                activeIcon: Icon(CupertinoIcons.person_circle_fill),
-                label: 'MY 페이지',
-                tooltip: 'MY 페이지',
+                icon: Icon(Icons.public),
+                activeIcon: Icon(Icons.public),
+                label: '커뮤니티',
+                tooltip: '커뮤니티',
+>>>>>>> Stashed changes
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person_outline),
+                activeIcon: Icon(Icons.person),
+                label: '마이페이지',
+                tooltip: '마이페이지',
               ),
             ],
           ),

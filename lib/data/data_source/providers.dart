@@ -25,17 +25,28 @@ final googleSignInProvider = Provider((ref) => GoogleSignIn());
 final kakaoSignInProvider = Provider((ref) => UserApi.instance);
 
 // data_source_providers
-final googleSignInDataSourceProvider = Provider<OAuthSignInDataSource>((ref) => GoogleOAuthDataSourceImpl(ref.read(googleSignInProvider)));
-
-final kakaoSignInDataSourceProvider = Provider<OAuthSignInDataSource>((ref) => KakaoOAuthDataSourceImpl(ref.read(kakaoSignInProvider)));
-
-final firebaseAuthDataSourceProvider = Provider<FirebaseAuthDataSource>(
-  (ref) => FirebaseAuthDataSourceImpl(ref.read(firebaseAuthProvider), ref.read(firebaseFunctionsProvider)),
+final googleSignInDataSourceProvider = Provider<OAuthSignInDataSource>(
+  (ref) => GoogleOAuthDataSourceImpl(ref.read(googleSignInProvider)),
 );
 
-final userFirestoreDataSourceProvider = Provider<UserDataSource>((ref) => UserFirestoreDataSource(ref.read(firestoreProvider)));
+final kakaoSignInDataSourceProvider = Provider<OAuthSignInDataSource>(
+  (ref) => KakaoOAuthDataSourceImpl(ref.read(kakaoSignInProvider)),
+);
 
-final imageStorageDataSourceProvider = Provider<ImageStorageDataSource>((ref) => FirebaseImageStorageDataSource(FirebaseStorage.instance));
+final firebaseAuthDataSourceProvider = Provider<FirebaseAuthDataSource>(
+  (ref) => FirebaseAuthDataSourceImpl(
+    ref.read(firebaseAuthProvider),
+    ref.read(firebaseFunctionsProvider),
+  ),
+);
+
+final userFirestoreDataSourceProvider = Provider<UserDataSource>(
+  (ref) => UserFirestoreDataSource(ref.read(firestoreProvider)),
+);
+
+final imageStorageDataSourceProvider = Provider<ImageStorageDataSource>(
+  (ref) => FirebaseImageStorageDataSource(FirebaseStorage.instance),
+);
 
 final recipeGenerationDataSourceProvider = Provider<RecipeGenerationDataSource>(
   (ref) => GeminiRecipeGenerationDataSource(ref.read(firebaseAIProvider)),
