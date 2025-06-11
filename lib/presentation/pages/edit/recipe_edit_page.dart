@@ -1,8 +1,10 @@
 import 'dart:developer';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cooki/presentation/pages/edit/recipe_edit_view_model.dart';
 import 'package:cooki/presentation/pages/edit/widgets/number_input_box.dart';
 import 'package:cooki/presentation/pages/edit/widgets/recipe_list_input_widget.dart';
+import 'package:cooki/presentation/widgets/app_cached_image.dart';
 import 'package:cooki/presentation/widgets/category_selection_dialog.dart';
 import 'package:cooki/presentation/widgets/recipe_page_widgets.dart';
 import 'package:easy_image_viewer/easy_image_viewer.dart';
@@ -13,7 +15,6 @@ import '../../../app/constants/app_colors.dart';
 import '../../../core/utils/general_util.dart';
 import '../../../domain/entity/recipe.dart';
 
-const servingsTitleStyle = TextStyle(fontSize: 17, fontWeight: FontWeight.bold);
 const cookTimeAndKcalTextStyle = TextStyle(
   fontWeight: FontWeight.bold,
   fontSize: 16,
@@ -218,7 +219,7 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
                               const SizedBox(width: 3),
                               Text(
                                 strings(context).servingsLabel,
-                                style: servingsTitleStyle,
+                                style: RecipePageWidgets.servingsTitleStyle,
                               ),
                             ],
                           ),
@@ -337,7 +338,9 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
   Widget _buildImageSelector() {
     return GestureDetector(
       onTap: () {
-        final imageProvider = NetworkImage(widget.recipe!.imageUrl!);
+        final imageProvider = CachedNetworkImageProvider(
+          widget.recipe!.imageUrl!,
+        );
         showImageViewer(
           context,
           imageProvider,
@@ -346,8 +349,8 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
           useSafeArea: true,
         );
       },
-      child: Image.network(
-        widget.recipe!.imageUrl!,
+      child: AppCachedImage(
+        imageUrl: widget.recipe!.imageUrl!,
         fit: BoxFit.cover,
         height: 230,
         width: double.infinity,

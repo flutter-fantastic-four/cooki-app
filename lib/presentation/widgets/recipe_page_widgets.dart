@@ -8,6 +8,8 @@ class RecipePageWidgets {
     fontSize: 20,
     fontWeight: FontWeight.bold,
   );
+
+  static const servingsTitleStyle = TextStyle(fontSize: 17, fontWeight: FontWeight.bold);
 }
 
 class StepIndexLabel extends StatelessWidget {
