@@ -3,6 +3,8 @@ import 'package:cooki/core/utils/general_util.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../../app/constants/app_colors.dart';
+
 enum AppDialogResult {
   confirm, // 확인 or 네
   cancel, // 아니오
@@ -99,6 +101,123 @@ class DialogueUtil {
               ),
             ),
           ),
+    );
+  }
+
+  static void showImagePickerModal(
+    BuildContext context, {
+    required VoidCallback onCamera,
+    required VoidCallback onGallery,
+    VoidCallback? onClose,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.greyScale50,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.only(
+            top: 8,
+            bottom: 30,
+            left: 15,
+            right: 15,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Top handle
+              Container(
+                width: 40,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: Colors.grey[400],
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                margin: const EdgeInsets.only(bottom: 12),
+              ),
+
+              _ModalOptionCard(
+                text: strings(context).takeWithCamera,
+                icon: Icons.photo_camera,
+                onTap: () {
+                  Navigator.pop(context);
+                  onCamera();
+                },
+              ),
+
+              _ModalOptionCard(
+                text: strings(context).chooseInGallery,
+                icon: CupertinoIcons.photo,
+                onTap: () {
+                  Navigator.pop(context);
+                  onGallery();
+                },
+              ),
+
+              const SizedBox(height: 15),
+              _ModalOptionCard(
+                text: strings(context).close,
+                onTap: () {
+                  Navigator.pop(context);
+                  if (onClose != null) onClose();
+                },
+                isCenter: true,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _ModalOptionCard extends StatelessWidget {
+  final String text;
+  final IconData? icon;
+  final VoidCallback onTap;
+  final bool isCenter;
+  final Color? textColor;
+  final Color? iconColor;
+
+  const _ModalOptionCard({
+    required this.text,
+    this.icon,
+    required this.onTap,
+    this.isCenter = false,
+    this.textColor,
+    this.iconColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      elevation: 0,
+      color: Colors.white,
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(vertical: 1),
+        leading:
+            !isCenter
+                ? Padding(
+                  padding: const EdgeInsets.only(left: 24, right: 4),
+                  child: Icon(icon, color: iconColor ?? Colors.black87),
+                )
+                : null,
+        title: Text(
+          text,
+          style: TextStyle(
+            fontSize: 16,
+            color: textColor ?? Colors.black,
+            fontWeight: FontWeight.w500,
+          ),
+          textAlign: isCenter ? TextAlign.center : null,
+        ),
+        onTap: onTap,
+      ),
     );
   }
 }
