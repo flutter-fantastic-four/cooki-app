@@ -17,12 +17,14 @@ class GenerateRecipePage extends ConsumerWidget {
   const GenerateRecipePage({super.key});
 
   Future<void> _generateRecipe(WidgetRef ref, BuildContext context) async {
-    await ref
+    final savedRecipe = await ref
         .read(generateRecipeViewModelProvider.notifier)
-        .generateRecipe(
+        .generateAndSaveRecipe(
           textOnlyRecipePromptPath: strings(context).textOnlyRecipePromptPath,
           imageRecipePromptPath: strings(context).imageRecipePromptPath,
+          user: ref.read(userGlobalViewModelProvider)!,
         );
+
     final state = ref.read(generateRecipeViewModelProvider);
 
     if (state.errorKey != null) {
@@ -33,26 +35,13 @@ class GenerateRecipePage extends ConsumerWidget {
         content: ErrorMapper.mapGenerateRecipeError(context, state.errorKey!),
       );
       ref.read(generateRecipeViewModelProvider.notifier).clearError();
-    } else if (state.generatedRecipe != null) {
-      // Save to Firestore
-      final user = ref.read(userGlobalViewModelProvider)!;
-      final savedRecipe = await ref
-          .read(generateRecipeViewModelProvider.notifier)
-          .saveGeneratedRecipe(
-            userId: user.id,
-            userName: user.name,
-            userProfileImage: user.profileImage ?? '',
-          );
+      return;
+    }
 
+    if (savedRecipe != null) {
       if (!context.mounted) return;
       Navigator.of(context).push(
-        MaterialPageRoute(
-          builder:
-              (context) => RecipeEditPage(
-                generatedRecipe: state.generatedRecipe,
-                // savedRecipe: savedRecipe,
-              ),
-        ),
+        MaterialPageRoute(builder: (_) => RecipeEditPage(recipe: savedRecipe)),
       );
     }
   }
@@ -82,7 +71,7 @@ class GenerateRecipePage extends ConsumerWidget {
                   state.canGenerate
                       ? () => _generateRecipe(ref, context)
                       : null,
-              isLoading: state.isGenerating,
+              isLoading: state.isGeneratingAndSaving,
             );
           },
         ),
