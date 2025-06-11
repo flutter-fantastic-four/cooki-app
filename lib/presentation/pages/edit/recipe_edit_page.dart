@@ -1,5 +1,4 @@
 import 'dart:developer';
-import 'dart:typed_data';
 
 import 'package:cooki/presentation/pages/edit/recipe_edit_view_model.dart';
 import 'package:cooki/presentation/pages/edit/widgets/number_input_box.dart';
@@ -12,7 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/constants/app_colors.dart';
 import '../../../core/utils/general_util.dart';
-import '../../../domain/entity/generated_recipe.dart';
+import '../../../domain/entity/recipe.dart';
 
 const servingsTitleStyle = TextStyle(fontSize: 17, fontWeight: FontWeight.bold);
 const cookTimeAndKcalTextStyle = TextStyle(
@@ -21,9 +20,9 @@ const cookTimeAndKcalTextStyle = TextStyle(
 );
 
 class RecipeEditPage extends ConsumerStatefulWidget {
-  final GeneratedRecipe? generatedRecipe;
+  Recipe? recipe;
 
-  const RecipeEditPage({super.key, this.generatedRecipe});
+  RecipeEditPage({super.key, this.recipe});
 
   @override
   ConsumerState<RecipeEditPage> createState() => _RecipeEditPageState();
@@ -38,8 +37,6 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
   final _tagsController = TextEditingController();
 
   String? _selectedCategory;
-  bool _isPublic = true;
-  Uint8List? _imageBytes;
 
   void _addIngredient(RecipeEditViewModel vm) {
     vm.addIngredient();
@@ -72,7 +69,7 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
   @override
   void initState() {
     super.initState();
-    final generatedRecipe = widget.generatedRecipe;
+    final generatedRecipe = widget.recipe;
 
     if (generatedRecipe != null) {
       _titleController.text = generatedRecipe.recipeName;
@@ -88,7 +85,6 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
       _caloriesController.text = generatedRecipe.calories.toString();
       _tagsController.text = (generatedRecipe.tags).join(', ');
       _selectedCategory = generatedRecipe.category;
-      _imageBytes = generatedRecipe.imageBytes;
     }
 
     // Ensure at least one field
@@ -120,9 +116,7 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
     // final state = ref.watch(
     //   recipeEditViewModelProvider(widget.generatedRecipe),
     // );
-    final vm = ref.read(
-      recipeEditViewModelProvider(widget.generatedRecipe).notifier,
-    );
+    final vm = ref.read(recipeEditViewModelProvider(widget.recipe).notifier);
 
     return GestureDetector(
       onTap: FocusScope.of(context).unfocus,
@@ -141,7 +135,7 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
               Expanded(
                 child: ListView(
                   children: [
-                    if (_imageBytes != null) ...[
+                    if (widget.recipe?.imageUrl != null) ...[
                       _buildImageSelector(),
                       const SizedBox(height: 5),
                     ],
@@ -203,8 +197,8 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
                           ),
 
                           const SizedBox(height: 20),
-                          if (widget.generatedRecipe != null)
-                            _buildTagChips(widget.generatedRecipe!.tags),
+                          if (widget.recipe != null)
+                            _buildTagChips(widget.recipe!.tags),
 
                           const SizedBox(height: 28),
                           Text(
@@ -343,7 +337,7 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
   Widget _buildImageSelector() {
     return GestureDetector(
       onTap: () {
-        final imageProvider = MemoryImage(_imageBytes!);
+        final imageProvider = NetworkImage(widget.recipe!.imageUrl!);
         showImageViewer(
           context,
           imageProvider,
@@ -352,8 +346,8 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
           useSafeArea: true,
         );
       },
-      child: Image.memory(
-        _imageBytes!,
+      child: Image.network(
+        widget.recipe!.imageUrl!,
         fit: BoxFit.cover,
         height: 230,
         width: double.infinity,
@@ -368,8 +362,13 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
         const SizedBox(height: 8),
         Switch.adaptive(
           activeColor: const Color(0xFF1D8163),
-          value: _isPublic,
-          onChanged: (val) => setState(() => _isPublic = val),
+          value: widget.recipe?.isPublic == true,
+          onChanged:
+              (val) => setState(() {
+                setState(() {
+                  widget.recipe = widget.recipe?.copyWith(isPublic: val);
+                });
+              }),
         ),
       ],
     );
@@ -384,17 +383,17 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
           Expanded(
             child: OutlinedButton(
               onPressed: () {
-                log(widget.generatedRecipe.toString());
+                log(widget.recipe.toString());
               },
               style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: AppColors.primary),
+                side: const BorderSide(color: Colors.red),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
               child: Text(
                 strings(context).deleteRecipeButton,
-                style: const TextStyle(color: AppColors.primary),
+                style: const TextStyle(color: Colors.red),
               ),
             ),
           ),
