@@ -2,8 +2,10 @@ import 'dart:typed_data';
 import 'package:cooki/core/utils/general_util.dart';
 import 'package:cooki/core/utils/logger.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../data/data_source/providers.dart';
 import '../../../data/repository/providers.dart';
 import '../../../domain/entity/generated_recipe.dart';
+import '../../../domain/entity/recipe.dart';
 
 enum GenerateRecipeErrorKey { invalidUserInput, invalidImage, generationFailed }
 
@@ -126,6 +128,38 @@ class GenerateRecipeViewModel extends AutoDisposeNotifier<GenerateRecipeState> {
         isGenerating: false,
         errorKey: GenerateRecipeErrorKey.generationFailed,
       );
+    }
+  }
+
+  Future<Recipe?> saveGeneratedRecipe({
+    required String userId,
+    required String userName,
+    required String userProfileImage,
+  }) async {
+    try {
+      final recipe = Recipe(
+        id: '',
+        // Will be set by Firestore
+        recipeName: state.generatedRecipe!.recipeName,
+        ingredients: state.generatedRecipe!.ingredients,
+        steps: state.generatedRecipe!.steps,
+        cookTime: state.generatedRecipe!.cookTime,
+        calories: state.generatedRecipe!.calories,
+        category: state.generatedRecipe!.category,
+        tags: state.generatedRecipe!.tags,
+        userId: userId,
+        userName: userName,
+        userProfileImage: userProfileImage,
+        isPublic: false,
+        // Default to private
+        imageUrl: null, // TODO: Implement image upload
+      );
+
+      final recipeId =  await ref.read(recipeRepositoryProvider).saveRecipe(recipe);
+      return recipe.copyWith(id: recipeId);
+    } catch (e, stack) {
+      logError(e, stack);
+      return null;
     }
   }
 

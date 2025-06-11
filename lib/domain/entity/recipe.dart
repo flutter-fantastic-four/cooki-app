@@ -32,6 +32,7 @@ class Recipe {
   }) : createdAt = createdAt ?? DateTime.now();
 
   Recipe copyWith({
+    String? id,
     String? recipeName,
     List<String>? ingredients,
     List<String>? steps,
@@ -47,14 +48,14 @@ class Recipe {
     DateTime? createdAt,
   }) {
     return Recipe(
-      id: id,
+      id: id ?? this.id,
       recipeName: recipeName ?? this.recipeName,
-      ingredients: ingredients ?? List.from(this.ingredients),
-      steps: steps ?? List.from(this.steps),
+      ingredients: ingredients ?? this.ingredients,
+      steps: steps ?? this.steps,
       cookTime: cookTime ?? this.cookTime,
       calories: calories ?? this.calories,
       category: category ?? this.category,
-      tags: tags ?? List.from(this.tags),
+      tags: tags ?? this.tags,
       userId: userId ?? this.userId,
       userName: userName ?? this.userName,
       userProfileImage: userProfileImage ?? this.userProfileImage,

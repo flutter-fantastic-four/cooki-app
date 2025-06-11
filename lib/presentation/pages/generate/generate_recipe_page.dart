@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/constants/app_constants.dart';
+import '../../user_global_view_model.dart';
 import '../../widgets/input_decorations.dart';
 import 'generate_recipe_view_model.dart';
 
@@ -33,12 +34,24 @@ class GenerateRecipePage extends ConsumerWidget {
       );
       ref.read(generateRecipeViewModelProvider.notifier).clearError();
     } else if (state.generatedRecipe != null) {
+      // Save to Firestore
+      final user = ref.read(userGlobalViewModelProvider)!;
+      final savedRecipe = await ref
+          .read(generateRecipeViewModelProvider.notifier)
+          .saveGeneratedRecipe(
+            userId: user.id,
+            userName: user.name,
+            userProfileImage: user.profileImage ?? '',
+          );
+
       if (!context.mounted) return;
       Navigator.of(context).push(
         MaterialPageRoute(
           builder:
-              (context) =>
-                  RecipeEditPage(generatedRecipe: state.generatedRecipe),
+              (context) => RecipeEditPage(
+                generatedRecipe: state.generatedRecipe,
+                // savedRecipe: savedRecipe,
+              ),
         ),
       );
     }
