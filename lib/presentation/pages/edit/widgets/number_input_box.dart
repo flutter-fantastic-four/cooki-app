@@ -40,13 +40,18 @@ class NumberInputBox extends StatelessWidget {
           decoration: InputDecoration(
             isCollapsed: true,
             counterText: '',
-            contentPadding: const EdgeInsets.symmetric(horizontal: 9, vertical: 8),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 9,
+              vertical: 8,
+            ),
             filled: true,
             fillColor: AppColors.greyScale50,
-            border: OutlineInputBorder(
-              // borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide.none,
-            ),
+            border: WidgetStateInputBorder.resolveWith((_) {
+              return OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide.none,
+              );
+            }),
           ),
         ),
       ),
