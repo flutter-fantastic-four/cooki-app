@@ -197,7 +197,7 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
 
                           const SizedBox(height: 20),
                           if (recipe != null)
-                            _buildTagChips(recipe!.tags),
+                            TagChips(recipe!.tags),
 
                           const SizedBox(height: 28),
                           Text(
@@ -303,33 +303,6 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildTagChips(List<String> tags) {
-    return Wrap(
-      spacing: 6,
-      runSpacing: 8,
-      children:
-          tags.map((tag) {
-            return Container(
-              padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 12),
-              decoration: ShapeDecoration(
-                shape: RoundedRectangleBorder(
-                  side: BorderSide(color: AppColors.greyScale400),
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                color: Colors.white,
-              ),
-              child: DefaultTextStyle(
-                style: const TextStyle(color: Colors.black, fontSize: 13),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [Text(tag)],
-                ),
-              ),
-            );
-          }).toList(),
     );
   }
 
