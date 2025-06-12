@@ -709,11 +709,10 @@ class _MyRecipesPageState extends State<MyRecipesPage> {
                                               });
                                             },
                                             child: Container(
-                                              height: 34,
                                               padding:
                                                   const EdgeInsets.symmetric(
                                                     horizontal: 12,
-                                                    vertical: 6,
+                                                    vertical: 8,
                                                   ),
                                               decoration: BoxDecoration(
                                                 color:
@@ -744,8 +743,13 @@ class _MyRecipesPageState extends State<MyRecipesPage> {
                                                           : const Color(
                                                             0xFF666666,
                                                           ),
-                                                  fontSize: 13,
-                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 12,
+                                                  fontWeight:
+                                                      tempSort ==
+                                                              AppConstants
+                                                                  .sortByRating
+                                                          ? FontWeight.w600
+                                                          : FontWeight.w400,
                                                 ),
                                               ),
                                             ),
@@ -763,11 +767,10 @@ class _MyRecipesPageState extends State<MyRecipesPage> {
                                               });
                                             },
                                             child: Container(
-                                              height: 34,
                                               padding:
                                                   const EdgeInsets.symmetric(
                                                     horizontal: 12,
-                                                    vertical: 6,
+                                                    vertical: 8,
                                                   ),
                                               decoration: BoxDecoration(
                                                 color:
@@ -798,8 +801,13 @@ class _MyRecipesPageState extends State<MyRecipesPage> {
                                                           : const Color(
                                                             0xFF666666,
                                                           ),
-                                                  fontSize: 13,
-                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 12,
+                                                  fontWeight:
+                                                      tempSort ==
+                                                              AppConstants
+                                                                  .sortByCookTimeAsc
+                                                          ? FontWeight.w600
+                                                          : FontWeight.w400,
                                                 ),
                                               ),
                                             ),
@@ -816,7 +824,7 @@ class _MyRecipesPageState extends State<MyRecipesPage> {
                                       const Text(
                                         '국가별',
                                         style: TextStyle(
-                                          fontSize: 16,
+                                          fontSize: 18,
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
@@ -841,11 +849,10 @@ class _MyRecipesPageState extends State<MyRecipesPage> {
                                                   });
                                                 },
                                                 child: Container(
-                                                  height: 34,
                                                   padding:
                                                       const EdgeInsets.symmetric(
                                                         horizontal: 12,
-                                                        vertical: 6,
+                                                        vertical: 8,
                                                       ),
                                                   decoration: BoxDecoration(
                                                     color:
@@ -874,9 +881,11 @@ class _MyRecipesPageState extends State<MyRecipesPage> {
                                                               : const Color(
                                                                 0xFF666666,
                                                               ),
-                                                      fontSize: 13,
+                                                      fontSize: 12,
                                                       fontWeight:
-                                                          FontWeight.w500,
+                                                          isSelected
+                                                              ? FontWeight.w600
+                                                              : FontWeight.w400,
                                                     ),
                                                   ),
                                                 ),
@@ -897,7 +906,7 @@ class _MyRecipesPageState extends State<MyRecipesPage> {
                                                 });
                                                 Navigator.pop(context);
                                               },
-                                              child: const Text('필터 초기화'),
+                                              child: const Text('초기화'),
                                             ),
                                           ),
                                           const SizedBox(width: 12),
@@ -959,60 +968,67 @@ class _MyRecipesPageState extends State<MyRecipesPage> {
       ),
       body: Column(
         children: [
-          // Category chips at the top
+          // Category tabs at the top
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children:
-                  AppConstants.recipeTabCategories(context).map((category) {
-                    final isSelected = selectedCategory == category;
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: GestureDetector(
-                        onTap: () {
-                          _pageController.animateToPage(
-                            AppConstants.recipeTabCategories(
-                              context,
-                            ).indexOf(category),
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeInOut,
-                          );
-                        },
-                        child: Container(
-                          height: 34,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color:
-                                isSelected
-                                    ? const Color(0xFF1D8163)
-                                    : Colors.white,
-                            borderRadius: BorderRadius.circular(24),
-                            border: Border.all(
-                              color: const Color(0xFFE0E0E0),
-                              width: 1,
+                  AppConstants.recipeTabCategories(context).asMap().entries.map(
+                    (entry) {
+                      final index = entry.key;
+                      final category = entry.value;
+                      final isSelected = selectedCategory == category;
+                      final isLastTab =
+                          index ==
+                          AppConstants.recipeTabCategories(context).length - 1;
+                      return Padding(
+                        padding: EdgeInsets.only(right: isLastTab ? 0 : 8),
+                        child: GestureDetector(
+                          onTap: () {
+                            _pageController.animateToPage(
+                              AppConstants.recipeTabCategories(
+                                context,
+                              ).indexOf(category),
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
                             ),
-                          ),
-                          child: Center(
+                            decoration: BoxDecoration(
+                              border: Border(
+                                bottom: BorderSide(
+                                  color:
+                                      isSelected
+                                          ? const Color(0xFF1D8163)
+                                          : Colors.transparent,
+                                  width: 2,
+                                ),
+                              ),
+                            ),
                             child: Text(
                               category,
                               style: TextStyle(
                                 color:
                                     isSelected
-                                        ? Colors.white
+                                        ? const Color(0xFF1D8163)
                                         : const Color(0xFF666666),
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
+                                fontSize: 12,
+                                fontWeight:
+                                    isSelected
+                                        ? FontWeight.w600
+                                        : FontWeight.w400,
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    );
-                  }).toList(),
+                      );
+                    },
+                  ).toList(),
             ),
           ),
           // Active filters display
