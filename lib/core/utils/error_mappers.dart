@@ -12,7 +12,7 @@ enum SaveRecipeErrorKey {
 
 enum RecipeValidationErrorKey {
   titleRequired,
-  titleTooShort,
+  textTooShort,
   ingredientEmpty,
   stepEmpty,
   required,
@@ -46,8 +46,8 @@ class ErrorMapper {
     switch (key) {
       case RecipeValidationErrorKey.titleRequired:
         return s.recipeTitleRequiredError;
-      case RecipeValidationErrorKey.titleTooShort:
-        return s.recipeTitleTooShortError;
+      case RecipeValidationErrorKey.textTooShort:
+        return s.textTooShortError;
       // case RecipeValidationErrorKey.categoryRequired:
       //   return s.categoryRequiredError;
       case RecipeValidationErrorKey.ingredientEmpty:

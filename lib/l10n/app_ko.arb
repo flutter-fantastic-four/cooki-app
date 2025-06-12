@@ -85,7 +85,7 @@
   "recipeSavedSuccessfully": "레시피가 저장되었습니다",
 
   "recipeTitleRequiredError": "레시피 제목을 입력해 주세요",
-  "recipeTitleTooShortError": "2글자 이상 입력해 주세요",
+  "textTooShortError": "2글자 이상 입력해 주세요",
   "ingredientEmptyError": "재료를 입력해 주세요",
   "stepEmptyError": "조리 과정을 입력해 주세요",
   "requiredError": "필수",

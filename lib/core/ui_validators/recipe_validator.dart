@@ -6,7 +6,7 @@ class RecipeValidator {
       return RecipeValidationErrorKey.titleRequired;
     }
     if (title.trim().length < 2) {
-      return RecipeValidationErrorKey.titleTooShort;
+      return RecipeValidationErrorKey.textTooShort;
     }
     return null;
   }
@@ -22,12 +22,18 @@ class RecipeValidator {
     if (ingredient == null || ingredient.trim().isEmpty) {
       return RecipeValidationErrorKey.ingredientEmpty;
     }
+    if (ingredient.trim().length < 2) {
+      return RecipeValidationErrorKey.textTooShort;
+    }
     return null;
   }
 
   static RecipeValidationErrorKey? validateStep(String? step) {
     if (step == null || step.trim().isEmpty) {
       return RecipeValidationErrorKey.stepEmpty;
+    }
+    if (step.trim().length < 2) {
+      return RecipeValidationErrorKey.textTooShort;
     }
     return null;
   }

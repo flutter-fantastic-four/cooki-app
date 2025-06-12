@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cooki/presentation/pages/edit/recipe_edit_view_model.dart';
 import 'package:cooki/presentation/widgets/recipe_page_widgets.dart';
 import '../../../../app/constants/app_colors.dart';
+import '../../../../core/ui_validators/recipe_validator.dart';
+import '../../../../core/utils/error_mappers.dart';
 
 /// A single widget to render either Ingredients or Steps list.
 /// If [isSteps] is true, it shows “1.”, “2.” etc. on the left.
@@ -22,6 +24,14 @@ class InputListWidget extends StatelessWidget {
     required this.onAdd,
     required this.onRemove,
   });
+
+  String? _validate(BuildContext context, String? value) {
+    final error =
+        isSteps
+            ? RecipeValidator.validateStep(value)
+            : RecipeValidator.validateIngredient(value);
+    return ErrorMapper.mapRecipeValidationError(context, error);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,10 +58,11 @@ class InputListWidget extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Expanded(
-                            child: TextField(
+                            child: TextFormField(
                               controller: controllers[index],
                               minLines: 1,
                               maxLines: isSteps ? 3 : 1,
+                              validator: (value) => _validate(context, value),
                               decoration: InputDecoration(
                                 hintText: hintText,
                                 hintStyle: TextStyle(
@@ -67,10 +78,15 @@ class InputListWidget extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(12),
                                   borderSide: BorderSide.none,
                                 ),
+                                // errorBorder: OutlineInputBorder(
+                                //   borderRadius: BorderRadius.circular(12),
+                                //   borderSide: const BorderSide(color: Colors.red),
+                                // ),
+                                errorStyle: const TextStyle(fontSize: 13),
                               ),
                             ),
                           ),
-                          SizedBox(width: 5),
+                          const SizedBox(width: 5),
                           SizedBox.square(
                             dimension: 27,
                             child: IconButton(
