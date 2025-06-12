@@ -31,14 +31,18 @@
   "imageSelection": "이미지 선택",
   "takeWithCamera": "카메라로 촬영하기",
   "chooseInGallery": "앨범에서 선택하기",
-  "generationFailed": "레시피 생성 실패",
+  "aiTextInputLabel": "AI 요청사항",
+  "close": "닫기",
+  "generateRecipeLoading": "레시피 생성 중...",
+
+  "generationFailedTitle": "레시피 생성 실패",
+  "recipeSavingFailedTitle": "레시피 저장 실패",
   "invalidUserInputError": "유효하지 않은 입력입니다.\n명확한 요리 설명 또는 재료를 입력해 주세요.",
   "invalidImageError": "레시피 생성에 실패했습니다.\n이미지에 음식이나 재료가 포함되어 있는지 확인해 주세요.",
   "generationFailedError": "레시피 생성에 실패했습니다.\n다시 시도해 주세요",
   "recipeSaveFailedError": "레시피 저장에 실패했습니다.\n다시 시도해 주세요",
-  "generateRecipeLoading": "레시피 생성 중...",
-  "aiTextInputLabel": "AI 요청사항",
-  "close": "닫기",
+  "categoryRequiredError": "카테고리를 선택해 주세요",
+
 
   "textOnlyRecipePromptPath": "ko/text_only_recipe.md",
   "imageRecipePromptPath": "ko/image_recipe.md",
@@ -72,12 +76,19 @@
   "cookTimeLabel": "조리 시간",
   "caloriesLabel": "칼로리",
   "isPublicLabel": "공개 여부",
-  "deleteRecipeButton": "레시피 삭제",
+  "deleteRecipeButton": "삭제",
   "saveRecipeButton": "저장",
   "minutes": "분",
   "beforeMinutesLabel" : "약 ",
   "afterMinutesLabel": " 분 소요",
   "caloriesUnitAfter": " kcal",
+  "recipeSavedSuccessfully": "레시피가 저장되었습니다",
+
+  "recipeTitleRequiredError": "레시피 제목을 입력해 주세요",
+  "textTooShortError": "2글자 이상 입력해 주세요",
+  "ingredientEmptyError": "재료를 입력해 주세요",
+  "stepEmptyError": "조리 과정을 입력해 주세요",
+  "requiredError": "필수",
 
   "shareRecipeSubjectSuffix": "레시피 공유합니다!",
   "recipe": "레시피"

@@ -3,6 +3,8 @@ import '../dto/recipe_firestore_dto.dart';
 
 abstract class RecipeDataSource {
   Future<String> saveRecipe(RecipeFirestoreDto recipe);
+
+  Future<void> editRecipe(RecipeFirestoreDto recipeDto);
 }
 
 class RecipeFirestoreDataSource implements RecipeDataSource {
@@ -12,7 +14,17 @@ class RecipeFirestoreDataSource implements RecipeDataSource {
 
   @override
   Future<String> saveRecipe(RecipeFirestoreDto recipeDto) async {
-    final docRef = await _firestore.collection('recipes').add(recipeDto.toMap());
+    final docRef = await _firestore
+        .collection('recipes')
+        .add(recipeDto.toMap());
     return docRef.id;
+  }
+
+  @override
+  Future<void> editRecipe(RecipeFirestoreDto recipeDto) async {
+    await _firestore
+        .collection('recipes')
+        .doc(recipeDto.id)
+        .set(recipeDto.toMap());
   }
 }

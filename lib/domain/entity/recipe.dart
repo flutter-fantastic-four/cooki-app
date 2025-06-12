@@ -13,6 +13,7 @@ class Recipe {
   final bool isPublic;
   final String? imageUrl;
   final DateTime createdAt;
+  final DateTime? updatedAt;
   final String? promptInput;
 
   Recipe({
@@ -30,6 +31,7 @@ class Recipe {
     required this.isPublic,
     this.imageUrl,
     DateTime? createdAt,
+    this.updatedAt,
     this.promptInput,
   }) : createdAt = createdAt ?? DateTime.now();
 
@@ -48,6 +50,7 @@ class Recipe {
     bool? isPublic,
     String? imageUrl,
     DateTime? createdAt,
+    DateTime? updatedAt,
     String? promptInput,
   }) {
     return Recipe(
@@ -65,6 +68,7 @@ class Recipe {
       isPublic: isPublic ?? this.isPublic,
       imageUrl: imageUrl ?? this.imageUrl,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
       promptInput: promptInput ?? this.promptInput,
     );
   }

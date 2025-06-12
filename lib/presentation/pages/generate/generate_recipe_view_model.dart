@@ -3,21 +3,15 @@ import 'package:cooki/core/utils/general_util.dart';
 import 'package:cooki/core/utils/logger.dart';
 import 'package:cooki/domain/entity/app_user.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/utils/error_mappers.dart';
 import '../../../data/repository/providers.dart';
 import '../../../domain/entity/generated_recipe.dart';
 import '../../../domain/entity/recipe.dart';
 
-enum GenerateRecipeErrorKey {
-  invalidUserInput,
-  invalidImage,
-  generationFailed,
-  saveFailed,
-}
-
 class GenerateRecipeState {
   final bool isGeneratingAndSaving;
   final bool isLoadingImage;
-  final GenerateRecipeErrorKey? errorKey;
+  final SaveRecipeErrorKey? errorKey;
   final Uint8List? selectedImageBytes;
   final String textInput;
   final Set<String> selectedPreferences;
@@ -34,7 +28,7 @@ class GenerateRecipeState {
   GenerateRecipeState copyWith({
     bool? isGeneratingAndSaving,
     bool? isLoadingImage,
-    GenerateRecipeErrorKey? errorKey,
+    SaveRecipeErrorKey? errorKey,
     bool clearErrorKey = false,
     Uint8List? selectedImageBytes,
     bool clearSelectedImageBytes = false,
@@ -103,7 +97,7 @@ class GenerateRecipeViewModel extends AutoDisposeNotifier<GenerateRecipeState> {
 
         if (!validationResult.isValid) {
           state = state.copyWith(
-            errorKey: GenerateRecipeErrorKey.invalidUserInput,
+            errorKey: SaveRecipeErrorKey.invalidUserInput,
           );
           return null;
         }
@@ -130,15 +124,15 @@ class GenerateRecipeViewModel extends AutoDisposeNotifier<GenerateRecipeState> {
         state = state.copyWith(
           errorKey:
               state.selectedImageBytes != null
-                  ? GenerateRecipeErrorKey.invalidImage
-                  : GenerateRecipeErrorKey.generationFailed,
+                  ? SaveRecipeErrorKey.invalidImage
+                  : SaveRecipeErrorKey.generationFailed,
         );
         return null;
       }
       return generatedRecipe.copyWith(imageBytes: state.selectedImageBytes);
     } catch (e, stack) {
       logError(e, stack);
-      state = state.copyWith(errorKey: GenerateRecipeErrorKey.generationFailed);
+      state = state.copyWith(errorKey: SaveRecipeErrorKey.generationFailed);
       return null;
     }
   }
@@ -191,7 +185,7 @@ class GenerateRecipeViewModel extends AutoDisposeNotifier<GenerateRecipeState> {
       return recipe.copyWith(id: recipeId);
     } catch (e, stack) {
       logError(e, stack);
-      state = state.copyWith(errorKey: GenerateRecipeErrorKey.saveFailed);
+      state = state.copyWith(errorKey: SaveRecipeErrorKey.saveFailed);
       return null;
     }
   }
