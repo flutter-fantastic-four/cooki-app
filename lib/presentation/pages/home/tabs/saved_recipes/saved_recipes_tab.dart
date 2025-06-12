@@ -1165,22 +1165,6 @@ class _MyRecipesPageState extends State<MyRecipesPage> {
           ),
         ],
       ),
-      floatingActionButton: Container(
-        width: 56,
-        height: 56,
-        decoration: BoxDecoration(
-          color: const Color(0xFF1D8163),
-          shape: BoxShape.circle,
-          // boxShadow: [
-          //   BoxShadow(
-          //     color: Colors.black.withOpacity(0.08),
-          //     blurRadius: 4,
-          //     offset: const Offset(0, 2),
-          //   ),
-          // ],
-        ),
-        child: const Icon(Icons.add, color: Colors.white, size: 28),
-      ),
     );
   }
 }
