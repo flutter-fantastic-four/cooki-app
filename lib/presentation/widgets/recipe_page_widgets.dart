@@ -9,7 +9,56 @@ class RecipePageWidgets {
     fontWeight: FontWeight.bold,
   );
 
-  static const servingsTitleStyle = TextStyle(fontSize: 17, fontWeight: FontWeight.bold);
+  static const servingsTitleStyle = TextStyle(
+    fontSize: 17,
+    fontWeight: FontWeight.bold,
+  );
+}
+
+class TagChips extends StatelessWidget {
+  final List<String> tags;
+  final double fontSize;
+  final double verticalPadding;
+  final double horizontalPadding;
+
+  const TagChips(
+    this.tags, {
+    super.key,
+    this.fontSize = 13,
+    this.verticalPadding = 5,
+    this.horizontalPadding = 12,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 6,
+      runSpacing: 8,
+      children:
+          tags.map((tag) {
+            return Container(
+              padding: EdgeInsets.symmetric(
+                vertical: verticalPadding,
+                horizontal: horizontalPadding,
+              ),
+              decoration: ShapeDecoration(
+                shape: RoundedRectangleBorder(
+                  side: BorderSide(color: AppColors.greyScale400),
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                color: Colors.white,
+              ),
+              child: DefaultTextStyle(
+                style: TextStyle(color: Colors.black, fontSize: fontSize),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [Text(tag)],
+                ),
+              ),
+            );
+          }).toList(),
+    );
+  }
 }
 
 class StepIndexLabel extends StatelessWidget {
