@@ -13,6 +13,7 @@ class Recipe {
   final bool isPublic;
   final String? imageUrl;
   final DateTime createdAt;
+  final String? promptInput;
 
   Recipe({
     required this.id,
@@ -29,6 +30,7 @@ class Recipe {
     required this.isPublic,
     this.imageUrl,
     DateTime? createdAt,
+    this.promptInput,
   }) : createdAt = createdAt ?? DateTime.now();
 
   Recipe copyWith({
@@ -46,6 +48,7 @@ class Recipe {
     bool? isPublic,
     String? imageUrl,
     DateTime? createdAt,
+    String? promptInput,
   }) {
     return Recipe(
       id: id ?? this.id,
@@ -62,6 +65,7 @@ class Recipe {
       isPublic: isPublic ?? this.isPublic,
       imageUrl: imageUrl ?? this.imageUrl,
       createdAt: createdAt ?? this.createdAt,
+      promptInput: promptInput ?? this.promptInput,
     );
   }
 }

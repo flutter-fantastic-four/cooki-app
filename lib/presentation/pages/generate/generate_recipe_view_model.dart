@@ -158,6 +158,15 @@ class GenerateRecipeViewModel extends AutoDisposeNotifier<GenerateRecipeState> {
               'recipe_images',
             );
       }
+
+      final buffer = StringBuffer()
+        ..writeln('[Text Input]')
+        ..writeln(state.textInput.trim())
+        ..writeln()
+        ..writeln('[Preferences]')
+        ..writeln(state.selectedPreferences.join(', '));
+      final promptInputFormatted = buffer.toString();
+
       final recipe = Recipe(
         id: '',
         // Firestore will generate
@@ -173,6 +182,7 @@ class GenerateRecipeViewModel extends AutoDisposeNotifier<GenerateRecipeState> {
         userProfileImage: user.profileImage,
         isPublic: false,
         imageUrl: imageUrl,
+        promptInput: promptInputFormatted,
       );
 
       final recipeId = await ref
