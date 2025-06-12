@@ -5,7 +5,7 @@ import 'package:cooki/core/utils/snackbar_util.dart';
 import 'package:cooki/domain/entity/app_user.dart';
 import 'package:cooki/presentation/pages/edit/recipe_edit_view_model.dart';
 import 'package:cooki/presentation/pages/edit/widgets/number_input_box.dart';
-import 'package:cooki/presentation/pages/edit/widgets/recipe_list_input_widget.dart';
+import 'package:cooki/presentation/pages/edit/widgets/input_list_widget.dart';
 import 'package:cooki/presentation/widgets/app_cached_image.dart';
 import 'package:cooki/presentation/widgets/category_selection_dialog.dart';
 import 'package:cooki/presentation/widgets/recipe_page_widgets.dart';
