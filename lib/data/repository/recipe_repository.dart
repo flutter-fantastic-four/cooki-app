@@ -8,6 +8,8 @@ import '../dto/recipe_firestore_dto.dart';
 abstract class RecipeRepository {
   Future<String> saveRecipe(Recipe recipe);
 
+  Future<void> editRecipe(Recipe recipe);
+
   Future<String> uploadImageBytes(
     Uint8List imageBytes,
     String uid,
@@ -26,6 +28,11 @@ class RecipeRepositoryImpl implements RecipeRepository {
     return await _recipeDataSource.saveRecipe(
       RecipeFirestoreDto.fromEntity(recipe),
     );
+  }
+
+  @override
+  Future<void> editRecipe(Recipe recipe) async {
+    await _recipeDataSource.editRecipe(RecipeFirestoreDto.fromEntity(recipe));
   }
 
   @override

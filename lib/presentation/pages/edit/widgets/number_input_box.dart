@@ -2,6 +2,9 @@ import 'package:cooki/app/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../../core/ui_validators/recipe_validator.dart';
+import '../../../../core/utils/error_mappers.dart';
+
 class NumberInputBox extends StatelessWidget {
   final TextEditingController controller;
   final bool isMinutes;
@@ -14,25 +17,20 @@ class NumberInputBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      padding: const EdgeInsets.symmetric(horizontal: 9),
-      decoration: BoxDecoration(
-        color: AppColors.greyScale50,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      height: 34,
-      alignment: Alignment.center,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
       child: SizedBox(
-        width: isMinutes ? 33 : 50,
+        width: isMinutes ? 50 : 65,
         child: TextFormField(
           autovalidateMode: AutovalidateMode.onUserInteraction,
           controller: controller,
           keyboardType: TextInputType.number,
-          inputFormatters: [
-            FilteringTextInputFormatter.digitsOnly,
-          ],
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           maxLength: isMinutes ? 3 : 4,
+          validator: (value) {
+            final error = RecipeValidator.validateGeneralNotEmpty(value);
+            return ErrorMapper.mapRecipeValidationError(context, error);
+          },
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w400,
@@ -42,7 +40,13 @@ class NumberInputBox extends StatelessWidget {
           decoration: InputDecoration(
             isCollapsed: true,
             counterText: '',
-            border: InputBorder.none,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 9, vertical: 8),
+            filled: true,
+            fillColor: AppColors.greyScale50,
+            border: OutlineInputBorder(
+              // borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide.none,
+            ),
           ),
         ),
       ),

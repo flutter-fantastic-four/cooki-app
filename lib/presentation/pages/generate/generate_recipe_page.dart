@@ -30,7 +30,7 @@ class GenerateRecipePage extends ConsumerWidget {
     if (context.mounted && state.errorKey != null) {
       DialogueUtil.showAppCupertinoDialog(
         context: context,
-        title: strings(context).generationFailed,
+        title: strings(context).generationFailedTitle,
         content: ErrorMapper.mapGenerateRecipeError(context, state.errorKey!),
       );
       ref.read(generateRecipeViewModelProvider.notifier).clearError();
