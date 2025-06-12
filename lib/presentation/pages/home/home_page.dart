@@ -1,4 +1,5 @@
 import 'package:cooki/app/constants/app_colors.dart';
+import 'package:cooki/presentation/pages/debug/test_recipe_list.dart';
 import 'package:cooki/presentation/pages/home/widgets/home_bottom_navigation_bar.dart';
 import 'package:cooki/presentation/pages/my/my_page.dart';
 import 'package:cooki/presentation/pages/home/tabs/saved_recipes/saved_recipes_tab.dart';
@@ -20,7 +21,7 @@ class HomePage extends ConsumerWidget {
       bottomNavigationBar: HomeBottomNavigationBar(),
       body: IndexedStack(
         index: currentIndex,
-        children: [MyRecipesPage(), SizedBox(), MyPage()],
+        children: [MyRecipesPage(), RecipeDebugListPage(), MyPage()],
       ),
       floatingActionButton:
           currentIndex == 0 || currentIndex == 1
