@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/constants/app_colors.dart';
+import '../../../core/ui_validators/recipe_validator.dart';
 import '../../../core/utils/dialogue_util.dart';
 import '../../../core/utils/error_mappers.dart';
 import '../../../core/utils/general_util.dart';
@@ -185,74 +186,29 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const SizedBox(height: 2),
-
                             // Title field
-                            Row(
-                              children: [
-                                Text(
-                                  _titleController.text,
-                                  style: RecipePageWidgets.sectionTitleStyle,
-                                ),
-                                const SizedBox(width: 7),
-                                SizedBox.square(
-                                  dimension: 20,
-                                  child: IconButton(
-                                    padding: EdgeInsets.zero,
-                                    onPressed: () {},
-                                    icon: const Icon(Icons.edit, size: 15),
-                                  ),
-                                ),
-                              ],
-                            ),
+                            const SizedBox(height: 2),
+                            _buildTitleField(),
 
-                            // TextFormField(
-                            //   controller: _titleController,
-                            //   validator: (value) {
-                            //     final error = RecipeValidator.validateTitle(
-                            //       value,
-                            //     );
-                            //     return error != null
-                            //         ? ErrorMapper.mapRecipeValidationError(
-                            //           context,
-                            //           error,
-                            //         )
-                            //         : null;
-                            //   },
-                            //   decoration: InputDecoration(
-                            //     labelText: strings(context).recipeTitleLabel,
-                            //     hintText: strings(context).recipeTitleHint,
-                            //     contentPadding: const EdgeInsets.symmetric(
-                            //       vertical: 12,
-                            //       horizontal: 14,
-                            //     ),
-                            //     filled: true,
-                            //     fillColor: AppColors.appBarGrey,
-                            //     border: OutlineInputBorder(
-                            //       borderRadius: BorderRadius.circular(12),
-                            //       borderSide: BorderSide.none,
-                            //     ),
-                            //     errorBorder: OutlineInputBorder(
-                            //       borderRadius: BorderRadius.circular(12),
-                            //       borderSide: const BorderSide(
-                            //         color: Colors.red,
-                            //       ),
-                            //     ),
-                            //   ),
-                            // ),
                             const SizedBox(height: 12),
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _buildCookLabel(strings(context).beforeMinutesLabel),
+                                _buildCookLabel(
+                                  strings(context).beforeMinutesLabel,
+                                ),
                                 NumberInputBox(controller: _cookTimeController),
-                                _buildCookLabel(strings(context).afterMinutesLabel),
+                                _buildCookLabel(
+                                  strings(context).afterMinutesLabel,
+                                ),
                                 const SizedBox(width: 24),
                                 NumberInputBox(
                                   controller: _caloriesController,
                                   isMinutes: false,
                                 ),
-                                _buildCookLabel(strings(context).caloriesUnitAfter),
+                                _buildCookLabel(
+                                  strings(context).caloriesUnitAfter,
+                                ),
                               ],
                             ),
 
@@ -324,6 +280,138 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
               _buildBottomActions(),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTitleField() {
+    final vm = ref.read(recipeEditViewModelProvider(widget.recipe).notifier);
+    final isEditingTitle = ref.watch(
+      recipeEditViewModelProvider(
+        widget.recipe,
+      ).select((state) => state.isEditingTitle),
+    );
+
+    if (isEditingTitle) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Flexible(
+            child: IntrinsicWidth(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(context).size.width - 100,
+                ),
+                child: TextFormField(
+                  controller: _titleController,
+                  // maxLength: RecipePageWidgets.titleMaxLength,
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: AppColors.greyScale800,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  autofocus: true,
+                  validator: (value) {
+                    final error = RecipeValidator.validateTitle(value);
+                    return error != null
+                        ? ErrorMapper.mapRecipeValidationError(context, error)
+                        : null;
+                  },
+                  onFieldSubmitted: (_) {
+                    final error = RecipeValidator.validateTitle(
+                      _titleController.text,
+                    );
+                    if (error == null) {
+                      vm.stopTitleEdit();
+                    }
+                  },
+                  decoration: InputDecoration(
+                    hintText: strings(context).recipeTitleHint,
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 12,
+                      horizontal: 14,
+                    ),
+                    filled: true,
+                    fillColor: AppColors.appBarGrey,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Colors.red),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 4),
+          _buildTitleActionButton(
+            onPressed: () {
+              final error = RecipeValidator.validateTitle(
+                _titleController.text,
+              );
+              if (error == null) {
+                vm.stopTitleEdit();
+              }
+            },
+            icon: Icons.check,
+            color: AppColors.primary,
+          ),
+          _buildTitleActionButton(
+            onPressed: () {
+              _titleController.text = recipe?.recipeName ?? '';
+              vm.stopTitleEdit();
+            },
+            icon: Icons.close,
+            color: AppColors.greyScale500,
+          ),
+        ],
+      );
+    } else {
+      return Row(
+        children: [
+          Text(
+            _titleController.text.isNotEmpty
+                ? _titleController.text
+                : strings(context).recipeTitleHint,
+            style: RecipePageWidgets.sectionTitleStyle.copyWith(
+              color:
+                  _titleController.text.isNotEmpty ? Colors.black : Colors.grey,
+            ),
+          ),
+          // const SizedBox(width: 7),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 3),
+            child: SizedBox.square(
+              dimension: 30,
+              child: IconButton(
+                padding: EdgeInsets.zero,
+                onPressed: () => vm.startTitleEdit(),
+                icon: const Icon(Icons.edit, size: 15),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+  }
+
+  Widget _buildTitleActionButton({
+    required VoidCallback onPressed,
+    required IconData icon,
+    Color? color,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: SizedBox.square(
+        dimension: 27,
+        child: IconButton(
+          padding: EdgeInsets.zero,
+          onPressed: onPressed,
+          icon: Icon(icon, color: color, size: 18),
         ),
       ),
     );
