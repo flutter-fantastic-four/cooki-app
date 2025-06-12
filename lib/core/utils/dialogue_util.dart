@@ -179,16 +179,12 @@ class _ModalOptionCard extends StatelessWidget {
   final IconData? icon;
   final VoidCallback onTap;
   final bool isCenter;
-  final Color? textColor;
-  final Color? iconColor;
 
   const _ModalOptionCard({
     required this.text,
     this.icon,
     required this.onTap,
     this.isCenter = false,
-    this.textColor,
-    this.iconColor,
   });
 
   @override
@@ -204,14 +200,14 @@ class _ModalOptionCard extends StatelessWidget {
             !isCenter
                 ? Padding(
                   padding: const EdgeInsets.only(left: 24, right: 4),
-                  child: Icon(icon, color: iconColor ?? Colors.black87),
+                  child: Icon(icon, color: Colors.black87),
                 )
                 : null,
         title: Text(
           text,
           style: TextStyle(
             fontSize: 16,
-            color: textColor ?? Colors.black,
+            color: Colors.black,
             fontWeight: FontWeight.w500,
           ),
           textAlign: isCenter ? TextAlign.center : null,
