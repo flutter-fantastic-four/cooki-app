@@ -118,7 +118,7 @@ class GenerateRecipePage extends ConsumerWidget {
           onChanged:
               (text) => ref
                   .read(generateRecipeViewModelProvider.notifier)
-                  .updateTextInput(text),
+                  .updateTextInput(text.trim()),
           decoration: getInputDecoration(
             strings(context).generateTextFieldHint,
           ),
