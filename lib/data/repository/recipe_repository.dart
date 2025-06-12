@@ -15,6 +15,8 @@ abstract class RecipeRepository {
     String uid,
     String folder,
   );
+
+  Future<List<Recipe>> getAllRecipes();
 }
 
 class RecipeRepositoryImpl implements RecipeRepository {
@@ -42,5 +44,11 @@ class RecipeRepositoryImpl implements RecipeRepository {
     String folder,
   ) {
     return _imageStorageDataSource.uploadImageBytes(imageBytes, uid, folder);
+  }
+
+  @override
+  Future<List<Recipe>> getAllRecipes() async {
+    final recipeDtoList = await _recipeDataSource.getAllRecipes();
+    return recipeDtoList.map((dto) => dto.toEntity()).toList();
   }
 }
