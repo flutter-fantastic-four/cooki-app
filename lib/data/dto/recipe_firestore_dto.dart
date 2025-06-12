@@ -16,6 +16,7 @@ class RecipeFirestoreDto {
   final bool isPublic;
   final String? imageUrl;
   final Timestamp createdAt;
+  final Timestamp? updatedAt;
   final String? promptInput;
 
   const RecipeFirestoreDto({
@@ -32,6 +33,7 @@ class RecipeFirestoreDto {
     this.userProfileImage,
     required this.isPublic,
     required this.createdAt,
+    this.updatedAt,
     this.imageUrl,
     this.promptInput,
   });
@@ -52,6 +54,7 @@ class RecipeFirestoreDto {
       isPublic: map['isPublic'] ?? false,
       imageUrl: map['imageUrl'],
       createdAt: map['createdAt'] ?? Timestamp.now(),
+      updatedAt: map['updatedAt'],
       promptInput: map['promptInput'],
     );
   }
@@ -71,6 +74,7 @@ class RecipeFirestoreDto {
       'isPublic': isPublic,
       'imageUrl': imageUrl,
       'createdAt': createdAt,
+      'updatedAt': updatedAt,
       'promptInput': promptInput,
     };
   }
@@ -91,6 +95,10 @@ class RecipeFirestoreDto {
       isPublic: recipe.isPublic,
       imageUrl: recipe.imageUrl,
       createdAt: Timestamp.fromDate(recipe.createdAt),
+      updatedAt:
+          recipe.updatedAt != null
+              ? Timestamp.fromDate(recipe.updatedAt!)
+              : null,
       promptInput: recipe.promptInput,
     );
   }
@@ -111,6 +119,7 @@ class RecipeFirestoreDto {
       isPublic: isPublic,
       imageUrl: imageUrl,
       createdAt: createdAt.toDate(),
+      updatedAt: updatedAt?.toDate(),
       promptInput: promptInput,
     );
   }
