@@ -971,16 +971,13 @@ class _MyRecipesPageState extends State<MyRecipesPage> {
                       padding: const EdgeInsets.only(right: 8),
                       child: GestureDetector(
                         onTap: () {
-                          setState(() {
-                            selectedCategory = category;
-                            _pageController.animateToPage(
-                              AppConstants.recipeTabCategories(
-                                context,
-                              ).indexOf(category),
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
-                            );
-                          });
+                          _pageController.animateToPage(
+                            AppConstants.recipeTabCategories(
+                              context,
+                            ).indexOf(category),
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                          );
                         },
                         child: Container(
                           height: 34,
