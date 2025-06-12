@@ -21,21 +21,21 @@ const cookTimeAndKcalTextStyle = TextStyle(
 );
 
 class RecipeEditPage extends ConsumerStatefulWidget {
-  Recipe? recipe;
+  final Recipe? recipe;
 
-  RecipeEditPage({super.key, this.recipe});
+  const RecipeEditPage({super.key, this.recipe});
 
   @override
   ConsumerState<RecipeEditPage> createState() => _RecipeEditPageState();
 }
 
 class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
+  Recipe? recipe;
   final _titleController = TextEditingController();
   final _ingredientsControllers = <TextEditingController>[];
   final _stepsControllers = <TextEditingController>[];
   final _cookTimeController = TextEditingController();
   final _caloriesController = TextEditingController();
-  final _tagsController = TextEditingController();
 
   String? _selectedCategory;
 
@@ -70,22 +70,21 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
   @override
   void initState() {
     super.initState();
-    final generatedRecipe = widget.recipe;
+    recipe = widget.recipe;
 
-    if (generatedRecipe != null) {
-      _titleController.text = generatedRecipe.recipeName;
+    if (recipe != null) {
+      _titleController.text = recipe!.recipeName;
       _ingredientsControllers.addAll(
-        generatedRecipe.ingredients.map(
+        recipe!.ingredients.map(
           (ingredient) => TextEditingController(text: ingredient),
         ),
       );
       _stepsControllers.addAll(
-        generatedRecipe.steps.map((step) => TextEditingController(text: step)),
+        recipe!.steps.map((step) => TextEditingController(text: step)),
       );
-      _cookTimeController.text = generatedRecipe.cookTime.toString();
-      _caloriesController.text = generatedRecipe.calories.toString();
-      _tagsController.text = (generatedRecipe.tags).join(', ');
-      _selectedCategory = generatedRecipe.category;
+      _cookTimeController.text = recipe!.cookTime.toString();
+      _caloriesController.text = recipe!.calories.toString();
+      _selectedCategory = recipe!.category;
     }
 
     // Ensure at least one field
@@ -108,7 +107,6 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
     }
     _cookTimeController.dispose();
     _caloriesController.dispose();
-    _tagsController.dispose();
     super.dispose();
   }
 
@@ -136,7 +134,7 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
               Expanded(
                 child: ListView(
                   children: [
-                    if (widget.recipe?.imageUrl != null) ...[
+                    if (recipe?.imageUrl != null) ...[
                       _buildImageSelector(),
                       const SizedBox(height: 5),
                     ],
@@ -198,8 +196,8 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
                           ),
 
                           const SizedBox(height: 20),
-                          if (widget.recipe != null)
-                            _buildTagChips(widget.recipe!.tags),
+                          if (recipe != null)
+                            _buildTagChips(recipe!.tags),
 
                           const SizedBox(height: 28),
                           Text(
@@ -339,7 +337,7 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
     return GestureDetector(
       onTap: () {
         final imageProvider = CachedNetworkImageProvider(
-          widget.recipe!.imageUrl!,
+          recipe!.imageUrl!,
         );
         showImageViewer(
           context,
@@ -350,7 +348,7 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
         );
       },
       child: AppCachedImage(
-        imageUrl: widget.recipe!.imageUrl!,
+        imageUrl: recipe!.imageUrl!,
         fit: BoxFit.cover,
         height: 230,
         width: double.infinity,
@@ -365,11 +363,11 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
         const SizedBox(height: 8),
         Switch.adaptive(
           activeColor: const Color(0xFF1D8163),
-          value: widget.recipe?.isPublic == true,
+          value: recipe?.isPublic == true,
           onChanged:
               (val) => setState(() {
                 setState(() {
-                  widget.recipe = widget.recipe?.copyWith(isPublic: val);
+                  recipe = recipe?.copyWith(isPublic: val);
                 });
               }),
         ),
@@ -386,7 +384,7 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
           Expanded(
             child: OutlinedButton(
               onPressed: () {
-                log(widget.recipe.toString());
+                log(recipe.toString());
               },
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: Colors.red),
