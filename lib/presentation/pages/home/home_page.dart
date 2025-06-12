@@ -20,7 +20,7 @@ class HomePage extends ConsumerWidget {
       bottomNavigationBar: HomeBottomNavigationBar(),
       body: IndexedStack(
         index: currentIndex,
-        children: [SizedBox(), SizedBox(), MyPage()],
+        children: [MyRecipesPage(), SizedBox(), MyPage()],
       ),
       floatingActionButton:
           currentIndex == 0 || currentIndex == 1
