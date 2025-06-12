@@ -56,7 +56,7 @@ class GenerateRecipeState {
   }
 
   bool get canGenerate =>
-      (textInput.trim().isNotEmpty || selectedImageBytes != null) &&
+      (textInput.isNotEmpty || selectedImageBytes != null) &&
       !isGeneratingAndSaving;
 
   bool get hasImage => selectedImageBytes != null;
@@ -96,7 +96,7 @@ class GenerateRecipeViewModel extends AutoDisposeNotifier<GenerateRecipeState> {
     required String imageRecipePromptPath,
   }) async {
     try {
-      if (state.textInput.trim().isNotEmpty) {
+      if (state.textInput.isNotEmpty) {
         final validationResult = await ref
             .read(recipeGenerationRepositoryProvider)
             .validateUserInput(state.textInput);
@@ -116,8 +116,7 @@ class GenerateRecipeViewModel extends AutoDisposeNotifier<GenerateRecipeState> {
       var generatedRecipe = await ref
           .read(recipeGenerationRepositoryProvider)
           .generateRecipe(
-            textInput:
-                state.textInput.trim().isNotEmpty ? state.textInput : null,
+            textInput: state.textInput.isNotEmpty ? state.textInput : null,
             imageBytes: compressedImageBytes,
             preferences:
                 state.selectedPreferences.isNotEmpty
