@@ -27,8 +27,7 @@ class GenerateRecipePage extends ConsumerWidget {
 
     final state = ref.read(generateRecipeViewModelProvider);
 
-    if (state.errorKey != null) {
-      if (!context.mounted) return;
+    if (context.mounted && state.errorKey != null) {
       DialogueUtil.showAppCupertinoDialog(
         context: context,
         title: strings(context).generationFailed,

@@ -1,22 +1,30 @@
 import 'package:flutter/material.dart';
 
-import '../../presentation/pages/generate/generate_recipe_view_model.dart';
 import 'general_util.dart';
+
+enum RecipeValidationErrorKey {
+  titleRequired,
+  titleTooShort,
+  categoryRequired,
+  ingredientEmpty,
+  stepEmpty,
+  required,
+}
 
 class ErrorMapper {
   static String mapGenerateRecipeError(
     BuildContext context,
-    GenerateRecipeErrorKey key,
+    SaveRecipeErrorKey key,
   ) {
     final s = strings(context);
     switch (key) {
-      case GenerateRecipeErrorKey.invalidUserInput:
+      case SaveRecipeErrorKey.invalidUserInput:
         return s.invalidUserInputError;
-      case GenerateRecipeErrorKey.invalidImage:
+      case SaveRecipeErrorKey.invalidImage:
         return s.invalidImageError;
-      case GenerateRecipeErrorKey.generationFailed:
+      case SaveRecipeErrorKey.generationFailed:
         return s.generationFailedError;
-      case GenerateRecipeErrorKey.saveFailed:
+      case SaveRecipeErrorKey.saveFailed:
         return s.recipeSaveFailedError;
     }
   }
