@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cooki/core/utils/snackbar_util.dart';
 import 'package:cooki/domain/entity/app_user.dart';
 import 'package:cooki/presentation/pages/edit/recipe_edit_view_model.dart';
+import 'package:cooki/presentation/pages/edit/widgets/cook_info_row.dart';
 import 'package:cooki/presentation/pages/edit/widgets/number_input_box.dart';
 import 'package:cooki/presentation/pages/edit/widgets/input_list_widget.dart';
 import 'package:cooki/presentation/pages/edit/widgets/title_field_widget.dart';
@@ -192,7 +193,10 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
                     ),
 
                     const SizedBox(height: 12),
-                    _buildCookInfoRow(context),
+                    CookInfoRowWidget(
+                      caloriesController: _caloriesController,
+                      cookTimeController: _cookTimeController,
+                    ),
 
                     const SizedBox(height: 20),
                     if (recipe != null) TagChips(recipe!.tags),
@@ -258,30 +262,6 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildCookInfoRow(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildCookLabel(strings(context).beforeMinutesLabel),
-        NumberInputBox(controller: _cookTimeController),
-        _buildCookLabel(strings(context).afterMinutesLabel),
-        const SizedBox(width: 24),
-        NumberInputBox(controller: _caloriesController, isMinutes: false),
-        _buildCookLabel(strings(context).caloriesUnitAfter),
-      ],
-    );
-  }
-
-  Widget _buildCookLabel(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 8),
-      child: Text(
-        text,
-        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
       ),
     );
   }
