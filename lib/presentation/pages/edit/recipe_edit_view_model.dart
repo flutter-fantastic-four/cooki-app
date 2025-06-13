@@ -9,41 +9,37 @@ import '../../../data/repository/providers.dart';
 const int recipeListMaxItems = 30;
 
 class RecipeEditState {
-  final int ingredientsCount;
-  final int stepsCount;
   final String? selectedCategory;
   final bool isPublic;
   final bool isSaving;
   final SaveRecipeErrorKey? errorKey;
   final bool isEditingTitle;
+  final String? currentTitle;
 
   const RecipeEditState({
-    required this.ingredientsCount,
-    required this.stepsCount,
     this.selectedCategory,
     this.isPublic = false,
     this.isSaving = false,
     this.errorKey,
     this.isEditingTitle = false,
+    this.currentTitle,
   });
 
   RecipeEditState copyWith({
-    int? ingredientsCount,
-    int? stepsCount,
     String? selectedCategory,
     bool? isPublic,
     bool? isSaving,
     SaveRecipeErrorKey? errorKey,
     bool clearErrorKey = false,
     bool? isEditingTitle,
+    String? currentTitle,
   }) => RecipeEditState(
-    ingredientsCount: ingredientsCount ?? this.ingredientsCount,
-    stepsCount: stepsCount ?? this.stepsCount,
     selectedCategory: selectedCategory ?? this.selectedCategory,
     isPublic: isPublic ?? this.isPublic,
     isSaving: isSaving ?? this.isSaving,
     errorKey: clearErrorKey ? null : errorKey ?? this.errorKey,
     isEditingTitle: isEditingTitle ?? this.isEditingTitle,
+    currentTitle: currentTitle ?? this.currentTitle,
   );
 }
 
@@ -51,13 +47,10 @@ class RecipeEditViewModel
     extends AutoDisposeFamilyNotifier<RecipeEditState, Recipe?> {
   @override
   RecipeEditState build(Recipe? arg) {
-    final ing = arg?.ingredients.length ?? 1;
-    final stp = arg?.steps.length ?? 1;
     return RecipeEditState(
-      ingredientsCount: ing.clamp(1, recipeListMaxItems),
-      stepsCount: stp.clamp(1, recipeListMaxItems),
       selectedCategory: arg?.category,
       isPublic: arg?.isPublic ?? false,
+      currentTitle: arg?.recipeName,
     );
   }
 
@@ -125,32 +118,12 @@ class RecipeEditViewModel
     state = state.copyWith(isEditingTitle: true);
   }
 
-  void stopTitleEdit() {
+  void cancelTitleEdit() {
     state = state.copyWith(isEditingTitle: false);
   }
 
-  void addIngredient() {
-    if (state.ingredientsCount < recipeListMaxItems) {
-      state = state.copyWith(ingredientsCount: state.ingredientsCount + 1);
-    }
-  }
-
-  void removeIngredient(int index) {
-    if (state.ingredientsCount > 1) {
-      state = state.copyWith(ingredientsCount: state.ingredientsCount - 1);
-    }
-  }
-
-  void addStep() {
-    if (state.stepsCount < recipeListMaxItems) {
-      state = state.copyWith(stepsCount: state.stepsCount + 1);
-    }
-  }
-
-  void removeStep(int index) {
-    if (state.stepsCount > 1) {
-      state = state.copyWith(stepsCount: state.stepsCount - 1);
-    }
+  void confirmTitleEdit(String newTitle) {
+    state = state.copyWith(isEditingTitle: false, currentTitle: newTitle);
   }
 }
 

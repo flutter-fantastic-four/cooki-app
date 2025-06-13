@@ -43,6 +43,7 @@ class LoginPage extends ConsumerWidget {
     );
   }
 
+  // ignore: unused_element
   Widget _termsAgreementText() {
     return Column(
       children: [
