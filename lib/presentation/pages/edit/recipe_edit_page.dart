@@ -6,6 +6,7 @@ import 'package:cooki/domain/entity/app_user.dart';
 import 'package:cooki/presentation/pages/edit/recipe_edit_view_model.dart';
 import 'package:cooki/presentation/pages/edit/widgets/number_input_box.dart';
 import 'package:cooki/presentation/pages/edit/widgets/input_list_widget.dart';
+import 'package:cooki/presentation/pages/edit/widgets/title_field_widget.dart';
 import 'package:cooki/presentation/widgets/app_cached_image.dart';
 import 'package:cooki/presentation/widgets/category_selection_dialog.dart';
 import 'package:cooki/presentation/widgets/recipe_page_widgets.dart';
@@ -15,7 +16,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/constants/app_colors.dart';
-import '../../../core/ui_validators/recipe_validator.dart';
 import '../../../core/utils/dialogue_util.dart';
 import '../../../core/utils/error_mappers.dart';
 import '../../../core/utils/general_util.dart';
@@ -191,7 +191,10 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
                   children: [
                     // Title field
                     const SizedBox(height: 2),
-                    _buildTitleField(),
+                    TitleFieldWidget(
+                      recipe: recipe,
+                      titleController: _titleController,
+                    ),
 
                     const SizedBox(height: 12),
                     _buildCookInfoRow(context),
@@ -259,144 +262,6 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  void _confirmTitleEdit(RecipeEditViewModel vm) {
-    final error = RecipeValidator.validateTitle(_titleController.text);
-    if (error == null) {
-      vm.confirmTitleEdit(_titleController.text);
-    }
-  }
-
-  void _cancelTitleEdit(RecipeEditViewModel vm, String? confirmedTitle) {
-    _titleController.text = confirmedTitle ?? '';
-    vm.cancelTitleEdit();
-  }
-
-  Widget _buildTitleField() {
-    final vm = ref.read(recipeEditViewModelProvider(widget.recipe).notifier);
-    final isEditingTitle = ref.watch(
-      recipeEditViewModelProvider(
-        widget.recipe,
-      ).select((state) => state.isEditingTitle),
-    );
-
-    if (isEditingTitle) {
-      return Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Flexible(
-            child: IntrinsicWidth(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: MediaQuery.of(context).size.width - 100,
-                ),
-                child: TextFormField(
-                  controller: _titleController,
-                  // maxLength: RecipePageWidgets.titleMaxLength,
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: AppColors.greyScale800,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  autofocus: true,
-                  validator: (value) {
-                    final error = RecipeValidator.validateTitle(value);
-                    return error != null
-                        ? ErrorMapper.mapRecipeValidationError(context, error)
-                        : null;
-                  },
-                  onFieldSubmitted: (_) => _confirmTitleEdit(vm),
-                  decoration: InputDecoration(
-                    hintText: strings(context).recipeTitleHint,
-                    contentPadding: const EdgeInsets.symmetric(
-                      vertical: 12,
-                      horizontal: 14,
-                    ),
-                    filled: true,
-                    fillColor: AppColors.appBarGrey,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    errorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Colors.red),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 4),
-          _buildTitleActionButton(
-            onPressed: () => _confirmTitleEdit(vm),
-            icon: Icons.check,
-            color: AppColors.primary,
-          ),
-          _buildTitleActionButton(
-            onPressed: () {
-              final confirmedTitle =
-                  ref
-                      .read(recipeEditViewModelProvider(widget.recipe))
-                      .currentTitle;
-              _cancelTitleEdit(vm, confirmedTitle);
-            },
-            icon: Icons.close,
-            color: AppColors.greyScale500,
-          ),
-        ],
-      );
-    } else {
-      return Row(
-        children: [
-          Flexible(
-            child: Text(
-              _titleController.text.isNotEmpty
-                  ? _titleController.text
-                  : strings(context).recipeTitleHint,
-              style: RecipePageWidgets.sectionTitleStyle.copyWith(
-                color:
-                    _titleController.text.isNotEmpty
-                        ? Colors.black
-                        : Colors.grey,
-              ),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 2,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 3),
-            child: SizedBox.square(
-              dimension: 30,
-              child: IconButton(
-                padding: EdgeInsets.zero,
-                onPressed: () => vm.startTitleEdit(),
-                icon: const Icon(Icons.edit, size: 15),
-              ),
-            ),
-          ),
-        ],
-      );
-    }
-  }
-
-  Widget _buildTitleActionButton({
-    required VoidCallback onPressed,
-    required IconData icon,
-    Color? color,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 10),
-      child: SizedBox.square(
-        dimension: 27,
-        child: IconButton(
-          padding: EdgeInsets.zero,
-          onPressed: onPressed,
-          icon: Icon(icon, color: color, size: 18),
         ),
       ),
     );
