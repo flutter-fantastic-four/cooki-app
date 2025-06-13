@@ -35,13 +35,14 @@ abstract class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           elevation: 0,
-          backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
+          backgroundColor: AppColors.primary,
+          disabledBackgroundColor: AppColors.inactiveButton,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
           minimumSize: const Size(double.infinity, 50),
-          textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 17),
+          textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
         ),
       ),
 
@@ -52,7 +53,7 @@ abstract class AppTheme {
             foregroundColor: AppColors.primary,
             side: BorderSide(color: AppColors.primary),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(8),
             ),
             minimumSize: const Size(double.infinity, 50),
             textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 17),
