@@ -84,28 +84,24 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
   }
 
   void _addIngredient(RecipeEditViewModel vm) {
-    vm.addIngredient();
     setState(() {
       _ingredientsControllers.add(TextEditingController());
     });
   }
 
   void _addStep(RecipeEditViewModel vm) {
-    vm.addStep();
     setState(() {
       _stepsControllers.add(TextEditingController());
     });
   }
 
   void _removeIngredient(RecipeEditViewModel vm, int index) {
-    vm.removeIngredient(index);
     setState(() {
       _ingredientsControllers.removeAt(index).dispose();
     });
   }
 
   void _removeStep(RecipeEditViewModel vm, int index) {
-    vm.removeStep(index);
     setState(() {
       _stepsControllers.removeAt(index).dispose();
     });
@@ -156,7 +152,6 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
   @override
   Widget build(BuildContext context) {
     final vm = ref.read(recipeEditViewModelProvider(widget.recipe).notifier);
-    // final state = ref.watch(recipeEditViewModelProvider(widget.recipe));
 
     return GestureDetector(
       onTap: () {
