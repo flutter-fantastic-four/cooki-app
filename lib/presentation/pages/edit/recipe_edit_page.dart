@@ -159,7 +159,10 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
     // final state = ref.watch(recipeEditViewModelProvider(widget.recipe));
 
     return GestureDetector(
-      onTap: FocusScope.of(context).unfocus,
+      onTap: () {
+        FocusScope.of(context).unfocus;
+        FocusManager.instance.primaryFocus?.unfocus();
+      },
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.white,
@@ -441,6 +444,8 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
 
     return GestureDetector(
       onTap: () async {
+        FocusScope.of(context).unfocus();
+        FocusManager.instance.primaryFocus?.unfocus();
         final category = await showCategorySelectionDialog(context);
         if (category?.isNotEmpty == true) {
           vm.setCategory(category);
