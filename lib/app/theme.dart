@@ -53,7 +53,7 @@ abstract class AppTheme {
             foregroundColor: AppColors.primary,
             side: BorderSide(color: AppColors.primary),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(8),
             ),
             minimumSize: const Size(double.infinity, 50),
             textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 17),

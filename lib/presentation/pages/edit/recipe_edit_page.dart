@@ -540,9 +540,6 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
               },
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: Colors.red),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
               ),
               child: Text(
                 strings(context).deleteRecipeButton,
@@ -555,8 +552,6 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
             child: ElevatedButton(
               onPressed: isSaving ? null : _saveRecipe,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1D8163),
-                foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
