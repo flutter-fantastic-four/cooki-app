@@ -269,6 +269,18 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
     );
   }
 
+  void _confirmTitleEdit(RecipeEditViewModel vm) {
+    final error = RecipeValidator.validateTitle(_titleController.text);
+    if (error == null) {
+      vm.confirmTitleEdit(_titleController.text);
+    }
+  }
+
+  void _cancelTitleEdit(RecipeEditViewModel vm, String? confirmedTitle) {
+    _titleController.text = confirmedTitle ?? '';
+    vm.cancelTitleEdit();
+  }
+
   Widget _buildTitleField() {
     final vm = ref.read(recipeEditViewModelProvider(widget.recipe).notifier);
     final isEditingTitle = ref.watch(
@@ -302,14 +314,7 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
                         ? ErrorMapper.mapRecipeValidationError(context, error)
                         : null;
                   },
-                  onFieldSubmitted: (_) {
-                    final error = RecipeValidator.validateTitle(
-                      _titleController.text,
-                    );
-                    if (error == null) {
-                      vm.stopTitleEdit();
-                    }
-                  },
+                  onFieldSubmitted: (_) => _confirmTitleEdit(vm),
                   decoration: InputDecoration(
                     hintText: strings(context).recipeTitleHint,
                     contentPadding: const EdgeInsets.symmetric(
@@ -333,21 +338,17 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
           ),
           const SizedBox(width: 4),
           _buildTitleActionButton(
-            onPressed: () {
-              final error = RecipeValidator.validateTitle(
-                _titleController.text,
-              );
-              if (error == null) {
-                vm.stopTitleEdit();
-              }
-            },
+            onPressed: () => _confirmTitleEdit(vm),
             icon: Icons.check,
             color: AppColors.primary,
           ),
           _buildTitleActionButton(
             onPressed: () {
-              _titleController.text = recipe?.recipeName ?? '';
-              vm.stopTitleEdit();
+              final confirmedTitle =
+                  ref
+                      .read(recipeEditViewModelProvider(widget.recipe))
+                      .currentTitle;
+              _cancelTitleEdit(vm, confirmedTitle);
             },
             icon: Icons.close,
             color: AppColors.greyScale500,
@@ -363,9 +364,10 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
                   ? _titleController.text
                   : strings(context).recipeTitleHint,
               style: RecipePageWidgets.sectionTitleStyle.copyWith(
-                color: _titleController.text.isNotEmpty
-                    ? Colors.black
-                    : Colors.grey,
+                color:
+                    _titleController.text.isNotEmpty
+                        ? Colors.black
+                        : Colors.grey,
               ),
               overflow: TextOverflow.ellipsis,
               maxLines: 2,

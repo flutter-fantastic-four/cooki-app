@@ -16,6 +16,7 @@ class RecipeEditState {
   final bool isSaving;
   final SaveRecipeErrorKey? errorKey;
   final bool isEditingTitle;
+  final String? currentTitle;
 
   const RecipeEditState({
     required this.ingredientsCount,
@@ -25,6 +26,7 @@ class RecipeEditState {
     this.isSaving = false,
     this.errorKey,
     this.isEditingTitle = false,
+    this.currentTitle,
   });
 
   RecipeEditState copyWith({
@@ -36,6 +38,7 @@ class RecipeEditState {
     SaveRecipeErrorKey? errorKey,
     bool clearErrorKey = false,
     bool? isEditingTitle,
+    String? currentTitle,
   }) => RecipeEditState(
     ingredientsCount: ingredientsCount ?? this.ingredientsCount,
     stepsCount: stepsCount ?? this.stepsCount,
@@ -44,6 +47,7 @@ class RecipeEditState {
     isSaving: isSaving ?? this.isSaving,
     errorKey: clearErrorKey ? null : errorKey ?? this.errorKey,
     isEditingTitle: isEditingTitle ?? this.isEditingTitle,
+    currentTitle: currentTitle ?? this.currentTitle,
   );
 }
 
@@ -58,6 +62,7 @@ class RecipeEditViewModel
       stepsCount: stp.clamp(1, recipeListMaxItems),
       selectedCategory: arg?.category,
       isPublic: arg?.isPublic ?? false,
+      currentTitle: arg?.recipeName,
     );
   }
 
@@ -125,8 +130,12 @@ class RecipeEditViewModel
     state = state.copyWith(isEditingTitle: true);
   }
 
-  void stopTitleEdit() {
+  void cancelTitleEdit() {
     state = state.copyWith(isEditingTitle: false);
+  }
+
+  void confirmTitleEdit(String newTitle) {
+    state = state.copyWith(isEditingTitle: false, currentTitle: newTitle);
   }
 
   void addIngredient() {
