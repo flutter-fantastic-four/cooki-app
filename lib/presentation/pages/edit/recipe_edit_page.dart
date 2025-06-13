@@ -357,16 +357,20 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
     } else {
       return Row(
         children: [
-          Text(
-            _titleController.text.isNotEmpty
-                ? _titleController.text
-                : strings(context).recipeTitleHint,
-            style: RecipePageWidgets.sectionTitleStyle.copyWith(
-              color:
-                  _titleController.text.isNotEmpty ? Colors.black : Colors.grey,
+          Flexible(
+            child: Text(
+              _titleController.text.isNotEmpty
+                  ? _titleController.text
+                  : strings(context).recipeTitleHint,
+              style: RecipePageWidgets.sectionTitleStyle.copyWith(
+                color: _titleController.text.isNotEmpty
+                    ? Colors.black
+                    : Colors.grey,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
             ),
           ),
-          // const SizedBox(width: 7),
           Padding(
             padding: const EdgeInsets.only(bottom: 3),
             child: SizedBox.square(
