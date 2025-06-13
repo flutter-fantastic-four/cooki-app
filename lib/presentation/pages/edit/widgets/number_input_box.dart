@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 
 import '../../../../core/ui_validators/recipe_validator.dart';
 import '../../../../core/utils/error_mappers.dart';
+import '../../../widgets/recipe_page_widgets.dart';
 
 class NumberInputBox extends StatelessWidget {
   final TextEditingController controller;
@@ -42,13 +43,13 @@ class NumberInputBox extends StatelessWidget {
             counterText: '',
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 9,
-              vertical: 8,
+              vertical: 6,
             ),
             filled: true,
             fillColor: AppColors.greyScale50,
             border: WidgetStateInputBorder.resolveWith((_) {
               return OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: RecipePageWidgets.inputBorderRadius,
                 borderSide: BorderSide.none,
               );
             }),

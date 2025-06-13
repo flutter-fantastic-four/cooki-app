@@ -194,26 +194,7 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
                             _buildTitleField(),
 
                             const SizedBox(height: 12),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildCookLabel(
-                                  strings(context).beforeMinutesLabel,
-                                ),
-                                NumberInputBox(controller: _cookTimeController),
-                                _buildCookLabel(
-                                  strings(context).afterMinutesLabel,
-                                ),
-                                const SizedBox(width: 24),
-                                NumberInputBox(
-                                  controller: _caloriesController,
-                                  isMinutes: false,
-                                ),
-                                _buildCookLabel(
-                                  strings(context).caloriesUnitAfter,
-                                ),
-                              ],
-                            ),
+                            _buildCookInfoRow(context),
 
                             const SizedBox(height: 20),
                             if (recipe != null) TagChips(recipe!.tags),
@@ -420,9 +401,23 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
     );
   }
 
+  Widget _buildCookInfoRow(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildCookLabel(strings(context).beforeMinutesLabel),
+        NumberInputBox(controller: _cookTimeController),
+        _buildCookLabel(strings(context).afterMinutesLabel),
+        const SizedBox(width: 24),
+        NumberInputBox(controller: _caloriesController, isMinutes: false),
+        _buildCookLabel(strings(context).caloriesUnitAfter),
+      ],
+    );
+  }
+
   Widget _buildCookLabel(String text) {
     return Padding(
-      padding: const EdgeInsets.only(top: 10),
+      padding: const EdgeInsets.only(top: 8),
       child: Text(
         text,
         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -449,7 +444,7 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
         decoration: BoxDecoration(
           color: AppColors.appBarGrey,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: RecipePageWidgets.inputBorderRadius,
         ),
         child: Row(
           children: [

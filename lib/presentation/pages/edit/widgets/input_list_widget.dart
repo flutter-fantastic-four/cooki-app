@@ -75,7 +75,7 @@ class InputListWidget extends StatelessWidget {
                                 filled: true,
                                 fillColor: AppColors.appBarGrey,
                                 border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: RecipePageWidgets.inputBorderRadius,
                                   borderSide: BorderSide.none,
                                 ),
                                 // errorBorder: OutlineInputBorder(
