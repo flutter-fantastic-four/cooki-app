@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cooki/data/repository/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -17,6 +19,7 @@ class UserGlobalViewModel extends Notifier<AppUser?> {
 
   Future<void> saveUserToDatabase() async {
     if (state == null) return;
+    print(state!.profileImage);
     await ref.read(userRepositoryProvider).saveUserToDatabase(state!);
   }
 
@@ -24,10 +27,10 @@ class UserGlobalViewModel extends Notifier<AppUser?> {
     state = state!.copyWith(name: name);
   }
 
-  void setProfileImage(String profileImage) {
-    state = state!.copyWith(profileImage: profileImage);
+  Future<void> setProfileImage(File profileImage) async {
+    final url = await ref.read(userRepositoryProvider).changeProfileImage(state!, profileImage);
+    state = state!.copyWith(profileImage: url);
   }
 }
 
-final userGlobalViewModelProvider =
-    NotifierProvider<UserGlobalViewModel, AppUser?>(UserGlobalViewModel.new);
+final userGlobalViewModelProvider = NotifierProvider<UserGlobalViewModel, AppUser?>(UserGlobalViewModel.new);

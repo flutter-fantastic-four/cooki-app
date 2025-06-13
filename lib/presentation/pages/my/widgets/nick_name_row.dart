@@ -15,7 +15,7 @@ class NickNameRow extends ConsumerWidget {
           Text(strings(context).nickName, style: TextStyle(fontSize: 16)),
           Spacer(),
           Text(ref.read(userGlobalViewModelProvider)!.name, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          Icon(Icons.chevron_right),
+          GestureDetector(child: Icon(Icons.edit_outlined)),
         ],
       ),
     );

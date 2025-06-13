@@ -5,7 +5,6 @@ import '../../data/repository/auth_repository.dart';
 import '../../data/repository/user_repository.dart';
 import '../data_source/providers.dart';
 import 'image_download_repository.dart';
-import 'image_repository.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>(
   (ref) => AuthRepositoryImpl(
@@ -16,16 +15,10 @@ final authRepositoryProvider = Provider<AuthRepository>(
   ),
 );
 
-final authStateChangesProvider = StreamProvider<String?>(
-  (ref) => ref.read(authRepositoryProvider).authStateChanges(),
-);
+final authStateChangesProvider = StreamProvider<String?>((ref) => ref.read(authRepositoryProvider).authStateChanges());
 
 final userRepositoryProvider = Provider<UserRepository>(
-  (ref) => UserRepositoryImpl(ref.read(userFirestoreDataSourceProvider)),
-);
-
-final imageRepositoryProvider = Provider<ImageRepository>(
-  (ref) => ImageRepositoryImpl(ref.read(imageStorageDataSourceProvider)),
+  (ref) => UserRepositoryImpl(ref.read(userFirestoreDataSourceProvider), ref.read(imageStorageDataSourceProvider)),
 );
 
 final recipeGenerationRepositoryProvider = Provider<RecipeGenerationRepository>((ref) {
@@ -33,5 +26,5 @@ final recipeGenerationRepositoryProvider = Provider<RecipeGenerationRepository>(
 });
 
 final imageDownloadRepositoryProvider = Provider<ImageDownloadRepository>(
-      (ref) => ImageDownloadRepositoryImpl(ref.read(imageDownloadDataSourceProvider)),
+  (ref) => ImageDownloadRepositoryImpl(ref.read(imageDownloadDataSourceProvider)),
 );

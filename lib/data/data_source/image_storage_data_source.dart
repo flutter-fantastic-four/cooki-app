@@ -12,9 +12,7 @@ class FirebaseImageStorageDataSource implements ImageStorageDataSource {
 
   @override
   Future<String> uploadImage(File imageFile, String uid, String folder) async {
-    final ref = _storage.ref().child(
-      '$folder/$uid/${DateTime.now().millisecondsSinceEpoch}_${imageFile.path.split('/').last}',
-    );
+    final ref = _storage.ref().child('$folder/$uid/${DateTime.now().millisecondsSinceEpoch}_${imageFile.path.split('/').last}');
 
     await ref.putFile(imageFile);
     return await ref.getDownloadURL();
