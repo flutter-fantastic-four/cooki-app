@@ -141,3 +141,4 @@ app.*.map.json
 firebase.json
 
 lib/gen
+macos/Runner/GoogleService-Info.plist

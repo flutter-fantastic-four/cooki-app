@@ -1,0 +1,44 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../dto/recipe_firestore_dto.dart';
+
+abstract class RecipeDataSource {
+  Future<String> saveRecipe(RecipeFirestoreDto recipe);
+
+  Future<void> editRecipe(RecipeFirestoreDto recipeDto);
+
+  Future<List<RecipeFirestoreDto>> getAllRecipes();
+}
+
+class RecipeFirestoreDataSource implements RecipeDataSource {
+  final FirebaseFirestore _firestore;
+
+  RecipeFirestoreDataSource(this._firestore);
+
+  @override
+  Future<String> saveRecipe(RecipeFirestoreDto recipeDto) async {
+    final docRef = await _firestore
+        .collection('recipes')
+        .add(recipeDto.toMap());
+    return docRef.id;
+  }
+
+  @override
+  Future<void> editRecipe(RecipeFirestoreDto recipeDto) async {
+    await _firestore
+        .collection('recipes')
+        .doc(recipeDto.id)
+        .set(recipeDto.toMap());
+  }
+
+  @override
+  Future<List<RecipeFirestoreDto>> getAllRecipes() async {
+    final querySnapshot = await _firestore
+        .collection('recipes')
+        .orderBy('createdAt', descending: true)
+        .get();
+
+    return querySnapshot.docs
+        .map((doc) => RecipeFirestoreDto.fromMap(doc.id, doc.data()))
+        .toList();
+  }
+}
