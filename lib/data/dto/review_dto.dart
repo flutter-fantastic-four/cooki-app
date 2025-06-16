@@ -3,7 +3,6 @@ import '../../domain/entity/review.dart';
 
 class ReviewDto {
   final String id;
-  final String recipeId;
   final String reviewText;
   final int rating;
   final List<String> imageUrls;
@@ -16,7 +15,6 @@ class ReviewDto {
 
   const ReviewDto({
     required this.id,
-    required this.recipeId,
     required this.reviewText,
     required this.rating,
     required this.imageUrls,
@@ -31,7 +29,6 @@ class ReviewDto {
   factory ReviewDto.fromMap(String id, Map<String, dynamic> map) {
     return ReviewDto(
       id: id,
-      recipeId: map['recipeId'] ?? '',
       reviewText: map['reviewText'] ?? '',
       rating: map['rating'] ?? 1,
       imageUrls: List<String>.from(map['imageUrls'] ?? []),
@@ -46,7 +43,6 @@ class ReviewDto {
 
   Map<String, dynamic> toMap() {
     return {
-      'recipeId': recipeId,
       'reviewText': reviewText,
       'rating': rating,
       'imageUrls': imageUrls,
@@ -62,7 +58,6 @@ class ReviewDto {
   factory ReviewDto.fromEntity(Review review) {
     return ReviewDto(
       id: review.id,
-      recipeId: review.recipeId,
       reviewText: review.reviewText,
       rating: review.rating,
       imageUrls: review.imageUrls,
@@ -80,7 +75,6 @@ class ReviewDto {
   Review toEntity() {
     return Review(
       id: id,
-      recipeId: recipeId,
       reviewText: reviewText,
       rating: rating,
       imageUrls: imageUrls,

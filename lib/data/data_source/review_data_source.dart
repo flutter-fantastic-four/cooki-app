@@ -5,11 +5,20 @@ import '../dto/review_dto.dart';
 enum ReviewSortType { dateDescending, ratingAscending, ratingDescending }
 
 abstract class ReviewDataSource {
-  Future<String> saveReview(ReviewDto review);
+  Future<String> saveReview({
+    required String recipeId,
+    required ReviewDto reviewDto,
+  });
 
-  Future<void> editReview(ReviewDto reviewDto);
+  Future<void> editReview({
+    required String recipeId,
+    required ReviewDto reviewDto,
+  });
 
-  Future<void> deleteReview(String reviewId);
+  Future<void> deleteReview({
+    required String recipeId,
+    required String reviewId,
+  });
 
   Future<List<ReviewDto>> getReviewsByRecipeId(
     String recipeId, {
@@ -24,27 +33,42 @@ class ReviewFirestoreDataSource implements ReviewDataSource {
   ReviewFirestoreDataSource(this._firestore);
 
   @override
-  Future<String> saveReview(ReviewDto reviewDto) async {
+  Future<String> saveReview({
+    required String recipeId,
+    required ReviewDto reviewDto,
+  }) async {
     final docRef = await _firestore
+        .collection('recipes')
+        .doc(recipeId)
         .collection('reviews')
         .add(reviewDto.toMap());
     return docRef.id;
   }
 
   @override
-  Future<void> editReview(ReviewDto reviewDto) async {
+  Future<void> editReview({
+    required String recipeId,
+    required ReviewDto reviewDto,
+  }) async {
     await _firestore
+        .collection('recipes')
+        .doc(recipeId)
         .collection('reviews')
         .doc(reviewDto.id)
         .update(reviewDto.toMap());
   }
 
   @override
-  Future<void> deleteReview(String reviewId) async {
-    await _firestore.collection('reviews').doc(reviewId).update({
-      'deleted': true,
-      'updatedAt': FieldValue.serverTimestamp(),
-    });
+  Future<void> deleteReview({
+    required String recipeId,
+    required String reviewId,
+  }) async {
+    await _firestore
+        .collection('recipes')
+        .doc(recipeId)
+        .collection('reviews')
+        .doc(reviewId)
+        .update({'isDeleted': true, 'updatedAt': FieldValue.serverTimestamp()});
   }
 
   @override
@@ -54,8 +78,9 @@ class ReviewFirestoreDataSource implements ReviewDataSource {
     int? limit,
   }) async {
     var query = _firestore
+        .collection('recipes')
+        .doc(recipeId)
         .collection('reviews')
-        .where('recipeId', isEqualTo: recipeId)
         .where('isDeleted', isEqualTo: false);
 
     switch (sortType) {
