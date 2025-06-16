@@ -81,12 +81,19 @@ class WriteReviewPage extends ConsumerWidget {
     final ImagePicker picker = ImagePicker();
 
     if (source == ImageSource.camera) {
-      final XFile? image = await picker.pickImage(source: source);
+      final XFile? image = await picker.pickImage(
+        source: source,
+        maxHeight: 1080,
+        maxWidth: 1080,
+      );
       if (image != null) {
         vm.addImages([File(image.path)]);
       }
     } else {
-      final List<XFile> images = await picker.pickMultiImage();
+      final List<XFile> images = await picker.pickMultiImage(
+        maxHeight: 1080,
+        maxWidth: 1080,
+      );
       if (images.isNotEmpty) {
         final imageFiles = images.map((xFile) => File(xFile.path)).toList();
         vm.addImages(imageFiles);
