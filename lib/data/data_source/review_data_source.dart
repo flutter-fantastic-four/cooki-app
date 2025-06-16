@@ -41,7 +41,10 @@ class ReviewFirestoreDataSource implements ReviewDataSource {
 
   @override
   Future<void> deleteReview(String reviewId) async {
-    await _firestore.collection('reviews').doc(reviewId).delete();
+    await _firestore.collection('reviews').doc(reviewId).update({
+      'deleted': true,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
   }
 
   @override
@@ -52,7 +55,8 @@ class ReviewFirestoreDataSource implements ReviewDataSource {
   }) async {
     var query = _firestore
         .collection('reviews')
-        .where('recipeId', isEqualTo: recipeId);
+        .where('recipeId', isEqualTo: recipeId)
+        .where('isDeleted', isEqualTo: false);
 
     switch (sortType) {
       case ReviewSortType.dateDescending:

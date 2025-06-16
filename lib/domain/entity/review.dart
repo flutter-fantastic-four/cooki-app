@@ -9,6 +9,7 @@ class Review {
   final String userId;
   final String userName;
   final String? userImageUrl;
+  final bool isDeleted;
 
   Review({
     required this.id,
@@ -21,6 +22,7 @@ class Review {
     required this.userId,
     required this.userName,
     this.userImageUrl,
+    this.isDeleted = false,
   }) : createdAt = createdAt ?? DateTime.now();
 
   Review copyWith({
@@ -34,6 +36,7 @@ class Review {
     String? userId,
     String? userName,
     String? userImageUrl,
+    bool? isDeleted,
   }) {
     return Review(
       id: id ?? this.id,
@@ -46,6 +49,7 @@ class Review {
       userId: userId ?? this.userId,
       userName: userName ?? this.userName,
       userImageUrl: userImageUrl ?? this.userImageUrl,
+      isDeleted: isDeleted ?? this.isDeleted,
     );
   }
 

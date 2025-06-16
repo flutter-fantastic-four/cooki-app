@@ -12,6 +12,7 @@ class ReviewDto {
   final String userId;
   final String userName;
   final String? userImageUrl;
+  final bool isDeleted;
 
   const ReviewDto({
     required this.id,
@@ -24,6 +25,7 @@ class ReviewDto {
     required this.userId,
     required this.userName,
     this.userImageUrl,
+    this.isDeleted = false,
   });
 
   factory ReviewDto.fromMap(String id, Map<String, dynamic> map) {
@@ -38,6 +40,7 @@ class ReviewDto {
       userId: map['userId'] ?? '',
       userName: map['userName'] ?? '',
       userImageUrl: map['userImageUrl'],
+      isDeleted: map['isDeleted'] ?? false,
     );
   }
 
@@ -52,6 +55,7 @@ class ReviewDto {
       'userId': userId,
       'userName': userName,
       'userImageUrl': userImageUrl,
+      'isDeleted': isDeleted,
     };
   }
 
@@ -69,6 +73,7 @@ class ReviewDto {
       userId: review.userId,
       userName: review.userName,
       userImageUrl: review.userImageUrl,
+      isDeleted: review.isDeleted,
     );
   }
 
@@ -84,6 +89,7 @@ class ReviewDto {
       userId: userId,
       userName: userName,
       userImageUrl: userImageUrl,
+      isDeleted: isDeleted,
     );
   }
 }
