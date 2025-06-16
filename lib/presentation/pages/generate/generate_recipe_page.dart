@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/constants/app_constants.dart';
+import '../../user_global_view_model.dart';
 import '../../widgets/input_decorations.dart';
 import 'generate_recipe_view_model.dart';
 
@@ -16,30 +17,30 @@ class GenerateRecipePage extends ConsumerWidget {
   const GenerateRecipePage({super.key});
 
   Future<void> _generateRecipe(WidgetRef ref, BuildContext context) async {
-    await ref
+    final savedRecipe = await ref
         .read(generateRecipeViewModelProvider.notifier)
-        .generateRecipe(
+        .generateAndSaveRecipe(
           textOnlyRecipePromptPath: strings(context).textOnlyRecipePromptPath,
           imageRecipePromptPath: strings(context).imageRecipePromptPath,
+          user: ref.read(userGlobalViewModelProvider)!,
         );
+
     final state = ref.read(generateRecipeViewModelProvider);
 
-    if (state.errorKey != null) {
-      if (!context.mounted) return;
+    if (context.mounted && state.errorKey != null) {
       DialogueUtil.showAppCupertinoDialog(
         context: context,
-        title: strings(context).generationFailed,
+        title: strings(context).generationFailedTitle,
         content: ErrorMapper.mapGenerateRecipeError(context, state.errorKey!),
       );
       ref.read(generateRecipeViewModelProvider.notifier).clearError();
-    } else if (state.generatedRecipe != null) {
+      return;
+    }
+
+    if (savedRecipe != null) {
       if (!context.mounted) return;
       Navigator.of(context).push(
-        MaterialPageRoute(
-          builder:
-              (context) =>
-                  RecipeEditPage(generatedRecipe: state.generatedRecipe),
-        ),
+        MaterialPageRoute(builder: (_) => RecipeEditPage(recipe: savedRecipe)),
       );
     }
   }
@@ -69,7 +70,7 @@ class GenerateRecipePage extends ConsumerWidget {
                   state.canGenerate
                       ? () => _generateRecipe(ref, context)
                       : null,
-              isLoading: state.isGenerating,
+              isLoading: state.isGeneratingAndSaving,
             );
           },
         ),
@@ -116,7 +117,7 @@ class GenerateRecipePage extends ConsumerWidget {
           onChanged:
               (text) => ref
                   .read(generateRecipeViewModelProvider.notifier)
-                  .updateTextInput(text),
+                  .updateTextInput(text.trim()),
           decoration: getInputDecoration(
             strings(context).generateTextFieldHint,
           ),

@@ -1,6 +1,5 @@
 import 'package:cooki/app/enum/sign_in_method.dart';
 import 'package:cooki/data/dto/user_dto.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../domain/entity/app_user.dart';
 import '../data_source/firebase_auth_data_source.dart';

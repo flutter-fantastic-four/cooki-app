@@ -21,6 +21,7 @@ final firebaseAuthProvider = Provider((ref) => FirebaseAuth.instance);
 final firebaseFunctionsProvider = Provider((ref) => FirebaseFunctions.instance);
 final firestoreProvider = Provider((ref) => FirebaseFirestore.instance);
 final firebaseAIProvider = Provider((ref) => FirebaseAI.googleAI());
+final firebaseStorageProvider = Provider((ref) => FirebaseStorage.instance);
 
 // oauth_providers
 final googleSignInProvider = Provider((ref) => GoogleSignIn());
@@ -56,7 +57,7 @@ final userFirestoreDataSourceProvider = Provider<UserDataSource>(
 );
 
 final imageStorageDataSourceProvider = Provider<ImageStorageDataSource>(
-  (ref) => FirebaseImageStorageDataSource(FirebaseStorage.instance),
+  (ref) => FirebaseImageStorageDataSource(ref.read(firebaseStorageProvider)),
 );
 
 final recipeGenerationDataSourceProvider = Provider<RecipeGenerationDataSource>(
@@ -64,5 +65,5 @@ final recipeGenerationDataSourceProvider = Provider<RecipeGenerationDataSource>(
 );
 
 final imageDownloadDataSourceProvider = Provider<ImageDownloadDataSource>(
-      (ref) => DioImageDownloadDataSource(ref.read(dioProvider)),
+  (ref) => DioImageDownloadDataSource(ref.read(dioProvider)),
 );

@@ -9,10 +9,12 @@ class Recipe {
   final List<String> tags;
   final String userId;
   final String userName;
-  final String userProfileImage;
+  final String? userProfileImage;
   final bool isPublic;
   final String? imageUrl;
   final DateTime createdAt;
+  final DateTime? updatedAt;
+  final String? promptInput;
 
   Recipe({
     required this.id,
@@ -25,13 +27,16 @@ class Recipe {
     required this.tags,
     required this.userId,
     required this.userName,
-    required this.userProfileImage,
+    this.userProfileImage,
     required this.isPublic,
     this.imageUrl,
     DateTime? createdAt,
+    this.updatedAt,
+    this.promptInput,
   }) : createdAt = createdAt ?? DateTime.now();
 
   Recipe copyWith({
+    String? id,
     String? recipeName,
     List<String>? ingredients,
     List<String>? steps,
@@ -45,22 +50,26 @@ class Recipe {
     bool? isPublic,
     String? imageUrl,
     DateTime? createdAt,
+    DateTime? updatedAt,
+    String? promptInput,
   }) {
     return Recipe(
-      id: id,
+      id: id ?? this.id,
       recipeName: recipeName ?? this.recipeName,
-      ingredients: ingredients ?? List.from(this.ingredients),
-      steps: steps ?? List.from(this.steps),
+      ingredients: ingredients ?? this.ingredients,
+      steps: steps ?? this.steps,
       cookTime: cookTime ?? this.cookTime,
       calories: calories ?? this.calories,
       category: category ?? this.category,
-      tags: tags ?? List.from(this.tags),
+      tags: tags ?? this.tags,
       userId: userId ?? this.userId,
       userName: userName ?? this.userName,
       userProfileImage: userProfileImage ?? this.userProfileImage,
       isPublic: isPublic ?? this.isPublic,
       imageUrl: imageUrl ?? this.imageUrl,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      promptInput: promptInput ?? this.promptInput,
     );
   }
 }

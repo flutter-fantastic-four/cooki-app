@@ -1,44 +1,43 @@
 import 'dart:typed_data';
 import 'package:cooki/core/utils/general_util.dart';
 import 'package:cooki/core/utils/logger.dart';
+import 'package:cooki/domain/entity/app_user.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/utils/error_mappers.dart';
 import '../../../data/repository/providers.dart';
 import '../../../domain/entity/generated_recipe.dart';
-
-enum GenerateRecipeErrorKey { invalidUserInput, invalidImage, generationFailed }
+import '../../../domain/entity/recipe.dart';
 
 class GenerateRecipeState {
-  final bool isGenerating;
+  final bool isGeneratingAndSaving;
   final bool isLoadingImage;
-  final GenerateRecipeErrorKey? errorKey;
+  final SaveRecipeErrorKey? errorKey;
   final Uint8List? selectedImageBytes;
   final String textInput;
   final Set<String> selectedPreferences;
-  final GeneratedRecipe? generatedRecipe;
 
   const GenerateRecipeState({
-    this.isGenerating = false,
+    this.isGeneratingAndSaving = false,
     this.isLoadingImage = false,
     this.errorKey,
     this.selectedImageBytes,
     this.textInput = '',
     this.selectedPreferences = const {},
-    this.generatedRecipe,
   });
 
   GenerateRecipeState copyWith({
-    bool? isGenerating,
+    bool? isGeneratingAndSaving,
     bool? isLoadingImage,
-    GenerateRecipeErrorKey? errorKey,
+    SaveRecipeErrorKey? errorKey,
     bool clearErrorKey = false,
     Uint8List? selectedImageBytes,
     bool clearSelectedImageBytes = false,
     String? textInput,
     Set<String>? selectedPreferences,
-    GeneratedRecipe? generatedRecipe,
   }) {
     return GenerateRecipeState(
-      isGenerating: isGenerating ?? this.isGenerating,
+      isGeneratingAndSaving:
+          isGeneratingAndSaving ?? this.isGeneratingAndSaving,
       isLoadingImage: isLoadingImage ?? this.isLoadingImage,
       errorKey: clearErrorKey ? null : errorKey ?? this.errorKey,
       selectedImageBytes:
@@ -47,13 +46,12 @@ class GenerateRecipeState {
               : selectedImageBytes ?? this.selectedImageBytes,
       textInput: textInput ?? this.textInput,
       selectedPreferences: selectedPreferences ?? this.selectedPreferences,
-      generatedRecipe: generatedRecipe ?? this.generatedRecipe,
     );
   }
 
   bool get canGenerate =>
-      (textInput.trim().isNotEmpty || selectedImageBytes != null) &&
-      !isGenerating;
+      (textInput.isNotEmpty || selectedImageBytes != null) &&
+      !isGeneratingAndSaving;
 
   bool get hasImage => selectedImageBytes != null;
 }
@@ -64,37 +62,55 @@ class GenerateRecipeViewModel extends AutoDisposeNotifier<GenerateRecipeState> {
     return const GenerateRecipeState();
   }
 
-  Future<void> generateRecipe({
+  Future<Recipe?> generateAndSaveRecipe({
+    required String textOnlyRecipePromptPath,
+    required String imageRecipePromptPath,
+    required AppUser user,
+  }) async {
+    state = state.copyWith(isGeneratingAndSaving: true);
+
+    try {
+      final generated = await _generateRecipe(
+        textOnlyRecipePromptPath: textOnlyRecipePromptPath,
+        imageRecipePromptPath: imageRecipePromptPath,
+      );
+      if (generated == null) return null;
+
+      final saved = await _saveRecipe(generatedRecipe: generated, user: user);
+      if (saved == null) return null;
+
+      return saved;
+    } finally {
+      state = state.copyWith(isGeneratingAndSaving: false);
+    }
+  }
+
+  Future<GeneratedRecipe?> _generateRecipe({
     required String textOnlyRecipePromptPath,
     required String imageRecipePromptPath,
   }) async {
-    if (!state.canGenerate) return;
-
-    state = state.copyWith(isGenerating: true);
     try {
-      // Validate input first if text is provided
-      if (state.textInput.trim().isNotEmpty) {
+      if (state.textInput.isNotEmpty) {
         final validationResult = await ref
             .read(recipeGenerationRepositoryProvider)
             .validateUserInput(state.textInput);
 
         if (!validationResult.isValid) {
           state = state.copyWith(
-            isGenerating: false,
-            errorKey: GenerateRecipeErrorKey.invalidUserInput,
+            errorKey: SaveRecipeErrorKey.invalidUserInput,
           );
-          return;
+          return null;
         }
       }
 
       final compressedImageBytes = await GeneralUtil.compressImageBytes(
         state.selectedImageBytes,
       );
+
       var generatedRecipe = await ref
           .read(recipeGenerationRepositoryProvider)
           .generateRecipe(
-            textInput:
-                state.textInput.trim().isNotEmpty ? state.textInput : null,
+            textInput: state.textInput.isNotEmpty ? state.textInput : null,
             imageBytes: compressedImageBytes,
             preferences:
                 state.selectedPreferences.isNotEmpty
@@ -103,29 +119,74 @@ class GenerateRecipeViewModel extends AutoDisposeNotifier<GenerateRecipeState> {
             textOnlyRecipePromptPath: textOnlyRecipePromptPath,
             imageRecipePromptPath: imageRecipePromptPath,
           );
+
       if (generatedRecipe.isError) {
         state = state.copyWith(
-          isGenerating: false,
           errorKey:
               state.selectedImageBytes != null
-                  ? GenerateRecipeErrorKey.invalidImage
-                  : GenerateRecipeErrorKey.generationFailed,
+                  ? SaveRecipeErrorKey.invalidImage
+                  : SaveRecipeErrorKey.generationFailed,
         );
-      } else {
-        generatedRecipe = generatedRecipe.copyWith(
-          imageBytes: state.selectedImageBytes,
-        );
-        state = state.copyWith(
-          isGenerating: false,
-          generatedRecipe: generatedRecipe,
-        );
+        return null;
       }
+      return generatedRecipe.copyWith(imageBytes: state.selectedImageBytes);
     } catch (e, stack) {
       logError(e, stack);
-      state = state.copyWith(
-        isGenerating: false,
-        errorKey: GenerateRecipeErrorKey.generationFailed,
+      state = state.copyWith(errorKey: SaveRecipeErrorKey.generationFailed);
+      return null;
+    }
+  }
+
+  Future<Recipe?> _saveRecipe({
+    required GeneratedRecipe generatedRecipe,
+    required AppUser user,
+  }) async {
+    try {
+      String? imageUrl;
+      if (state.selectedImageBytes != null) {
+        imageUrl = await ref
+            .read(recipeRepositoryProvider)
+            .uploadImageBytes(
+              state.selectedImageBytes!,
+              user.id,
+              'recipe_images',
+            );
+      }
+
+      final buffer = StringBuffer()
+        ..writeln('[Text Input]')
+        ..writeln(state.textInput.trim())
+        ..writeln()
+        ..writeln('[Preferences]')
+        ..writeln(state.selectedPreferences.join(', '));
+      final promptInputFormatted = buffer.toString();
+
+      final recipe = Recipe(
+        id: '',
+        // Firestore will generate
+        recipeName: generatedRecipe.recipeName,
+        ingredients: generatedRecipe.ingredients,
+        steps: generatedRecipe.steps,
+        cookTime: generatedRecipe.cookTime,
+        calories: generatedRecipe.calories,
+        category: generatedRecipe.category,
+        tags: generatedRecipe.tags,
+        userId: user.id,
+        userName: user.name,
+        userProfileImage: user.profileImage,
+        isPublic: false,
+        imageUrl: imageUrl,
+        promptInput: promptInputFormatted,
       );
+
+      final recipeId = await ref
+          .read(recipeRepositoryProvider)
+          .saveRecipe(recipe);
+      return recipe.copyWith(id: recipeId);
+    } catch (e, stack) {
+      logError(e, stack);
+      state = state.copyWith(errorKey: SaveRecipeErrorKey.saveFailed);
+      return null;
     }
   }
 

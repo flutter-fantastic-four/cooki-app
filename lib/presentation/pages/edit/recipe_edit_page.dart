@@ -1,9 +1,12 @@
-import 'dart:developer';
-import 'dart:typed_data';
-
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cooki/core/utils/snackbar_util.dart';
+import 'package:cooki/domain/entity/app_user.dart';
 import 'package:cooki/presentation/pages/edit/recipe_edit_view_model.dart';
-import 'package:cooki/presentation/pages/edit/widgets/number_input_box.dart';
-import 'package:cooki/presentation/pages/edit/widgets/recipe_list_input_widget.dart';
+import 'package:cooki/presentation/pages/edit/widgets/bottom_buttons_row.dart';
+import 'package:cooki/presentation/pages/edit/widgets/cook_info_row.dart';
+import 'package:cooki/presentation/pages/edit/widgets/input_list_widget.dart';
+import 'package:cooki/presentation/pages/edit/widgets/title_field_widget.dart';
+import 'package:cooki/presentation/widgets/app_cached_image.dart';
 import 'package:cooki/presentation/widgets/category_selection_dialog.dart';
 import 'package:cooki/presentation/widgets/recipe_page_widgets.dart';
 import 'package:easy_image_viewer/easy_image_viewer.dart';
@@ -11,59 +14,92 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/constants/app_colors.dart';
+import '../../../core/utils/dialogue_util.dart';
+import '../../../core/utils/error_mappers.dart';
 import '../../../core/utils/general_util.dart';
-import '../../../domain/entity/generated_recipe.dart';
-
-const servingsTitleStyle = TextStyle(fontSize: 17, fontWeight: FontWeight.bold);
-const cookTimeAndKcalTextStyle = TextStyle(
-  fontWeight: FontWeight.bold,
-  fontSize: 16,
-);
+import '../../../domain/entity/recipe.dart';
+import '../../user_global_view_model.dart';
+import '../debug/test_recipe_list.dart';
 
 class RecipeEditPage extends ConsumerStatefulWidget {
-  final GeneratedRecipe? generatedRecipe;
+  final Recipe? recipe;
 
-  const RecipeEditPage({super.key, this.generatedRecipe});
+  const RecipeEditPage({super.key, this.recipe});
 
   @override
   ConsumerState<RecipeEditPage> createState() => _RecipeEditPageState();
 }
 
 class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
+  Recipe? recipe;
+  final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _ingredientsControllers = <TextEditingController>[];
   final _stepsControllers = <TextEditingController>[];
   final _cookTimeController = TextEditingController();
   final _caloriesController = TextEditingController();
-  final _tagsController = TextEditingController();
 
-  String? _selectedCategory;
-  bool _isPublic = true;
-  Uint8List? _imageBytes;
+  Future<void> _saveRecipe() async {
+    if (_formKey.currentState!.validate()) {
+      final vm = ref.read(recipeEditViewModelProvider(widget.recipe).notifier);
+      AppUser? user;
+      if (widget.recipe == null) {
+        user = ref.read(userGlobalViewModelProvider)!;
+      }
+
+      await vm.saveRecipe(
+        title: _titleController.text.trim(),
+        ingredients: _ingredientsControllers.map((c) => c.text.trim()).toList(),
+        steps: _stepsControllers.map((c) => c.text.trim()).toList(),
+        cookTime: int.parse(_cookTimeController.text),
+        calories: int.parse(_caloriesController.text),
+        user: user,
+      );
+
+      final errorKey =
+          ref.read(recipeEditViewModelProvider(widget.recipe)).errorKey;
+      if (mounted && errorKey != null) {
+        DialogueUtil.showAppCupertinoDialog(
+          context: context,
+          title: strings(context).recipeSavingFailedTitle,
+          content: ErrorMapper.mapGenerateRecipeError(context, errorKey),
+        );
+        vm.clearError();
+        return;
+      }
+
+      if (mounted) {
+        SnackbarUtil.showSnackBar(
+          context,
+          strings(context).recipeSavedSuccessfully,
+          showIcon: true,
+        );
+        // TODO: Remove this and call VM method to be created
+        ref.invalidate(recipeListProvider);
+        Navigator.of(context).pop();
+      }
+    }
+  }
 
   void _addIngredient(RecipeEditViewModel vm) {
-    vm.addIngredient();
     setState(() {
       _ingredientsControllers.add(TextEditingController());
     });
   }
 
-  void _removeIngredient(RecipeEditViewModel vm, int index) {
-    vm.removeIngredient(index);
-    setState(() {
-      _ingredientsControllers.removeAt(index).dispose();
-    });
-  }
-
   void _addStep(RecipeEditViewModel vm) {
-    vm.addStep();
     setState(() {
       _stepsControllers.add(TextEditingController());
     });
   }
 
+  void _removeIngredient(RecipeEditViewModel vm, int index) {
+    setState(() {
+      _ingredientsControllers.removeAt(index).dispose();
+    });
+  }
+
   void _removeStep(RecipeEditViewModel vm, int index) {
-    vm.removeStep(index);
     setState(() {
       _stepsControllers.removeAt(index).dispose();
     });
@@ -72,23 +108,20 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
   @override
   void initState() {
     super.initState();
-    final generatedRecipe = widget.generatedRecipe;
+    recipe = widget.recipe;
 
-    if (generatedRecipe != null) {
-      _titleController.text = generatedRecipe.recipeName;
+    if (recipe != null) {
+      _titleController.text = recipe!.recipeName;
       _ingredientsControllers.addAll(
-        generatedRecipe.ingredients.map(
+        recipe!.ingredients.map(
           (ingredient) => TextEditingController(text: ingredient),
         ),
       );
       _stepsControllers.addAll(
-        generatedRecipe.steps.map((step) => TextEditingController(text: step)),
+        recipe!.steps.map((step) => TextEditingController(text: step)),
       );
-      _cookTimeController.text = generatedRecipe.cookTime.toString();
-      _caloriesController.text = generatedRecipe.calories.toString();
-      _tagsController.text = (generatedRecipe.tags).join(', ');
-      _selectedCategory = generatedRecipe.category;
-      _imageBytes = generatedRecipe.imageBytes;
+      _cookTimeController.text = recipe!.cookTime.toString();
+      _caloriesController.text = recipe!.calories.toString();
     }
 
     // Ensure at least one field
@@ -111,21 +144,18 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
     }
     _cookTimeController.dispose();
     _caloriesController.dispose();
-    _tagsController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // final state = ref.watch(
-    //   recipeEditViewModelProvider(widget.generatedRecipe),
-    // );
-    final vm = ref.read(
-      recipeEditViewModelProvider(widget.generatedRecipe).notifier,
-    );
+    final vm = ref.read(recipeEditViewModelProvider(widget.recipe).notifier);
 
     return GestureDetector(
-      onTap: FocusScope.of(context).unfocus,
+      onTap: () {
+        FocusScope.of(context).unfocus;
+        FocusManager.instance.primaryFocus?.unfocus();
+      },
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.white,
@@ -134,140 +164,102 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
             style: const TextStyle(color: Colors.black),
           ),
         ),
-        backgroundColor: Colors.white,
-        body: SafeArea(
-          child: Column(
+        bottomNavigationBar: BottomButtonsRow(
+          recipe: recipe,
+          onSave: _saveRecipe,
+        ),
+
+        body: Form(
+          key: _formKey,
+          child: ListView(
             children: [
-              Expanded(
-                child: ListView(
+              if (recipe?.imageUrl != null) ...[
+                _buildImageSelector(),
+                const SizedBox(height: 5),
+              ],
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (_imageBytes != null) ...[
-                      _buildImageSelector(),
-                      const SizedBox(height: 5),
-                    ],
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 16,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 2),
-                          Row(
-                            children: [
-                              Text(
-                                _titleController.text,
-                                style: RecipePageWidgets.sectionTitleStyle,
-                              ),
-                              const SizedBox(width: 7),
-                              SizedBox.square(
-                                dimension: 20,
-                                child: IconButton(
-                                  padding: EdgeInsets.zero,
-                                  onPressed: () {},
-                                  icon: const Icon(Icons.edit, size: 15),
-                                ),
-                              ),
-                            ],
-                          ),
+                    // Title field
+                    const SizedBox(height: 2),
+                    TitleFieldWidget(
+                      recipe: recipe,
+                      titleController: _titleController,
+                    ),
 
-                          // const SizedBox(height: 8),
-                          // _buildTextField(
-                          //   _titleController,
-                          //   hint: strings(context).recipeTitleHint,
-                          // ),
-                          const SizedBox(height: 12),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                strings(context).beforeMinutesLabel,
-                                style: cookTimeAndKcalTextStyle,
-                              ),
-                              NumberInputBox(controller: _cookTimeController),
-                              Text(
-                                strings(context).afterMinutesLabel,
-                                style: cookTimeAndKcalTextStyle,
-                              ),
-                              const SizedBox(width: 24),
-                              NumberInputBox(
-                                controller: _caloriesController,
-                                isMinutes: false,
-                              ),
-                              Text(
-                                strings(context).caloriesUnitAfter,
-                                style: cookTimeAndKcalTextStyle,
-                              ),
-                            ],
-                          ),
+                    const SizedBox(height: 12),
+                    CookInfoRowWidget(
+                      caloriesController: _caloriesController,
+                      cookTimeController: _cookTimeController,
+                    ),
 
-                          const SizedBox(height: 20),
-                          if (widget.generatedRecipe != null)
-                            _buildTagChips(widget.generatedRecipe!.tags),
+                    const SizedBox(height: 20),
+                    if (recipe != null) TagChips(recipe!.tags),
 
-                          const SizedBox(height: 28),
-                          Text(
-                            strings(context).categoryLabel,
-                            style: RecipePageWidgets.sectionTitleStyle,
-                          ),
-                          const SizedBox(height: 8),
-                          _buildCategorySelector(),
+                    const SizedBox(height: 28),
+                    Text(
+                      strings(context).categoryLabel,
+                      style: RecipePageWidgets.sectionTitleStyle,
+                    ),
+                    const SizedBox(height: 8),
+                    _buildCategorySelector(),
 
-                          const SizedBox(height: 28),
-                          Row(
-                            children: [
-                              Text(
-                                strings(context).ingredientsLabel,
-                                style: RecipePageWidgets.sectionTitleStyle,
-                              ),
-                              const SizedBox(width: 3),
-                              Text(
-                                strings(context).servingsLabel,
-                                style: servingsTitleStyle,
-                              ),
-                            ],
-                          ),
+                    const SizedBox(height: 28),
+                    Row(
+                      children: [
+                        Text(
+                          strings(context).ingredientsLabel,
+                          style: RecipePageWidgets.sectionTitleStyle,
+                        ),
+                        const SizedBox(width: 3),
+                        Text(
+                          strings(context).servingsLabel,
+                          style: RecipePageWidgets.servingsTitleStyle,
+                        ),
+                      ],
+                    ),
 
-                          const SizedBox(height: 8),
-                          InputListWidget(
-                            controllers: _ingredientsControllers,
-                            hintText: strings(context).ingredientsHint,
-                            onAdd: () => _addIngredient(vm),
-                            onRemove: (index) => _removeIngredient(vm, index),
-                          ),
+                    const SizedBox(height: 8),
+                    InputListWidget(
+                      controllers: _ingredientsControllers,
+                      hintText: strings(context).ingredientsHint,
+                      onAdd: () => _addIngredient(vm),
+                      onRemove: (index) => _removeIngredient(vm, index),
+                    ),
 
-                          const SizedBox(height: 24),
-                          Text(
-                            strings(context).stepsLabel,
-                            style: RecipePageWidgets.sectionTitleStyle,
-                          ),
+                    const SizedBox(height: 24),
+                    Text(
+                      strings(context).stepsLabel,
+                      style: RecipePageWidgets.sectionTitleStyle,
+                    ),
 
-                          const SizedBox(height: 8),
-                          InputListWidget(
-                            controllers: _stepsControllers,
-                            isSteps: true,
-                            hintText: strings(context).stepsHint,
-                            onAdd: () => _addStep(vm),
-                            onRemove: (index) => _removeStep(vm, index),
-                          ),
+                    const SizedBox(height: 8),
+                    InputListWidget(
+                      controllers: _stepsControllers,
+                      isSteps: true,
+                      hintText: strings(context).stepsHint,
+                      onAdd: () => _addStep(vm),
+                      onRemove: (index) => _removeStep(vm, index),
+                    ),
 
-                          const SizedBox(height: 10),
-                          Text(
-                            strings(context).isPublicLabel,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          _buildPublicToggle(),
-                        ],
+                    const SizedBox(height: 10),
+                    Text(
+                      strings(context).isPublicLabel,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
+
+                    _buildPublicToggle(),
                   ],
                 ),
               ),
-              _buildBottomActions(),
             ],
           ),
         ),
@@ -276,29 +268,36 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
   }
 
   Widget _buildCategorySelector() {
+    final vm = ref.read(recipeEditViewModelProvider(widget.recipe).notifier);
+    final selectedCategory = ref.watch(
+      recipeEditViewModelProvider(
+        widget.recipe,
+      ).select((state) => state.selectedCategory),
+    );
+
     return GestureDetector(
       onTap: () async {
-        final selectedCategory = await showCategorySelectionDialog(context);
-        if (selectedCategory?.isNotEmpty == true) {
-          setState(() {
-            _selectedCategory = selectedCategory;
-          });
+        FocusScope.of(context).unfocus();
+        FocusManager.instance.primaryFocus?.unfocus();
+        final category = await showCategorySelectionDialog(context);
+        if (category?.isNotEmpty == true) {
+          vm.setCategory(category);
         }
       },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
         decoration: BoxDecoration(
           color: AppColors.appBarGrey,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: RecipePageWidgets.inputBorderRadius,
         ),
         child: Row(
           children: [
             Expanded(
               child: Text(
-                _selectedCategory ?? strings(context).categoryPlaceholder,
+                selectedCategory ?? strings(context).categoryPlaceholder,
                 style: TextStyle(
                   fontSize: 16,
-                  color: _selectedCategory == null ? Colors.grey : Colors.black,
+                  color: selectedCategory == null ? Colors.grey : Colors.black,
                 ),
               ),
             ),
@@ -313,37 +312,10 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
     );
   }
 
-  Widget _buildTagChips(List<String> tags) {
-    return Wrap(
-      spacing: 6,
-      runSpacing: 8,
-      children:
-          tags.map((tag) {
-            return Container(
-              padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 12),
-              decoration: ShapeDecoration(
-                shape: RoundedRectangleBorder(
-                  side: BorderSide(color: AppColors.greyScale400),
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                color: Colors.white,
-              ),
-              child: DefaultTextStyle(
-                style: const TextStyle(color: Colors.black, fontSize: 13),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [Text(tag)],
-                ),
-              ),
-            );
-          }).toList(),
-    );
-  }
-
   Widget _buildImageSelector() {
     return GestureDetector(
       onTap: () {
-        final imageProvider = MemoryImage(_imageBytes!);
+        final imageProvider = CachedNetworkImageProvider(recipe!.imageUrl!);
         showImageViewer(
           context,
           imageProvider,
@@ -352,8 +324,8 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
           useSafeArea: true,
         );
       },
-      child: Image.memory(
-        _imageBytes!,
+      child: AppCachedImage(
+        imageUrl: recipe!.imageUrl!,
         fit: BoxFit.cover,
         height: 230,
         width: double.infinity,
@@ -362,60 +334,23 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
   }
 
   Widget _buildPublicToggle() {
+    final vm = ref.read(recipeEditViewModelProvider(widget.recipe).notifier);
+    final isPublic = ref.watch(
+      recipeEditViewModelProvider(
+        widget.recipe,
+      ).select((state) => state.isPublic),
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 8),
         Switch.adaptive(
           activeColor: const Color(0xFF1D8163),
-          value: _isPublic,
-          onChanged: (val) => setState(() => _isPublic = val),
+          value: isPublic,
+          onChanged: (val) => vm.setIsPublic(val),
         ),
       ],
-    );
-  }
-
-  Widget _buildBottomActions() {
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-      child: Row(
-        children: [
-          Expanded(
-            child: OutlinedButton(
-              onPressed: () {
-                log(widget.generatedRecipe.toString());
-              },
-              style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: AppColors.primary),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: Text(
-                strings(context).deleteRecipeButton,
-                style: const TextStyle(color: AppColors.primary),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: ElevatedButton(
-              onPressed: () {
-                // handle save later
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1D8163),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: Text(strings(context).saveRecipeButton),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
