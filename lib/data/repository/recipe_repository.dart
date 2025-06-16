@@ -10,11 +10,7 @@ abstract class RecipeRepository {
 
   Future<void> editRecipe(Recipe recipe);
 
-  Future<String> uploadImageBytes(
-    Uint8List imageBytes,
-    String uid,
-    String folder,
-  );
+  Future<String> uploadImageBytes(Uint8List imageBytes, String uid);
 
   Future<List<Recipe>> getAllRecipes();
 }
@@ -38,12 +34,12 @@ class RecipeRepositoryImpl implements RecipeRepository {
   }
 
   @override
-  Future<String> uploadImageBytes(
-    Uint8List imageBytes,
-    String uid,
-    String folder,
-  ) {
-    return _imageStorageDataSource.uploadImageBytes(imageBytes, uid, folder);
+  Future<String> uploadImageBytes(Uint8List imageBytes, String uid) {
+    return _imageStorageDataSource.uploadImageBytes(
+      imageBytes,
+      uid,
+      'recipe_images',
+    );
   }
 
   @override
