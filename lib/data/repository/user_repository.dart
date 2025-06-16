@@ -33,6 +33,6 @@ class UserRepositoryImpl implements UserRepository {
 
   @override
   Future<String> changeProfileImage(AppUser user, File imageFile) async {
-    return await _storageDataSource.uploadImage(imageFile, user.id, 'user');
+    return await _storageDataSource.uploadImageFile(imageFile, user.id, 'user');
   }
 }
