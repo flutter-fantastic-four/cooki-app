@@ -9,6 +9,7 @@ class RecipePageWidgets {
     fontSize: 20,
     fontWeight: FontWeight.bold,
   );
+  static get inputBorderRadius => BorderRadius.circular(8);
 
   static const servingsTitleStyle = TextStyle(
     fontSize: 17,

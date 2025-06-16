@@ -2,8 +2,6 @@ import 'package:cooki/core/utils/general_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
-import '../../../../app/constants/app_colors.dart';
-
 class GenerateButton extends StatelessWidget {
   final VoidCallback? onTap;
   final bool isLoading;
@@ -25,9 +23,6 @@ class GenerateButton extends StatelessWidget {
           onPressed: onTap,
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            foregroundColor: Colors.white,
-            backgroundColor: AppColors.primary,
-            disabledBackgroundColor: AppColors.inactiveButton,
           ),
           icon:
               isLoading
@@ -42,7 +37,6 @@ class GenerateButton extends StatelessWidget {
             isLoading
                 ? strings(context).generateRecipeLoading
                 : strings(context).generateRecipe,
-            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
           ),
         ),
       ),

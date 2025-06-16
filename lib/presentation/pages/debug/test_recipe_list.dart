@@ -20,15 +20,23 @@ class RecipeDebugListPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final recipesAsync = ref.watch(recipeListProvider);
 
+    Widget body;
+    if (recipesAsync.isLoading) {
+      body = const Center(child: CircularProgressIndicator());
+    } else if (recipesAsync.hasError) {
+      throw recipesAsync.error!;
+    } else if (recipesAsync.hasValue) {
+      body = _buildRecipeList(context, recipesAsync.value!);
+    } else {
+      throw Exception('Unexpected state');
+    }
+
     return Scaffold(
       appBar: AppBar(title: const Text('모든 레시피 디버그')),
-      body: recipesAsync.when(
-        data: (recipes) => _buildRecipeList(context, recipes),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(child: Text('오류: ${error.toString()}')),
-      ),
+      body: body,
     );
   }
+
 
   Widget _buildRecipeList(BuildContext context, List<Recipe> recipes) {
     final dateFormat = DateFormat('yyyy-MM-dd HH:mm');

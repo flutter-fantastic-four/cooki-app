@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../../../app/constants/app_constants.dart';
-import '../../../../../core/utils/general_util.dart';
 
 class Recipe {
   final String name;
@@ -496,6 +495,7 @@ class _MyRecipesPageState extends State<MyRecipesPage> {
     return recipes;
   }
 
+  // ignore: unused_element
   void _showCuisineFilter() {
     final cuisineCategories = AppConstants.recipeCategories(context);
 
@@ -614,6 +614,7 @@ class _MyRecipesPageState extends State<MyRecipesPage> {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
     final recipes = filteredRecipes;
 
     return Scaffold(
@@ -1049,7 +1050,7 @@ class _MyRecipesPageState extends State<MyRecipesPage> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF1D8163).withOpacity(0.1),
+                            color: const Color(0xFF1D8163).withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
                               color: const Color(0xFF1D8163),
@@ -1084,7 +1085,7 @@ class _MyRecipesPageState extends State<MyRecipesPage> {
                           ),
                         ),
                       )
-                      .toList(),
+                      ,
                   if (selectedSort.isNotEmpty)
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -1092,7 +1093,7 @@ class _MyRecipesPageState extends State<MyRecipesPage> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF1D8163).withOpacity(0.1),
+                        color: const Color(0xFF1D8163).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
                           color: const Color(0xFF1D8163),
@@ -1290,7 +1291,7 @@ class _RecipeCard extends StatelessWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

@@ -1,5 +1,6 @@
 import 'package:cooki/data/repository/recipe_generation_repository.dart';
 import 'package:cooki/data/repository/recipe_repository.dart';
+import 'package:cooki/data/repository/review_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/repository/auth_repository.dart';
@@ -48,3 +49,11 @@ final recipeRepositoryProvider = Provider<RecipeRepository>(
     ref.read(imageStorageDataSourceProvider),
   ),
 );
+
+final reviewRepositoryProvider = Provider<ReviewRepository>(
+      (ref) => ReviewRepositoryImpl(
+    ref.read(reviewDataSourceProvider),
+    ref.read(imageStorageDataSourceProvider),
+  ),
+);
+
