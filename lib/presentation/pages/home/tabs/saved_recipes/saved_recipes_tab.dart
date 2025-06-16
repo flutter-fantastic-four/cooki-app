@@ -1280,11 +1280,12 @@ class _RecipeCard extends StatelessWidget {
     );
   }
 
+  //Card interface for each recipe
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(color: const Color(0xFFE0E0E0)),
         color: Colors.white,
         boxShadow: [
