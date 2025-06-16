@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/error_mappers.dart';
+import '../../../core/utils/general_util.dart';
 import '../../../core/utils/logger.dart';
 import '../../../data/repository/providers.dart';
 import '../../../domain/entity/app_user.dart';
@@ -56,22 +57,8 @@ class WriteReviewViewModel extends AutoDisposeNotifier<WriteReviewState> {
     state = state.copyWith(isSaving: true);
 
     try {
-      List<String> imageUrls = [];
-
-      if (state.selectedImages.isNotEmpty) {
-        try {
-          for (final imageFile in state.selectedImages) {
-            final imageUrl = await ref
-                .read(reviewRepositoryProvider)
-                .uploadReviewImage(imageFile, user.id);
-            imageUrls.add(imageUrl);
-          }
-        } catch (e, stack) {
-          logError(e, stack);
-          state = state.copyWith(errorKey: AddReviewErrorKey.imageUploadFailed);
-          return;
-        }
-      }
+      final imageUrls = await _compressAndUploadImages(user.id);
+      if (imageUrls == null) return;
 
       final review = Review(
         id: '',
@@ -91,6 +78,25 @@ class WriteReviewViewModel extends AutoDisposeNotifier<WriteReviewState> {
       state = state.copyWith(errorKey: AddReviewErrorKey.saveFailed);
     } finally {
       state = state.copyWith(isSaving: false);
+    }
+  }
+
+  Future<List<String>?> _compressAndUploadImages(String userId) async {
+    if (state.selectedImages.isEmpty) return [];
+
+    try {
+      final uploadTasks = state.selectedImages.map((imageFile) async {
+        final compressedFile = await GeneralUtil.compressImageFile(imageFile);
+        return ref
+            .read(reviewRepositoryProvider)
+            .uploadReviewImage(compressedFile, userId);
+      });
+
+      return await Future.wait(uploadTasks);
+    } catch (e, stack) {
+      logError(e, stack);
+      state = state.copyWith(errorKey: AddReviewErrorKey.imageUploadFailed);
+      return null;
     }
   }
 
