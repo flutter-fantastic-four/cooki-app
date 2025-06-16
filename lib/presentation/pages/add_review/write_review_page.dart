@@ -27,9 +27,13 @@ class WriteReviewPage extends ConsumerWidget {
     final user = ref.read(userGlobalViewModelProvider);
     if (user == null) return;
 
+    final start = DateTime.now();
     await ref
         .read(writeReviewViewModelProvider.notifier)
         .saveReview(recipeId: recipeId, user: user);
+    log(
+      'saveReview executed in ${DateTime.now().difference(start).inMilliseconds} ms',
+    );
 
     final state = ref.read(writeReviewViewModelProvider);
 
