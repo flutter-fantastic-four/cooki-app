@@ -76,7 +76,7 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
         );
         // TODO: Remove this and call VM method to be created
         ref.invalidate(recipeListProvider);
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(true); // Return true to indicate success
       }
     }
   }

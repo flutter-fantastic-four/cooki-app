@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import 'package:cooki/core/utils/snackbar_util.dart';
 import 'package:easy_image_viewer/easy_image_viewer.dart';
@@ -24,13 +25,13 @@ class WriteReviewPage extends ConsumerWidget {
   });
 
   Future<void> _submitReview(WidgetRef ref, BuildContext context) async {
-    final user = ref.read(userGlobalViewModelProvider);
-    if (user == null) return;
-
     final start = DateTime.now();
     await ref
         .read(writeReviewViewModelProvider.notifier)
-        .saveReview(recipeId: recipeId, user: user);
+        .saveReview(
+          recipeId: recipeId,
+          user: ref.read(userGlobalViewModelProvider)!,
+        );
     log(
       'saveReview executed in ${DateTime.now().difference(start).inMilliseconds} ms',
     );
@@ -48,6 +49,11 @@ class WriteReviewPage extends ConsumerWidget {
     }
 
     if (context.mounted) {
+      SnackbarUtil.showSnackBar(
+        context,
+        strings(context).reviewSavedSuccessfully,
+        showIcon: true,
+      );
       Navigator.of(context).pop(true); // Return true to indicate success
     }
   }
