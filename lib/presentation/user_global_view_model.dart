@@ -19,7 +19,6 @@ class UserGlobalViewModel extends Notifier<AppUser?> {
 
   Future<void> saveUserToDatabase() async {
     if (state == null) return;
-    print(state!.profileImage);
     await ref.read(userRepositoryProvider).saveUserToDatabase(state!);
   }
 
