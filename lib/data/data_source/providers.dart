@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cooki/data/data_source/image_download_data_source.dart';
 import 'package:cooki/data/data_source/recipe_generation_data_source.dart';
+import 'package:cooki/data/data_source/review_data_source.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:cloud_functions/cloud_functions.dart';
@@ -49,4 +50,10 @@ final recipeGenerationDataSourceProvider = Provider<RecipeGenerationDataSource>(
   (ref) => GeminiRecipeGenerationDataSource(ref.read(firebaseAIProvider)),
 );
 
-final imageDownloadDataSourceProvider = Provider<ImageDownloadDataSource>((ref) => DioImageDownloadDataSource(ref.read(dioProvider)));
+final imageDownloadDataSourceProvider = Provider<ImageDownloadDataSource>(
+  (ref) => DioImageDownloadDataSource(ref.read(dioProvider)),
+);
+
+final reviewDataSourceProvider = Provider<ReviewDataSource>(
+      (ref) => ReviewFirestoreDataSource(ref.read(firestoreProvider)),
+);
