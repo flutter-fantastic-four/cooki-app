@@ -1,16 +1,19 @@
 import 'dart:developer';
 
 import 'package:cooki/core/utils/logger.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 abstract class OAuthSignInDataSource<T> {
   Future<T?> signIn();
   Future<void> signOut();
 }
 
-class GoogleOAuthDataSourceImpl implements OAuthSignInDataSource<GoogleSignInAuthentication> {
+class GoogleOAuthDataSourceImpl
+    implements OAuthSignInDataSource<GoogleSignInAuthentication> {
   final GoogleSignIn _googleSignIn;
 
   GoogleOAuthDataSourceImpl(this._googleSignIn);
@@ -24,6 +27,26 @@ class GoogleOAuthDataSourceImpl implements OAuthSignInDataSource<GoogleSignInAut
 
   @override
   Future<void> signOut() => _googleSignIn.signOut();
+}
+
+class AppleOAuthDataSourceImpl
+    implements OAuthSignInDataSource<AuthorizationCredentialAppleID> {
+  @override
+  Future<AuthorizationCredentialAppleID?> signIn() async {
+    final appleCredential = await SignInWithApple.getAppleIDCredential(
+      scopes: [
+        AppleIDAuthorizationScopes.fullName,
+        AppleIDAuthorizationScopes.email,
+      ],
+    );
+    return appleCredential;
+  }
+
+  @override
+  Future<void> signOut() async {
+    log('Apple Sign In sign out completed.');
+    return Future.value();
+  }
 }
 
 class KakaoOAuthDataSourceImpl implements OAuthSignInDataSource<String> {

@@ -18,17 +18,24 @@ abstract class AuthRepository {
 class AuthRepositoryImpl implements AuthRepository {
   final OAuthSignInDataSource _googleDataSource;
   final OAuthSignInDataSource _kakaoDataSource;
+  final OAuthSignInDataSource _appleDataSource;
   final FirebaseAuthDataSource _firebaseAuth;
   final UserDataSource _userDataSource;
 
-  AuthRepositoryImpl(this._googleDataSource, this._kakaoDataSource, this._firebaseAuth, this._userDataSource);
+  AuthRepositoryImpl(
+    this._googleDataSource,
+    this._kakaoDataSource,
+    this._appleDataSource,
+    this._firebaseAuth,
+    this._userDataSource,
+  );
 
   @override
   Future<AppUser?> signIn(SignInMethod signInmethod) async {
     final auth = switch (signInmethod) {
       SignInMethod.google => await _googleDataSource.signIn(),
       SignInMethod.kakao => await _kakaoDataSource.signIn(),
-      SignInMethod.apple => null,
+      SignInMethod.apple => await _appleDataSource.signIn(),
     };
 
     if (auth == null) return null;
@@ -36,7 +43,7 @@ class AuthRepositoryImpl implements AuthRepository {
     final firebaseUser = switch (signInmethod) {
       SignInMethod.google => await _firebaseAuth.signInWithGoogle(auth),
       SignInMethod.kakao => await _firebaseAuth.signInWithKakao(auth),
-      SignInMethod.apple => null,
+      SignInMethod.apple => await _firebaseAuth.signInWithApple(auth),
     };
 
     if (firebaseUser == null) return null;
@@ -62,7 +69,9 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> signOut() async {
     if (_firebaseAuth.currentUser() == null) return;
 
-    final user = await _userDataSource.getUserById(_firebaseAuth.currentUser()!.uid);
+    final user = await _userDataSource.getUserById(
+      _firebaseAuth.currentUser()!.uid,
+    );
 
     if (user == null) return;
     switch (user.signInProvider) {
@@ -72,9 +81,9 @@ class AuthRepositoryImpl implements AuthRepository {
       case "kakao":
         await _kakaoDataSource.signOut();
         break;
-      // case "apple":
-      //   await _googleDataSource.signOut();
-      //   break;
+      case "apple":
+        await _appleDataSource.signOut();
+        break;
     }
     await _firebaseAuth.signOut();
   }

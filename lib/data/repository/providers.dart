@@ -10,6 +10,7 @@ final authRepositoryProvider = Provider<AuthRepository>(
   (ref) => AuthRepositoryImpl(
     ref.read(googleSignInDataSourceProvider),
     ref.read(kakaoSignInDataSourceProvider),
+    ref.read(appleSignInDataSourceProvider),
     ref.read(firebaseAuthDataSourceProvider),
     ref.read(userFirestoreDataSourceProvider),
   ),
@@ -27,6 +28,10 @@ final imageRepositoryProvider = Provider<ImageRepository>(
   (ref) => ImageRepositoryImpl(ref.read(imageStorageDataSourceProvider)),
 );
 
-final recipeGenerationRepositoryProvider = Provider<RecipeGenerationRepository>((ref) {
-  return RecipeGenerationRepositoryImpl(ref.read(recipeGenerationDataSourceProvider));
-});
+final recipeGenerationRepositoryProvider = Provider<RecipeGenerationRepository>(
+  (ref) {
+    return RecipeGenerationRepositoryImpl(
+      ref.read(recipeGenerationDataSourceProvider),
+    );
+  },
+);
