@@ -29,34 +29,52 @@ class ReviewsPage extends ConsumerWidget {
     required this.recipeName,
   });
 
-  void _showImageViewer(
+  void _showReviewOptionsModal(
     BuildContext context,
-    List<String> imageUrls,
-    int initialIndex,
+    WidgetRef ref,
+    Review review,
+    bool isMyReview,
   ) {
-    final imageProviders =
-        imageUrls.map((url) => CachedNetworkImageProvider(url)).toList();
+    final options = <ModalOption>[
+      ModalOption(
+        text: strings(context).translateReview,
+        icon: Icons.g_translate,
+        onTap: () => _translateReview(context, review),
+      ),
+      if (isMyReview)
+        ModalOption(
+          text: strings(context).editReview,
+          icon: Icons.edit_outlined,
+          onTap: () => _navigateToEditPage(context, ref, review),
+        ),
+      ModalOption(
+        text: strings(context).reportReview,
+        icon: Icons.flag,
+        isRed: true,
+        onTap: () => _reportReview(context, review),
+      ),
+      if (isMyReview)
+        ModalOption(
+          text: strings(context).deleteReview,
+          isRed: true,
+          icon: Icons.delete,
+          onTap: () => _deleteReview(context, ref, review),
+        ),
+    ];
 
-    showImageViewerPager(
-      context,
-      MultiImageProvider(imageProviders, initialIndex: initialIndex),
-      swipeDismissible: true,
-      doubleTapZoomable: true,
-      useSafeArea: true,
-    );
+    DialogueUtil.showGenericModal(context, options: options);
   }
 
-  void _navigateToWriteReview(BuildContext context, WidgetRef ref) async {
-    final result = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(
-        builder:
-            (_) => WriteReviewPage(recipeId: recipeId, recipeName: recipeName),
-      ),
-    );
+  void _translateReview(BuildContext context, Review review) {
+    // TODO: Implement translate functionality
+  }
 
-    if (result == true) {
-      ref.read(reviewsViewModelProvider(recipeId).notifier).refreshReviews();
-    }
+  void _navigateToEditPage(BuildContext context, WidgetRef ref, Review review) {
+    // TODO: Implement edit functionality
+  }
+
+  void _reportReview(BuildContext context, Review review) {
+    // TODO: Implement report functionality
   }
 
   Future<void> _deleteReview(
@@ -89,6 +107,36 @@ class ReviewsPage extends ConsumerWidget {
         );
       }
     }
+  }
+
+  void _navigateToWriteReview(BuildContext context, WidgetRef ref) async {
+    final result = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder:
+            (_) => WriteReviewPage(recipeId: recipeId, recipeName: recipeName),
+      ),
+    );
+
+    if (result == true) {
+      ref.read(reviewsViewModelProvider(recipeId).notifier).refreshReviews();
+    }
+  }
+
+  void _showImageViewer(
+    BuildContext context,
+    List<String> imageUrls,
+    int initialIndex,
+  ) {
+    final imageProviders =
+        imageUrls.map((url) => CachedNetworkImageProvider(url)).toList();
+
+    showImageViewerPager(
+      context,
+      MultiImageProvider(imageProviders, initialIndex: initialIndex),
+      swipeDismissible: true,
+      doubleTapZoomable: true,
+      useSafeArea: true,
+    );
   }
 
   void _showErrorDialog(
@@ -357,36 +405,18 @@ class ReviewsPage extends ConsumerWidget {
     Review review,
     bool isMyReview,
   ) {
-    return PopupMenuButton<String>(
-      icon: const Icon(Icons.more_vert, color: Color(0xFF888888), size: 20),
-      onSelected: (value) {
-        switch (value) {
-          case 'translate':
-            break;
-          case 'report':
-            break;
-          case 'delete':
-            _deleteReview(context, ref, review);
-            break;
-        }
-      },
-      itemBuilder: (context) {
-        final items = <PopupMenuEntry<String>>[
-          PopupMenuItem(value: 'translate', child: Text('번역')),
-          PopupMenuItem(value: 'report', child: Text('신고')),
-        ];
-
-        if (isMyReview) {
-          items.add(
-            PopupMenuItem(
-              value: 'delete',
-              child: Text('삭제', style: TextStyle(color: Colors.red)),
-            ),
-          );
-        }
-
-        return items;
-      },
+    return SizedBox.square(
+      dimension: 30,
+      child: IconButton(
+        padding: EdgeInsets.zero,
+        onPressed:
+            () => _showReviewOptionsModal(context, ref, review, isMyReview),
+        icon: const Icon(
+          CupertinoIcons.ellipsis,
+          color: AppColors.greyScale600,
+          size: 22,
+        ),
+      ),
     );
   }
 

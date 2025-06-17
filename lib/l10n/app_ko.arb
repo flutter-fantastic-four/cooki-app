@@ -137,5 +137,9 @@
   "less": "접기",
   "more": "더보기",
 
-  "confirm": "확인"
+  "confirm": "확인",
+  "translateReview": "번역하기",
+  "editReview": "수정하기",
+  "reportReview": "신고하기",
+  "deleteReview": "삭제하기"
 }
