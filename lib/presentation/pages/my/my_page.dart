@@ -20,11 +20,7 @@ class MyPage extends ConsumerWidget {
   /// Falls back to a browser-based email client if no email app is available.
   /// Shows an error message if both approaches fail.
   Future<void> _launchEmail(BuildContext context) async {
-    final Uri emailUri = Uri(
-      scheme: 'mailto',
-      path: 'penjan.eng@gmail.com',
-      queryParameters: {'subject': 'ShareLingo앱 피드백'},
-    );
+    final Uri emailUri = Uri(scheme: 'mailto', path: 'penjan.eng@gmail.com', queryParameters: {'subject': 'ShareLingo앱 피드백'});
 
     if (await canLaunchUrl(emailUri)) {
       await launchUrl(emailUri, mode: LaunchMode.externalApplication);
@@ -52,21 +48,13 @@ class MyPage extends ConsumerWidget {
 
   Future<void> _logout(BuildContext context, WidgetRef ref) async {
     try {
-      final result = await DialogueUtil.showAppCupertinoDialog(
-        context: context,
-        title: '로그아웃할까요?',
-        content: '정말 로그아웃하시겠습니까?',
-        showCancel: true,
-      );
+      final result = await DialogueUtil.showAppCupertinoDialog(context: context, title: '로그아웃할까요?', content: '정말 로그아웃하시겠습니까?', showCancel: true);
       if (result == AppDialogResult.confirm) {
         await ref.read(authRepositoryProvider).signOut();
         ref.read(userGlobalViewModelProvider.notifier).clearUser();
 
         // ignore: use_build_context_synchronously
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const LoginPage()),
-          (route) => false,
-        );
+        Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const LoginPage()), (route) => false);
       }
     } catch (e) {
       // ignore: use_build_context_synchronously
@@ -77,54 +65,24 @@ class MyPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('설정'),
-        centerTitle: false,
-        titleSpacing: 5,
-        backgroundColor: Colors.white,
-      ),
+      appBar: AppBar(title: Text('설정'), centerTitle: false, titleSpacing: 5, backgroundColor: Colors.white),
       body: SettingsList(
-        lightTheme: SettingsThemeData(
-          settingsListBackground: AppColors.backgroundGrey,
-        ),
+        lightTheme: SettingsThemeData(settingsListBackground: AppColors.backgroundGrey),
         platform: DevicePlatform.iOS,
         sections: [
           SettingsSection(
             // margin: EdgeInsetsDirectional.only(start: 18, end: 18, top: 7, bottom: 7),
             title: Text('계정', style: AppStyles.mediumText),
-            tiles: [
-              SettingsTile(
-                leading: const Icon(Icons.logout),
-                title: Text('로그아웃'),
-                onPressed: (context) => _logout(context, ref),
-              ),
-            ],
+            tiles: [SettingsTile(leading: const Icon(Icons.logout), title: Text('로그아웃'), onPressed: (context) => _logout(context, ref))],
           ),
           SettingsSection(
             // margin: EdgeInsetsDirectional.only(start: 18, end: 18, top: 7, bottom: 7),
             title: Text('정보', style: AppStyles.mediumText),
             tiles: [
-              SettingsTile(
-                leading: const Icon(Icons.article_outlined),
-                title: Text('이용약관'),
-                onPressed: (context) => _launchUrl(context, ''),
-              ),
-              SettingsTile(
-                leading: const Icon(Icons.vpn_key),
-                title: Text('개인정보처리방침'),
-                onPressed: (context) => _launchUrl(context, ''),
-              ),
-              SettingsTile(
-                leading: const Icon(Icons.email),
-                title: Text('개발자들에게 문의'),
-                onPressed: (context) => _launchEmail(context),
-              ),
-              SettingsTile(
-                leading: const Icon(Icons.info_outline),
-                title: Text('버전'),
-                value: Text('1.0.0'),
-                onPressed: (_) {},
-              ),
+              SettingsTile(leading: const Icon(Icons.article_outlined), title: Text('이용약관'), onPressed: (context) => _launchUrl(context, '')),
+              SettingsTile(leading: const Icon(Icons.vpn_key), title: Text('개인정보처리방침'), onPressed: (context) => _launchUrl(context, '')),
+              SettingsTile(leading: const Icon(Icons.email), title: Text('개발자들에게 문의'), onPressed: (context) => _launchEmail(context)),
+              SettingsTile(leading: const Icon(Icons.info_outline), title: Text('버전'), value: Text('1.0.0'), onPressed: (_) {}),
             ],
           ),
         ],
