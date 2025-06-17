@@ -1,12 +1,8 @@
 {
-  "appName": "Cooki",
-  "startWithGoogle": "구글 계정으로 시작하기",
-  "loginAdSubtitle": "레시피들을 뭐뭐... 홍보 문장",
-
   "loginPageLogoTitle" : "맛있는 그 순간, cooki와 함께",
-  "loginPageGoogleButton" : "Google로 시작하기",
-  "loginPageKaKaoButton" : "Kakao로 시작하기",
-  "loginPageAppleButton" : "Apple로 시작하기",
+  "loginPageGoogleButton" : "Google로 로그인",
+  "loginPageKaKaoButton" : "Kakao로 로그인",
+  "loginPageAppleButton" : "Apple로 로그인",
 
   "cancel": "취소",
   "generateRecipe": "레시피 생성하기",
@@ -90,6 +86,27 @@
   "stepEmptyError": "조리 과정을 입력해 주세요",
   "requiredError": "필수",
 
+  "myPage" : "마이페이지",
+  "nickName": "닉네임",
+  "information": "정보",
+  "termsOfService" : "이용약관",
+  "privacyPolicy" : "개인정보처리방침",
+  "version" : "버전",
+  "contactTheDevelopersTeam" : "개발자들에게 문의",
+  "logout" : "로그아웃",
+  "deleteAccount":"회원탈퇴",
+  "language" : "언어설정", 
+
+  "logoutDialogTitle" : "로그아웃할까요?",
+  "logoutDialogSubTitle" : "로그아웃할까요?",
+  "logouterror" : "로그아웃 중 오류가 발생했습니다",
+  
+
+  "deleteAccountDialogTitle" : "회원탈퇴할까요?",
+  "deleteAccountDialogSubTitle" : "회원탈퇴할까요?",
+  "deleteAccountError" : "회원탈퇴 중 오류가 발생했습니다",
+  
+
   "shareRecipeSubjectSuffix": "레시피 공유합니다!",
   "recipe": "레시피",
 
@@ -104,4 +121,5 @@
   "reviewTextHint": "요리하면서 느낀 점, 맛에 대한 평가, 팁이나 후기 등 음식에 대한 솔직한 리뷰를 자유롭게 작성해보세요. (선택)",
   "saveReviewButtonText": "저장",
   "reviewSavedSuccessfully": "리뷰가 저장되었습니다"
+  
 }

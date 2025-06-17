@@ -15,6 +15,7 @@ abstract class FirebaseAuthDataSource {
   Stream<User?> authStateChanges();
 
   User? currentUser();
+  Future<void> deleteUser();
 }
 
 class FirebaseAuthDataSourceImpl implements FirebaseAuthDataSource {
@@ -24,10 +25,7 @@ class FirebaseAuthDataSourceImpl implements FirebaseAuthDataSource {
 
   @override
   Future<User?> signInWithGoogle(GoogleSignInAuthentication googleAuth) async {
-    final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
+    final credential = GoogleAuthProvider.credential(accessToken: googleAuth.accessToken, idToken: googleAuth.idToken);
     final userCredential = await _auth.signInWithCredential(credential);
     return userCredential.user;
   }
@@ -55,13 +53,13 @@ class FirebaseAuthDataSourceImpl implements FirebaseAuthDataSource {
   }
 
   @override
-  Future<User?> signInWithApple(
-    AuthorizationCredentialAppleID appleCredential,
-  ) async {
-    final credential = OAuthProvider('apple.com').credential(
-      idToken: appleCredential.identityToken,
-      accessToken: appleCredential.authorizationCode,
-    );
+  Future<void> deleteUser() async {
+    _auth.currentUser!.delete();
+  }
+
+  @override
+  Future<User?> signInWithApple(AuthorizationCredentialAppleID appleCredential) async {
+    final credential = OAuthProvider('apple.com').credential(idToken: appleCredential.identityToken, accessToken: appleCredential.authorizationCode);
     final userCredential = await _auth.signInWithCredential(credential);
     return userCredential.user;
   }
