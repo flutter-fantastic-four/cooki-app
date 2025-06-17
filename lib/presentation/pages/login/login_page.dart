@@ -22,7 +22,10 @@ class LoginPage extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Image.asset("assets/icons/cooki_logo_green.png", width: 164),
-                  Text(strings(context).loginPageLogoTitle),
+                  Text(
+                    strings(context).loginPageLogoTitle,
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
                   const SizedBox(height: 100),
                   LoginButton(signInMethod: SignInMethod.kakao),
                   const SizedBox(height: 16),
@@ -36,7 +39,11 @@ class LoginPage extends ConsumerWidget {
           ),
 
           // 로딩 오버레이
-          if (loginState.isLoading) Container(color: Colors.black.withValues(alpha: 0.3), child: const Center(child: CircularProgressIndicator())),
+          if (loginState.isLoading)
+            Container(
+              color: Colors.black.withValues(alpha: 0.3),
+              child: const Center(child: CircularProgressIndicator()),
+            ),
         ],
       ),
     );
