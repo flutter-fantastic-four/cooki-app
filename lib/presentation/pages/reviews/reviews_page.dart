@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cooki/app/constants/app_constants.dart';
 import 'package:cooki/core/utils/date_time_util.dart';
 import 'package:cooki/core/utils/dialogue_util.dart';
 import 'package:cooki/core/utils/error_mappers.dart';
@@ -13,7 +14,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/constants/app_colors.dart';
 import '../../../core/utils/general_util.dart';
 import '../../../core/utils/snackbar_util.dart';
-import '../../../data/data_source/review_data_source.dart';
 import '../../../domain/entity/review.dart';
 import '../../user_global_view_model.dart';
 import '../add_review/write_review_page.dart';
@@ -215,20 +215,7 @@ class ReviewsPage extends ConsumerWidget {
     WidgetRef ref,
     ReviewsState state,
   ) {
-    final sortOptions = [
-      {
-        'label': strings(context).newestFirst,
-        'type': ReviewSortType.dateDescending,
-      },
-      {
-        'label': strings(context).highestRating,
-        'type': ReviewSortType.ratingDescending,
-      },
-      {
-        'label': strings(context).lowestRating,
-        'type': ReviewSortType.ratingAscending,
-      },
-    ];
+    final sortOptions = AppConstants.getSortOptions();
 
     return Container(
       width: double.infinity,
@@ -237,15 +224,15 @@ class ReviewsPage extends ConsumerWidget {
         scrollDirection: Axis.horizontal,
         child: Row(
           children:
-              sortOptions.map((option) {
-                final isActive = state.currentSortType == option['type'];
+              sortOptions.map((sortOption) {
+                final isActive = state.currentSortType == sortOption.type;
                 return Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: GestureDetector(
                     onTap:
                         () => ref
                             .read(reviewsViewModelProvider(recipeId).notifier)
-                            .changeSortType(option['type'] as ReviewSortType),
+                            .changeSortType(sortOption.type),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
@@ -255,20 +242,17 @@ class ReviewsPage extends ConsumerWidget {
                         color: isActive ? AppColors.primary : Colors.white,
                         border: Border.all(
                           color:
-                              isActive
-                                  ? AppColors.primary
-                                  : AppColors.greyScale200,
+                              isActive ? AppColors.primary : Colors.grey[400]!,
                         ),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        option['label'] as String,
+                        sortOption.getLabel(context),
                         style: TextStyle(
-                          fontSize: 14.3,
                           color:
-                              isActive ? Colors.white : AppColors.greyScale800,
+                              isActive ? Colors.white : const Color(0xFF444444),
                           fontWeight:
-                              isActive ? FontWeight.w700 : FontWeight.normal,
+                              isActive ? FontWeight.w600 : FontWeight.normal,
                         ),
                       ),
                     ),
