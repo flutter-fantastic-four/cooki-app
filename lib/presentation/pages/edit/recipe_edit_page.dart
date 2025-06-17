@@ -73,15 +73,17 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
         return;
       }
 
-      if (mounted) {
+      if (mounted && context.mounted) {
         SnackbarUtil.showSnackBar(
           context,
           strings(context).recipeSavedSuccessfully,
           showIcon: true,
         );
         // Refresh the recipe lists
-        ref.invalidate(recipeListProvider);
-        Navigator.of(context).pop();
+        ref.invalidate(
+          savedRecipesProvider,
+        ); // refresh the saved recipes list after saving
+        Navigator.of(context).popUntil((route) => route.isFirst);
       }
     }
   }

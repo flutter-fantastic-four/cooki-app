@@ -19,6 +19,10 @@ class AppStrings {
   static const String minutes = '분';
   static const String calories = 'kcal';
   static const String communityPost = '커뮤니티 게시하기';
+  static const String communityUnpost = '커뮤니티 게시 취소';
   static const String deleteSuccess = '레시피가 삭제되었습니다.';
   static const String deleteError = '삭제 중 오류가 발생했습니다.';
+  static const String postSuccess = '커뮤니티에 게시되었습니다.';
+  static const String unpostSuccess = '커뮤니티 게시가 취소되었습니다.';
+  static const String postError = '게시 중 오류가 발생했습니다.';
 }

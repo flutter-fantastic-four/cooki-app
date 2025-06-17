@@ -156,6 +156,12 @@ class GenerateRecipeViewModel extends AutoDisposeNotifier<GenerateRecipeState> {
             ..writeln(state.selectedPreferences.join(', '));
       final promptInputFormatted = buffer.toString();
 
+      // Ensure generated recipes have the 'generated' tag
+      final tags = List<String>.from(generatedRecipe.tags);
+      if (!tags.contains('generated')) {
+        tags.add('generated');
+      }
+
       final recipe = Recipe(
         id: '',
         // Firestore will generate
@@ -165,7 +171,7 @@ class GenerateRecipeViewModel extends AutoDisposeNotifier<GenerateRecipeState> {
         cookTime: generatedRecipe.cookTime,
         calories: generatedRecipe.calories,
         category: generatedRecipe.category,
-        tags: generatedRecipe.tags,
+        tags: tags,
         userId: user.id,
         userName: user.name,
         userProfileImage: user.profileImage,
