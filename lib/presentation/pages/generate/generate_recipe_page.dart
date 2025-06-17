@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cooki/core/utils/dialogue_util.dart';
 import 'package:cooki/core/utils/error_mappers.dart';
 import 'package:cooki/core/utils/general_util.dart';
@@ -19,6 +21,7 @@ class GenerateRecipePage extends ConsumerWidget {
   const GenerateRecipePage({super.key});
 
   Future<void> _generateRecipe(WidgetRef ref, BuildContext context) async {
+    final start = DateTime.now();
     final savedRecipe = await ref
         .read(generateRecipeViewModelProvider.notifier)
         .generateAndSaveRecipe(
@@ -26,6 +29,9 @@ class GenerateRecipePage extends ConsumerWidget {
           imageRecipePromptPath: strings(context).imageRecipePromptPath,
           user: ref.read(userGlobalViewModelProvider)!,
         );
+    log(
+      'generateAndSaveRecipe executed in ${DateTime.now().difference(start).inMilliseconds} ms',
+    );
 
     final state = ref.read(generateRecipeViewModelProvider);
 

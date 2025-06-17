@@ -2,8 +2,10 @@ import 'dart:developer';
 
 import 'package:cooki/core/utils/logger.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 abstract class OAuthSignInDataSource<T> {
   Future<T?> signIn();
@@ -24,6 +26,26 @@ class GoogleOAuthDataSourceImpl implements OAuthSignInDataSource<GoogleSignInAut
 
   @override
   Future<void> signOut() => _googleSignIn.signOut();
+}
+
+class AppleOAuthDataSourceImpl implements OAuthSignInDataSource<AuthorizationCredentialAppleID> {
+  @override
+  Future<AuthorizationCredentialAppleID?> signIn() async {
+    String redirectURL = dotenv.env['APPLE_REDIRECT_URI'].toString();
+    String? clientID = dotenv.env['APPLE_CLIENT_ID'];
+    final appleCredential = await SignInWithApple.getAppleIDCredential(
+      scopes: [AppleIDAuthorizationScopes.fullName, AppleIDAuthorizationScopes.email],
+      webAuthenticationOptions: WebAuthenticationOptions(clientId: clientID!, redirectUri: Uri.parse(redirectURL)),
+    );
+
+    return appleCredential;
+  }
+
+  @override
+  Future<void> signOut() async {
+    log('Apple Sign In sign out completed.');
+    return Future.value();
+  }
 }
 
 class KakaoOAuthDataSourceImpl implements OAuthSignInDataSource<String> {

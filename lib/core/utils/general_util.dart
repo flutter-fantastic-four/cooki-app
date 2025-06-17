@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -22,5 +23,24 @@ class GeneralUtil {
           format: format,
         )
         : null;
+  }
+
+  static Future<File> compressImageFile(
+    File imageFile, {
+    int quality = 70,
+    CompressFormat format = CompressFormat.jpeg,
+  }) async {
+    final dir = imageFile.parent;
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final targetPath = '${dir.path}/compressed_$timestamp.jpg';
+
+    final compressedFile = await FlutterImageCompress.compressAndGetFile(
+      imageFile.absolute.path,
+      targetPath,
+      quality: quality,
+      format: format
+    );
+
+    return compressedFile != null ? File(compressedFile.path) : imageFile;
   }
 }

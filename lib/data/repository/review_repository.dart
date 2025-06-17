@@ -6,11 +6,14 @@ import '../data_source/image_storage_data_source.dart';
 import '../data_source/review_data_source.dart';
 
 abstract class ReviewRepository {
-  Future<String> saveReview(Review review);
+  Future<String> saveReview({required String recipeId, required Review review});
 
-  Future<void> editReview(Review review);
+  Future<void> editReview({required String recipeId, required Review review});
 
-  Future<void> deleteReview(String reviewId);
+  Future<void> deleteReview({
+    required String recipeId,
+    required String reviewId,
+  });
 
   Future<List<Review>> getReviewsByRecipeId(
     String recipeId, {
@@ -33,18 +36,36 @@ class ReviewRepositoryImpl implements ReviewRepository {
   ReviewRepositoryImpl(this._reviewDataSource, this._imageStorageDataSource);
 
   @override
-  Future<String> saveReview(Review review) async {
-    return await _reviewDataSource.saveReview(ReviewDto.fromEntity(review));
+  Future<String> saveReview({
+    required String recipeId,
+    required Review review,
+  }) async {
+    return await _reviewDataSource.saveReview(
+      recipeId: recipeId,
+      reviewDto: ReviewDto.fromEntity(review),
+    );
   }
 
   @override
-  Future<void> editReview(Review review) async {
-    await _reviewDataSource.editReview(ReviewDto.fromEntity(review));
+  Future<void> editReview({
+    required String recipeId,
+    required Review review,
+  }) async {
+    await _reviewDataSource.editReview(
+      recipeId: recipeId,
+      reviewDto: ReviewDto.fromEntity(review),
+    );
   }
 
   @override
-  Future<void> deleteReview(String reviewId) async {
-    await _reviewDataSource.deleteReview(reviewId);
+  Future<void> deleteReview({
+    required String recipeId,
+    required String reviewId,
+  }) async {
+    await _reviewDataSource.deleteReview(
+      recipeId: recipeId,
+      reviewId: reviewId,
+    );
   }
 
   @override
@@ -76,6 +97,10 @@ class ReviewRepositoryImpl implements ReviewRepository {
 
   @override
   Future<String> uploadReviewImage(File imageFile, String uid) async {
-    return await _imageStorageDataSource.uploadImageFile(imageFile, uid, 'review_images');
+    return await _imageStorageDataSource.uploadImageFile(
+      imageFile,
+      uid,
+      'review_images',
+    );
   }
 }

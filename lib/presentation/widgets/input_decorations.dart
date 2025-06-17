@@ -1,12 +1,10 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../app/constants/app_colors.dart';
 
-InputDecoration getInputDecoration(String? hint, {bool isDate = false}) {
+InputDecoration getInputDecoration(String? hint) {
   return InputDecoration(
     hintText: hint,
-    suffixIcon: !isDate ? null : const Icon(CupertinoIcons.calendar),
     hintStyle: const TextStyle(color: Colors.grey),
     enabledBorder: _buildBorder(radius: 14, color: AppColors.borderGrey),
     focusedBorder: _buildBorder(radius: 12, color: AppColors.primary),
