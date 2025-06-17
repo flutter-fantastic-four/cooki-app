@@ -96,9 +96,7 @@ class GenerateRecipeViewModel extends AutoDisposeNotifier<GenerateRecipeState> {
             .validateUserInput(state.textInput);
 
         if (!validationResult.isValid) {
-          state = state.copyWith(
-            errorKey: SaveRecipeErrorKey.invalidUserInput,
-          );
+          state = state.copyWith(errorKey: SaveRecipeErrorKey.invalidUserInput);
           return null;
         }
       }
@@ -146,19 +144,16 @@ class GenerateRecipeViewModel extends AutoDisposeNotifier<GenerateRecipeState> {
       if (state.selectedImageBytes != null) {
         imageUrl = await ref
             .read(recipeRepositoryProvider)
-            .uploadImageBytes(
-              state.selectedImageBytes!,
-              user.id,
-              'recipe_images',
-            );
+            .uploadImageBytes(state.selectedImageBytes!, user.id);
       }
 
-      final buffer = StringBuffer()
-        ..writeln('[Text Input]')
-        ..writeln(state.textInput.trim())
-        ..writeln()
-        ..writeln('[Preferences]')
-        ..writeln(state.selectedPreferences.join(', '));
+      final buffer =
+          StringBuffer()
+            ..writeln('[Text Input]')
+            ..writeln(state.textInput.trim())
+            ..writeln()
+            ..writeln('[Preferences]')
+            ..writeln(state.selectedPreferences.join(', '));
       final promptInputFormatted = buffer.toString();
 
       final recipe = Recipe(

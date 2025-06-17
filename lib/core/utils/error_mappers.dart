@@ -18,6 +18,13 @@ enum RecipeValidationErrorKey {
   required,
 }
 
+enum ReviewsErrorKey {
+  loadFailed,
+  deleteFailed,
+}
+
+enum AddReviewErrorKey { tooManyImages, saveFailed, imageUploadFailed }
+
 class ErrorMapper {
   static String mapGenerateRecipeError(
     BuildContext context,
@@ -39,9 +46,9 @@ class ErrorMapper {
   }
 
   static String? mapRecipeValidationError(
-      BuildContext context,
-      RecipeValidationErrorKey? key,
-      ) {
+    BuildContext context,
+    RecipeValidationErrorKey? key,
+  ) {
     final s = strings(context);
     switch (key) {
       case RecipeValidationErrorKey.titleRequired:
@@ -61,4 +68,27 @@ class ErrorMapper {
     }
   }
 
+  static String mapAddReviewError(BuildContext context, AddReviewErrorKey key) {
+    final s = strings(context);
+    switch (key) {
+      // case AddReviewErrorKey.ratingRequired:
+      //   return s.ratingRequiredError;
+      case AddReviewErrorKey.tooManyImages:
+        return s.tooManyImagesError;
+      case AddReviewErrorKey.saveFailed:
+        return s.saveFailedError;
+      case AddReviewErrorKey.imageUploadFailed:
+        return s.imageUploadFailedError;
+    }
+  }
+
+  static String mapReviewsPageError(BuildContext context, ReviewsErrorKey errorKey) {
+    final s = strings(context);
+    switch (errorKey) {
+      case ReviewsErrorKey.loadFailed:
+        return s.reviewsLoadFailedError;
+      case ReviewsErrorKey.deleteFailed:
+        return s.reviewDeleteFailedError;
+    }
+  }
 }

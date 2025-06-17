@@ -22,7 +22,13 @@ class LoginButton extends ConsumerWidget {
           child: Stack(
             alignment: Alignment.center,
             children: [
-              Align(alignment: Alignment.centerLeft, child: Padding(padding: const EdgeInsets.only(left: 16), child: _signInMethodIcon())),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 16),
+                  child: _signInMethodIcon(),
+                ),
+              ),
               _signInMethodText(context),
             ],
           ),
@@ -48,7 +54,7 @@ class LoginButton extends ConsumerWidget {
       SignInMethod.kakao => strings(context).loginPageKaKaoButton,
       SignInMethod.apple => strings(context).loginPageAppleButton,
     };
-    return Text('$signInMethodText로 시작하기', style: const TextStyle(fontSize: 16));
+    return Text(signInMethodText, style: const TextStyle(fontSize: 16));
   }
 
   Image _signInMethodIcon() {
@@ -67,17 +73,17 @@ class LoginButton extends ConsumerWidget {
 
     switch (signInMethod) {
       case SignInMethod.google:
-        backgroundColor = AppColors.googleLoginBackground;
-        textColor = AppColors.googleLogintext;
-        border = AppColors.googleLoginBorder;
+        backgroundColor = AppColors.white;
+        textColor = AppColors.black;
+        border = AppColors.black;
         break;
       case SignInMethod.kakao:
         backgroundColor = AppColors.kakaoLoginBackground;
-        textColor = AppColors.kakaoLogintext;
+        textColor = AppColors.black;
         break;
       case SignInMethod.apple:
-        backgroundColor = AppColors.appleLoginBackground;
-        textColor = AppColors.appleLogintext;
+        backgroundColor = AppColors.black;
+        textColor = AppColors.white;
         break;
     }
 
