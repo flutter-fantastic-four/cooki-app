@@ -123,15 +123,14 @@ class ReviewsPage extends ConsumerWidget {
         title: Text(strings(context).recipeReviews),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: InkWell(
-              highlightColor: AppColors.greyScale300,
-              onTap: () => _navigateToWriteReview(context, ref),
-              customBorder: const CircleBorder(),
-              child: Image.asset(
-                'assets/icons/edit_icon.png',
-                width: 24,
-                height: 24,
+            padding: const EdgeInsets.only(right: 4),
+            child: IconButton(
+              tooltip: strings(context).writeReviewTitle,
+              onPressed: () => _navigateToWriteReview(context, ref),
+              icon: const Icon(
+                Icons.edit_outlined,
+                size: 22,
+                color: Colors.black87,
               ),
             ),
           ),
