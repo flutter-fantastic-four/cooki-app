@@ -146,7 +146,7 @@ class WriteReviewPage extends ConsumerWidget {
                     writeReviewViewModelProvider.select((state) => state.rating),
                   ),
                   iconSize: 32,
-                  onPressed:
+                  setRating:
                       (selectedRating) => ref
                       .read(writeReviewViewModelProvider.notifier)
                       .setRating(selectedRating),

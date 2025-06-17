@@ -3,15 +3,17 @@ import 'package:flutter/material.dart';
 class StarRating extends StatelessWidget {
   final int currentRating;
   final double iconSize;
-  final Function(int) onPressed;
+  final double horizontalPadding;
+  final Function(int)? setRating;
   final Color selectedColor;
   final Color unselectedColor;
 
   const StarRating({
     super.key,
     required this.currentRating,
-    required this.iconSize,
-    required this.onPressed,
+    this.iconSize = 32,
+    this.horizontalPadding = 4,
+    this.setRating,
     this.selectedColor = Colors.black,
     this.unselectedColor = Colors.black,
   });
@@ -22,7 +24,7 @@ class StarRating extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(5, (index) {
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+          padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
           child: SizedBox.square(
             dimension: iconSize,
             child: IconButton(
@@ -32,11 +34,16 @@ class StarRating extends StatelessWidget {
                 size: iconSize,
                 color: index < currentRating ? selectedColor : unselectedColor,
               ),
-              onPressed: () {
-                final selectedRating = index + 1;
-                // If the same star is pressed, reset to 0, otherwise set the new rating
-                onPressed(selectedRating == currentRating ? 0 : selectedRating);
-              },
+              onPressed:
+                  setRating == null
+                      ? null
+                      : () {
+                        final selectedRating = index + 1;
+                        // If the same star is pressed, reset to 0, otherwise set the new rating
+                        setRating!(
+                          selectedRating == currentRating ? 0 : selectedRating,
+                        );
+                      },
             ),
           ),
         );
