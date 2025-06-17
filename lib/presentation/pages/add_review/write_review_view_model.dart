@@ -9,14 +9,14 @@ import '../../../domain/entity/review.dart';
 
 class WriteReviewState {
   final int rating;
-  final String reviewText;
+  final String? reviewText;
   final List<File> selectedImages;
   final bool isSaving;
   final AddReviewErrorKey? errorKey;
 
   const WriteReviewState({
     this.rating = 0,
-    this.reviewText = '',
+    this.reviewText,
     this.selectedImages = const [],
     this.isSaving = false,
     this.errorKey,
@@ -62,7 +62,7 @@ class WriteReviewViewModel extends AutoDisposeNotifier<WriteReviewState> {
 
       final review = Review(
         id: '',
-        reviewText: state.reviewText.trim(),
+        reviewText: state.reviewText?.trim(),
         rating: state.rating,
         imageUrls: imageUrls,
         userId: user.id,

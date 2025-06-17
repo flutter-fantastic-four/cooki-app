@@ -3,7 +3,7 @@ import '../../domain/entity/review.dart';
 
 class ReviewDto {
   final String id;
-  final String reviewText;
+  final String? reviewText;
   final int rating;
   final List<String> imageUrls;
   final Timestamp createdAt;
@@ -15,7 +15,7 @@ class ReviewDto {
 
   const ReviewDto({
     required this.id,
-    required this.reviewText,
+    this.reviewText,
     required this.rating,
     required this.imageUrls,
     required this.createdAt,
@@ -29,7 +29,7 @@ class ReviewDto {
   factory ReviewDto.fromMap(String id, Map<String, dynamic> map) {
     return ReviewDto(
       id: id,
-      reviewText: map['reviewText'] ?? '',
+      reviewText: map['reviewText'],
       rating: map['rating'] ?? 1,
       imageUrls: List<String>.from(map['imageUrls'] ?? []),
       createdAt: map['createdAt'] ?? Timestamp.now(),
