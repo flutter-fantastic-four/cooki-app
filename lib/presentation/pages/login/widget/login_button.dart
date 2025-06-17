@@ -73,17 +73,17 @@ class LoginButton extends ConsumerWidget {
 
     switch (signInMethod) {
       case SignInMethod.google:
-        backgroundColor = AppColors.googleLoginBackground;
-        textColor = AppColors.googleLogintext;
-        border = AppColors.googleLoginBorder;
+        backgroundColor = AppColors.white;
+        textColor = AppColors.black;
+        border = AppColors.black;
         break;
       case SignInMethod.kakao:
         backgroundColor = AppColors.kakaoLoginBackground;
-        textColor = AppColors.kakaoLogintext;
+        textColor = AppColors.black;
         break;
       case SignInMethod.apple:
-        backgroundColor = AppColors.appleLoginBackground;
-        textColor = AppColors.appleLogintext;
+        backgroundColor = AppColors.black;
+        textColor = AppColors.white;
         break;
     }
 

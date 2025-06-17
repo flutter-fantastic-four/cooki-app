@@ -21,7 +21,9 @@ final authRepositoryProvider = Provider<AuthRepository>(
 
 final authStateChangesProvider = StreamProvider<String?>((ref) => ref.read(authRepositoryProvider).authStateChanges());
 
-final userRepositoryProvider = Provider<UserRepository>((ref) => UserRepositoryImpl(ref.read(userFirestoreDataSourceProvider)));
+final userRepositoryProvider = Provider<UserRepository>(
+  (ref) => UserRepositoryImpl(ref.read(userFirestoreDataSourceProvider), ref.read(imageStorageDataSourceProvider)),
+);
 
 final recipeGenerationRepositoryProvider = Provider<RecipeGenerationRepository>((ref) {
   return RecipeGenerationRepositoryImpl(ref.read(recipeGenerationDataSourceProvider));
@@ -38,9 +40,5 @@ final recipeRepositoryProvider = Provider<RecipeRepository>(
 );
 
 final reviewRepositoryProvider = Provider<ReviewRepository>(
-      (ref) => ReviewRepositoryImpl(
-    ref.read(reviewDataSourceProvider),
-    ref.read(imageStorageDataSourceProvider),
-  ),
+  (ref) => ReviewRepositoryImpl(ref.read(reviewDataSourceProvider), ref.read(imageStorageDataSourceProvider)),
 );
-

@@ -5,6 +5,7 @@ import '../dto/user_dto.dart';
 abstract class UserDataSource {
   Future<UserDto?> getUserById(String uid);
   Future<void> saveUser(UserDto user);
+  Future<void> deleteUser(UserDto user);
 }
 
 class UserFirestoreDataSource implements UserDataSource {
@@ -22,5 +23,10 @@ class UserFirestoreDataSource implements UserDataSource {
   @override
   Future<void> saveUser(UserDto user) async {
     await _firestore.collection('users').doc(user.id).set(user.toMap());
+  }
+
+  @override
+  Future<void> deleteUser(UserDto user) async {
+    await _firestore.collection('users').doc(user.id).delete();
   }
 }
