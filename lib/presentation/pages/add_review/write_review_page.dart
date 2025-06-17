@@ -56,7 +56,7 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
       DialogueUtil.showAppCupertinoDialog(
         context: context,
         title: strings(context).reviewUploadFailedTitle,
-        content: ErrorMapper.mapAddReviewError(context, state.errorKey!),
+        content: ErrorMapper.mapWriteReviewError(context, state.errorKey!),
       );
       ref.read(writeReviewViewModelProvider.notifier).clearError();
       return;
@@ -121,7 +121,7 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
 
       final state = ref.read(writeReviewViewModelProvider);
       if (context.mounted &&
-          state.errorKey == AddReviewErrorKey.tooManyImages) {
+          state.errorKey == WriteReviewErrorKey.tooManyImages) {
         SnackbarUtil.showSnackBar(
           context,
           strings(context).tooManyImagesError,

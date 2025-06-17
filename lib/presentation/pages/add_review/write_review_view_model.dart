@@ -11,7 +11,7 @@ class WriteReviewState {
   final int rating;
   final List<File> selectedImages;
   final bool isSaving;
-  final AddReviewErrorKey? errorKey;
+  final WriteReviewErrorKey? errorKey;
 
   const WriteReviewState({
     this.rating = 0,
@@ -24,7 +24,7 @@ class WriteReviewState {
     int? rating,
     List<File>? selectedImages,
     bool? isSaving,
-    AddReviewErrorKey? errorKey,
+    WriteReviewErrorKey? errorKey,
     bool clearErrorKey = false,
   }) {
     return WriteReviewState(
@@ -72,7 +72,7 @@ class WriteReviewViewModel extends AutoDisposeNotifier<WriteReviewState> {
           .saveReview(recipeId: recipeId, review: review);
     } catch (e, stack) {
       logError(e, stack);
-      state = state.copyWith(errorKey: AddReviewErrorKey.saveFailed);
+      state = state.copyWith(errorKey: WriteReviewErrorKey.saveFailed);
     } finally {
       state = state.copyWith(isSaving: false);
     }
@@ -92,7 +92,7 @@ class WriteReviewViewModel extends AutoDisposeNotifier<WriteReviewState> {
       return await Future.wait(uploadTasks);
     } catch (e, stack) {
       logError(e, stack);
-      state = state.copyWith(errorKey: AddReviewErrorKey.imageUploadFailed);
+      state = state.copyWith(errorKey: WriteReviewErrorKey.imageUploadFailed);
       return null;
     }
   }
@@ -106,7 +106,7 @@ class WriteReviewViewModel extends AutoDisposeNotifier<WriteReviewState> {
     final totalImages = currentImages.length + images.length;
 
     if (totalImages > 5) {
-      state = state.copyWith(errorKey: AddReviewErrorKey.tooManyImages);
+      state = state.copyWith(errorKey: WriteReviewErrorKey.tooManyImages);
       return;
     }
 
