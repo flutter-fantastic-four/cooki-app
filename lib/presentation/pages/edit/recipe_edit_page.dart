@@ -247,15 +247,6 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
                       onRemove: (index) => _removeStep(vm, index),
                     ),
 
-                    const SizedBox(height: 10),
-                    Text(
-                      strings(context).isPublicLabel,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-
                     _buildPublicToggle(),
                   ],
                 ),
@@ -341,16 +332,28 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
       ).select((state) => state.isPublic),
     );
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 8),
-        Switch.adaptive(
-          activeColor: const Color(0xFF1D8163),
-          value: isPublic,
-          onChanged: (val) => vm.setIsPublic(val),
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.only(left: 5),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 6),
+          Text(
+            strings(context).isPublicLabel,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Switch.adaptive(
+            activeColor: const Color(0xFF1D8163),
+            value: isPublic,
+            onChanged: (val) => vm.setIsPublic(val),
+          ),
+          const SizedBox(height: 20),
+        ],
+      ),
     );
   }
 }
