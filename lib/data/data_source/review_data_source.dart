@@ -37,11 +37,14 @@ class ReviewFirestoreDataSource implements ReviewDataSource {
     required String recipeId,
     required ReviewDto reviewDto,
   }) async {
+    final reviewData =
+        reviewDto.toMap()..['createdAt'] = FieldValue.serverTimestamp();
+
     final docRef = await _firestore
         .collection('recipes')
         .doc(recipeId)
         .collection('reviews')
-        .add(reviewDto.toMap());
+        .add(reviewData);
     return docRef.id;
   }
 
@@ -50,12 +53,15 @@ class ReviewFirestoreDataSource implements ReviewDataSource {
     required String recipeId,
     required ReviewDto reviewDto,
   }) async {
+    final reviewData =
+        reviewDto.toMap()..['updatedAt'] = FieldValue.serverTimestamp();
+
     await _firestore
         .collection('recipes')
         .doc(recipeId)
         .collection('reviews')
         .doc(reviewDto.id)
-        .update(reviewDto.toMap());
+        .update(reviewData);
   }
 
   @override
