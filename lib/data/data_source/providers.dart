@@ -11,7 +11,6 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import 'firebase_auth_data_source.dart';
 import 'oauth_sign_in_data_source.dart';
@@ -50,10 +49,6 @@ final recipeGenerationDataSourceProvider = Provider<RecipeGenerationDataSource>(
   (ref) => GeminiRecipeGenerationDataSource(ref.read(firebaseAIProvider)),
 );
 
-final imageDownloadDataSourceProvider = Provider<ImageDownloadDataSource>(
-  (ref) => DioImageDownloadDataSource(ref.read(dioProvider)),
-);
+final imageDownloadDataSourceProvider = Provider<ImageDownloadDataSource>((ref) => DioImageDownloadDataSource(ref.read(dioProvider)));
 
-final reviewDataSourceProvider = Provider<ReviewDataSource>(
-      (ref) => ReviewFirestoreDataSource(ref.read(firestoreProvider)),
-);
+final reviewDataSourceProvider = Provider<ReviewDataSource>((ref) => ReviewFirestoreDataSource(ref.read(firestoreProvider)));
