@@ -91,6 +91,19 @@ class ReviewsPage extends ConsumerWidget {
     }
   }
 
+  void _showErrorDialog(
+    BuildContext context,
+    ReviewsErrorKey errorKey,
+    WidgetRef ref,
+  ) {
+    DialogueUtil.showAppCupertinoDialog(
+      context: context,
+      title: strings(context).genericErrorTitle,
+      content: ErrorMapper.mapReviewsPageError(context, errorKey),
+    );
+    ref.read(reviewsViewModelProvider(recipeId).notifier).clearError();
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(reviewsViewModelProvider(recipeId));
@@ -124,61 +137,56 @@ class ReviewsPage extends ConsumerWidget {
           ),
         ],
       ),
-      body: Stack(
-        children: [
-          RefreshIndicator(
-            onRefresh:
-                () =>
-                    ref
-                        .read(reviewsViewModelProvider(recipeId).notifier)
-                        .refreshReviews(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (state.reviews.isEmpty && !state.isLoading)
-                  Expanded(child: _buildEmptyLayout(context))
-                else if (state.reviews.isNotEmpty) ...[
-                  _buildSortingChips(context, ref, state),
-                  Expanded(
-                    child: ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(16, 10, 16, 40),
-                      itemCount: state.reviews.length,
-                      itemBuilder: (context, index) {
-                        final review = state.reviews[index];
-                        return _buildReviewItem(context, ref, review);
-                      },
+      body:
+          state.isLoading && state.reviews.isEmpty
+              ? const Center(child: CupertinoActivityIndicator(radius: 20))
+              : Stack(
+                children: [
+                  RefreshIndicator(
+                    onRefresh:
+                        () =>
+                            ref
+                                .read(
+                                  reviewsViewModelProvider(recipeId).notifier,
+                                )
+                                .refreshReviews(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (state.reviews.isEmpty && !state.isLoading)
+                          Expanded(child: _buildEmptyLayout(context))
+                        else if (state.reviews.isNotEmpty) ...[
+                          _buildSortingChips(context, ref, state),
+                          Expanded(
+                            child: ListView.builder(
+                              padding: const EdgeInsets.fromLTRB(
+                                16,
+                                10,
+                                16,
+                                40,
+                              ),
+                              itemCount: state.reviews.length,
+                              itemBuilder: (context, index) {
+                                final review = state.reviews[index];
+                                return _buildReviewItem(context, ref, review);
+                              },
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
+                  if (state.isLoading)
+                    const Positioned.fill(
+                      child: IgnorePointer(
+                        child: Center(
+                          child: CupertinoActivityIndicator(radius: 14),
+                        ),
+                      ),
+                    ),
                 ],
-              ],
-            ),
-          ),
-          if (state.isLoading && state.reviews.isEmpty)
-            Expanded(
-              child: Center(child: CupertinoActivityIndicator(radius: 20)),
-            )
-          else if (state.isLoading)
-            const Positioned.fill(
-              child: IgnorePointer(
-                child: Center(child: CupertinoActivityIndicator(radius: 14)),
               ),
-            ),
-        ],
-      ),
     );
-  }
-
-  void _showErrorDialog(
-    BuildContext context,
-    ReviewsErrorKey errorKey,
-    WidgetRef ref,
-  ) {
-    DialogueUtil.showAppCupertinoDialog(
-      context: context,
-      title: strings(context).genericErrorTitle,
-      content: ErrorMapper.mapReviewsPageError(context, errorKey),
-    );
-    ref.read(reviewsViewModelProvider(recipeId).notifier).clearError();
   }
 
   Widget _buildEmptyLayout(BuildContext context) {
