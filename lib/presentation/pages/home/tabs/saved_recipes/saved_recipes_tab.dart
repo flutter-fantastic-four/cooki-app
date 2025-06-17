@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../app/constants/app_constants.dart';
 import '../../../../../data/repository/providers.dart';
 import '../../../../../domain/entity/recipe.dart';
-import '../../../../../presentation/widgets/app_cached_image.dart';
 import '../../../../../app/constants/app_colors.dart';
 import '../../../../../app/constants/app_strings.dart';
 import '../../../../pages/edit/recipe_edit_page.dart';
@@ -535,7 +534,6 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
       primaryButtonText: AppStrings.delete,
       secondaryButtonText: AppStrings.cancel,
       onPrimaryButtonPressed: () {
-        Navigator.of(context).pop();
         _deleteRecipe(recipe.id);
       },
     );
@@ -637,8 +635,8 @@ class _RecipeCard extends StatelessWidget {
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(6),
                     ),
-                    child: AppCachedImage(
-                      imageUrl: recipe.imageUrl!,
+                    child: Image.network(
+                      recipe.imageUrl!,
                       fit: BoxFit.cover,
                       width: double.infinity,
                       height: double.infinity,
