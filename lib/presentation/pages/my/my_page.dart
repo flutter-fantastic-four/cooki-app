@@ -12,7 +12,13 @@ class MyPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppBar(title: Text(strings(context).myPage), centerTitle: false),
+      appBar: AppBar(
+        titleSpacing: 20,
+        actionsPadding: EdgeInsets.only(right: 20),
+        title: Text(strings(context).myPage),
+        centerTitle: false,
+        actions: [Text(strings(context).language)],
+      ),
       body: Column(
         children: [
           const SizedBox(height: 24),

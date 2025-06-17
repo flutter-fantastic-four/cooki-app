@@ -95,6 +95,7 @@
   "contactTheDevelopersTeam" : "개발자들에게 문의",
   "logout" : "로그아웃",
   "deleteAccount":"회원탈퇴",
+  "language" : "언어설정", 
 
   "logoutDialogTitle" : "로그아웃할까요?",
   "logoutDialogSubTitle" : "로그아웃할까요?",
@@ -120,4 +121,5 @@
   "reviewTextHint": "요리하면서 느낀 점, 맛에 대한 평가, 팁이나 후기 등 음식에 대한 솔직한 리뷰를 자유롭게 작성해보세요. (선택)",
   "saveReviewButtonText": "저장",
   "reviewSavedSuccessfully": "리뷰가 저장되었습니다"
+  
 }
