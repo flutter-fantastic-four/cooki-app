@@ -1,11 +1,14 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 abstract class FirebaseAuthDataSource {
   Future<User?> signInWithGoogle(GoogleSignInAuthentication auth);
 
   Future<User?> signInWithKakao(String kakaoToken);
+
+  Future<User?> signInWithApple(AuthorizationCredentialAppleID appleCredential);
 
   Future<void> signOut();
 
@@ -52,5 +55,12 @@ class FirebaseAuthDataSourceImpl implements FirebaseAuthDataSource {
   @override
   Future<void> deleteUser() async {
     _auth.currentUser!.delete();
+  }
+
+  @override
+  Future<User?> signInWithApple(AuthorizationCredentialAppleID appleCredential) async {
+    final credential = OAuthProvider('apple.com').credential(idToken: appleCredential.identityToken, accessToken: appleCredential.authorizationCode);
+    final userCredential = await _auth.signInWithCredential(credential);
+    return userCredential.user;
   }
 }

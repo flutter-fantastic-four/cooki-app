@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:cooki/presentation/pages/add_review/write_review_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,6 +34,14 @@ class BottomButtonsRow extends ConsumerWidget {
             child: OutlinedButton(
               onPressed: () {
                 log(recipe.toString());
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder:
+                        (context) =>
+                            WriteReviewPage(recipeId: recipe!.id, recipeName: recipe!.recipeName),
+                  ),
+                );
               },
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: Colors.red),

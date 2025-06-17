@@ -38,6 +38,7 @@ dependencies:
   path_provider: ^2.1.5
   share_plus: ^11.0.0
   package_info_plus: ^8.3.0
+  sign_in_with_apple: ^7.0.1
 
 dev_dependencies:
   flutter_test:
