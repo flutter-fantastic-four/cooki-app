@@ -15,6 +15,7 @@ class Recipe {
   final DateTime createdAt;
   final DateTime? updatedAt;
   final String? promptInput;
+  final int rating;
 
   Recipe({
     required this.id,
@@ -33,6 +34,7 @@ class Recipe {
     DateTime? createdAt,
     this.updatedAt,
     this.promptInput,
+    this.rating = 0,
   }) : createdAt = createdAt ?? DateTime.now();
 
   Recipe copyWith({
@@ -52,6 +54,7 @@ class Recipe {
     DateTime? createdAt,
     DateTime? updatedAt,
     String? promptInput,
+    int? rating,
   }) {
     return Recipe(
       id: id ?? this.id,
@@ -70,6 +73,7 @@ class Recipe {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       promptInput: promptInput ?? this.promptInput,
+      rating: rating ?? this.rating,
     );
   }
 }

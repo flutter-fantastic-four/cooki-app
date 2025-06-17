@@ -5,11 +5,11 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../app/constants/app_colors.dart';
 import '../../../app/constants/app_styles.dart';
-import '../../../core/utils/dialogue_util.dart';
 import '../../../core/utils/snackbar_util.dart';
 import '../../../data/repository/providers.dart';
 import '../../user_global_view_model.dart';
 import '../login/login_page.dart';
+import '../../widgets/app_dialog.dart';
 
 /// Settings page that allows users to configure app preferences.
 class MyPage extends ConsumerWidget {
@@ -52,13 +52,15 @@ class MyPage extends ConsumerWidget {
 
   Future<void> _logout(BuildContext context, WidgetRef ref) async {
     try {
-      final result = await DialogueUtil.showAppCupertinoDialog(
+      final result = await AppDialog.show(
         context: context,
-        title: '로그아웃할까요?',
-        content: '정말 로그아웃하시겠습니까?',
-        showCancel: true,
+        title: '로그아웃',
+        subText: '정말 로그아웃하시겠습니까?',
+        primaryButtonText: '로그아웃',
+        secondaryButtonText: '취소',
       );
-      if (result == AppDialogResult.confirm) {
+
+      if (result == true) {
         await ref.read(authRepositoryProvider).signOut();
         ref.read(userGlobalViewModelProvider.notifier).clearUser();
 

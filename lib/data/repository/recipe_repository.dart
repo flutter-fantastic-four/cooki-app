@@ -13,6 +13,14 @@ abstract class RecipeRepository {
   Future<String> uploadImageBytes(Uint8List imageBytes, String uid);
 
   Future<List<Recipe>> getAllRecipes();
+
+  Future<List<Recipe>> getSharedRecipes();
+
+  Future<List<Recipe>> getCommunityRecipes();
+
+  Future<void> toggleRecipeShare(String recipeId, bool isPublic);
+
+  Future<void> deleteRecipe(String recipeId);
 }
 
 class RecipeRepositoryImpl implements RecipeRepository {
@@ -46,5 +54,27 @@ class RecipeRepositoryImpl implements RecipeRepository {
   Future<List<Recipe>> getAllRecipes() async {
     final recipeDtoList = await _recipeDataSource.getAllRecipes();
     return recipeDtoList.map((dto) => dto.toEntity()).toList();
+  }
+
+  @override
+  Future<List<Recipe>> getSharedRecipes() async {
+    final recipeDtoList = await _recipeDataSource.getSharedRecipes();
+    return recipeDtoList.map((dto) => dto.toEntity()).toList();
+  }
+
+  @override
+  Future<List<Recipe>> getCommunityRecipes() async {
+    final recipeDtoList = await _recipeDataSource.getCommunityRecipes();
+    return recipeDtoList.map((dto) => dto.toEntity()).toList();
+  }
+
+  @override
+  Future<void> toggleRecipeShare(String recipeId, bool isPublic) async {
+    await _recipeDataSource.toggleRecipeShare(recipeId, isPublic);
+  }
+
+  @override
+  Future<void> deleteRecipe(String recipeId) async {
+    await _recipeDataSource.deleteRecipe(recipeId);
   }
 }

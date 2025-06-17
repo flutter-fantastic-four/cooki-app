@@ -18,6 +18,7 @@ class RecipeFirestoreDto {
   final Timestamp createdAt;
   final Timestamp? updatedAt;
   final String? promptInput;
+  final int rating;
 
   const RecipeFirestoreDto({
     required this.id,
@@ -36,6 +37,7 @@ class RecipeFirestoreDto {
     this.updatedAt,
     this.imageUrl,
     this.promptInput,
+    this.rating = 0,
   });
 
   factory RecipeFirestoreDto.fromMap(String id, Map<String, dynamic> map) {
@@ -56,6 +58,7 @@ class RecipeFirestoreDto {
       createdAt: map['createdAt'] ?? Timestamp.now(),
       updatedAt: map['updatedAt'],
       promptInput: map['promptInput'],
+      rating: map['rating'] ?? 0,
     );
   }
 
@@ -76,6 +79,7 @@ class RecipeFirestoreDto {
       'createdAt': createdAt,
       'updatedAt': updatedAt,
       'promptInput': promptInput,
+      'rating': rating,
     };
   }
 
@@ -100,6 +104,7 @@ class RecipeFirestoreDto {
               ? Timestamp.fromDate(recipe.updatedAt!)
               : null,
       promptInput: recipe.promptInput,
+      rating: recipe.rating,
     );
   }
 
@@ -121,6 +126,7 @@ class RecipeFirestoreDto {
       createdAt: createdAt.toDate(),
       updatedAt: updatedAt?.toDate(),
       promptInput: promptInput,
+      rating: rating,
     );
   }
 }

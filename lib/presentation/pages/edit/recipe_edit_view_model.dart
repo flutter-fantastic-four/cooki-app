@@ -15,6 +15,7 @@ class RecipeEditState {
   final SaveRecipeErrorKey? errorKey;
   final bool isEditingTitle;
   final String? currentTitle;
+  final bool isGenerated;
 
   const RecipeEditState({
     this.selectedCategory,
@@ -23,6 +24,7 @@ class RecipeEditState {
     this.errorKey,
     this.isEditingTitle = false,
     this.currentTitle,
+    this.isGenerated = false,
   });
 
   RecipeEditState copyWith({
@@ -33,6 +35,7 @@ class RecipeEditState {
     bool clearErrorKey = false,
     bool? isEditingTitle,
     String? currentTitle,
+    bool? isGenerated,
   }) => RecipeEditState(
     selectedCategory: selectedCategory ?? this.selectedCategory,
     isPublic: isPublic ?? this.isPublic,
@@ -40,6 +43,7 @@ class RecipeEditState {
     errorKey: clearErrorKey ? null : errorKey ?? this.errorKey,
     isEditingTitle: isEditingTitle ?? this.isEditingTitle,
     currentTitle: currentTitle ?? this.currentTitle,
+    isGenerated: isGenerated ?? this.isGenerated,
   );
 }
 
@@ -51,6 +55,7 @@ class RecipeEditViewModel
       selectedCategory: arg?.category,
       isPublic: arg?.isPublic ?? false,
       currentTitle: arg?.recipeName,
+      isGenerated: arg?.tags.contains('generated') ?? false,
     );
   }
 
@@ -61,6 +66,7 @@ class RecipeEditViewModel
     required int cookTime,
     required int calories,
     required AppUser? user,
+    bool isGenerated = false,
   }) async {
     state = state.copyWith(isSaving: true);
     try {
@@ -78,10 +84,8 @@ class RecipeEditViewModel
         calories: calories,
         category: state.selectedCategory!,
         isPublic: state.isPublic,
-        // TO-DO(optional) Allow editing image
         imageUrl: arg?.imageUrl,
-        // TO-DO(optional): Allow editing tags
-        tags: arg?.tags ?? [],
+        tags: [...(arg?.tags ?? []), if (isGenerated) 'generated'],
         createdAt: arg?.createdAt,
         updatedAt: DateTime.now(),
         userId: arg?.userId ?? user!.id,
