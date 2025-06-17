@@ -135,38 +135,34 @@ class WriteReviewPage extends ConsumerWidget {
         ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: _buildContent(context, ref),
+          child: Center(
+            child: ListView(
+              children: [
+                const SizedBox(height: 24),
+                _buildRecipeNameSection(),
+                const SizedBox(height: 13),
+                StarRating(
+                  currentRating: ref.watch(
+                    writeReviewViewModelProvider.select((state) => state.rating),
+                  ),
+                  iconSize: 32,
+                  setRating:
+                      (selectedRating) => ref
+                      .read(writeReviewViewModelProvider.notifier)
+                      .setRating(selectedRating),
+                ),
+                const SizedBox(height: 32),
+                _buildPhotoUploadSection(ref, context),
+                const SizedBox(height: 24),
+                _buildPhotoThumbnails(ref),
+                const SizedBox(height: 18),
+                _buildTextInputSection(context, ref),
+                const SizedBox(height: 32),
+              ],
+            ),
+          ),
         ),
         bottomNavigationBar: _buildSubmitButton(context, ref),
-      ),
-    );
-  }
-
-  Widget _buildContent(BuildContext context, WidgetRef ref) {
-    return Center(
-      child: ListView(
-        children: [
-          const SizedBox(height: 24),
-          _buildRecipeNameSection(),
-          const SizedBox(height: 13),
-          StarRating(
-            currentRating: ref.watch(
-              writeReviewViewModelProvider.select((state) => state.rating),
-            ),
-            iconSize: 32,
-            onPressed:
-                (selectedRating) => ref
-                    .read(writeReviewViewModelProvider.notifier)
-                    .setRating(selectedRating),
-          ),
-          const SizedBox(height: 32),
-          _buildPhotoUploadSection(ref, context),
-          const SizedBox(height: 24),
-          _buildPhotoThumbnails(ref),
-          const SizedBox(height: 18),
-          _buildTextInputSection(context, ref),
-          const SizedBox(height: 32),
-        ],
       ),
     );
   }
@@ -245,30 +241,28 @@ class WriteReviewPage extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(8),
                     child: Image.file(
                       images[index],
-                      width: 80,
                       height: 80,
                       fit: BoxFit.cover,
                     ),
                   ),
                   Positioned(
-                    top: 3,
-                    right: 3,
+                    top: 4,
+                    right: 4,
                     child: GestureDetector(
                       onTap:
                           () => ref
                               .read(writeReviewViewModelProvider.notifier)
                               .removeImage(index),
                       child: Container(
-                        padding: const EdgeInsets.all(2),
+                        padding: const EdgeInsets.all(0.5),
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade600,
+                          color: Colors.white,
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2.4),
                         ),
                         child: const Icon(
-                          Icons.close,
-                          size: 15,
-                          color: Colors.white,
+                          Icons.cancel,
+                          size: 18,
+                          color: Colors.red,
                         ),
                       ),
                     ),
