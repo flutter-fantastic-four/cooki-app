@@ -14,7 +14,7 @@ import '../../widgets/input_decorations.dart';
 import '../../widgets/star_rating.dart';
 import 'write_review_view_model.dart';
 
-class WriteReviewPage extends ConsumerWidget {
+class WriteReviewPage extends ConsumerStatefulWidget {
   final String recipeId;
   final String recipeName;
 
@@ -24,12 +24,26 @@ class WriteReviewPage extends ConsumerWidget {
     required this.recipeName,
   });
 
-  Future<void> _submitReview(WidgetRef ref, BuildContext context) async {
+  @override
+  ConsumerState<WriteReviewPage> createState() => _WriteReviewPageState();
+}
+
+class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submitReview(BuildContext context) async {
     final start = DateTime.now();
     await ref
         .read(writeReviewViewModelProvider.notifier)
         .saveReview(
-          recipeId: recipeId,
+          recipeId: widget.recipeId,
+          reviewText: _controller.text,
           user: ref.read(userGlobalViewModelProvider)!,
         );
     log(
@@ -58,7 +72,7 @@ class WriteReviewPage extends ConsumerWidget {
     }
   }
 
-  void _showImagePickerModal(BuildContext context, WidgetRef ref) {
+  void _showImagePickerModal(BuildContext context) {
     final currentImageCount = ref.read(
       writeReviewViewModelProvider.select(
         (state) => state.selectedImages.length,
@@ -77,16 +91,12 @@ class WriteReviewPage extends ConsumerWidget {
 
     DialogueUtil.showImagePickerModal(
       context,
-      onCamera: () => _pickImages(context, ref, ImageSource.camera),
-      onGallery: () => _pickImages(context, ref, ImageSource.gallery),
+      onCamera: () => _pickImages(context, ImageSource.camera),
+      onGallery: () => _pickImages(context, ImageSource.gallery),
     );
   }
 
-  Future<void> _pickImages(
-    BuildContext context,
-    WidgetRef ref,
-    ImageSource source,
-  ) async {
+  Future<void> _pickImages(BuildContext context, ImageSource source) async {
     final vm = ref.read(writeReviewViewModelProvider.notifier);
     final ImagePicker picker = ImagePicker();
 
@@ -125,7 +135,7 @@ class WriteReviewPage extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return GestureDetector(
       onTap: FocusScope.of(context).unfocus,
       child: Scaffold(
@@ -143,33 +153,35 @@ class WriteReviewPage extends ConsumerWidget {
                 const SizedBox(height: 13),
                 StarRating(
                   currentRating: ref.watch(
-                    writeReviewViewModelProvider.select((state) => state.rating),
+                    writeReviewViewModelProvider.select(
+                      (state) => state.rating,
+                    ),
                   ),
                   iconSize: 32,
                   setRating:
                       (selectedRating) => ref
-                      .read(writeReviewViewModelProvider.notifier)
-                      .setRating(selectedRating),
+                          .read(writeReviewViewModelProvider.notifier)
+                          .setRating(selectedRating),
                 ),
                 const SizedBox(height: 32),
-                _buildPhotoUploadSection(ref, context),
+                _buildPhotoUploadSection(context),
                 const SizedBox(height: 24),
-                _buildPhotoThumbnails(ref),
+                _buildPhotoThumbnails(),
                 const SizedBox(height: 18),
-                _buildTextInputSection(context, ref),
+                _buildTextInputSection(context),
                 const SizedBox(height: 32),
               ],
             ),
           ),
         ),
-        bottomNavigationBar: _buildSubmitButton(context, ref),
+        bottomNavigationBar: _buildSubmitButton(context),
       ),
     );
   }
 
   Widget _buildRecipeNameSection() {
     return Text(
-      recipeName,
+      widget.recipeName,
       style: const TextStyle(
         fontSize: 20,
         fontWeight: FontWeight.bold,
@@ -179,9 +191,9 @@ class WriteReviewPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildPhotoUploadSection(WidgetRef ref, BuildContext context) {
+  Widget _buildPhotoUploadSection(BuildContext context) {
     return GestureDetector(
-      onTap: () => _showImagePickerModal(context, ref),
+      onTap: () => _showImagePickerModal(context),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 14),
@@ -209,7 +221,7 @@ class WriteReviewPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildPhotoThumbnails(WidgetRef ref) {
+  Widget _buildPhotoThumbnails() {
     final images = ref.watch(
       writeReviewViewModelProvider.select((state) => state.selectedImages),
     );
@@ -276,14 +288,11 @@ class WriteReviewPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildTextInputSection(BuildContext context, WidgetRef ref) {
+  Widget _buildTextInputSection(BuildContext context) {
     return TextField(
       maxLines: 7,
       maxLength: 500,
-      onChanged:
-          (text) => ref
-              .read(writeReviewViewModelProvider.notifier)
-              .updateReviewText(text),
+      controller: _controller,
       decoration: getInputDecoration(strings(context).reviewTextHint).copyWith(
         contentPadding: const EdgeInsets.symmetric(
           vertical: 16,
@@ -293,7 +302,7 @@ class WriteReviewPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildSubmitButton(BuildContext context, WidgetRef ref) {
+  Widget _buildSubmitButton(BuildContext context) {
     final canSubmit = ref.watch(
       writeReviewViewModelProvider.select((state) => state.canSubmit),
     );
@@ -307,7 +316,7 @@ class WriteReviewPage extends ConsumerWidget {
         width: double.infinity,
         height: 48,
         child: ElevatedButton(
-          onPressed: canSubmit ? () => _submitReview(ref, context) : null,
+          onPressed: canSubmit ? () => _submitReview(context) : null,
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 16),
           ),

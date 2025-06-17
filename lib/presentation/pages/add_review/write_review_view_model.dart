@@ -9,14 +9,12 @@ import '../../../domain/entity/review.dart';
 
 class WriteReviewState {
   final int rating;
-  final String? reviewText;
   final List<File> selectedImages;
   final bool isSaving;
   final AddReviewErrorKey? errorKey;
 
   const WriteReviewState({
     this.rating = 0,
-    this.reviewText,
     this.selectedImages = const [],
     this.isSaving = false,
     this.errorKey,
@@ -24,7 +22,6 @@ class WriteReviewState {
 
   WriteReviewState copyWith({
     int? rating,
-    String? reviewText,
     List<File>? selectedImages,
     bool? isSaving,
     AddReviewErrorKey? errorKey,
@@ -32,7 +29,6 @@ class WriteReviewState {
   }) {
     return WriteReviewState(
       rating: rating ?? this.rating,
-      reviewText: reviewText ?? this.reviewText,
       selectedImages: selectedImages ?? this.selectedImages,
       isSaving: isSaving ?? this.isSaving,
       errorKey: clearErrorKey ? null : errorKey ?? this.errorKey,
@@ -52,6 +48,7 @@ class WriteReviewViewModel extends AutoDisposeNotifier<WriteReviewState> {
 
   Future<void> saveReview({
     required String recipeId,
+    required String reviewText,
     required AppUser user,
   }) async {
     state = state.copyWith(isSaving: true);
@@ -62,7 +59,7 @@ class WriteReviewViewModel extends AutoDisposeNotifier<WriteReviewState> {
 
       final review = Review(
         id: '',
-        reviewText: state.reviewText?.trim(),
+        reviewText: reviewText.trim(),
         rating: state.rating,
         imageUrls: imageUrls,
         userId: user.id,
@@ -102,10 +99,6 @@ class WriteReviewViewModel extends AutoDisposeNotifier<WriteReviewState> {
 
   void setRating(int rating) {
     state = state.copyWith(rating: rating);
-  }
-
-  void updateReviewText(String text) {
-    state = state.copyWith(reviewText: text);
   }
 
   void addImages(List<File> images) {
