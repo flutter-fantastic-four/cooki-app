@@ -1,3 +1,4 @@
+import 'package:cooki/core/utils/general_util.dart';
 import 'package:flutter/material.dart';
 import '../../app/constants/app_colors.dart';
 
@@ -23,7 +24,7 @@ class AppDialog extends StatelessWidget {
     required BuildContext context,
     required String title,
     required String subText,
-    required String primaryButtonText,
+    String? primaryButtonText,
     String? secondaryButtonText,
     VoidCallback? onPrimaryButtonPressed,
     VoidCallback? onSecondaryButtonPressed,
@@ -34,7 +35,7 @@ class AppDialog extends StatelessWidget {
           (BuildContext context) => AppDialog(
             title: title,
             subText: subText,
-            primaryButtonText: primaryButtonText,
+            primaryButtonText: primaryButtonText ?? strings(context).confirm,
             secondaryButtonText: secondaryButtonText,
             onPrimaryButtonPressed:
                 onPrimaryButtonPressed ?? () => Navigator.of(context).pop(true),
@@ -65,12 +66,12 @@ class AppDialog extends StatelessWidget {
               ),
               textAlign: TextAlign.left,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
             Text(
               subText,
               style: const TextStyle(
-                fontSize: 14,
-                color: AppColors.greyScale500,
+                fontSize: 15,
+                color: AppColors.greyScale700,
               ),
               textAlign: TextAlign.left,
             ),

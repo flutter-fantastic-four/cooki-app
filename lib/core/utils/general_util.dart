@@ -31,7 +31,7 @@ class GeneralUtil {
     CompressFormat format = CompressFormat.jpeg,
   }) async {
     final dir = imageFile.parent;
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final timestamp = DateTime.now().microsecondsSinceEpoch;
     final targetPath = '${dir.path}/compressed_$timestamp.jpg';
 
     final compressedFile = await FlutterImageCompress.compressAndGetFile(

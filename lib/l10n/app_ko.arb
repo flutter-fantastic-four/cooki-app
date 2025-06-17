@@ -135,5 +135,7 @@
   "noReviewsTitle": "아직 리뷰가 없습니다",
   "noReviewsSubtitle": "첫 번째 리뷰를 작성해보세요!",
   "less": "접기",
-  "more": "더보기"
+  "more": "더보기",
+
+  "confirm": "확인"
 }

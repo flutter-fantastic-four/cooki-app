@@ -11,7 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/constants/app_constants.dart';
-import '../../../app/constants/app_strings.dart';
 import '../../user_global_view_model.dart';
 import '../../widgets/input_decorations.dart';
 import '../../widgets/app_dialog.dart';
@@ -36,11 +35,10 @@ class GenerateRecipePage extends ConsumerWidget {
     final state = ref.read(generateRecipeViewModelProvider);
 
     if (context.mounted && state.errorKey != null) {
-      await AppDialog.show(
+      AppDialog.show(
         context: context,
         title: strings(context).generationFailedTitle,
         subText: ErrorMapper.mapGenerateRecipeError(context, state.errorKey!),
-        primaryButtonText: AppStrings.confirm,
       );
       ref.read(generateRecipeViewModelProvider.notifier).clearError();
       return;
