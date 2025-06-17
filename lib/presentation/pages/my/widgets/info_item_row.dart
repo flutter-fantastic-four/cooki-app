@@ -41,25 +41,26 @@ class _InfoItemRowState extends State<InfoItemRow> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: GestureDetector(
-            onTap: () {
-              switch (widget.infoItem) {
-                case InfoItem.termsOfService:
-                  _launchUrl(context, "https://flutter-fantastic-four.github.io/terms_of_service.html");
-                  break;
-                case InfoItem.privacyPolicy:
-                  _launchUrl(context, "https://flutter-fantastic-four.github.io/privacy_policy.html");
-                  break;
-                case InfoItem.contactTheDevelopersTeam:
-                  _launchEmail();
-                  break;
-                case InfoItem.version:
-                  _launchStore();
-                  break;
-              }
-            },
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            switch (widget.infoItem) {
+              case InfoItem.termsOfService:
+                _launchUrl(context, "https://flutter-fantastic-four.github.io/terms_of_service.html");
+                break;
+              case InfoItem.privacyPolicy:
+                _launchUrl(context, "https://flutter-fantastic-four.github.io/privacy_policy.html");
+                break;
+              case InfoItem.contactTheDevelopersTeam:
+                _launchEmail();
+                break;
+              case InfoItem.version:
+                _launchStore();
+                break;
+            }
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
