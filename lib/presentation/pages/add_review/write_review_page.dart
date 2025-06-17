@@ -246,24 +246,23 @@ class WriteReviewPage extends ConsumerWidget {
                     ),
                   ),
                   Positioned(
-                    top: 3,
-                    right: 3,
+                    top: 4,
+                    right: 4,
                     child: GestureDetector(
                       onTap:
                           () => ref
                               .read(writeReviewViewModelProvider.notifier)
                               .removeImage(index),
                       child: Container(
-                        padding: const EdgeInsets.all(2),
+                        padding: const EdgeInsets.all(0.5),
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade600,
+                          color: Colors.white,
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2.4),
                         ),
                         child: const Icon(
-                          Icons.close,
-                          size: 15,
-                          color: Colors.white,
+                          Icons.cancel,
+                          size: 18,
+                          color: Colors.red,
                         ),
                       ),
                     ),
