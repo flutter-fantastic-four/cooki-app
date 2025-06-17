@@ -33,8 +33,10 @@ class ReviewsPage extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     Review review,
-    bool isMyReview,
   ) {
+    final currentUser = ref.read(userGlobalViewModelProvider);
+    final isMyReview = currentUser?.id == review.userId;
+
     final options = <ModalOption>[
       ModalOption(
         text: strings(context).translateReview,
@@ -179,7 +181,20 @@ class ReviewsPage extends ConsumerWidget {
             padding: const EdgeInsets.only(right: 4),
             child: IconButton(
               tooltip: strings(context).writeReviewTitle,
-              onPressed: () => _navigateToWriteOrEditReview(context, ref),
+              onPressed: () async {
+                final existingReview = await ref
+                    .read(reviewsViewModelProvider(recipeId).notifier)
+                    .getUserReviewForRecipe(
+                      ref.read(userGlobalViewModelProvider)!.id,
+                    );
+                if (context.mounted) {
+                  _navigateToWriteOrEditReview(
+                    context,
+                    ref,
+                    review: existingReview,
+                  );
+                }
+              },
               icon: const Icon(
                 Icons.edit_outlined,
                 size: 22,
@@ -318,15 +333,13 @@ class ReviewsPage extends ConsumerWidget {
 
   Widget _buildReviewItem(BuildContext context, WidgetRef ref, Review review) {
     final vm = ref.read(reviewsViewModelProvider(recipeId).notifier);
-    final currentUser = ref.read(userGlobalViewModelProvider);
-    final isMyReview = currentUser?.id == review.userId;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 30),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildReviewHeader(context, ref, review, isMyReview),
+          _buildReviewHeader(context, ref, review),
           const SizedBox(height: 10),
           StarRating(
             currentRating: review.rating,
@@ -359,7 +372,6 @@ class ReviewsPage extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     Review review,
-    bool isMyReview,
   ) {
     return Row(
       children: [
@@ -384,7 +396,7 @@ class ReviewsPage extends ConsumerWidget {
             ],
           ),
         ),
-        _buildOverflowMenu(context, ref, review, isMyReview),
+        _buildOverflowMenu(context, ref, review),
       ],
     );
   }
@@ -408,14 +420,12 @@ class ReviewsPage extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     Review review,
-    bool isMyReview,
   ) {
     return SizedBox.square(
       dimension: 30,
       child: IconButton(
         padding: EdgeInsets.zero,
-        onPressed:
-            () => _showReviewOptionsModal(context, ref, review, isMyReview),
+        onPressed: () => _showReviewOptionsModal(context, ref, review),
         icon: const Icon(
           CupertinoIcons.ellipsis,
           color: AppColors.greyScale600,

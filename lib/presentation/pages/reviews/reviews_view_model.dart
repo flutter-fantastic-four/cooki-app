@@ -120,6 +120,20 @@ class ReviewsViewModel extends AutoDisposeFamilyNotifier<ReviewsState, String> {
     }
   }
 
+  Future<Review?> getUserReviewForRecipe(String userId) async {
+    try {
+      state = state.copyWith(isLoading: true);
+      return await ref
+          .read(reviewRepositoryProvider)
+          .getUserReviewForRecipe(recipeId: arg, userId: userId);
+    } catch (e, stack) {
+      logError(e, stack);
+      return null;
+    } finally {
+      state = state.copyWith(isLoading: false);
+    }
+  }
+
   void clearError() {
     state = state.copyWith(clearErrorKey: true);
   }

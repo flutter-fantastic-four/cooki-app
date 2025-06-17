@@ -26,6 +26,11 @@ abstract class ReviewRepository {
     int limit = 5,
   });
 
+  Future<Review?> getUserReviewForRecipe({
+    required String recipeId,
+    required String userId,
+  });
+
   Future<String> uploadReviewImage(File imageFile, String uid);
 }
 
@@ -93,6 +98,18 @@ class ReviewRepositoryImpl implements ReviewRepository {
       sortType: ReviewSortType.dateDescending,
     );
     return reviewDtoList.map((dto) => dto.toEntity()).toList();
+  }
+
+  @override
+  Future<Review?> getUserReviewForRecipe({
+    required String recipeId,
+    required String userId,
+  }) async {
+    final reviewDto = await _reviewDataSource.getUserReviewForRecipe(
+      recipeId: recipeId,
+      userId: userId,
+    );
+    return reviewDto?.toEntity();
   }
 
   @override
