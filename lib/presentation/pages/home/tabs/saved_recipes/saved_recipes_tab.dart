@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../app/constants/app_constants.dart';
 import '../../../../../data/repository/providers.dart';
 import '../../../../../domain/entity/recipe.dart';
-import '../../../../../domain/entity/app_user.dart';
-import '../../../../../presentation/view_models/user_global_view_model.dart';
 import '../../../../../presentation/widgets/app_cached_image.dart';
 import '../../../../../app/constants/app_colors.dart';
 import '../../../../../app/constants/app_strings.dart';

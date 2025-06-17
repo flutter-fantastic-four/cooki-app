@@ -15,14 +15,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/constants/app_colors.dart';
-import '../../../app/constants/app_strings.dart';
 import '../../../core/utils/error_mappers.dart';
 import '../../../core/utils/general_util.dart';
 import '../../../domain/entity/recipe.dart';
 import '../../user_global_view_model.dart';
 import '../debug/test_recipe_list.dart';
-import '../generate/generated_recipes_page.dart';
-import '../home/tabs/saved_recipes/saved_recipes_tab.dart';
 
 class RecipeEditPage extends ConsumerStatefulWidget {
   final Recipe? recipe;
@@ -57,17 +54,15 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
         cookTime: int.parse(_cookTimeController.text),
         calories: int.parse(_caloriesController.text),
         user: user,
-        isGenerated: widget.recipe?.tags.contains('generated') ?? false,
       );
 
       final errorKey =
           ref.read(recipeEditViewModelProvider(widget.recipe)).errorKey;
       if (mounted && errorKey != null) {
-        await AppDialog.show(
+        AppDialog.show(
           context: context,
           title: strings(context).recipeSavingFailedTitle,
           subText: ErrorMapper.mapGenerateRecipeError(context, errorKey),
-          primaryButtonText: AppStrings.confirm,
         );
         vm.clearError();
         return;
@@ -79,9 +74,9 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
           strings(context).recipeSavedSuccessfully,
           showIcon: true,
         );
-        // Refresh the recipe lists
+        // TODO: Remove this and call VM method to be created
         ref.invalidate(recipeListProvider);
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(true); // Return true to indicate success
       }
     }
   }
