@@ -21,13 +21,7 @@ class AuthRepositoryImpl implements AuthRepository {
   final FirebaseAuthDataSource _firebaseAuth;
   final UserDataSource _userDataSource;
 
-  AuthRepositoryImpl(
-    this._googleDataSource,
-    this._kakaoDataSource,
-    this._appleDataSource,
-    this._firebaseAuth,
-    this._userDataSource,
-  );
+  AuthRepositoryImpl(this._googleDataSource, this._kakaoDataSource, this._appleDataSource, this._firebaseAuth, this._userDataSource);
 
   @override
   Future<AppUser?> signIn(SignInMethod signInmethod) async {
@@ -68,9 +62,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> signOut() async {
     if (_firebaseAuth.currentUser() == null) return;
 
-    final user = await _userDataSource.getUserById(
-      _firebaseAuth.currentUser()!.uid,
-    );
+    final user = await _userDataSource.getUserById(_firebaseAuth.currentUser()!.uid);
 
     if (user == null) return;
 
@@ -110,22 +102,12 @@ class AuthRepositoryImpl implements AuthRepository {
         case "kakao":
           await _kakaoDataSource.signOut();
           break;
-        // case "apple":
-        //   await _appleDataSource.signOut();
-        //   break;
+        case "apple":
+          await _appleDataSource.signOut();
+          break;
       }
     } catch (e) {
       throw Exception('Failed to sign out from social provider: $e');
-    switch (user.signInProvider) {
-      case "google":
-        await _googleDataSource.signOut();
-        break;
-      case "kakao":
-        await _kakaoDataSource.signOut();
-        break;
-      case "apple":
-        await _appleDataSource.signOut();
-        break;
     }
   }
 
