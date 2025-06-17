@@ -141,5 +141,14 @@
   "translateReview": "번역하기",
   "editReview": "수정하기",
   "reportReview": "신고하기",
-  "deleteReview": "삭제하기"
+  "deleteReview": "삭제하기",
+
+  "editReviewTitle": "리뷰 수정",
+  "editReviewConfirmMessage": "이 리뷰를 수정하시겠습니까?",
+  "reviewEditFailedTitle": "리뷰 수정 실패",
+  "reviewEditedSuccessfully": "리뷰가 성공적으로 수정되었습니다",
+  "deleteReviewConfirmTitle": "리뷰 삭제",
+  "deleteReviewConfirmMessage": "이 리뷰를 삭제하시겠습니까? 삭제된 리뷰는 복구할 수 없습니다.",
+  "delete": "삭제",
+  "editReviewButtonText": "수정"
 }

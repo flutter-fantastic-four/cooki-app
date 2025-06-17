@@ -1,14 +1,19 @@
 import 'dart:developer';
 import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cooki/core/utils/snackbar_util.dart';
+import 'package:cooki/presentation/widgets/app_cached_image.dart';
 import 'package:easy_image_viewer/easy_image_viewer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../app/constants/app_colors.dart';
 import '../../../core/utils/dialogue_util.dart';
 import '../../../core/utils/error_mappers.dart';
 import '../../../core/utils/general_util.dart';
+import '../../../domain/entity/review.dart';
 import '../../user_global_view_model.dart';
 import '../../widgets/input_decorations.dart';
 import '../../widgets/star_rating.dart';
@@ -17,11 +22,13 @@ import 'write_review_view_model.dart';
 class WriteReviewPage extends ConsumerStatefulWidget {
   final String recipeId;
   final String recipeName;
+  final Review? review;
 
   const WriteReviewPage({
     super.key,
     required this.recipeId,
     required this.recipeName,
+    this.review,
   });
 
   @override
@@ -32,15 +39,37 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
   final _controller = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    // Initialize controller with existing review text if editing
+    if (widget.review?.reviewText != null) {
+      _controller.text = widget.review!.reviewText!;
+    }
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
   }
 
   Future<void> _submitReview(BuildContext context) async {
+    final isEditingMode = widget.review != null;
+
+    // Show confirmation dialog for editing
+    if (isEditingMode) {
+      final result = await DialogueUtil.showAppCupertinoDialog(
+        context: context,
+        showCancel: true,
+        title: strings(context).editReviewTitle,
+        content: strings(context).editReviewConfirmMessage,
+      );
+      if (result != AppDialogResult.confirm) return;
+    }
+
     final start = DateTime.now();
     await ref
-        .read(writeReviewViewModelProvider.notifier)
+        .read(writeReviewViewModelProvider(widget.review).notifier)
         .saveReview(
           recipeId: widget.recipeId,
           reviewText: _controller.text,
@@ -50,22 +79,67 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
       'saveReview executed in ${DateTime.now().difference(start).inMilliseconds} ms',
     );
 
-    final state = ref.read(writeReviewViewModelProvider);
+    final state = ref.read(writeReviewViewModelProvider(widget.review));
 
     if (context.mounted && state.errorKey != null) {
       DialogueUtil.showAppCupertinoDialog(
         context: context,
-        title: strings(context).reviewUploadFailedTitle,
+        title:
+            isEditingMode
+                ? strings(context).reviewEditFailedTitle
+                : strings(context).reviewUploadFailedTitle,
         content: ErrorMapper.mapWriteReviewError(context, state.errorKey!),
       );
-      ref.read(writeReviewViewModelProvider.notifier).clearError();
+      ref
+          .read(writeReviewViewModelProvider(widget.review).notifier)
+          .clearError();
       return;
     }
 
     if (context.mounted) {
       SnackbarUtil.showSnackBar(
         context,
-        strings(context).reviewSavedSuccessfully,
+        isEditingMode
+            ? strings(context).reviewEditedSuccessfully
+            : strings(context).reviewSavedSuccessfully,
+        showIcon: true,
+      );
+      Navigator.of(context).pop(true); // Return true to indicate success
+    }
+  }
+
+  Future<void> _deleteReview(BuildContext context) async {
+    if (widget.review == null) return;
+
+    final result = await DialogueUtil.showAppCupertinoDialog(
+      context: context,
+      title: strings(context).deleteReviewConfirmTitle,
+      content: strings(context).deleteReviewConfirmMessage,
+      showCancel: true,
+    );
+    if (result != AppDialogResult.confirm) return;
+
+    await ref
+        .read(writeReviewViewModelProvider(widget.review).notifier)
+        .deleteReview(recipeId: widget.recipeId, reviewId: widget.review!.id);
+
+    final state = ref.read(writeReviewViewModelProvider(widget.review));
+    if (context.mounted && state.errorKey != null) {
+      DialogueUtil.showAppCupertinoDialog(
+        context: context,
+        title: strings(context).genericErrorTitle,
+        content: ErrorMapper.mapWriteReviewError(context, state.errorKey!),
+      );
+      ref
+          .read(writeReviewViewModelProvider(widget.review).notifier)
+          .clearError();
+      return;
+    }
+
+    if (context.mounted) {
+      SnackbarUtil.showSnackBar(
+        context,
+        strings(context).reviewDeletedSuccessfully,
         showIcon: true,
       );
       Navigator.of(context).pop(true); // Return true to indicate success
@@ -74,9 +148,9 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
 
   void _showImagePickerModal(BuildContext context) {
     final currentImageCount = ref.read(
-      writeReviewViewModelProvider.select(
-        (state) => state.selectedImages.length,
-      ),
+      writeReviewViewModelProvider(
+        widget.review,
+      ).select((state) => state.selectedImages.length),
     );
 
     if (currentImageCount >= 5) {
@@ -97,7 +171,7 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
   }
 
   Future<void> _pickImages(BuildContext context, ImageSource source) async {
-    final vm = ref.read(writeReviewViewModelProvider.notifier);
+    final vm = ref.read(writeReviewViewModelProvider(widget.review).notifier);
     final ImagePicker picker = ImagePicker();
 
     if (source == ImageSource.camera) {
@@ -119,7 +193,7 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
         vm.addImages(imageFiles);
       }
 
-      final state = ref.read(writeReviewViewModelProvider);
+      final state = ref.read(writeReviewViewModelProvider(widget.review));
       if (context.mounted &&
           state.errorKey == WriteReviewErrorKey.tooManyImages) {
         SnackbarUtil.showSnackBar(
@@ -128,7 +202,9 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
           showIcon: true,
           customIcon: SnackbarUtil.appLogoIcon(),
         );
-        ref.read(writeReviewViewModelProvider.notifier).clearError();
+        ref
+            .read(writeReviewViewModelProvider(widget.review).notifier)
+            .clearError();
         return;
       }
     }
@@ -136,12 +212,19 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isEditingMode = widget.review != null;
+
     return GestureDetector(
       onTap: FocusScope.of(context).unfocus,
       child: Scaffold(
         appBar: AppBar(
           elevation: 1,
-          title: Text(strings(context).writeReviewTitle),
+          title: Text(
+            isEditingMode
+                ? strings(context).editReviewTitle
+                : strings(context).writeReviewTitle,
+          ),
+          actions: isEditingMode ? [_buildDeleteActionButton(context)] : null,
         ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -153,14 +236,18 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
                 const SizedBox(height: 13),
                 StarRating(
                   currentRating: ref.watch(
-                    writeReviewViewModelProvider.select(
-                      (state) => state.rating,
-                    ),
+                    writeReviewViewModelProvider(
+                      widget.review,
+                    ).select((state) => state.rating),
                   ),
                   iconSize: 32,
                   setRating:
                       (selectedRating) => ref
-                          .read(writeReviewViewModelProvider.notifier)
+                          .read(
+                            writeReviewViewModelProvider(
+                              widget.review,
+                            ).notifier,
+                          )
                           .setRating(selectedRating),
                 ),
                 const SizedBox(height: 32),
@@ -176,6 +263,33 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
         ),
         bottomNavigationBar: _buildSubmitButton(context),
       ),
+    );
+  }
+
+  Widget _buildDeleteActionButton(BuildContext context) {
+    final isDeleting = ref.watch(
+      writeReviewViewModelProvider(
+        widget.review,
+      ).select((state) => state.isDeleting),
+    );
+    return Padding(
+      padding: const EdgeInsets.only(right: 16),
+      child:
+          isDeleting
+              ? CupertinoActivityIndicator(radius: 10)
+              : InkWell(
+                onTap: () => _deleteReview(context),
+                highlightColor: Colors.grey,
+                child: SvgPicture.asset(
+                  'assets/icons/delete_icon_outline.svg',
+                  width: 25,
+                  height: 25,
+                  colorFilter: const ColorFilter.mode(
+                    AppColors.greyScale800,
+                    BlendMode.srcIn,
+                  ),
+                ),
+              ),
     );
   }
 
@@ -223,22 +337,33 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
 
   Widget _buildPhotoThumbnails() {
     final images = ref.watch(
-      writeReviewViewModelProvider.select((state) => state.selectedImages),
+      writeReviewViewModelProvider(
+        widget.review,
+      ).select((state) => state.selectedImages),
     );
 
     if (images.isEmpty) return const SizedBox.shrink();
 
+    final double imageDimension = 80;
     return SizedBox(
-      height: 80,
+      height: imageDimension,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: images.length,
         itemBuilder: (context, index) {
+          final reviewImage = images[index];
+
           return Padding(
             padding: const EdgeInsets.only(right: 8),
             child: GestureDetector(
               onTap: () {
-                final imageProvider = FileImage(images[index]);
+                ImageProvider imageProvider;
+                if (reviewImage.isFile) {
+                  imageProvider = FileImage(reviewImage.file!);
+                } else {
+                  imageProvider = CachedNetworkImageProvider(reviewImage.url!);
+                }
+
                 showImageViewer(
                   context,
                   imageProvider,
@@ -251,11 +376,20 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: Image.file(
-                      images[index],
-                      height: 80,
-                      fit: BoxFit.cover,
-                    ),
+                    child:
+                        reviewImage.isFile
+                            ? Image.file(
+                              reviewImage.file!,
+                              height: imageDimension,
+                              width: imageDimension,
+                              fit: BoxFit.cover,
+                            )
+                            : AppCachedImage(
+                              imageUrl: reviewImage.url!,
+                              height: imageDimension,
+                              width: imageDimension,
+                              fit: BoxFit.cover,
+                            ),
                   ),
                   Positioned(
                     top: 4,
@@ -263,7 +397,11 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
                     child: GestureDetector(
                       onTap:
                           () => ref
-                              .read(writeReviewViewModelProvider.notifier)
+                              .read(
+                                writeReviewViewModelProvider(
+                                  widget.review,
+                                ).notifier,
+                              )
                               .removeImage(index),
                       child: Container(
                         padding: const EdgeInsets.all(0.5),
@@ -304,11 +442,16 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
 
   Widget _buildSubmitButton(BuildContext context) {
     final canSubmit = ref.watch(
-      writeReviewViewModelProvider.select((state) => state.canSubmit),
+      writeReviewViewModelProvider(
+        widget.review,
+      ).select((state) => state.canSubmit),
     );
     final isSaving = ref.watch(
-      writeReviewViewModelProvider.select((state) => state.isSaving),
+      writeReviewViewModelProvider(
+        widget.review,
+      ).select((state) => state.isSaving),
     );
+    final isEditingMode = widget.review != null;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 33),
@@ -327,7 +470,11 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
                     height: 21,
                     child: CupertinoActivityIndicator(radius: 10),
                   )
-                  : Text(strings(context).saveReviewButtonText),
+                  : Text(
+                    isEditingMode
+                        ? strings(context).editReviewButtonText
+                        : strings(context).saveReviewButtonText,
+                  ),
         ),
       ),
     );

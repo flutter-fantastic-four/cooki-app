@@ -2,18 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/utils/general_util.dart';
 import '../../data/data_source/review_data_source.dart';
-
-class SortOption {
-  final ReviewSortType type;
-  final String Function(BuildContext) labelGetter;
-
-  const SortOption({
-    required this.type,
-    required this.labelGetter,
-  });
-
-  String getLabel(BuildContext context) => labelGetter(context);
-}
+import '../../domain/entity/sort_option.dart';
 
 class AppConstants {
   static const appTitle = 'Cooki';

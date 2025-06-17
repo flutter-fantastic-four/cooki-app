@@ -45,7 +45,8 @@ class ReviewsPage extends ConsumerWidget {
         ModalOption(
           text: strings(context).editReview,
           icon: Icons.edit_outlined,
-          onTap: () => _navigateToEditPage(context, ref, review),
+          onTap:
+              () => _navigateToWriteOrEditReview(context, ref, review: review),
         ),
       ModalOption(
         text: strings(context).reportReview,
@@ -67,10 +68,6 @@ class ReviewsPage extends ConsumerWidget {
 
   void _translateReview(BuildContext context, Review review) {
     // TODO: Implement translate functionality
-  }
-
-  void _navigateToEditPage(BuildContext context, WidgetRef ref, Review review) {
-    // TODO: Implement edit functionality
   }
 
   void _reportReview(BuildContext context, Review review) {
@@ -109,11 +106,19 @@ class ReviewsPage extends ConsumerWidget {
     }
   }
 
-  void _navigateToWriteReview(BuildContext context, WidgetRef ref) async {
+  void _navigateToWriteOrEditReview(
+    BuildContext context,
+    WidgetRef ref, {
+    Review? review,
+  }) async {
     final result = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
         builder:
-            (_) => WriteReviewPage(recipeId: recipeId, recipeName: recipeName),
+            (_) => WriteReviewPage(
+              recipeId: recipeId,
+              recipeName: recipeName,
+              review: review,
+            ),
       ),
     );
 
@@ -174,7 +179,7 @@ class ReviewsPage extends ConsumerWidget {
             padding: const EdgeInsets.only(right: 4),
             child: IconButton(
               tooltip: strings(context).writeReviewTitle,
-              onPressed: () => _navigateToWriteReview(context, ref),
+              onPressed: () => _navigateToWriteOrEditReview(context, ref),
               icon: const Icon(
                 Icons.edit_outlined,
                 size: 22,
@@ -322,7 +327,7 @@ class ReviewsPage extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildReviewHeader(context, ref, review, isMyReview),
-          const SizedBox(height: 4),
+          const SizedBox(height: 10),
           StarRating(
             currentRating: review.rating,
             iconSize: 16,

@@ -5,25 +5,29 @@ import '../../../core/utils/general_util.dart';
 import '../../../core/utils/logger.dart';
 import '../../../data/repository/providers.dart';
 import '../../../domain/entity/app_user.dart';
+import '../../../domain/entity/local_or_remote_image.dart';
 import '../../../domain/entity/review.dart';
 
 class WriteReviewState {
   final int rating;
-  final List<File> selectedImages;
+  final List<LocalOrRemoteImage> selectedImages;
   final bool isSaving;
+  final bool isDeleting;
   final WriteReviewErrorKey? errorKey;
 
   const WriteReviewState({
     this.rating = 0,
     this.selectedImages = const [],
     this.isSaving = false,
+    this.isDeleting = false,
     this.errorKey,
   });
 
   WriteReviewState copyWith({
     int? rating,
-    List<File>? selectedImages,
+    List<LocalOrRemoteImage>? selectedImages,
     bool? isSaving,
+    bool? isDeleting,
     WriteReviewErrorKey? errorKey,
     bool clearErrorKey = false,
   }) {
@@ -31,18 +35,28 @@ class WriteReviewState {
       rating: rating ?? this.rating,
       selectedImages: selectedImages ?? this.selectedImages,
       isSaving: isSaving ?? this.isSaving,
+      isDeleting: isDeleting ?? this.isDeleting,
       errorKey: clearErrorKey ? null : errorKey ?? this.errorKey,
     );
   }
 
   bool get canSubmit => rating > 0 && !isSaving;
-
-  bool get hasImages => selectedImages.isNotEmpty;
 }
 
-class WriteReviewViewModel extends AutoDisposeNotifier<WriteReviewState> {
+class WriteReviewViewModel
+    extends AutoDisposeFamilyNotifier<WriteReviewState, Review?> {
   @override
-  WriteReviewState build() {
+  WriteReviewState build(Review? arg) {
+    if (arg != null) {
+      // Edit Mode: Initialize with existing review data
+      final existingImages =
+          arg.imageUrls.map((url) => LocalOrRemoteImage.url(url)).toList();
+
+      return WriteReviewState(
+        rating: arg.rating,
+        selectedImages: existingImages,
+      );
+    }
     return const WriteReviewState();
   }
 
@@ -58,18 +72,26 @@ class WriteReviewViewModel extends AutoDisposeNotifier<WriteReviewState> {
       if (imageUrls == null) return;
 
       final review = Review(
-        id: '',
+        id: arg?.id ?? '',
         reviewText: reviewText.trim(),
         rating: state.rating,
         imageUrls: imageUrls,
         userId: user.id,
         userName: user.name,
         userImageUrl: user.profileImage,
+        createdAt: arg?.createdAt,
+        updatedAt: arg != null ? DateTime.now() : null,
       );
 
-      await ref
-          .read(reviewRepositoryProvider)
-          .saveReview(recipeId: recipeId, review: review);
+      if (arg != null) {
+        await ref
+            .read(reviewRepositoryProvider)
+            .editReview(recipeId: recipeId, review: review);
+      } else {
+        await ref
+            .read(reviewRepositoryProvider)
+            .saveReview(recipeId: recipeId, review: review);
+      }
     } catch (e, stack) {
       logError(e, stack);
       state = state.copyWith(errorKey: WriteReviewErrorKey.saveFailed);
@@ -82,18 +104,68 @@ class WriteReviewViewModel extends AutoDisposeNotifier<WriteReviewState> {
     if (state.selectedImages.isEmpty) return [];
 
     try {
-      final uploadTasks = state.selectedImages.map((imageFile) async {
-        final compressedFile = await GeneralUtil.compressImageFile(imageFile);
-        return ref
-            .read(reviewRepositoryProvider)
-            .uploadReviewImage(compressedFile, userId);
-      });
+      final List<String> existingUrls = [];
+      final List<File> filesToUpload = [];
 
-      return await Future.wait(uploadTasks);
+      for (final reviewImage in state.selectedImages) {
+        if (reviewImage.isUrl) {
+          existingUrls.add(reviewImage.url!);
+        } else if (reviewImage.isFile) {
+          filesToUpload.add(reviewImage.file!);
+        }
+      }
+
+      // Upload new files in parallel
+      final List<String> uploadedUrls;
+      if (filesToUpload.isNotEmpty) {
+        final uploadTasks = filesToUpload.map((imageFile) async {
+          final compressedFile = await GeneralUtil.compressImageFile(imageFile);
+          return ref
+              .read(reviewRepositoryProvider)
+              .uploadReviewImage(compressedFile, userId);
+        });
+
+        uploadedUrls = await Future.wait(uploadTasks);
+      } else {
+        uploadedUrls = [];
+      }
+
+      // Combine URLs in the correct order
+      final List<String> finalImageUrls = [];
+      int uploadedIndex = 0;
+
+      for (final reviewImage in state.selectedImages) {
+        if (reviewImage.isUrl) {
+          finalImageUrls.add(reviewImage.url!);
+        } else if (reviewImage.isFile) {
+          finalImageUrls.add(uploadedUrls[uploadedIndex]);
+          uploadedIndex++;
+        }
+      }
+
+      return finalImageUrls;
     } catch (e, stack) {
       logError(e, stack);
       state = state.copyWith(errorKey: WriteReviewErrorKey.imageUploadFailed);
       return null;
+    }
+  }
+
+  Future<void> deleteReview({
+    required String recipeId,
+    required String reviewId,
+  }) async {
+    state = state.copyWith(isDeleting: true);
+
+    try {
+      await ref
+          .read(reviewRepositoryProvider)
+          .deleteReview(recipeId: recipeId, reviewId: reviewId);
+    } catch (e, stack) {
+      logError(e, stack);
+      state = state.copyWith(errorKey: WriteReviewErrorKey.deleteFailed);
+    } finally {
+      state = state.copyWith(isDeleting: false);
     }
   }
 
@@ -102,7 +174,7 @@ class WriteReviewViewModel extends AutoDisposeNotifier<WriteReviewState> {
   }
 
   void addImages(List<File> images) {
-    final currentImages = List<File>.from(state.selectedImages);
+    final currentImages = List<LocalOrRemoteImage>.from(state.selectedImages);
     final totalImages = currentImages.length + images.length;
 
     if (totalImages > 5) {
@@ -110,12 +182,14 @@ class WriteReviewViewModel extends AutoDisposeNotifier<WriteReviewState> {
       return;
     }
 
-    currentImages.addAll(images);
+    final newImages =
+        images.map((file) => LocalOrRemoteImage.file(file)).toList();
+    currentImages.addAll(newImages);
     state = state.copyWith(selectedImages: currentImages);
   }
 
   void removeImage(int index) {
-    final updatedImages = List<File>.from(state.selectedImages);
+    final updatedImages = List<LocalOrRemoteImage>.from(state.selectedImages);
     if (index >= 0 && index < updatedImages.length) {
       updatedImages.removeAt(index);
       state = state.copyWith(selectedImages: updatedImages);
@@ -127,7 +201,7 @@ class WriteReviewViewModel extends AutoDisposeNotifier<WriteReviewState> {
   }
 }
 
-final writeReviewViewModelProvider =
-    NotifierProvider.autoDispose<WriteReviewViewModel, WriteReviewState>(
+final writeReviewViewModelProvider = NotifierProvider.autoDispose
+    .family<WriteReviewViewModel, WriteReviewState, Review?>(
       WriteReviewViewModel.new,
     );
