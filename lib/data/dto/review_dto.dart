@@ -3,7 +3,6 @@ import '../../domain/entity/review.dart';
 
 class ReviewDto {
   final String id;
-  final String recipeId;
   final String reviewText;
   final int rating;
   final List<String> imageUrls;
@@ -12,10 +11,10 @@ class ReviewDto {
   final String userId;
   final String userName;
   final String? userImageUrl;
+  final bool isDeleted;
 
   const ReviewDto({
     required this.id,
-    required this.recipeId,
     required this.reviewText,
     required this.rating,
     required this.imageUrls,
@@ -24,12 +23,12 @@ class ReviewDto {
     required this.userId,
     required this.userName,
     this.userImageUrl,
+    this.isDeleted = false,
   });
 
   factory ReviewDto.fromMap(String id, Map<String, dynamic> map) {
     return ReviewDto(
       id: id,
-      recipeId: map['recipeId'] ?? '',
       reviewText: map['reviewText'] ?? '',
       rating: map['rating'] ?? 1,
       imageUrls: List<String>.from(map['imageUrls'] ?? []),
@@ -38,12 +37,12 @@ class ReviewDto {
       userId: map['userId'] ?? '',
       userName: map['userName'] ?? '',
       userImageUrl: map['userImageUrl'],
+      isDeleted: map['isDeleted'] ?? false,
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'recipeId': recipeId,
       'reviewText': reviewText,
       'rating': rating,
       'imageUrls': imageUrls,
@@ -52,13 +51,13 @@ class ReviewDto {
       'userId': userId,
       'userName': userName,
       'userImageUrl': userImageUrl,
+      'isDeleted': isDeleted,
     };
   }
 
   factory ReviewDto.fromEntity(Review review) {
     return ReviewDto(
       id: review.id,
-      recipeId: review.recipeId,
       reviewText: review.reviewText,
       rating: review.rating,
       imageUrls: review.imageUrls,
@@ -69,13 +68,13 @@ class ReviewDto {
       userId: review.userId,
       userName: review.userName,
       userImageUrl: review.userImageUrl,
+      isDeleted: review.isDeleted,
     );
   }
 
   Review toEntity() {
     return Review(
       id: id,
-      recipeId: recipeId,
       reviewText: reviewText,
       rating: rating,
       imageUrls: imageUrls,
@@ -84,6 +83,7 @@ class ReviewDto {
       userId: userId,
       userName: userName,
       userImageUrl: userImageUrl,
+      isDeleted: isDeleted,
     );
   }
 }

@@ -91,5 +91,17 @@
   "requiredError": "필수",
 
   "shareRecipeSubjectSuffix": "레시피 공유합니다!",
-  "recipe": "레시피"
+  "recipe": "레시피",
+
+  "writeReviewTitle": "리뷰쓰기",
+  "reviewUploadFailedTitle": "리뷰 업로드 실패",
+  "ratingRequiredError": "평점을 선택해주세요",
+  "tooManyImagesError": "사진은 최대 5장까지 선택 가능합니다",
+  "saveFailedError": "리뷰 저장에 실패했습니다. 다시 시도해주세요",
+  "imageUploadFailedError": "이미지 업로드에 실패했습니다. 다시 시도해주세요",
+
+  "addPicture": "사진 추가하기",
+  "reviewTextHint": "요리하면서 느낀 점, 맛에 대한 평가, 팁이나 후기 등 음식에 대한 솔직한 리뷰를 자유롭게 작성해보세요. (선택)",
+  "saveReviewButtonText": "저장",
+  "reviewSavedSuccessfully": "리뷰가 저장되었습니다"
 }

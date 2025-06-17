@@ -1,6 +1,5 @@
 class Review {
   final String id;
-  final String recipeId;
   final String reviewText;
   final int rating; // 1-5 stars
   final List<String> imageUrls;
@@ -9,10 +8,10 @@ class Review {
   final String userId;
   final String userName;
   final String? userImageUrl;
+  final bool isDeleted;
 
   Review({
     required this.id,
-    required this.recipeId,
     required this.reviewText,
     required this.rating,
     required this.imageUrls,
@@ -21,11 +20,11 @@ class Review {
     required this.userId,
     required this.userName,
     this.userImageUrl,
+    this.isDeleted = false,
   }) : createdAt = createdAt ?? DateTime.now();
 
   Review copyWith({
     String? id,
-    String? recipeId,
     String? reviewText,
     int? rating,
     List<String>? imageUrls,
@@ -34,10 +33,10 @@ class Review {
     String? userId,
     String? userName,
     String? userImageUrl,
+    bool? isDeleted,
   }) {
     return Review(
       id: id ?? this.id,
-      recipeId: recipeId ?? this.recipeId,
       reviewText: reviewText ?? this.reviewText,
       rating: rating ?? this.rating,
       imageUrls: imageUrls ?? this.imageUrls,
@@ -46,11 +45,12 @@ class Review {
       userId: userId ?? this.userId,
       userName: userName ?? this.userName,
       userImageUrl: userImageUrl ?? this.userImageUrl,
+      isDeleted: isDeleted ?? this.isDeleted,
     );
   }
 
   @override
   String toString() {
-    return 'Review{id: $id, recipeId: $recipeId, reviewText: $reviewText, rating: $rating, imageUrls: $imageUrls, createdAt: $createdAt, updatedAt: $updatedAt, userId: $userId, userName: $userName, userImageUrl: $userImageUrl}';
+    return 'Review{id: $id, reviewText: $reviewText, rating: $rating, imageUrls: $imageUrls, createdAt: $createdAt, updatedAt: $updatedAt, userId: $userId, userName: $userName, userImageUrl: $userImageUrl}';
   }
 }
