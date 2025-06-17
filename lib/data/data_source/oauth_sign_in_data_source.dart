@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:cooki/core/utils/logger.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_sign_in/google_sign_in.dart';

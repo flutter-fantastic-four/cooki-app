@@ -1,6 +1,6 @@
 class Review {
   final String id;
-  final String reviewText;
+  final String? reviewText;
   final int rating; // 1-5 stars
   final List<String> imageUrls;
   final DateTime createdAt;
@@ -12,7 +12,7 @@ class Review {
 
   Review({
     required this.id,
-    required this.reviewText,
+    this.reviewText,
     required this.rating,
     required this.imageUrls,
     DateTime? createdAt,

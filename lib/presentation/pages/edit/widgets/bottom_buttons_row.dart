@@ -1,5 +1,5 @@
 import 'dart:developer';
-import 'package:cooki/presentation/pages/add_review/write_review_page.dart';
+import 'package:cooki/presentation/pages/reviews/reviews_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -39,7 +39,7 @@ class BottomButtonsRow extends ConsumerWidget {
                   MaterialPageRoute(
                     builder:
                         (context) =>
-                            WriteReviewPage(recipeId: recipe!.id, recipeName: recipe!.recipeName),
+                            ReviewsPage(recipeId: recipe!.id, recipeName: recipe!.recipeName),
                   ),
                 );
               },

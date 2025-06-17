@@ -18,6 +18,11 @@ enum RecipeValidationErrorKey {
   required,
 }
 
+enum ReviewsErrorKey {
+  loadFailed,
+  deleteFailed,
+}
+
 enum AddReviewErrorKey { tooManyImages, saveFailed, imageUploadFailed }
 
 class ErrorMapper {
@@ -74,6 +79,16 @@ class ErrorMapper {
         return s.saveFailedError;
       case AddReviewErrorKey.imageUploadFailed:
         return s.imageUploadFailedError;
+    }
+  }
+
+  static String mapReviewsPageError(BuildContext context, ReviewsErrorKey errorKey) {
+    final s = strings(context);
+    switch (errorKey) {
+      case ReviewsErrorKey.loadFailed:
+        return s.reviewsLoadFailedError;
+      case ReviewsErrorKey.deleteFailed:
+        return s.reviewDeleteFailedError;
     }
   }
 }

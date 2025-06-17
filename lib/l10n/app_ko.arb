@@ -103,5 +103,20 @@
   "addPicture": "사진 추가하기",
   "reviewTextHint": "요리하면서 느낀 점, 맛에 대한 평가, 팁이나 후기 등 음식에 대한 솔직한 리뷰를 자유롭게 작성해보세요. (선택)",
   "saveReviewButtonText": "저장",
-  "reviewSavedSuccessfully": "리뷰가 저장되었습니다"
+  "reviewSavedSuccessfully": "리뷰가 저장되었습니다",
+
+  "reviewsLoadFailedError": "리뷰를 불러오는데 실패했습니다",
+  "reviewDeleteFailedError": "리뷰 삭제에 실패했습니다",
+  "genericErrorTitle": "오류 발생",
+  "recipeReviews": "레시피 리뷰",
+  "reviewDeletedSuccessfully": "리뷰가 삭제되었습니다",
+  "newestFirst": "최신순",
+  "highestRating": "별점 높은 순",
+  "lowestRating": "별점 낮은 순",
+  "deleteReviewTitle": "리뷰를 삭제할까요?",
+  "deleteReviewConfirmation": "리뷰를 삭제하면 더이상 다른 사용자는 볼 수 없어요",
+  "noReviewsTitle": "아직 리뷰가 없습니다",
+  "noReviewsSubtitle": "첫 번째 리뷰를 작성해보세요!",
+  "less": "접기",
+  "more": "더보기"
 }
