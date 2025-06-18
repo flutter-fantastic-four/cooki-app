@@ -351,7 +351,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                                 return Container(
                                   width: double.infinity,
                                   padding: EdgeInsets.symmetric(
-                                    horizontal: horizontalPadding,
+                                    horizontal: 8,
                                   ),
                                   child: Wrap(
                                     alignment: WrapAlignment.start,
@@ -431,7 +431,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                                 return Container(
                                   width: double.infinity,
                                   padding: EdgeInsets.symmetric(
-                                    horizontal: horizontalPadding,
+                                    horizontal: 8,
                                   ),
                                   child: Wrap(
                                     alignment: WrapAlignment.start,
@@ -878,11 +878,11 @@ class _FilterChip extends StatelessWidget {
                     isModalChip
                         ? (isSelected
                             ? AppColors.white
-                            : AppColors.greyScale600)
+                            : AppColors.greyScale800)
                         : (isSelected
                             ? AppColors.primary700
                             : AppColors.primary700),
-                fontSize: 12,
+                fontSize: 13,
                 height: 1.2,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
               ),
