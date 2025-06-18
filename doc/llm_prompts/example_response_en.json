@@ -1,0 +1,28 @@
+{
+  "recipeName": "Kimchi Fried Rice",
+  "ingredients": [
+    "200g cooked rice",
+    "80g aged kimchi",
+    "20g scallion",
+    "30g onion",
+    "1 tbsp cooking oil",
+    "1 tsp gochujang (Korean chili paste)",
+    "1 tsp soy sauce",
+    "1 tsp sesame oil",
+    "1 tsp sesame seeds",
+    "1 egg"
+  ],
+  "steps": [
+    "Finely chop the kimchi and onion. Thinly slice the scallion.",
+    "In a heated pan, add cooking oil and stir-fry the scallion to make scallion oil.",
+    "Add the onion and kimchi and stir-fry over medium heat for 2–3 minutes.",
+    "Add gochujang and soy sauce, mix evenly, and stir-fry for 1 more minute.",
+    "Add the cooked rice and stir-fry everything together for 3–4 minutes.",
+    "Turn off the heat and mix in sesame oil and sesame seeds.",
+    "Fry an egg in a separate pan and place it on top of the kimchi fried rice to finish."
+  ],
+  "cookTime": 15,
+  "calories": 550,
+  "category": "Korean",
+  "tags": ["fried rice", "kimchi", "easy", "home cooking", "15-minute meal"]
+}

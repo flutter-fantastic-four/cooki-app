@@ -57,6 +57,7 @@ flutter:
     - assets/icons/
     - assets/prompts/
     - assets/prompts/ko/
+    - assets/prompts/en/
     - assets/no_image.png
 
 flutter_native_splash:
