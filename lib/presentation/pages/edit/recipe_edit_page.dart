@@ -79,6 +79,7 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
           savedRecipesProvider,
         ); // refresh the saved recipes list after saving
         Navigator.of(context).popUntil((route) => route.isFirst);
+        // Navigator.of(context).pop(true); // Return true to indicate success
       }
     }
   }
