@@ -35,9 +35,11 @@ class Recipe {
     DateTime? createdAt,
     this.updatedAt,
     this.promptInput,
-    required this.ratingCount,
-    required this.ratingSum,
-  }) : createdAt = createdAt ?? DateTime.now();
+    int? ratingCount,
+    double? ratingSum,
+  }) : createdAt = createdAt ?? DateTime.now(),
+       ratingCount = ratingCount ?? 0,
+       ratingSum = ratingSum ?? 0;
 
   Recipe copyWith({
     String? id,

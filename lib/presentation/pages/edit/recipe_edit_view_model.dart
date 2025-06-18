@@ -82,8 +82,8 @@ class RecipeEditViewModel extends AutoDisposeFamilyNotifier<RecipeEditState, Rec
         userId: arg?.userId ?? user!.id,
         userName: arg?.userName ?? user!.name,
         userProfileImage: arg?.userProfileImage ?? user!.profileImage,
-        ratingCount: 0,
-        ratingSum: 0,
+        ratingCount: arg?.ratingCount,
+        ratingSum: arg?.ratingSum,
       );
 
       if (arg != null) {
