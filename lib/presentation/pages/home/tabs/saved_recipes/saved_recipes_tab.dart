@@ -580,7 +580,10 @@ class _RecipeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        NavigationUtil.pushFromBottom(context, DetailRecipePage(recipe: recipe, category: category == AppConstants.recipeTabAll ? null : category));
+        NavigationUtil.pushFromBottom(
+          context,
+          DetailRecipePage(recipe: recipe, category: category == strings(context).recipeTabAll ? null : category),
+        );
       },
       child: Container(
         decoration: BoxDecoration(
