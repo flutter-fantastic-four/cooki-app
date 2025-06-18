@@ -98,21 +98,20 @@ class ImageSelector extends ConsumerWidget {
                           ),
                         ),
                         Positioned(
-                          top: 8,
-                          right: 8,
+                          top: 10,
+                          right: 10,
                           child: GestureDetector(
                             onTap: vm.removeImage,
                             child: Container(
-                              padding: const EdgeInsets.all(3),
+                              padding: const EdgeInsets.all(0.5),
                               decoration: BoxDecoration(
-                                color: Colors.grey.shade600,
+                                color: Colors.white,
                                 shape: BoxShape.circle,
-                                border: Border.all(color: Colors.white, width: 2.8),
                               ),
                               child: const Icon(
-                                Icons.close,
-                                size: 19,
-                                color: Colors.white,
+                                Icons.cancel,
+                                size: 24,
+                                color: Colors.red,
                               ),
                             ),
                           ),

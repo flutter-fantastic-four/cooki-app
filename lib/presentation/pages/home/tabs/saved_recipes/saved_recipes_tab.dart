@@ -625,15 +625,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
       primaryButtonText: AppStrings.delete,
       secondaryButtonText: AppStrings.cancel,
       onPrimaryButtonPressed: () {
-        if (context.mounted) {
-          Navigator.of(context).pop();
-          // Add a small delay to ensure dialog is properly closed
-          Future.delayed(const Duration(milliseconds: 50), () {
-            if (mounted) {
-              _deleteRecipe(recipe.id);
-            }
-          });
-        }
+        _deleteRecipe(recipe.id);
       },
     );
   }
@@ -767,8 +759,8 @@ class _RecipeCard extends StatelessWidget {
                   ),
                   child:
                       recipe.imageUrl != null
-                          ? AppCachedImage(
-                            imageUrl: recipe.imageUrl!,
+                          ? Image.network(
+                            recipe.imageUrl!,
                             fit: BoxFit.cover,
                             width: double.infinity,
                             height: double.infinity,

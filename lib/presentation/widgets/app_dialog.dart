@@ -37,8 +37,12 @@ class AppDialog extends StatelessWidget {
             subText: subText,
             primaryButtonText: primaryButtonText ?? strings(context).confirm,
             secondaryButtonText: secondaryButtonText,
-            onPrimaryButtonPressed:
-                onPrimaryButtonPressed ?? () => Navigator.of(context).pop(true),
+            onPrimaryButtonPressed: () {
+              if (onPrimaryButtonPressed != null) {
+                onPrimaryButtonPressed();
+              }
+              Navigator.of(context).pop(true);
+            },
             onSecondaryButtonPressed:
                 onSecondaryButtonPressed ??
                 () => Navigator.of(context).pop(false),
