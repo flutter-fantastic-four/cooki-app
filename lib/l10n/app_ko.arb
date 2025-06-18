@@ -34,7 +34,7 @@
   "generationFailedTitle": "레시피 생성 실패",
   "recipeSavingFailedTitle": "레시피 저장 실패",
   "invalidUserInputError": "유효하지 않은 입력입니다.\n명확한 요리 설명 또는 재료를 입력해 주세요.",
-  "invalidImageError": "레시피 생성에 실패했습니다.\n이미지에 음식이나 재료가 포함되어 있는지 확인해 주세요.",
+  "invalidImageError": "사진에서 음식이나 재료를 찾을 수 없어요.\n다른 사진으로 다시 시도해 주세요.",
   "generationFailedError": "레시피 생성에 실패했습니다.\n다시 시도해 주세요",
   "recipeSaveFailedError": "레시피 저장에 실패했습니다.\n다시 시도해 주세요",
   "categoryRequiredError": "카테고리를 선택해 주세요",
