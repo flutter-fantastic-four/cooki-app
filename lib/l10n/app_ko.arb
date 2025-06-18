@@ -200,5 +200,12 @@
   "countryCategory": "국가별",
   "deleteConfirmMessage": "{recipeName}을(를) 삭제하시겠습니까?",
   "share": "공유",
-  "edit": "수정"
+  "edit": "수정",
+
+  "timeSeconds": "{count}초",
+  "timeMinutes": "{count}분",
+  "timeHours": "{count}시간",
+  "timeMonthDay": "{month}월 {day}일",
+  "timeYearMonthDay": "{year}년 {month}월 {day}일",
+  "yesterday": "어제"
 }
