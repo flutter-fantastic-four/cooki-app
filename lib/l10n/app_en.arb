@@ -218,5 +218,12 @@
   "recipeTabAll": "All",
   "recipeTabCreated": "Created",
   "recipeTabSaved": "Saved",
-  "recipeTabShared": "Shared"
+  "recipeTabShared": "Shared",
+  "review": "Review",
+  "amount": "count",
+  "average": "Average",
+  "score": "points",
+
+  "recipeReview": "Rate this recipe",
+  "recipeRating": "Leave a star rating for the generated recipe"
 }
