@@ -143,8 +143,6 @@ class GenerateRecipeViewModel extends AutoDisposeNotifier<GenerateRecipeState> {
         isPublic: false,
         imageUrl: imageUrl,
         promptInput: promptInputFormatted,
-        ratingCount: 0,
-        ratingSum: 0,
       );
 
       final recipeId = await ref.read(recipeRepositoryProvider).saveRecipe(recipe);
