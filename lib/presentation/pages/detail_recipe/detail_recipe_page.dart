@@ -117,7 +117,10 @@ class DetailRecipePage extends ConsumerWidget {
                   },
                   child: Row(
                     children: [
-                      Text('리뷰 ${recipe.ratingCount > 999 ? '999+' : recipe.ratingCount}개', style: RecipePageWidgets.sectionTitleStyle),
+                      Text(
+                        '${strings(context).review} ${recipe.ratingCount > 999 ? '999+' : recipe.ratingCount}${strings(context).amount}',
+                        style: RecipePageWidgets.sectionTitleStyle,
+                      ),
 
                       Icon(Icons.arrow_forward_ios),
                     ],
@@ -125,7 +128,10 @@ class DetailRecipePage extends ConsumerWidget {
                 ),
                 Spacer(),
                 Icon(Icons.star, color: AppColors.secondary600),
-                Text('평균 ${recipe.ratingSum == 0.0 ? '0' : recipe.ratingSum}점', style: RecipePageWidgets.sectionTitleStyle),
+                Text(
+                  '${strings(context).average} ${recipe.ratingSum == 0.0 ? '0' : recipe.ratingSum}${strings(context).score}',
+                  style: RecipePageWidgets.sectionTitleStyle,
+                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -243,7 +249,7 @@ class DetailRecipePage extends ConsumerWidget {
                                     spacing: 4,
                                     children: [
                                       Text(
-                                        '레시피 평가하기',
+                                        strings(context).recipeReview,
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
                                           color: Colors.black,
@@ -254,7 +260,7 @@ class DetailRecipePage extends ConsumerWidget {
                                         ),
                                       ),
                                       Text(
-                                        '생성한 레시피에 대한 별점을 남겨보세요',
+                                        strings(context).recipeRating,
                                         style: TextStyle(
                                           color: Colors.black,
                                           fontSize: 14,
@@ -328,7 +334,7 @@ class DetailRecipePage extends ConsumerWidget {
                                               spacing: 8,
                                               children: [
                                                 Text(
-                                                  '닫기',
+                                                  strings(context).close,
                                                   textAlign: TextAlign.center,
                                                   style: TextStyle(
                                                     color: const Color(0xFF1D8163) /* Primary-700 */,
@@ -358,7 +364,7 @@ class DetailRecipePage extends ConsumerWidget {
                                             spacing: 8,
                                             children: [
                                               Text(
-                                                '완료',
+                                                strings(context).confirm,
                                                 textAlign: TextAlign.center,
                                                 style: TextStyle(
                                                   color: Colors.white /* Grayscale-White */,

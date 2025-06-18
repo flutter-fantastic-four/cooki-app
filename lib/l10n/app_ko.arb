@@ -168,5 +168,12 @@
   "additionalContextHint": "신고 사유에 대한 추가 설명을 입력해주세요.",
   "submitReport": "제출하기",
   "reportSubmitted": "신고가 접수되었습니다. 검토 후 조치하겠습니다.",
-  "reportError": "신고 접수 중 오류가 발생했습니다."
+  "reportError": "신고 접수 중 오류가 발생했습니다.",
+  "review":"리뷰",
+  "amount":"개",
+  "average":"평균",
+  "score":"점",
+
+  "recipeReview":"레시피 평가하기",
+  "recipeRating":"생성한 레시피에 대한 별점을 남겨보세요"
 }
