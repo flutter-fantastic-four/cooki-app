@@ -28,7 +28,7 @@ class MyRecipesPage extends ConsumerStatefulWidget {
 }
 
 class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
-  String selectedCategory = AppConstants.recipeTabAll;
+  late String selectedCategory;
   List<String> selectedCuisines = [];
   String selectedSort = '';
   late PageController _pageController;
@@ -42,26 +42,21 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
         List<Recipe> filtered = recipes;
 
         // Filter by selected tab category
-        switch (selectedCategory) {
-          case AppConstants.recipeTabAll:
-            // Show all recipes - no additional filtering needed
-            break;
-          case AppConstants.recipeTabCreated:
-            // Show only generated recipes (recipes with 'generated' tag)
-            filtered =
-                filtered.where((r) => r.tags.contains('generated')).toList();
-            break;
-          case AppConstants.recipeTabSaved:
-            // Show only saved recipes (recipes without 'generated' tag and not public)
-            filtered =
-                filtered
-                    .where((r) => !r.tags.contains('generated') && !r.isPublic)
-                    .toList();
-            break;
-          case AppConstants.recipeTabShared:
-            // Show only shared recipes (public recipes)
-            filtered = filtered.where((r) => r.isPublic).toList();
-            break;
+        if (selectedCategory == strings(context).recipeTabAll) {
+          // Show all recipes - no additional filtering needed
+        } else if (selectedCategory == strings(context).recipeTabCreated) {
+          // Show only generated recipes (recipes with 'generated' tag)
+          filtered =
+              filtered.where((r) => r.tags.contains('generated')).toList();
+        } else if (selectedCategory == strings(context).recipeTabSaved) {
+          // Show only saved recipes (recipes without 'generated' tag and not public)
+          filtered =
+              filtered
+                  .where((r) => !r.tags.contains('generated') && !r.isPublic)
+                  .toList();
+        } else if (selectedCategory == strings(context).recipeTabShared) {
+          // Show only shared recipes (public recipes)
+          filtered = filtered.where((r) => r.isPublic).toList();
         }
 
         // Filter by cuisine categories if any selected
@@ -88,6 +83,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
   @override
   void initState() {
     super.initState();
+    selectedCategory = strings(context).recipeTabAll;
     _pageController = PageController(
       initialPage: AppConstants.recipeTabCategories(
         context,
