@@ -207,5 +207,12 @@
   "timeHours": "{count}시간",
   "timeMonthDay": "{month}월 {day}일",
   "timeYearMonthDay": "{year}년 {month}월 {day}일",
-  "yesterday": "어제"
+  "yesterday": "어제",
+
+  "communityTitle": "커뮤니티",
+  "errorOccurred": "오류가 발생했습니다",
+  "checkNetworkConnection": "네트워크 연결을 확인해주세요",
+  "retryButton": "다시 시도",
+  "noSharedRecipes": "공유된 레시피가 없습니다",
+  "shareFirstRecipe": "첫 번째로 레시피를 공유해보세요!"
 }
