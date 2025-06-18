@@ -20,8 +20,6 @@ import '../../../core/utils/error_mappers.dart';
 import '../../../core/utils/general_util.dart';
 import '../../../domain/entity/recipe.dart';
 import '../../user_global_view_model.dart';
-import '../debug/test_recipe_list.dart';
-import '../generate/generated_recipes_page.dart';
 import '../home/tabs/saved_recipes/saved_recipes_tab.dart';
 
 class RecipeEditPage extends ConsumerStatefulWidget {

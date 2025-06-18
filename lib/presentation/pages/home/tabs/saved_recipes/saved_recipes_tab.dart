@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../app/constants/app_constants.dart';
@@ -669,7 +671,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
         SnackbarUtil.showSnackBar(context, AppStrings.deleteError);
       }
       // Log the error for debugging
-      print('Delete error: $e');
+      log('Delete error: $e');
     }
   }
 
@@ -697,6 +699,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
     }
   }
 
+  // ignore: unused_element
   Widget _buildRecipeGrid(List<Recipe> recipes, List<Recipe> filteredRecipes) {
     return RefreshIndicator(
       onRefresh: _refreshRecipes,
@@ -745,7 +748,7 @@ class _RecipeCard extends StatelessWidget {
         color: AppColors.white,
         boxShadow: [
           BoxShadow(
-            color: AppColors.black.withOpacity(0.04),
+            color: AppColors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

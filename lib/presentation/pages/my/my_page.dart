@@ -5,11 +5,8 @@ import 'package:cooki/presentation/pages/my/widgets/nick_name_row.dart';
 import 'package:cooki/presentation/pages/my/widgets/profile_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:settings_ui/settings_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../app/constants/app_colors.dart';
-import '../../../app/constants/app_styles.dart';
 import '../../../core/utils/dialogue_util.dart';
 import '../../../core/utils/snackbar_util.dart';
 import '../../../data/repository/providers.dart';

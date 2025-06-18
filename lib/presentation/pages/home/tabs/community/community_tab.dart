@@ -1,3 +1,5 @@
+// ignore_for_file: unused_element_parameter
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../app/constants/app_constants.dart';
@@ -6,8 +8,6 @@ import '../../../../../domain/entity/recipe.dart';
 import '../../../../../presentation/widgets/app_cached_image.dart';
 import '../../../../../app/constants/app_colors.dart';
 import '../../../../../app/constants/app_strings.dart';
-import '../../../../../presentation/widgets/app_dialog.dart';
-import '../../../../../core/utils/snackbar_util.dart';
 
 // Provider for shared recipes from all users
 final communityRecipesProvider = FutureProvider<List<Recipe>>((ref) async {
@@ -556,7 +556,7 @@ class _RecipeCard extends StatelessWidget {
         color: AppColors.white,
         boxShadow: [
           BoxShadow(
-            color: AppColors.black.withOpacity(0.04),
+            color: AppColors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
