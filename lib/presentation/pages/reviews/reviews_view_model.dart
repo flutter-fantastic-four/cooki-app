@@ -101,6 +101,7 @@ class ReviewsViewModel extends AutoDisposeFamilyNotifier<ReviewsState, String> {
   }
 
   Future<void> deleteReview(String reviewId) async {
+    state = state.copyWith(isLoading: true);
     try {
       await ref
           .read(reviewRepositoryProvider)
@@ -114,6 +115,22 @@ class ReviewsViewModel extends AutoDisposeFamilyNotifier<ReviewsState, String> {
     } catch (e, stack) {
       logError(e, stack);
       state = state.copyWith(errorKey: ReviewsErrorKey.deleteFailed);
+    } finally {
+      state = state.copyWith(isLoading: false);
+    }
+  }
+
+  Future<Review?> getUserReviewForRecipe(String userId) async {
+    try {
+      state = state.copyWith(isLoading: true);
+      return await ref
+          .read(reviewRepositoryProvider)
+          .getUserReviewForRecipe(recipeId: arg, userId: userId);
+    } catch (e, stack) {
+      logError(e, stack);
+      return null;
+    } finally {
+      state = state.copyWith(isLoading: false);
     }
   }
 

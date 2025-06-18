@@ -24,18 +24,17 @@ class RecipeFirestoreDataSource implements RecipeDataSource {
 
   @override
   Future<String> saveRecipe(RecipeFirestoreDto recipeDto) async {
-    final docRef = await _firestore
-        .collection('recipes')
-        .add(recipeDto.toMap());
+    final recipeData =
+        recipeDto.toMap()..['createdAt'] = FieldValue.serverTimestamp();
+    final docRef = await _firestore.collection('recipes').add(recipeData);
     return docRef.id;
   }
 
   @override
   Future<void> editRecipe(RecipeFirestoreDto recipeDto) async {
-    await _firestore
-        .collection('recipes')
-        .doc(recipeDto.id)
-        .set(recipeDto.toMap());
+    final recipeData =
+        recipeDto.toMap()..['updatedAt'] = FieldValue.serverTimestamp();
+    await _firestore.collection('recipes').doc(recipeDto.id).set(recipeData);
   }
 
   @override

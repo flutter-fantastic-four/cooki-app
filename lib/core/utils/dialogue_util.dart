@@ -104,10 +104,9 @@ class DialogueUtil {
     );
   }
 
-  static void showImagePickerModal(
+  static void showGenericModal(
     BuildContext context, {
-    required VoidCallback onCamera,
-    required VoidCallback onGallery,
+    required List<ModalOption> options,
     VoidCallback? onClose,
   }) {
     showModalBottomSheet(
@@ -139,32 +138,28 @@ class DialogueUtil {
                 margin: const EdgeInsets.only(bottom: 12),
               ),
 
-              _ModalOptionCard(
-                text: strings(context).takeWithCamera,
-                icon: Icons.photo_camera,
-                onTap: () {
-                  Navigator.pop(context);
-                  onCamera();
-                },
-              ),
-
-              _ModalOptionCard(
-                text: strings(context).chooseInGallery,
-                icon: CupertinoIcons.photo,
-                onTap: () {
-                  Navigator.pop(context);
-                  onGallery();
-                },
+              // Dynamic options
+              ...options.map(
+                (option) => _ModalOptionCard(
+                  text: option.text,
+                  icon: option.icon,
+                  isRed: option.isRed,
+                  onTap: () {
+                    Navigator.pop(context);
+                    option.onTap();
+                  },
+                ),
               ),
 
               const SizedBox(height: 15),
+              // Fixed close button
               _ModalOptionCard(
                 text: strings(context).close,
+                isCenter: true,
                 onTap: () {
                   Navigator.pop(context);
                   if (onClose != null) onClose();
                 },
-                isCenter: true,
               ),
             ],
           ),
@@ -172,6 +167,44 @@ class DialogueUtil {
       },
     );
   }
+
+  static void showImagePickerModal(
+    BuildContext context, {
+    required VoidCallback onCamera,
+    required VoidCallback onGallery,
+    VoidCallback? onClose,
+  }) {
+    showGenericModal(
+      context,
+      options: [
+        ModalOption(
+          text: strings(context).takeWithCamera,
+          icon: Icons.photo_camera,
+          onTap: onCamera,
+        ),
+        ModalOption(
+          text: strings(context).chooseInGallery,
+          icon: CupertinoIcons.photo,
+          onTap: onGallery,
+        ),
+      ],
+      onClose: onClose,
+    );
+  }
+}
+
+class ModalOption {
+  final String text;
+  final IconData icon;
+  final VoidCallback onTap;
+  final bool isRed;
+
+  const ModalOption({
+    required this.text,
+    required this.icon,
+    required this.onTap,
+    this.isRed = false,
+  });
 }
 
 class _ModalOptionCard extends StatelessWidget {
@@ -179,12 +212,14 @@ class _ModalOptionCard extends StatelessWidget {
   final IconData? icon;
   final VoidCallback onTap;
   final bool isCenter;
+  final bool isRed;
 
   const _ModalOptionCard({
     required this.text,
     this.icon,
     required this.onTap,
     this.isCenter = false,
+    this.isRed = false,
   });
 
   @override
@@ -200,14 +235,14 @@ class _ModalOptionCard extends StatelessWidget {
             !isCenter
                 ? Padding(
                   padding: const EdgeInsets.only(left: 24, right: 4),
-                  child: Icon(icon, color: Colors.black87),
+                  child: Icon(icon, color: isRed ? Colors.red : Colors.black87),
                 )
                 : null,
         title: Text(
           text,
           style: TextStyle(
             fontSize: 16,
-            color: Colors.black,
+            color: isRed ? Colors.red : Colors.black,
             fontWeight: FontWeight.w500,
           ),
           textAlign: isCenter ? TextAlign.center : null,

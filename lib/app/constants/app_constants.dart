@@ -1,9 +1,28 @@
 import 'package:flutter/material.dart';
 
 import '../../core/utils/general_util.dart';
+import '../../data/data_source/review_data_source.dart';
+import '../../domain/entity/sort_option.dart';
 
 class AppConstants {
   static const appTitle = 'Cooki';
+
+  static List<SortOption> getSortOptions() {
+    return [
+      SortOption(
+        labelGetter: (context) => strings(context).newestFirst,
+        type: ReviewSortType.dateDescending,
+      ),
+      SortOption(
+        labelGetter: (context) => strings(context).highestRating,
+        type: ReviewSortType.ratingDescending,
+      ),
+      SortOption(
+        labelGetter: (context) => strings(context).lowestRating,
+        type: ReviewSortType.ratingAscending,
+      ),
+    ];
+  }
 
   static List<String> recipePreferences(BuildContext context) {
     final s = strings(context);

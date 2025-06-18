@@ -25,6 +25,11 @@ abstract class ReviewDataSource {
     ReviewSortType sortType = ReviewSortType.dateDescending,
     int? limit,
   });
+
+  Future<ReviewDto?> getUserReviewForRecipe({
+    required String recipeId,
+    required String userId,
+  });
 }
 
 class ReviewFirestoreDataSource implements ReviewDataSource {
@@ -37,11 +42,14 @@ class ReviewFirestoreDataSource implements ReviewDataSource {
     required String recipeId,
     required ReviewDto reviewDto,
   }) async {
+    final reviewData =
+        reviewDto.toMap()..['createdAt'] = FieldValue.serverTimestamp();
+
     final docRef = await _firestore
         .collection('recipes')
         .doc(recipeId)
         .collection('reviews')
-        .add(reviewDto.toMap());
+        .add(reviewData);
     return docRef.id;
   }
 
@@ -50,12 +58,15 @@ class ReviewFirestoreDataSource implements ReviewDataSource {
     required String recipeId,
     required ReviewDto reviewDto,
   }) async {
+    final reviewData =
+        reviewDto.toMap()..['updatedAt'] = FieldValue.serverTimestamp();
+
     await _firestore
         .collection('recipes')
         .doc(recipeId)
         .collection('reviews')
         .doc(reviewDto.id)
-        .update(reviewDto.toMap());
+        .update(reviewData);
   }
 
   @override
@@ -103,5 +114,29 @@ class ReviewFirestoreDataSource implements ReviewDataSource {
     return querySnapshot.docs
         .map((doc) => ReviewDto.fromMap(doc.id, doc.data()))
         .toList();
+  }
+
+  @override
+  Future<ReviewDto?> getUserReviewForRecipe({
+    required String recipeId,
+    required String userId,
+  }) async {
+    final querySnapshot =
+        await _firestore
+            .collection('recipes')
+            .doc(recipeId)
+            .collection('reviews')
+            .where('userId', isEqualTo: userId)
+            .where('isDeleted', isEqualTo: false)
+            .orderBy('createdAt', descending: true)
+            .limit(1)
+            .get();
+
+    if (querySnapshot.docs.isEmpty) return null;
+
+    return ReviewDto.fromMap(
+      querySnapshot.docs.first.id,
+      querySnapshot.docs.first.data(),
+    );
   }
 }

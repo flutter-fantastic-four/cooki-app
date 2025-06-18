@@ -1,7 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cooki/app/constants/app_constants.dart';
 import 'package:cooki/core/utils/date_time_util.dart';
 import 'package:cooki/core/utils/dialogue_util.dart';
 import 'package:cooki/core/utils/error_mappers.dart';
+import 'package:cooki/presentation/pages/report_review/review_report_page.dart';
 import 'package:cooki/presentation/pages/reviews/widgets/expandable_text.dart';
 import 'package:cooki/presentation/widgets/app_cached_image.dart';
 import 'package:cooki/presentation/widgets/feedback_layout.dart';
@@ -13,7 +15,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/constants/app_colors.dart';
 import '../../../core/utils/general_util.dart';
 import '../../../core/utils/snackbar_util.dart';
-import '../../../data/data_source/review_data_source.dart';
 import '../../../domain/entity/review.dart';
 import '../../user_global_view_model.dart';
 import '../add_review/write_review_page.dart';
@@ -29,34 +30,56 @@ class ReviewsPage extends ConsumerWidget {
     required this.recipeName,
   });
 
-  void _showImageViewer(
+  void _showReviewOptionsModal(
     BuildContext context,
-    List<String> imageUrls,
-    int initialIndex,
+    WidgetRef ref,
+    Review review,
   ) {
-    final imageProviders =
-        imageUrls.map((url) => CachedNetworkImageProvider(url)).toList();
+    final currentUser = ref.read(userGlobalViewModelProvider);
+    final isMyReview = currentUser?.id == review.userId;
 
-    showImageViewerPager(
-      context,
-      MultiImageProvider(imageProviders, initialIndex: initialIndex),
-      swipeDismissible: true,
-      doubleTapZoomable: true,
-      useSafeArea: true,
-    );
+    final options = <ModalOption>[
+      ModalOption(
+        text: strings(context).translateReview,
+        icon: Icons.g_translate,
+        onTap: () => _translateReview(context, review),
+      ),
+      if (isMyReview)
+        ModalOption(
+          text: strings(context).editReview,
+          icon: Icons.edit_outlined,
+          onTap:
+              () => _navigateToWriteOrEditReview(context, ref, review: review),
+        ),
+      if (!isMyReview)
+        ModalOption(
+          text: strings(context).reportReview,
+          icon: Icons.flag,
+          isRed: true,
+          onTap: () => _reportReview(context, review),
+        ),
+      if (isMyReview)
+        ModalOption(
+          text: strings(context).deleteReview,
+          isRed: true,
+          icon: Icons.delete,
+          onTap: () => _deleteReview(context, ref, review),
+        ),
+    ];
+
+    DialogueUtil.showGenericModal(context, options: options);
   }
 
-  void _navigateToWriteReview(BuildContext context, WidgetRef ref) async {
-    final result = await Navigator.of(context).push<bool>(
+  void _translateReview(BuildContext context, Review review) {
+    // TODO: Implement translate functionality
+  }
+
+  void _reportReview(BuildContext context, Review review) {
+    Navigator.of(context).push(
       MaterialPageRoute(
-        builder:
-            (_) => WriteReviewPage(recipeId: recipeId, recipeName: recipeName),
+        builder: (_) => ReviewReportPage(recipeId: recipeId, review: review),
       ),
     );
-
-    if (result == true) {
-      ref.read(reviewsViewModelProvider(recipeId).notifier).refreshReviews();
-    }
   }
 
   Future<void> _deleteReview(
@@ -91,6 +114,57 @@ class ReviewsPage extends ConsumerWidget {
     }
   }
 
+  void _navigateToWriteOrEditReview(
+    BuildContext context,
+    WidgetRef ref, {
+    Review? review,
+  }) async {
+    final result = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder:
+            (_) => WriteReviewPage(
+              recipeId: recipeId,
+              recipeName: recipeName,
+              review: review,
+            ),
+      ),
+    );
+
+    if (result == true) {
+      ref.read(reviewsViewModelProvider(recipeId).notifier).refreshReviews();
+    }
+  }
+
+  void _showImageViewer(
+    BuildContext context,
+    List<String> imageUrls,
+    int initialIndex,
+  ) {
+    final imageProviders =
+        imageUrls.map((url) => CachedNetworkImageProvider(url)).toList();
+
+    showImageViewerPager(
+      context,
+      MultiImageProvider(imageProviders, initialIndex: initialIndex),
+      swipeDismissible: true,
+      doubleTapZoomable: true,
+      useSafeArea: true,
+    );
+  }
+
+  void _showErrorDialog(
+    BuildContext context,
+    ReviewsErrorKey errorKey,
+    WidgetRef ref,
+  ) {
+    DialogueUtil.showAppCupertinoDialog(
+      context: context,
+      title: strings(context).genericErrorTitle,
+      content: ErrorMapper.mapReviewsPageError(context, errorKey),
+    );
+    ref.read(reviewsViewModelProvider(recipeId).notifier).clearError();
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(reviewsViewModelProvider(recipeId));
@@ -110,75 +184,82 @@ class ReviewsPage extends ConsumerWidget {
         title: Text(strings(context).recipeReviews),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: InkWell(
-              highlightColor: AppColors.greyScale300,
-              onTap: () => _navigateToWriteReview(context, ref),
-              customBorder: const CircleBorder(),
-              child: Image.asset(
-                'assets/icons/edit_icon.png',
-                width: 24,
-                height: 24,
+            padding: const EdgeInsets.only(right: 4),
+            child: IconButton(
+              tooltip: strings(context).writeReviewTitle,
+              onPressed: () async {
+                final existingReview = await ref
+                    .read(reviewsViewModelProvider(recipeId).notifier)
+                    .getUserReviewForRecipe(
+                      ref.read(userGlobalViewModelProvider)!.id,
+                    );
+                if (context.mounted) {
+                  _navigateToWriteOrEditReview(
+                    context,
+                    ref,
+                    review: existingReview,
+                  );
+                }
+              },
+              icon: const Icon(
+                Icons.edit_outlined,
+                size: 22,
+                color: Colors.black87,
               ),
             ),
           ),
         ],
       ),
-      body: Stack(
-        children: [
-          RefreshIndicator(
-            onRefresh:
-                () =>
-                    ref
-                        .read(reviewsViewModelProvider(recipeId).notifier)
-                        .refreshReviews(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (state.reviews.isEmpty && !state.isLoading)
-                  Expanded(child: _buildEmptyLayout(context))
-                else if (state.reviews.isNotEmpty) ...[
-                  _buildSortingChips(context, ref, state),
-                  Expanded(
-                    child: ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(16, 10, 16, 40),
-                      itemCount: state.reviews.length,
-                      itemBuilder: (context, index) {
-                        final review = state.reviews[index];
-                        return _buildReviewItem(context, ref, review);
-                      },
+      body:
+          state.isLoading && state.reviews.isEmpty
+              ? const Center(child: CupertinoActivityIndicator(radius: 20))
+              : Stack(
+                children: [
+                  RefreshIndicator(
+                    onRefresh:
+                        () =>
+                            ref
+                                .read(
+                                  reviewsViewModelProvider(recipeId).notifier,
+                                )
+                                .refreshReviews(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (state.reviews.isEmpty && !state.isLoading)
+                          Expanded(child: _buildEmptyLayout(context))
+                        else if (state.reviews.isNotEmpty) ...[
+                          _buildSortingChips(context, ref, state),
+                          Expanded(
+                            child: ListView.builder(
+                              padding: const EdgeInsets.fromLTRB(
+                                16,
+                                10,
+                                16,
+                                40,
+                              ),
+                              itemCount: state.reviews.length,
+                              itemBuilder: (context, index) {
+                                final review = state.reviews[index];
+                                return _buildReviewItem(context, ref, review);
+                              },
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
+                  if (state.isLoading)
+                    const Positioned.fill(
+                      child: IgnorePointer(
+                        child: Center(
+                          child: CupertinoActivityIndicator(radius: 14),
+                        ),
+                      ),
+                    ),
                 ],
-              ],
-            ),
-          ),
-          if (state.isLoading && state.reviews.isEmpty)
-            Expanded(
-              child: Center(child: CupertinoActivityIndicator(radius: 20)),
-            )
-          else if (state.isLoading)
-            const Positioned.fill(
-              child: IgnorePointer(
-                child: Center(child: CupertinoActivityIndicator(radius: 14)),
               ),
-            ),
-        ],
-      ),
     );
-  }
-
-  void _showErrorDialog(
-    BuildContext context,
-    ReviewsErrorKey errorKey,
-    WidgetRef ref,
-  ) {
-    DialogueUtil.showAppCupertinoDialog(
-      context: context,
-      title: strings(context).genericErrorTitle,
-      content: ErrorMapper.mapReviewsPageError(context, errorKey),
-    );
-    ref.read(reviewsViewModelProvider(recipeId).notifier).clearError();
   }
 
   Widget _buildEmptyLayout(BuildContext context) {
@@ -207,20 +288,7 @@ class ReviewsPage extends ConsumerWidget {
     WidgetRef ref,
     ReviewsState state,
   ) {
-    final sortOptions = [
-      {
-        'label': strings(context).newestFirst,
-        'type': ReviewSortType.dateDescending,
-      },
-      {
-        'label': strings(context).highestRating,
-        'type': ReviewSortType.ratingDescending,
-      },
-      {
-        'label': strings(context).lowestRating,
-        'type': ReviewSortType.ratingAscending,
-      },
-    ];
+    final sortOptions = AppConstants.getSortOptions();
 
     return Container(
       width: double.infinity,
@@ -229,15 +297,15 @@ class ReviewsPage extends ConsumerWidget {
         scrollDirection: Axis.horizontal,
         child: Row(
           children:
-              sortOptions.map((option) {
-                final isActive = state.currentSortType == option['type'];
+              sortOptions.map((sortOption) {
+                final isActive = state.currentSortType == sortOption.type;
                 return Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: GestureDetector(
                     onTap:
                         () => ref
                             .read(reviewsViewModelProvider(recipeId).notifier)
-                            .changeSortType(option['type'] as ReviewSortType),
+                            .changeSortType(sortOption.type),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
@@ -247,20 +315,17 @@ class ReviewsPage extends ConsumerWidget {
                         color: isActive ? AppColors.primary : Colors.white,
                         border: Border.all(
                           color:
-                              isActive
-                                  ? AppColors.primary
-                                  : AppColors.greyScale200,
+                              isActive ? AppColors.primary : Colors.grey[400]!,
                         ),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        option['label'] as String,
+                        sortOption.getLabel(context),
                         style: TextStyle(
-                          fontSize: 14.3,
                           color:
-                              isActive ? Colors.white : AppColors.greyScale800,
+                              isActive ? Colors.white : const Color(0xFF444444),
                           fontWeight:
-                              isActive ? FontWeight.w700 : FontWeight.normal,
+                              isActive ? FontWeight.w600 : FontWeight.normal,
                         ),
                       ),
                     ),
@@ -274,16 +339,14 @@ class ReviewsPage extends ConsumerWidget {
 
   Widget _buildReviewItem(BuildContext context, WidgetRef ref, Review review) {
     final vm = ref.read(reviewsViewModelProvider(recipeId).notifier);
-    final currentUser = ref.read(userGlobalViewModelProvider);
-    final isMyReview = currentUser?.id == review.userId;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 30),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildReviewHeader(context, ref, review, isMyReview),
-          const SizedBox(height: 4),
+          _buildReviewHeader(context, ref, review),
+          const SizedBox(height: 10),
           StarRating(
             currentRating: review.rating,
             iconSize: 16,
@@ -315,7 +378,6 @@ class ReviewsPage extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     Review review,
-    bool isMyReview,
   ) {
     return Row(
       children: [
@@ -340,7 +402,7 @@ class ReviewsPage extends ConsumerWidget {
             ],
           ),
         ),
-        _buildOverflowMenu(context, ref, review, isMyReview),
+        _buildOverflowMenu(context, ref, review),
       ],
     );
   }
@@ -364,38 +426,18 @@ class ReviewsPage extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     Review review,
-    bool isMyReview,
   ) {
-    return PopupMenuButton<String>(
-      icon: const Icon(Icons.more_vert, color: Color(0xFF888888), size: 20),
-      onSelected: (value) {
-        switch (value) {
-          case 'translate':
-            break;
-          case 'report':
-            break;
-          case 'delete':
-            _deleteReview(context, ref, review);
-            break;
-        }
-      },
-      itemBuilder: (context) {
-        final items = <PopupMenuEntry<String>>[
-          PopupMenuItem(value: 'translate', child: Text('번역')),
-          PopupMenuItem(value: 'report', child: Text('신고')),
-        ];
-
-        if (isMyReview) {
-          items.add(
-            PopupMenuItem(
-              value: 'delete',
-              child: Text('삭제', style: TextStyle(color: Colors.red)),
-            ),
-          );
-        }
-
-        return items;
-      },
+    return SizedBox.square(
+      dimension: 30,
+      child: IconButton(
+        padding: EdgeInsets.zero,
+        onPressed: () => _showReviewOptionsModal(context, ref, review),
+        icon: const Icon(
+          CupertinoIcons.ellipsis,
+          color: AppColors.greyScale600,
+          size: 22,
+        ),
+      ),
     );
   }
 
