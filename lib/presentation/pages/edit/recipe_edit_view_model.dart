@@ -43,15 +43,10 @@ class RecipeEditState {
   );
 }
 
-class RecipeEditViewModel
-    extends AutoDisposeFamilyNotifier<RecipeEditState, Recipe?> {
+class RecipeEditViewModel extends AutoDisposeFamilyNotifier<RecipeEditState, Recipe?> {
   @override
   RecipeEditState build(Recipe? arg) {
-    return RecipeEditState(
-      selectedCategory: arg?.category,
-      isPublic: arg?.isPublic ?? false,
-      currentTitle: arg?.recipeName,
-    );
+    return RecipeEditState(selectedCategory: arg?.category, isPublic: arg?.isPublic ?? false, currentTitle: arg?.recipeName);
   }
 
   Future<void> saveRecipe({
@@ -87,6 +82,8 @@ class RecipeEditViewModel
         userId: arg?.userId ?? user!.id,
         userName: arg?.userName ?? user!.name,
         userProfileImage: arg?.userProfileImage ?? user!.profileImage,
+        ratingCount: 0,
+        ratingSum: 0,
       );
 
       if (arg != null) {
@@ -127,7 +124,4 @@ class RecipeEditViewModel
   }
 }
 
-final recipeEditViewModelProvider = NotifierProvider.autoDispose
-    .family<RecipeEditViewModel, RecipeEditState, Recipe?>(
-      RecipeEditViewModel.new,
-    );
+final recipeEditViewModelProvider = NotifierProvider.autoDispose.family<RecipeEditViewModel, RecipeEditState, Recipe?>(RecipeEditViewModel.new);
