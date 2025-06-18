@@ -43,10 +43,15 @@ class RecipeEditState {
   );
 }
 
-class RecipeEditViewModel extends AutoDisposeFamilyNotifier<RecipeEditState, Recipe?> {
+class RecipeEditViewModel
+    extends AutoDisposeFamilyNotifier<RecipeEditState, Recipe?> {
   @override
   RecipeEditState build(Recipe? arg) {
-    return RecipeEditState(selectedCategory: arg?.category, isPublic: arg?.isPublic ?? false, currentTitle: arg?.recipeName);
+    return RecipeEditState(
+      selectedCategory: arg?.category,
+      isPublic: arg?.isPublic ?? false,
+      currentTitle: arg?.recipeName,
+    );
   }
 
   Future<void> saveRecipe({
@@ -99,6 +104,14 @@ class RecipeEditViewModel extends AutoDisposeFamilyNotifier<RecipeEditState, Rec
     }
   }
 
+  Future<void> deleteRecipe() async {
+    try {
+      await ref.read(recipeRepositoryProvider).deleteRecipe(arg!.id);
+    } catch (e, stack) {
+      logError(e, stack);
+    }
+  }
+
   void setCategory(String? category) {
     state = state.copyWith(selectedCategory: category);
   }
@@ -124,4 +137,7 @@ class RecipeEditViewModel extends AutoDisposeFamilyNotifier<RecipeEditState, Rec
   }
 }
 
-final recipeEditViewModelProvider = NotifierProvider.autoDispose.family<RecipeEditViewModel, RecipeEditState, Recipe?>(RecipeEditViewModel.new);
+final recipeEditViewModelProvider = NotifierProvider.autoDispose
+    .family<RecipeEditViewModel, RecipeEditState, Recipe?>(
+      RecipeEditViewModel.new,
+    );
