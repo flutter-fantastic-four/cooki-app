@@ -20,7 +20,7 @@ class DialogueUtil {
     required String content,
     bool showCancel = false,
   }) {
-    final confirmButtonText = showCancel ? '네' : '확인';
+    final confirmButtonText = showCancel ? strings(context).yes : strings(context).confirm;
     final Widget dialog = CupertinoAlertDialog(
       title: Text(title, style: const TextStyle(fontSize: 20)),
       content: Text(content, style: const TextStyle(fontSize: 15)),
@@ -29,7 +29,7 @@ class DialogueUtil {
           CupertinoDialogAction(
             onPressed: () => Navigator.pop(context, AppDialogResult.cancel),
             child: Text(
-              '아니오',
+              strings(context).no,
               style: TextStyle(color: Colors.red, fontSize: 17),
             ),
           ),

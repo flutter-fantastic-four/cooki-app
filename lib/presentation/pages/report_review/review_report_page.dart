@@ -10,6 +10,7 @@ import '../../../core/utils/snackbar_util.dart';
 import '../../../data/dto/report_dto.dart';
 import '../../../domain/entity/review.dart';
 import '../../user_global_view_model.dart';
+import '../../widgets/selectable_option_row.dart';
 
 class ReviewReportPage extends ConsumerStatefulWidget {
   final String recipeId;
@@ -130,52 +131,14 @@ class _ReportPageState extends ConsumerState<ReviewReportPage> {
     return Column(
       children:
           ReportReason.values.map((reason) {
-            return Column(
-              children: [
-                _buildReasonOption(reason, state.selectedReason == reason),
-              ],
+            return SelectableOptionRow(
+              text: reason.getDisplayName(context),
+              isSelected: state.selectedReason == reason,
+              onTap: () => ref
+                  .read(reviewReportViewModelProvider.notifier)
+                  .setSelectedReason(reason),
             );
           }).toList(),
-    );
-  }
-
-  Widget _buildReasonOption(ReportReason reason, bool isSelected) {
-    return GestureDetector(
-      onTap:
-          () => ref
-              .read(reviewReportViewModelProvider.notifier)
-              .setSelectedReason(reason),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 10),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              reason.getDisplayName(context),
-              style: const TextStyle(fontSize: 17, color: Colors.black),
-            ),
-            _buildRadioButton(isSelected),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRadioButton(bool isSelected) {
-    return Container(
-      width: 24,
-      height: 24,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: isSelected ? AppColors.primary400 : Colors.transparent,
-        border: isSelected ? null : Border.all(
-          color: const Color(0xFFCCCCCC),
-          width: 1.0,
-        ),
-      ),
-      child: isSelected
-          ? const Icon(Icons.check, color: Colors.white, size: 18)
-          : null,
     );
   }
 

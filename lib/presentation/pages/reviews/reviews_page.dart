@@ -396,7 +396,7 @@ class ReviewsPage extends ConsumerWidget {
                 ),
               ),
               Text(
-                DateTimeUtil.formatCompactDateTime(review.createdAt),
+                DateTimeUtil.formatCompactDateTime(review.createdAt, context),
                 style: TextStyle(fontSize: 13, color: AppColors.greyScale500),
               ),
             ],

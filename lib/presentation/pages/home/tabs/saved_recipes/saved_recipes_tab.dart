@@ -1,13 +1,14 @@
 import 'dart:developer';
 
+import 'package:cooki/core/utils/sharing_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../app/constants/app_constants.dart';
 import '../../../../../data/repository/providers.dart';
 import '../../../../../domain/entity/recipe.dart';
+import '../../../../../core/utils/general_util.dart';
 
 import '../../../../../app/constants/app_colors.dart';
-import '../../../../../app/constants/app_strings.dart';
 import '../../../../pages/edit/recipe_edit_page.dart';
 import '../../../../../presentation/widgets/app_dialog.dart';
 import '../../../../../core/utils/snackbar_util.dart';
@@ -27,7 +28,7 @@ class MyRecipesPage extends ConsumerStatefulWidget {
 }
 
 class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
-  String selectedCategory = AppConstants.recipeTabAll;
+  late String selectedCategory;
   List<String> selectedCuisines = [];
   String selectedSort = '';
   late PageController _pageController;
@@ -41,26 +42,21 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
         List<Recipe> filtered = recipes;
 
         // Filter by selected tab category
-        switch (selectedCategory) {
-          case AppConstants.recipeTabAll:
-            // Show all recipes - no additional filtering needed
-            break;
-          case AppConstants.recipeTabCreated:
-            // Show only generated recipes (recipes with 'generated' tag)
-            filtered =
-                filtered.where((r) => r.tags.contains('generated')).toList();
-            break;
-          case AppConstants.recipeTabSaved:
-            // Show only saved recipes (recipes without 'generated' tag and not public)
-            filtered =
-                filtered
-                    .where((r) => !r.tags.contains('generated') && !r.isPublic)
-                    .toList();
-            break;
-          case AppConstants.recipeTabShared:
-            // Show only shared recipes (public recipes)
-            filtered = filtered.where((r) => r.isPublic).toList();
-            break;
+        if (selectedCategory == strings(context).recipeTabAll) {
+          // Show all recipes - no additional filtering needed
+        } else if (selectedCategory == strings(context).recipeTabCreated) {
+          // Show only generated recipes (recipes with 'generated' tag)
+          filtered =
+              filtered.where((r) => r.tags.contains('generated')).toList();
+        } else if (selectedCategory == strings(context).recipeTabSaved) {
+          // Show only saved recipes (recipes without 'generated' tag and not public)
+          filtered =
+              filtered
+                  .where((r) => !r.tags.contains('generated') && !r.isPublic)
+                  .toList();
+        } else if (selectedCategory == strings(context).recipeTabShared) {
+          // Show only shared recipes (public recipes)
+          filtered = filtered.where((r) => r.isPublic).toList();
         }
 
         // Filter by cuisine categories if any selected
@@ -72,10 +68,10 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
         }
 
         // Apply sort option if selected
-        if (selectedSort == AppConstants.sortByRating) {
+        if (selectedSort == strings(context).sortByRating) {
           // Sort by rating
           filtered.sort((a, b) => b.ratingSum.compareTo(a.ratingSum));
-        } else if (selectedSort == AppConstants.sortByCookTimeAsc) {
+        } else if (selectedSort == strings(context).sortByCookTime) {
           filtered.sort((a, b) => a.cookTime.compareTo(b.cookTime));
         }
 
@@ -87,6 +83,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
   @override
   void initState() {
     super.initState();
+    selectedCategory = strings(context).recipeTabAll;
     _pageController = PageController(
       initialPage: AppConstants.recipeTabCategories(
         context,
@@ -105,9 +102,10 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text(
-          '나의 레시피',
-          style: TextStyle(
+        titleSpacing: 20,
+        title: Text(
+          strings(context).myRecipesTitle,
+          style: const TextStyle(
             color: Colors.black,
             fontSize: 20,
             fontWeight: FontWeight.w600,
@@ -326,9 +324,9 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // Sort options
-                            const Text(
-                              '정렬 기준',
-                              style: TextStyle(
+                            Text(
+                              strings(context).sort,
+                              style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -342,13 +340,10 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                                     ((constraints.maxWidth - 24) /
                                             (chipWidth + spacing))
                                         .floor();
-                                final totalWidth =
-                                    chipsPerRow * (chipWidth + spacing) -
-                                    spacing;
 
                                 return Container(
                                   width: double.infinity,
-                                  padding: EdgeInsets.symmetric(
+                                  padding: const EdgeInsets.symmetric(
                                     horizontal: 8,
                                   ),
                                   child: Wrap(
@@ -357,36 +352,41 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                                     runSpacing: 8,
                                     children: [
                                       _FilterChip(
-                                        label: AppConstants.sortByRating,
+                                        label: strings(context).sortByRating,
                                         isSelected:
                                             tempSort ==
-                                            AppConstants.sortByRating,
+                                            strings(context).sortByRating,
                                         onTap: () {
                                           setModalState(() {
                                             tempSort =
                                                 tempSort ==
-                                                        AppConstants
-                                                            .sortByRating
+                                                        strings(
+                                                          context,
+                                                        ).sortByRating
                                                     ? ''
-                                                    : AppConstants.sortByRating;
+                                                    : strings(
+                                                      context,
+                                                    ).sortByRating;
                                           });
                                         },
                                         isModalChip: true,
                                       ),
                                       _FilterChip(
-                                        label: AppConstants.sortByCookTimeAsc,
+                                        label: strings(context).sortByCookTime,
                                         isSelected:
                                             tempSort ==
-                                            AppConstants.sortByCookTimeAsc,
+                                            strings(context).sortByCookTime,
                                         onTap: () {
                                           setModalState(() {
                                             tempSort =
                                                 tempSort ==
-                                                        AppConstants
-                                                            .sortByCookTimeAsc
+                                                        strings(
+                                                          context,
+                                                        ).sortByCookTime
                                                     ? ''
-                                                    : AppConstants
-                                                        .sortByCookTimeAsc;
+                                                    : strings(
+                                                      context,
+                                                    ).sortByCookTime;
                                           });
                                         },
                                         isModalChip: true,
@@ -404,9 +404,9 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                             ),
                             const SizedBox(height: 20),
                             // Cuisine filters
-                            const Text(
-                              '국가별',
-                              style: TextStyle(
+                            Text(
+                              strings(context).countryCategory,
+                              style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -420,13 +420,10 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                                     ((constraints.maxWidth - 24) /
                                             (chipWidth + spacing))
                                         .floor();
-                                final totalWidth =
-                                    chipsPerRow * (chipWidth + spacing) -
-                                    spacing;
 
                                 return Container(
                                   width: double.infinity,
-                                  padding: EdgeInsets.symmetric(
+                                  padding: const EdgeInsets.symmetric(
                                     horizontal: 8,
                                   ),
                                   child: Wrap(
@@ -470,7 +467,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                                       });
                                       Navigator.pop(context);
                                     },
-                                    child: const Text(AppStrings.reset),
+                                    child: Text(strings(context).reset),
                                   ),
                                 ),
                                 const SizedBox(width: 12),
@@ -493,7 +490,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                     ),
-                                    child: const Text(AppStrings.apply),
+                                    child: Text(strings(context).apply),
                                   ),
                                 ),
                               ],
@@ -548,8 +545,8 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
               _PhotoModalStyleCard(
                 text:
                     recipe.isPublic
-                        ? AppStrings.communityUnpost
-                        : AppStrings.communityPost,
+                        ? strings(context).communityUnpost
+                        : strings(context).communityPost,
                 icon: recipe.isPublic ? Icons.public_off : Icons.public,
                 onTap: () {
                   Navigator.pop(context);
@@ -558,16 +555,21 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
               ),
 
               _PhotoModalStyleCard(
-                text: AppStrings.share,
+                text: strings(context).share,
                 icon: Icons.share_outlined,
-                onTap: () {
+                onTap: () async {
+                  await SharingUtil.shareRecipe(
+                    context,
+                    recipe,
+                    ref.read(imageDownloadRepositoryProvider),
+                  );
+                  if (!context.mounted) return;
                   Navigator.pop(context);
-                  // TODO: Implement share action
                 },
               ),
 
               _PhotoModalStyleCard(
-                text: AppStrings.edit,
+                text: strings(context).edit,
                 icon: Icons.edit_outlined,
                 onTap: () {
                   Navigator.pop(context);
@@ -581,7 +583,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
               ),
 
               _PhotoModalStyleCard(
-                text: AppStrings.delete,
+                text: strings(context).delete,
                 icon: Icons.delete_outline,
                 iconColor: Colors.red,
                 textColor: Colors.red,
@@ -593,7 +595,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
 
               const SizedBox(height: 15),
               _PhotoModalStyleCard(
-                text: AppStrings.close,
+                text: strings(context).close,
                 onTap: () => Navigator.pop(context),
                 isCenter: true,
               ),
@@ -608,17 +610,17 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
     // Add null checks
     if (recipe.id.isEmpty) {
       if (context.mounted) {
-        SnackbarUtil.showSnackBar(context, AppStrings.deleteError);
+        SnackbarUtil.showSnackBar(context, strings(context).deleteError);
       }
       return;
     }
 
     AppDialog.show(
       context: context,
-      title: AppStrings.delete,
-      subText: '${recipe.recipeName}을(를) 삭제하시겠습니까?',
-      primaryButtonText: AppStrings.delete,
-      secondaryButtonText: AppStrings.cancel,
+      title: strings(context).delete,
+      subText: strings(context).deleteConfirmMessage(recipe.recipeName),
+      primaryButtonText: strings(context).delete,
+      secondaryButtonText: strings(context).cancel,
       onPrimaryButtonPressed: () {
         _deleteRecipe(recipe.id);
       },
@@ -629,7 +631,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
     // Add null check for recipeId
     if (recipeId.isEmpty) {
       if (context.mounted) {
-        SnackbarUtil.showSnackBar(context, AppStrings.deleteError);
+        SnackbarUtil.showSnackBar(context, strings(context).deleteError);
       }
       return;
     }
@@ -648,14 +650,14 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
       if (mounted && context.mounted) {
         SnackbarUtil.showSnackBar(
           context,
-          AppStrings.deleteSuccess,
+          strings(context).deleteSuccess,
           showIcon: true,
         );
       }
     } catch (e) {
       // Show error message with more specific error handling
       if (mounted && context.mounted) {
-        SnackbarUtil.showSnackBar(context, AppStrings.deleteError);
+        SnackbarUtil.showSnackBar(context, strings(context).deleteError);
       }
       // Log the error for debugging
       log('Delete error: $e');
@@ -674,14 +676,16 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
       if (mounted && context.mounted) {
         SnackbarUtil.showSnackBar(
           context,
-          recipe.isPublic ? AppStrings.unpostSuccess : AppStrings.postSuccess,
+          recipe.isPublic
+              ? strings(context).unpostSuccess
+              : strings(context).postSuccess,
           showIcon: true,
         );
       }
     } catch (e) {
       // Show error message
       if (mounted && context.mounted) {
-        SnackbarUtil.showSnackBar(context, AppStrings.postError);
+        SnackbarUtil.showSnackBar(context, strings(context).postError);
       }
     }
   }
