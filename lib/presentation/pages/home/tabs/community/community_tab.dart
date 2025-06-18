@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../app/constants/app_constants.dart';
+import '../../../../../core/utils/sharing_util.dart';
 import '../../../../../data/repository/providers.dart';
 import '../../../../../domain/entity/recipe.dart';
 import '../../../../../presentation/widgets/app_cached_image.dart';
@@ -372,9 +373,10 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
               _PhotoModalStyleCard(
                 text: AppStrings.share,
                 icon: Icons.share_outlined,
-                onTap: () {
+                onTap: () async {
+                  await SharingUtil.shareRecipe(context, recipe, ref.read(imageDownloadRepositoryProvider));
+                  if (!context.mounted) return;
                   Navigator.pop(context);
-                  // TODO: Implement share action
                 },
               ),
 

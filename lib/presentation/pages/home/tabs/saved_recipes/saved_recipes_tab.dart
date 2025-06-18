@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:cooki/core/utils/sharing_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../app/constants/app_constants.dart';
@@ -554,9 +555,10 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
               _PhotoModalStyleCard(
                 text: AppStrings.share,
                 icon: Icons.share_outlined,
-                onTap: () {
+                onTap: () async {
+                  await SharingUtil.shareRecipe(context, recipe, ref.read(imageDownloadRepositoryProvider));
+                  if (!context.mounted) return;
                   Navigator.pop(context);
-                  // TODO: Implement share action
                 },
               ),
 
