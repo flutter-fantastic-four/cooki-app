@@ -211,7 +211,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                           ),
                           delegate: SliverChildBuilderDelegate((context, recipeIndex) {
                             final recipe = filteredRecipes[recipeIndex];
-                            return _RecipeCard(recipe: recipe, onOptionsTap: () => _showOptionsModal(context, recipe));
+                            return _RecipeCard(recipe: recipe, onOptionsTap: () => _showOptionsModal(context, recipe), category: selectedCategory);
                           }, childCount: filteredRecipes.length),
                         ),
                       ),
@@ -563,7 +563,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
         itemCount: filteredRecipes.length,
         itemBuilder: (context, index) {
           final recipe = filteredRecipes[index];
-          return _RecipeCard(recipe: recipe, onOptionsTap: () => _showOptionsModal(context, recipe));
+          return _RecipeCard(recipe: recipe, onOptionsTap: () => _showOptionsModal(context, recipe), category: selectedCategory);
         },
       ),
     );
@@ -578,14 +578,15 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
 class _RecipeCard extends StatelessWidget {
   final Recipe recipe;
   final VoidCallback onOptionsTap;
+  final String category;
 
-  const _RecipeCard({required this.recipe, required this.onOptionsTap});
+  const _RecipeCard({required this.recipe, required this.onOptionsTap, required this.category});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        NavigationUtil.pushFromBottom(context, DetailRecipePage(recipe: recipe));
+        NavigationUtil.pushFromBottom(context, DetailRecipePage(recipe: recipe, category: category == AppConstants.recipeTabAll ? null : category));
       },
       child: Container(
         decoration: BoxDecoration(

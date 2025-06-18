@@ -405,7 +405,7 @@ class _RecipeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        NavigationUtil.pushFromBottom(context, DetailRecipePage(recipe: recipe, isShardRecipe: false));
+        NavigationUtil.pushFromBottom(context, DetailRecipePage(recipe: recipe));
       },
       child: Container(
         decoration: BoxDecoration(
