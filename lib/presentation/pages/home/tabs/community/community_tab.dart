@@ -5,11 +5,12 @@ import 'package:cooki/presentation/pages/detail_recipe/detail_recipe_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../app/constants/app_constants.dart';
+import '../../../../../core/utils/sharing_util.dart';
 import '../../../../../data/repository/providers.dart';
 import '../../../../../domain/entity/recipe.dart';
 import '../../../../../presentation/widgets/app_cached_image.dart';
 import '../../../../../app/constants/app_colors.dart';
-import '../../../../../app/constants/app_strings.dart';
+import '../../../../../core/utils/general_util.dart';
 
 // Provider for shared recipes from all users
 final communityRecipesProvider = FutureProvider<List<Recipe>>((ref) async {
@@ -42,9 +43,9 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
         }
 
         // Apply sort option if selected
-        if (selectedSort == AppConstants.sortByRating) {
+        if (selectedSort == strings(context).sortByRating) {
           filtered.sort((a, b) => b.ratingSum.compareTo(a.ratingSum));
-        } else if (selectedSort == AppConstants.sortByCookTimeAsc) {
+        } else if (selectedSort == strings(context).sortByCookTime) {
           filtered.sort((a, b) => a.cookTime.compareTo(b.cookTime));
         }
 
@@ -58,7 +59,8 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('커뮤니티', style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.w600)),
+        titleSpacing: 20,
+        title: Text(strings(context).communityTitle, style: const TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.w600)),
         actions: [
           IconButton(
             icon: FilterIconWithDot(showDot: selectedCuisines.isNotEmpty || selectedSort.isNotEmpty),
@@ -125,14 +127,17 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
               children: [
                 const Icon(Icons.error_outline, size: 64, color: AppColors.greyScale400),
                 const SizedBox(height: 16),
-                Text('오류가 발생했습니다', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.greyScale600)),
+                Text(
+                  strings(context).errorOccurred,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.greyScale600),
+                ),
                 const SizedBox(height: 8),
-                Text('네트워크 연결을 확인해주세요', style: TextStyle(fontSize: 14, color: AppColors.greyScale500)),
+                Text(strings(context).checkNetworkConnection, style: const TextStyle(fontSize: 14, color: AppColors.greyScale500)),
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () => ref.invalidate(communityRecipesProvider),
                   style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
-                  child: const Text('다시 시도'),
+                  child: Text(strings(context).retryButton),
                 ),
               ],
             ),
@@ -145,9 +150,12 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
               children: [
                 const Icon(Icons.restaurant_menu, size: 64, color: AppColors.greyScale400),
                 const SizedBox(height: 16),
-                Text('공유된 레시피가 없습니다', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.greyScale600)),
+                Text(
+                  strings(context).noSharedRecipes,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.greyScale600),
+                ),
                 const SizedBox(height: 8),
-                Text('첫 번째로 레시피를 공유해보세요!', style: TextStyle(fontSize: 14, color: AppColors.greyScale500)),
+                Text(strings(context).shareFirstRecipe, style: const TextStyle(fontSize: 14, color: AppColors.greyScale500)),
               ],
             ),
           );
@@ -209,7 +217,7 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // Sort options
-                            const Text('정렬 기준', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                            Text(strings(context).sort, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
                             const SizedBox(height: 12),
                             LayoutBuilder(
                               builder: (context, constraints) {
@@ -228,21 +236,21 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                                     runSpacing: 8,
                                     children: [
                                       _FilterChip(
-                                        label: AppConstants.sortByRating,
-                                        isSelected: tempSort == AppConstants.sortByRating,
+                                        label: strings(context).sortByRating,
+                                        isSelected: tempSort == strings(context).sortByRating,
                                         onTap: () {
                                           setModalState(() {
-                                            tempSort = tempSort == AppConstants.sortByRating ? '' : AppConstants.sortByRating;
+                                            tempSort = tempSort == strings(context).sortByRating ? '' : strings(context).sortByRating;
                                           });
                                         },
                                         isModalChip: true,
                                       ),
                                       _FilterChip(
-                                        label: AppConstants.sortByCookTimeAsc,
-                                        isSelected: tempSort == AppConstants.sortByCookTimeAsc,
+                                        label: strings(context).sortByCookTime,
+                                        isSelected: tempSort == strings(context).sortByCookTime,
                                         onTap: () {
                                           setModalState(() {
-                                            tempSort = tempSort == AppConstants.sortByCookTimeAsc ? '' : AppConstants.sortByCookTimeAsc;
+                                            tempSort = tempSort == strings(context).sortByCookTime ? '' : strings(context).sortByCookTime;
                                           });
                                         },
                                         isModalChip: true,
@@ -256,7 +264,7 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                             const Divider(height: 1, thickness: 1, color: AppColors.greyScale200),
                             const SizedBox(height: 20),
                             // Cuisine filters
-                            const Text('국가별', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                            Text(strings(context).countryCategory, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
                             const SizedBox(height: 12),
                             LayoutBuilder(
                               builder: (context, constraints) {
@@ -313,7 +321,10 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                                         side: const BorderSide(color: AppColors.greyScale300),
                                       ),
                                     ),
-                                    child: const Text(AppStrings.reset, style: TextStyle(color: AppColors.greyScale600, fontWeight: FontWeight.w600)),
+                                    child: Text(
+                                      strings(context).reset,
+                                      style: const TextStyle(color: AppColors.greyScale600, fontWeight: FontWeight.w600),
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 12),
@@ -332,7 +343,7 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                                       padding: const EdgeInsets.symmetric(vertical: 12),
                                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                     ),
-                                    child: const Text(AppStrings.apply, style: TextStyle(fontWeight: FontWeight.w600)),
+                                    child: Text(strings(context).apply, style: const TextStyle(fontWeight: FontWeight.w600)),
                                   ),
                                 ),
                               ],
@@ -372,16 +383,17 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
               ),
 
               _PhotoModalStyleCard(
-                text: AppStrings.share,
+                text: strings(context).share,
                 icon: Icons.share_outlined,
-                onTap: () {
+                onTap: () async {
+                  await SharingUtil.shareRecipe(context, recipe, ref.read(imageDownloadRepositoryProvider));
+                  if (!context.mounted) return;
                   Navigator.pop(context);
-                  // TODO: Implement share action
                 },
               ),
 
               const SizedBox(height: 15),
-              _PhotoModalStyleCard(text: AppStrings.close, onTap: () => Navigator.pop(context), isCenter: true),
+              _PhotoModalStyleCard(text: strings(context).close, onTap: () => Navigator.pop(context), isCenter: true),
             ],
           ),
         );
@@ -528,6 +540,7 @@ class _FilterChip extends StatelessWidget {
 
 class FilterIconWithDot extends StatelessWidget {
   final bool showDot;
+
   const FilterIconWithDot({super.key, required this.showDot});
 
   @override

@@ -40,6 +40,7 @@ dependencies:
   package_info_plus: ^8.3.0
   sign_in_with_apple: ^7.0.1
   flutter_svg: ^2.2.0
+  shared_preferences: ^2.5.3
 
 dev_dependencies:
   flutter_test:
@@ -56,6 +57,7 @@ flutter:
     - assets/icons/
     - assets/prompts/
     - assets/prompts/ko/
+    - assets/prompts/en/
     - assets/no_image.png
 
 flutter_native_splash:

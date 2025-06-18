@@ -20,7 +20,7 @@ import 'image_storage_data_source.dart';
 
 // firebase_providers
 final firebaseAuthProvider = Provider((ref) => FirebaseAuth.instance);
-final firebaseFunctionsProvider = Provider((ref) => FirebaseFunctions.instance);
+final firebaseFunctionsProvider = Provider((ref) => FirebaseFunctions.instanceFor(region: 'asia-northeast3'));
 final firestoreProvider = Provider((ref) => FirebaseFirestore.instance);
 final firebaseAIProvider = Provider((ref) => FirebaseAI.googleAI());
 final firebaseStorageProvider = Provider((ref) => FirebaseStorage.instance);
