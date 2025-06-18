@@ -168,5 +168,6 @@
   "additionalContextHint": "신고 사유에 대한 추가 설명을 입력해주세요.",
   "submitReport": "제출하기",
   "reportSubmitted": "신고가 접수되었습니다. 검토 후 조치하겠습니다.",
-  "reportError": "신고 접수 중 오류가 발생했습니다."
+  "reportError": "신고 접수 중 오류가 발생했습니다.",
+  "configure": "설정하기"
 }
