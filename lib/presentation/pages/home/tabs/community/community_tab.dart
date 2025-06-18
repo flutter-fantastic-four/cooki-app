@@ -1,5 +1,7 @@
 // ignore_for_file: unused_element_parameter
 
+import 'package:cooki/core/utils/navigation_util.dart';
+import 'package:cooki/presentation/pages/detail_recipe/detail_recipe_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../app/constants/app_constants.dart';
@@ -401,68 +403,73 @@ class _RecipeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.greyScale200),
-        color: AppColors.white,
-        boxShadow: [BoxShadow(color: AppColors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 4,
-            child: Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
-                  child:
-                      recipe.imageUrl != null
-                          ? AppCachedImage(imageUrl: recipe.imageUrl!, fit: BoxFit.cover, width: double.infinity, height: double.infinity)
-                          : Image.asset('assets/no_image.png', fit: BoxFit.cover, width: double.infinity, height: double.infinity),
-                ),
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: GestureDetector(onTap: onOptionsTap, child: const Icon(Icons.more_vert, size: 20, color: AppColors.black)),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            flex: 3,
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
+    return GestureDetector(
+      onTap: () {
+        NavigationUtil.pushFromBottom(context, DetailRecipePage(recipe: recipe, isShardRecipe: false));
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: AppColors.greyScale200),
+          color: AppColors.white,
+          boxShadow: [BoxShadow(color: AppColors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 4,
+              child: Stack(
                 children: [
-                  SizedBox(
-                    height: 42, // Approximately 2 lines of text at fontSize 15 with 1.2 height
-                    child: Text(
-                      recipe.recipeName,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.greyScale800, height: 1.2),
-                    ),
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
+                    child:
+                        recipe.imageUrl != null
+                            ? AppCachedImage(imageUrl: recipe.imageUrl!, fit: BoxFit.cover, width: double.infinity, height: double.infinity)
+                            : Image.asset('assets/no_image.png', fit: BoxFit.cover, width: double.infinity, height: double.infinity),
                   ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      ...List.generate(5, (index) {
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 2),
-                          child: Icon(index < recipe.ratingSum ? Icons.star : Icons.star_border, color: AppColors.black, size: 14),
-                        );
-                      }),
-                    ],
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: GestureDetector(onTap: onOptionsTap, child: const Icon(Icons.more_vert, size: 20, color: AppColors.black)),
                   ),
                 ],
               ),
             ),
-          ),
-        ],
+            Expanded(
+              flex: 3,
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      height: 42, // Approximately 2 lines of text at fontSize 15 with 1.2 height
+                      child: Text(
+                        recipe.recipeName,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.greyScale800, height: 1.2),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        ...List.generate(5, (index) {
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 2),
+                            child: Icon(index < recipe.ratingSum ? Icons.star : Icons.star_border, color: AppColors.black, size: 14),
+                          );
+                        }),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
