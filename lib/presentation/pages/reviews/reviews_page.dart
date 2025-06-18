@@ -3,6 +3,7 @@ import 'package:cooki/app/constants/app_constants.dart';
 import 'package:cooki/core/utils/date_time_util.dart';
 import 'package:cooki/core/utils/dialogue_util.dart';
 import 'package:cooki/core/utils/error_mappers.dart';
+import 'package:cooki/presentation/pages/report_review/review_report_page.dart';
 import 'package:cooki/presentation/pages/reviews/widgets/expandable_text.dart';
 import 'package:cooki/presentation/widgets/app_cached_image.dart';
 import 'package:cooki/presentation/widgets/feedback_layout.dart';
@@ -50,12 +51,13 @@ class ReviewsPage extends ConsumerWidget {
           onTap:
               () => _navigateToWriteOrEditReview(context, ref, review: review),
         ),
-      ModalOption(
-        text: strings(context).reportReview,
-        icon: Icons.flag,
-        isRed: true,
-        onTap: () => _reportReview(context, review),
-      ),
+      if (!isMyReview)
+        ModalOption(
+          text: strings(context).reportReview,
+          icon: Icons.flag,
+          isRed: true,
+          onTap: () => _reportReview(context, review),
+        ),
       if (isMyReview)
         ModalOption(
           text: strings(context).deleteReview,
@@ -73,7 +75,11 @@ class ReviewsPage extends ConsumerWidget {
   }
 
   void _reportReview(BuildContext context, Review review) {
-    // TODO: Implement report functionality
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ReviewReportPage(recipeId: recipeId, review: review),
+      ),
+    );
   }
 
   Future<void> _deleteReview(
