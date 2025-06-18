@@ -342,9 +342,6 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                                     ((constraints.maxWidth - 24) /
                                             (chipWidth + spacing))
                                         .floor();
-                                final totalWidth =
-                                    chipsPerRow * (chipWidth + spacing) -
-                                    spacing;
 
                                 return Container(
                                   width: double.infinity,
@@ -420,9 +417,6 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                                     ((constraints.maxWidth - 24) /
                                             (chipWidth + spacing))
                                         .floor();
-                                final totalWidth =
-                                    chipsPerRow * (chipWidth + spacing) -
-                                    spacing;
 
                                 return Container(
                                   width: double.infinity,
