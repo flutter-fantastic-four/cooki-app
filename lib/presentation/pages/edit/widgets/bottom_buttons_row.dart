@@ -1,11 +1,12 @@
 import 'dart:developer';
-import 'package:cooki/presentation/pages/reviews/reviews_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/general_util.dart';
+import '../../../../core/utils/snackbar_util.dart';
 import '../../../../domain/entity/recipe.dart';
+import '../../../widgets/app_dialog.dart';
 import '../recipe_edit_view_model.dart';
 
 class BottomButtonsRow extends ConsumerWidget {
@@ -32,15 +33,33 @@ class BottomButtonsRow extends ConsumerWidget {
         children: [
           Expanded(
             child: OutlinedButton(
-              onPressed: () {
+              onPressed: () async {
                 log(recipe.toString());
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder:
-                        (context) =>
-                            ReviewsPage(recipeId: recipe!.id, recipeName: recipe!.recipeName),
-                  ),
+
+                if (recipe == null) return;
+
+                if (!context.mounted) return;
+                AppDialog.show(
+                  context: context,
+                  title: strings(context).delete,
+                  subText: strings(
+                    context,
+                  ).deleteConfirmMessage(recipe!.recipeName),
+                  primaryButtonText: strings(context).delete,
+                  secondaryButtonText: strings(context).cancel,
+                  onPrimaryButtonPressed: () async {
+                    await ref
+                        .read(recipeEditViewModelProvider(recipe).notifier)
+                        .deleteRecipe();
+
+                    if (!context.mounted) return;
+                    SnackbarUtil.showSnackBar(
+                      context,
+                      strings(context).deleteSuccess,
+                      showIcon: true,
+                    );
+                    Navigator.of(context).popUntil((route) => route.isFirst);
+                  },
                 );
               },
               style: OutlinedButton.styleFrom(
