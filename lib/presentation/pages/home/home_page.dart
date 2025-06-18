@@ -25,34 +25,19 @@ class HomePage extends ConsumerWidget {
       ),
       floatingActionButton:
           currentIndex == 0 || currentIndex == 1
-              ? Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
+              ? FloatingActionButton(
+                shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(8),
-                    splashColor: AppColors.primary900,
-                    highlightColor: AppColors.primary900.withValues(alpha: 0.2),
-                    onTap: () {
-                      NavigationUtil.pushFromBottom(
-                        context,
-                        GenerateRecipePage(),
-                      );
-                    },
-                    child: Center(
-                      child: Image.asset(
-                        'assets/icons/cooki_logo_white_no_letters.png',
-                        width: 28,
-                        height: 28,
-                      ),
-                    ),
-                  ),
+                backgroundColor: AppColors.primary,
+                child: Image.asset(
+                  'assets/icons/cooki_logo_white_no_letters.png',
+                  width: 28,
+                  height: 28,
                 ),
+                onPressed: () {
+                  NavigationUtil.pushFromBottom(context, GenerateRecipePage());
+                },
               )
               : null,
     );
