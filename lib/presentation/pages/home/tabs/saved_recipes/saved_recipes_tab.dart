@@ -33,6 +33,17 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
   String selectedSort = '';
   late PageController _pageController;
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    selectedCategory = strings(context).recipeTabAll;
+    _pageController = PageController(
+      initialPage: AppConstants.recipeTabCategories(
+        context,
+      ).indexOf(selectedCategory),
+    );
+  }
+
   List<Recipe> get filteredRecipes {
     final recipesAsync = ref.watch(savedRecipesProvider);
     return recipesAsync.when(
@@ -80,16 +91,6 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
-    selectedCategory = strings(context).recipeTabAll;
-    _pageController = PageController(
-      initialPage: AppConstants.recipeTabCategories(
-        context,
-      ).indexOf(selectedCategory),
-    );
-  }
 
   @override
   void dispose() {
