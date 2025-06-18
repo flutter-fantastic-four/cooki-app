@@ -15,7 +15,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/constants/app_colors.dart';
-import '../../../app/constants/app_strings.dart';
 import '../../../core/utils/error_mappers.dart';
 import '../../../core/utils/general_util.dart';
 import '../../../domain/entity/recipe.dart';
@@ -55,23 +54,21 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
         cookTime: int.parse(_cookTimeController.text),
         calories: int.parse(_caloriesController.text),
         user: user,
-        isGenerated: widget.recipe?.tags.contains('generated') ?? false,
       );
 
       final errorKey =
           ref.read(recipeEditViewModelProvider(widget.recipe)).errorKey;
       if (mounted && errorKey != null) {
-        await AppDialog.show(
+        AppDialog.show(
           context: context,
           title: strings(context).recipeSavingFailedTitle,
           subText: ErrorMapper.mapGenerateRecipeError(context, errorKey),
-          primaryButtonText: AppStrings.confirm,
         );
         vm.clearError();
         return;
       }
 
-      if (mounted && context.mounted) {
+      if (mounted) {
         SnackbarUtil.showSnackBar(
           context,
           strings(context).recipeSavedSuccessfully,
