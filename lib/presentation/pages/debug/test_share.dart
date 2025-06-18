@@ -3,7 +3,6 @@ import 'package:cooki/data/repository/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-
 import '../../../domain/entity/recipe.dart';
 
 class ShareExample extends StatelessWidget {
@@ -19,6 +18,8 @@ class ShareExample extends StatelessWidget {
             return ElevatedButton(
               onPressed: () async {
                 final testRecipe = Recipe(
+                  ratingCount: 10,
+                  ratingSum: 3.5,
                   id: 'test001',
                   recipeName: '김치볶음밥',
                   ingredients: [
@@ -57,11 +58,7 @@ class ShareExample extends StatelessWidget {
                   isPublic: true,
                   imageUrl: 'https://picsum.photos/600/400', // Recipe image
                 );
-                await SharingUtil.shareRecipe(
-                  context,
-                  testRecipe,
-                  ref.read(imageDownloadRepositoryProvider),
-                );
+                await SharingUtil.shareRecipe(context, testRecipe, ref.read(imageDownloadRepositoryProvider));
               },
               child: const Text('Share Image + Text'),
             );

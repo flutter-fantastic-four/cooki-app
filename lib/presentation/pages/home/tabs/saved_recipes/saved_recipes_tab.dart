@@ -41,16 +41,13 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
 
         // Filter by cuisine categories if any selected
         if (selectedCuisines.isNotEmpty) {
-          filtered =
-              filtered
-                  .where((r) => selectedCuisines.contains(r.category))
-                  .toList();
+          filtered = filtered.where((r) => selectedCuisines.contains(r.category)).toList();
         }
 
         // Apply sort option if selected
         if (selectedSort == AppConstants.sortByRating) {
           // Sort by rating
-          filtered.sort((a, b) => b.rating.compareTo(a.rating));
+          filtered.sort((a, b) => b.ratingSum.compareTo(a.ratingSum));
         } else if (selectedSort == AppConstants.sortByCookTimeAsc) {
           filtered.sort((a, b) => a.cookTime.compareTo(b.cookTime));
         }
@@ -63,11 +60,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(
-      initialPage: AppConstants.recipeTabCategories(
-        context,
-      ).indexOf(selectedCategory),
-    );
+    _pageController = PageController(initialPage: AppConstants.recipeTabCategories(context).indexOf(selectedCategory));
   }
 
   @override
@@ -81,25 +74,13 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text(
-          '나의 레시피',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        title: const Text('나의 레시피', style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.w600)),
         actions: [
           IconButton(
-            icon: FilterIconWithDot(
-              showDot: selectedCuisines.isNotEmpty || selectedSort.isNotEmpty,
-            ),
+            icon: FilterIconWithDot(showDot: selectedCuisines.isNotEmpty || selectedSort.isNotEmpty),
             onPressed: () => _showFilterModal(context),
           ),
-          IconButton(
-            icon: const Icon(Icons.search, color: Colors.black, size: 24),
-            onPressed: () {},
-          ),
+          IconButton(icon: const Icon(Icons.search, color: Colors.black, size: 24), onPressed: () {}),
         ],
         backgroundColor: Colors.white,
         elevation: 0,
@@ -113,61 +94,38 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children:
-                  AppConstants.recipeTabCategories(context).asMap().entries.map(
-                    (entry) {
-                      final index = entry.key;
-                      final category = entry.value;
-                      final isSelected = selectedCategory == category;
-                      final isLastTab =
-                          index ==
-                          AppConstants.recipeTabCategories(context).length - 1;
-                      return Padding(
-                        padding: EdgeInsets.only(right: isLastTab ? 0 : 8),
-                        child: GestureDetector(
-                          onTap: () {
-                            _pageController.animateToPage(
-                              AppConstants.recipeTabCategories(
-                                context,
-                              ).indexOf(category),
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
-                            );
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              border: Border(
-                                bottom: BorderSide(
-                                  color:
-                                      isSelected
-                                          ? AppColors.primary
-                                          : Colors.transparent,
-                                  width: 2,
-                                ),
-                              ),
-                            ),
-                            child: Text(
-                              category,
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight:
-                                    isSelected
-                                        ? FontWeight.w600
-                                        : FontWeight.w400,
-                                color:
-                                    isSelected
-                                        ? AppColors.primary
-                                        : AppColors.greyScale600,
-                              ),
+                  AppConstants.recipeTabCategories(context).asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final category = entry.value;
+                    final isSelected = selectedCategory == category;
+                    final isLastTab = index == AppConstants.recipeTabCategories(context).length - 1;
+                    return Padding(
+                      padding: EdgeInsets.only(right: isLastTab ? 0 : 8),
+                      child: GestureDetector(
+                        onTap: () {
+                          _pageController.animateToPage(
+                            AppConstants.recipeTabCategories(context).indexOf(category),
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            border: Border(bottom: BorderSide(color: isSelected ? AppColors.primary : Colors.transparent, width: 2)),
+                          ),
+                          child: Text(
+                            category,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                              color: isSelected ? AppColors.primary : AppColors.greyScale600,
                             ),
                           ),
                         ),
-                      );
-                    },
-                  ).toList(),
+                      ),
+                    );
+                  }).toList(),
             ),
           ),
           // Active filters
@@ -206,8 +164,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
               controller: _pageController,
               onPageChanged: (index) {
                 setState(() {
-                  selectedCategory =
-                      AppConstants.recipeTabCategories(context)[index];
+                  selectedCategory = AppConstants.recipeTabCategories(context)[index];
                 });
               },
               itemCount: AppConstants.recipeTabCategories(context).length,
@@ -221,23 +178,15 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                       SliverPadding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
                         sliver: SliverGrid(
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                crossAxisSpacing: 12,
-                                mainAxisSpacing: 16,
-                                childAspectRatio: 0.75,
-                              ),
-                          delegate: SliverChildBuilderDelegate((
-                            context,
-                            recipeIndex,
-                          ) {
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 16,
+                            childAspectRatio: 0.75,
+                          ),
+                          delegate: SliverChildBuilderDelegate((context, recipeIndex) {
                             final recipe = filteredRecipes[recipeIndex];
-                            return _RecipeCard(
-                              recipe: recipe,
-                              onOptionsTap:
-                                  () => _showOptionsModal(context, recipe),
-                            );
+                            return _RecipeCard(recipe: recipe, onOptionsTap: () => _showOptionsModal(context, recipe));
                           }, childCount: filteredRecipes.length),
                         ),
                       ),
@@ -268,13 +217,8 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
           builder: (context, setModalState) {
             return Container(
               width: double.infinity,
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.9,
-              ),
-              decoration: const BoxDecoration(
-                color: Color(0xFFF5F5F5),
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-              ),
+              constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.9),
+              decoration: const BoxDecoration(color: Color(0xFFF5F5F5), borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
               child: SafeArea(
                 child: SingleChildScrollView(
                   child: Column(
@@ -287,10 +231,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                           margin: const EdgeInsets.only(top: 8, bottom: 8),
                           width: 36,
                           height: 4,
-                          decoration: BoxDecoration(
-                            color: AppColors.greyScale200,
-                            borderRadius: BorderRadius.circular(2),
-                          ),
+                          decoration: BoxDecoration(color: AppColors.greyScale200, borderRadius: BorderRadius.circular(2)),
                         ),
                       ),
                       // Filter content
@@ -299,13 +240,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              '필터',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
+                            const Text('필터', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
                             const SizedBox(height: 16),
                             // Sort options
                             Wrap(
@@ -314,58 +249,36 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                               children: [
                                 _FilterChip(
                                   label: AppConstants.sortByRating,
-                                  isSelected:
-                                      tempSort == AppConstants.sortByRating,
+                                  isSelected: tempSort == AppConstants.sortByRating,
                                   onTap: () {
                                     setModalState(() {
-                                      tempSort =
-                                          tempSort == AppConstants.sortByRating
-                                              ? ''
-                                              : AppConstants.sortByRating;
+                                      tempSort = tempSort == AppConstants.sortByRating ? '' : AppConstants.sortByRating;
                                     });
                                   },
                                 ),
                                 _FilterChip(
                                   label: AppConstants.sortByCookTimeAsc,
-                                  isSelected:
-                                      tempSort ==
-                                      AppConstants.sortByCookTimeAsc,
+                                  isSelected: tempSort == AppConstants.sortByCookTimeAsc,
                                   onTap: () {
                                     setModalState(() {
-                                      tempSort =
-                                          tempSort ==
-                                                  AppConstants.sortByCookTimeAsc
-                                              ? ''
-                                              : AppConstants.sortByCookTimeAsc;
+                                      tempSort = tempSort == AppConstants.sortByCookTimeAsc ? '' : AppConstants.sortByCookTimeAsc;
                                     });
                                   },
                                 ),
                               ],
                             ),
                             const SizedBox(height: 20),
-                            const Divider(
-                              height: 1,
-                              thickness: 1,
-                              color: AppColors.greyScale200,
-                            ),
+                            const Divider(height: 1, thickness: 1, color: AppColors.greyScale200),
                             const SizedBox(height: 20),
                             // Cuisine filters
-                            const Text(
-                              '국가별',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
+                            const Text('국가별', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
                             const SizedBox(height: 12),
                             Wrap(
                               spacing: 8,
                               runSpacing: 8,
                               children:
                                   cuisineCategories.map((cuisine) {
-                                    final isSelected = tempCuisines.contains(
-                                      cuisine,
-                                    );
+                                    final isSelected = tempCuisines.contains(cuisine);
                                     return _FilterChip(
                                       label: cuisine,
                                       isSelected: isSelected,
@@ -404,9 +317,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                                     onPressed: () {
                                       setState(() {
                                         selectedSort = tempSort;
-                                        selectedCuisines = List.from(
-                                          tempCuisines,
-                                        );
+                                        selectedCuisines = List.from(tempCuisines);
                                         selectedCategory = tempCategory;
                                       });
                                       Navigator.pop(context);
@@ -414,9 +325,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: AppColors.primary,
                                       foregroundColor: Colors.white,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                     ),
                                     child: const Text(AppStrings.apply),
                                   ),
@@ -426,9 +335,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                           ],
                         ),
                       ),
-                      SizedBox(
-                        height: MediaQuery.of(context).viewInsets.bottom + 16,
-                      ),
+                      SizedBox(height: MediaQuery.of(context).viewInsets.bottom + 16),
                     ],
                   ),
                 ),
@@ -445,17 +352,10 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.greyScale50,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
-      ),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(26))),
       builder: (BuildContext context) {
         return Padding(
-          padding: const EdgeInsets.only(
-            top: 8,
-            bottom: 30,
-            left: 15,
-            right: 15,
-          ),
+          padding: const EdgeInsets.only(top: 8, bottom: 30, left: 15, right: 15),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -463,10 +363,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
               Container(
                 width: 40,
                 height: 5,
-                decoration: BoxDecoration(
-                  color: AppColors.greyScale400,
-                  borderRadius: BorderRadius.circular(10),
-                ),
+                decoration: BoxDecoration(color: AppColors.greyScale400, borderRadius: BorderRadius.circular(10)),
                 margin: const EdgeInsets.only(bottom: 12),
               ),
 
@@ -493,12 +390,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                 icon: Icons.edit_outlined,
                 onTap: () {
                   Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => RecipeEditPage(recipe: recipe),
-                    ),
-                  );
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => RecipeEditPage(recipe: recipe)));
                 },
               ),
 
@@ -514,11 +406,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
               ),
 
               const SizedBox(height: 15),
-              _PhotoModalStyleCard(
-                text: AppStrings.close,
-                onTap: () => Navigator.pop(context),
-                isCenter: true,
-              ),
+              _PhotoModalStyleCard(text: AppStrings.close, onTap: () => Navigator.pop(context), isCenter: true),
             ],
           ),
         );
@@ -549,22 +437,12 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
 
       // Show success message
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(AppStrings.deleteSuccess),
-            backgroundColor: AppColors.primary,
-          ),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(AppStrings.deleteSuccess), backgroundColor: AppColors.primary));
       }
     } catch (e) {
       // Show error message
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(AppStrings.deleteError),
-            backgroundColor: Colors.red,
-          ),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(AppStrings.deleteError), backgroundColor: Colors.red));
       }
     }
   }
@@ -585,10 +463,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
         itemCount: filteredRecipes.length,
         itemBuilder: (context, index) {
           final recipe = filteredRecipes[index];
-          return _RecipeCard(
-            recipe: recipe,
-            onOptionsTap: () => _showOptionsModal(context, recipe),
-          );
+          return _RecipeCard(recipe: recipe, onOptionsTap: () => _showOptionsModal(context, recipe));
         },
       ),
     );
@@ -596,9 +471,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
 
   Future<void> _refreshRecipes() async {
     ref.invalidate(savedRecipesProvider);
-    await Future.delayed(
-      const Duration(milliseconds: 300),
-    ); // Small delay for better UX
+    await Future.delayed(const Duration(milliseconds: 300)); // Small delay for better UX
   }
 }
 
@@ -615,13 +488,7 @@ class _RecipeCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: AppColors.greyScale200),
         color: AppColors.white,
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: AppColors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -632,37 +499,18 @@ class _RecipeCard extends StatelessWidget {
               children: [
                 if (recipe.imageUrl != null)
                   ClipRRect(
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(6),
-                    ),
-                    child: Image.network(
-                      recipe.imageUrl!,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      height: double.infinity,
-                    ),
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
+                    child: Image.network(recipe.imageUrl!, fit: BoxFit.cover, width: double.infinity, height: double.infinity),
                   )
                 else
                   Container(
                     width: double.infinity,
-                    decoration: const BoxDecoration(
-                      color: AppColors.appBarGrey,
-                      borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(12),
-                      ),
-                    ),
+                    decoration: const BoxDecoration(color: AppColors.appBarGrey, borderRadius: BorderRadius.vertical(top: Radius.circular(12))),
                   ),
                 Positioned(
                   top: 8,
                   right: 8,
-                  child: GestureDetector(
-                    onTap: onOptionsTap,
-                    child: const Icon(
-                      Icons.more_vert,
-                      size: 20,
-                      color: AppColors.black,
-                    ),
-                  ),
+                  child: GestureDetector(onTap: onOptionsTap, child: const Icon(Icons.more_vert, size: 20, color: AppColors.black)),
                 ),
               ],
             ),
@@ -676,18 +524,12 @@ class _RecipeCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   SizedBox(
-                    height:
-                        42, // Approximately 2 lines of text at fontSize 15 with 1.2 height
+                    height: 42, // Approximately 2 lines of text at fontSize 15 with 1.2 height
                     child: Text(
                       recipe.recipeName,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.greyScale800,
-                        height: 1.2,
-                      ),
+                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.greyScale800, height: 1.2),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -696,13 +538,7 @@ class _RecipeCard extends StatelessWidget {
                       ...List.generate(5, (index) {
                         return Padding(
                           padding: const EdgeInsets.only(right: 2),
-                          child: Icon(
-                            index < recipe.rating
-                                ? Icons.star
-                                : Icons.star_border,
-                            color: AppColors.black,
-                            size: 14,
-                          ),
+                          child: Icon(index < recipe.ratingSum ? Icons.star : Icons.star_border, color: AppColors.black, size: 14),
                         );
                       }),
                     ],
@@ -723,12 +559,7 @@ class _FilterChip extends StatelessWidget {
   final VoidCallback? onDeleted;
   final bool isSelected;
 
-  const _FilterChip({
-    required this.label,
-    this.onTap,
-    this.onDeleted,
-    this.isSelected = false,
-  });
+  const _FilterChip({required this.label, this.onTap, this.onDeleted, this.isSelected = false});
 
   @override
   Widget build(BuildContext context) {
@@ -754,14 +585,7 @@ class _FilterChip extends StatelessWidget {
             ),
             if (onDeleted != null) ...[
               const SizedBox(width: 4),
-              GestureDetector(
-                onTap: onDeleted,
-                child: const Icon(
-                  Icons.close,
-                  size: 14,
-                  color: AppColors.primary,
-                ),
-              ),
+              GestureDetector(onTap: onDeleted, child: const Icon(Icons.close, size: 14, color: AppColors.primary)),
             ],
           ],
         ),
@@ -784,14 +608,7 @@ class FilterIconWithDot extends StatelessWidget {
           Positioned(
             right: -2,
             top: 2,
-            child: Container(
-              width: 8,
-              height: 8,
-              decoration: const BoxDecoration(
-                color: AppColors.primary,
-                shape: BoxShape.circle,
-              ),
-            ),
+            child: Container(width: 8, height: 8, decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle)),
           ),
       ],
     );
@@ -806,14 +623,7 @@ class _PhotoModalStyleCard extends StatelessWidget {
   final Color? textColor;
   final Color? iconColor;
 
-  const _PhotoModalStyleCard({
-    required this.text,
-    this.icon,
-    required this.onTap,
-    this.isCenter = false,
-    this.textColor,
-    this.iconColor,
-  });
+  const _PhotoModalStyleCard({required this.text, this.icon, required this.onTap, this.isCenter = false, this.textColor, this.iconColor});
 
   @override
   Widget build(BuildContext context) {
@@ -825,19 +635,10 @@ class _PhotoModalStyleCard extends StatelessWidget {
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(vertical: 1),
         leading:
-            !isCenter
-                ? Padding(
-                  padding: const EdgeInsets.only(left: 24, right: 4),
-                  child: Icon(icon, color: iconColor ?? Colors.black87),
-                )
-                : null,
+            !isCenter ? Padding(padding: const EdgeInsets.only(left: 24, right: 4), child: Icon(icon, color: iconColor ?? Colors.black87)) : null,
         title: Text(
           text,
-          style: TextStyle(
-            fontSize: 16,
-            color: textColor ?? Colors.black,
-            fontWeight: FontWeight.w500,
-          ),
+          style: TextStyle(fontSize: 16, color: textColor ?? Colors.black, fontWeight: FontWeight.w500),
           textAlign: isCenter ? TextAlign.center : null,
         ),
         onTap: onTap,
