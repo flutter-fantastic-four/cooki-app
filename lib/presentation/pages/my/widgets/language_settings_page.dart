@@ -1,82 +1,110 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/general_util.dart';
+import '../../../../core/utils/snackbar_util.dart';
+import '../../../settings_global_view_model.dart';
 import '../../../widgets/big_title_widget.dart';
 import '../../../widgets/selectable_option_row.dart';
 
-class LanguageSelectionPage extends StatefulWidget {
+class LanguageSelectionPage extends ConsumerStatefulWidget {
   const LanguageSelectionPage({super.key});
 
   @override
-  State<LanguageSelectionPage> createState() => _LanguageSelectionPageState();
+  ConsumerState<LanguageSelectionPage> createState() =>
+      _LanguageSelectionPageState();
 }
 
-class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
-  String _selectedLanguage = '한국어';
+class _LanguageSelectionPageState extends ConsumerState<LanguageSelectionPage> {
+  late SupportedLanguage _selectedLanguage;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize with current global language setting
+    _selectedLanguage =
+        ref.read(settingsGlobalViewModelProvider.notifier).getCurrentLanguage();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('언어설정'),
-      ),
+      appBar: AppBar(title: Text(strings(context).languageSettings)),
       backgroundColor: Colors.white,
-      bottomNavigationBar: _buildSubmitButton(),
+      bottomNavigationBar: _buildSubmitButton(context),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 30),
-            const BigTitleWidget(title: '쿠키에서\n사용할 언어를 선택하세요'),
+            BigTitleWidget(title: strings(context).selectLanguageTitle),
             const SizedBox(height: 40),
-            SelectableOptionRow(
-              text: '한국어',
-              isSelected: _selectedLanguage == '한국어',
-              horizontalPadding: 0,
-              showCheckOnUnselected: true,
-              onTap: () {
-                setState(() {
-                  _selectedLanguage = '한국어';
-                });
-              },
-            ),
-            const SizedBox(height: 16),
-            SelectableOptionRow(
-              text: 'English',
-              isSelected: _selectedLanguage == 'English',
-              horizontalPadding: 0,
-              showCheckOnUnselected: true,
-              onTap: () {
-                setState(() {
-                  _selectedLanguage = 'English';
-                });
-              },
-            ),
+            ...SupportedLanguage.values.map((language) {
+              return Column(
+                children: [
+                  SelectableOptionRow(
+                    text: language.displayName,
+                    isSelected: _selectedLanguage == language,
+                    horizontalPadding: 0,
+                    showCheckOnUnselected: true,
+                    onTap: () {
+                      setState(() {
+                        _selectedLanguage = language;
+                      });
+                    },
+                  ),
+                  if (language != SupportedLanguage.values.last)
+                    const SizedBox(height: 16),
+                ],
+              );
+            }),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSubmitButton() {
+  Widget _buildSubmitButton(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 33),
       child: SizedBox(
         width: double.infinity,
         height: 48,
         child: ElevatedButton(
-          onPressed: () {},
+          onPressed: _applyLanguageChange,
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 16),
           ),
-          child: Text(
-            strings(context).configure,
-          ),
+          child: Text(strings(context).configure),
         ),
       ),
     );
   }
 
+  Future<void> _applyLanguageChange() async {
+    try {
+      await ref
+          .read(settingsGlobalViewModelProvider.notifier)
+          .changeLanguage(_selectedLanguage);
 
+      if (mounted) {
+        SnackbarUtil.showSnackBar(
+          context,
+          strings(context).languageChangedSuccessfully,
+          showIcon: true,
+        );
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      if (mounted) {
+        SnackbarUtil.showSnackBar(
+          context,
+          strings(context).languageChangeFailedError,
+          showIcon: true,
+        );
+      }
+    }
+  }
 }

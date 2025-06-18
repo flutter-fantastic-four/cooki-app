@@ -29,7 +29,7 @@ class MyPage extends ConsumerWidget {
               );
             },
             child: Text(
-              strings(context).language,
+              strings(context).languageSettings,
               style: TextStyle(fontSize: 16.4, color: Colors.black, fontWeight: FontWeight.w500),
             ),
           ),

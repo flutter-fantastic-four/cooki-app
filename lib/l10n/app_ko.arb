@@ -95,7 +95,7 @@
   "contactTheDevelopersTeam" : "개발자들에게 문의",
   "logout" : "로그아웃",
   "deleteAccount":"회원탈퇴",
-  "language" : "언어설정",
+  "languageSettings" : "언어설정",
 
   "logoutDialogTitle" : "로그아웃할까요?",
   "logoutDialogSubTitle" : "로그아웃할까요?",
@@ -169,5 +169,11 @@
   "submitReport": "제출하기",
   "reportSubmitted": "신고가 접수되었습니다. 검토 후 조치하겠습니다.",
   "reportError": "신고 접수 중 오류가 발생했습니다.",
+
+  "selectLanguageTitle": "쿠키에서\n사용할 언어를 선택하세요",
+  "languageChangedSuccessfully": "언어가 성공적으로 변경되었습니다",
+  "languageChangeFailedError": "언어 변경에 실패했습니다",
+  "korean": "한국어",
+  "english": "English",
   "configure": "설정하기"
 }
