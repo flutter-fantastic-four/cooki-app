@@ -57,6 +57,7 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        titleSpacing: 20,
         title: const Text('커뮤니티', style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.w600)),
         actions: [
           IconButton(

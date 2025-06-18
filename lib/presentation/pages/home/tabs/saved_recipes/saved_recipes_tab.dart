@@ -106,6 +106,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        titleSpacing: 20,
         title: const Text(
           '나의 레시피',
           style: TextStyle(
