@@ -46,7 +46,7 @@ class GenerateRecipePage extends ConsumerWidget {
 
     if (savedRecipe != null) {
       if (!context.mounted) return;
-      Navigator.of(context).push(
+      Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => DetailRecipePage(recipe: savedRecipe)),
       );
     }
