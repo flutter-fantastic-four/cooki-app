@@ -1,65 +1,96 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cooki/app/constants/app_colors.dart';
-import 'package:cooki/core/utils/dialogue_util.dart';
 import 'package:cooki/core/utils/general_util.dart';
 import 'package:cooki/core/utils/navigation_util.dart';
 import 'package:cooki/domain/entity/recipe.dart';
+import 'package:cooki/domain/entity/review.dart';
 import 'package:cooki/presentation/pages/add_review/write_review_page.dart';
+import 'package:cooki/presentation/pages/edit/recipe_edit_page.dart';
 import 'package:cooki/presentation/pages/reviews/reviews_page.dart';
+import 'package:cooki/presentation/pages/reviews/reviews_view_model.dart';
 import 'package:cooki/presentation/widgets/app_cached_image.dart';
 import 'package:cooki/presentation/widgets/recipe_page_widgets.dart';
 import 'package:cooki/presentation/widgets/star_rating.dart';
 import 'package:easy_image_viewer/easy_image_viewer.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class DetailRecipePage extends StatefulWidget {
-  const DetailRecipePage({super.key, required this.recipe, this.category});
+class DetailRecipePage extends ConsumerWidget {
   final Recipe recipe;
   final String? category;
 
-  @override
-  State<DetailRecipePage> createState() => _DetailRecipePageState();
-}
-
-class _DetailRecipePageState extends State<DetailRecipePage> {
   int currentRating = 0;
+
+  DetailRecipePage({super.key, required this.recipe, this.category});
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        actionsPadding: EdgeInsets.only(right: 20),
-        backgroundColor: Colors.white,
-        elevation: 1,
-        actions: [widget.recipe.isPublic ? SizedBox() : Icon(Icons.edit_outlined)],
-      ),
-      body: ListView(
-        children: [
-          widget.recipe.imageUrl != null ? _buildImageSelector() : SizedBox(),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            ListView(
               children: [
-                _infoChip(context),
-                const SizedBox(height: 12),
-                _title(),
-                const SizedBox(height: 40),
-                TagChips(widget.recipe.tags),
-                const SizedBox(height: 24),
-                _review(),
-                const SizedBox(height: 24),
-                _ingredientsLabel(context),
-                const SizedBox(height: 16),
-                _ingredientsColumn(),
-                const SizedBox(height: 16),
-                Text(strings(context).stepsLabel, style: RecipePageWidgets.sectionTitleStyle),
-                const SizedBox(height: 16),
-                _stepsColumn(),
+                recipe.imageUrl != null
+                    ? _buildImageSelector(context)
+                    : Image.asset('assets/no_image.png', fit: BoxFit.cover, width: double.infinity, height: 230),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _infoChip(context),
+                      const SizedBox(height: 12),
+                      _title(),
+                      const SizedBox(height: 40),
+                      TagChips(recipe.tags),
+                      const SizedBox(height: 24),
+                      _review(context),
+                      const SizedBox(height: 24),
+                      _ingredientsLabel(context),
+                      const SizedBox(height: 16),
+                      _ingredientsColumn(),
+                      const SizedBox(height: 16),
+                      Text(strings(context).stepsLabel, style: RecipePageWidgets.sectionTitleStyle),
+                      const SizedBox(height: 16),
+                      _stepsColumn(),
+                    ],
+                  ),
+                ),
               ],
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(elevation: 4, padding: EdgeInsets.zero, backgroundColor: Colors.white),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 24),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(elevation: 4, padding: EdgeInsets.zero, backgroundColor: Colors.white),
+                      onPressed: () {
+                        NavigationUtil.pushFromBottom(context, RecipeEditPage(recipe: recipe));
+                      },
+                      child: Icon(Icons.edit_outlined, color: Colors.black, size: 24),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -74,19 +105,19 @@ class _DetailRecipePageState extends State<DetailRecipePage> {
     );
   }
 
-  Widget _review() {
-    return widget.recipe.isPublic
+  Widget _review(BuildContext context) {
+    return recipe.isPublic
         ? Column(
           children: [
             Row(
               children: [
                 GestureDetector(
                   onTap: () {
-                    NavigationUtil.pushFromBottom(context, ReviewsPage(recipeId: widget.recipe.id, recipeName: widget.recipe.recipeName));
+                    NavigationUtil.pushFromBottom(context, ReviewsPage(recipeId: recipe.id, recipeName: recipe.recipeName));
                   },
                   child: Row(
                     children: [
-                      Text('리뷰 ${widget.recipe.ratingCount > 999 ? '999+' : widget.recipe.ratingCount}개', style: RecipePageWidgets.sectionTitleStyle),
+                      Text('리뷰 ${recipe.ratingCount > 999 ? '999+' : recipe.ratingCount}개', style: RecipePageWidgets.sectionTitleStyle),
 
                       Icon(Icons.arrow_forward_ios),
                     ],
@@ -94,11 +125,11 @@ class _DetailRecipePageState extends State<DetailRecipePage> {
                 ),
                 Spacer(),
                 Icon(Icons.star, color: AppColors.secondary600),
-                Text('평균 ${widget.recipe.ratingSum == 0.0 ? '0' : widget.recipe.ratingSum}점', style: RecipePageWidgets.sectionTitleStyle),
+                Text('평균 ${recipe.ratingSum == 0.0 ? '0' : recipe.ratingSum}점', style: RecipePageWidgets.sectionTitleStyle),
               ],
             ),
             const SizedBox(height: 16),
-            ReviewCardList(),
+            ReviewCardList(recipe),
           ],
         )
         : SizedBox();
@@ -108,7 +139,7 @@ class _DetailRecipePageState extends State<DetailRecipePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (final item in widget.recipe.ingredients) ...[
+        for (final item in recipe.ingredients) ...[
           RecipePageWidgets.divider,
           Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12), child: Text(item)),
         ],
@@ -120,7 +151,7 @@ class _DetailRecipePageState extends State<DetailRecipePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (int i = 0; i < widget.recipe.steps.length; i++) ...[
+        for (int i = 0; i < recipe.steps.length; i++) ...[
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -130,7 +161,7 @@ class _DetailRecipePageState extends State<DetailRecipePage> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 14),
                   decoration: BoxDecoration(color: AppColors.appBarGrey, borderRadius: RecipePageWidgets.inputBorderRadius),
-                  child: Text(widget.recipe.steps[i]),
+                  child: Text(recipe.steps[i]),
                 ),
               ),
             ],
@@ -144,7 +175,7 @@ class _DetailRecipePageState extends State<DetailRecipePage> {
   Row _title() {
     return Row(
       children: [
-        Text(widget.recipe.recipeName, style: RecipePageWidgets.sectionTitleStyle),
+        Text(recipe.recipeName, style: RecipePageWidgets.sectionTitleStyle),
         Spacer(),
         IconButton(onPressed: () {}, icon: Icon(Icons.bookmark_border)),
         IconButton(onPressed: () {}, icon: Icon(Icons.more_vert)),
@@ -155,7 +186,7 @@ class _DetailRecipePageState extends State<DetailRecipePage> {
   Row _infoChip(BuildContext context) {
     return Row(
       children: [
-        widget.category != null
+        category != null
             ? Row(
               children: [
                 Container(
@@ -168,165 +199,127 @@ class _DetailRecipePageState extends State<DetailRecipePage> {
                       borderRadius: BorderRadius.circular(99999),
                     ),
                   ),
-                  child: Text(widget.category!, style: TextStyle(fontSize: 12)),
+                  child: Text(category!, style: TextStyle(fontSize: 12)),
                 ),
                 SizedBox(width: 8),
               ],
             )
             : SizedBox(),
-        Container(
-          height: 28,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: ShapeDecoration(
-            shape: RoundedRectangleBorder(side: BorderSide(width: 1, color: AppColors.greyScale300), borderRadius: BorderRadius.circular(99999)),
-          ),
-          child: GestureDetector(
-            onTap: () {
-              int currentRating = 0;
-              widget.recipe.isPublic
-                  ? NavigationUtil.pushFromBottom(context, WriteReviewPage(recipeId: widget.recipe.id, recipeName: widget.recipe.recipeName))
-                  : showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    backgroundColor: AppColors.greyScale50,
-                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(26))),
-                    builder: (context) {
-                      return Padding(
-                        padding: const EdgeInsets.only(top: 8, bottom: 30, left: 15, right: 15),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // Top handle
-                            Container(
-                              width: 40,
-                              height: 5,
-                              decoration: BoxDecoration(color: Colors.grey[400], borderRadius: BorderRadius.circular(10)),
-                              margin: const EdgeInsets.only(bottom: 12),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.only(top: 40),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                spacing: 24,
-                                children: [
-                                  SizedBox(
-                                    width: double.infinity,
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      spacing: 4,
-                                      children: [
-                                        Text(
-                                          '레시피 평가하기',
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                            color: Colors.black,
-                                            fontSize: 20,
-                                            fontFamily: 'Pretendard',
-                                            fontWeight: FontWeight.w700,
-                                            height: 1.50,
-                                          ),
+        GestureDetector(
+          onTap: () {
+            int currentRating = 0;
+            recipe.isPublic
+                ? NavigationUtil.pushFromBottom(context, WriteReviewPage(recipeId: recipe.id, recipeName: recipe.recipeName))
+                : showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: AppColors.greyScale50,
+                  shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(26))),
+                  builder: (context) {
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 8, bottom: 30, left: 15, right: 15),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Top handle
+                          Container(
+                            width: 40,
+                            height: 5,
+                            decoration: BoxDecoration(color: Colors.grey[400], borderRadius: BorderRadius.circular(10)),
+                            margin: const EdgeInsets.only(bottom: 12),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(top: 40),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              spacing: 24,
+                              children: [
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    spacing: 4,
+                                    children: [
+                                      Text(
+                                        '레시피 평가하기',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 20,
+                                          fontFamily: 'Pretendard',
+                                          fontWeight: FontWeight.w700,
+                                          height: 1.50,
                                         ),
-                                        Text(
-                                          '생성한 레시피에 대한 별점을 남겨보세요',
-                                          style: TextStyle(
-                                            color: Colors.black,
-                                            fontSize: 14,
-                                            fontFamily: 'Pretendard',
-                                            fontWeight: FontWeight.w400,
-                                            height: 1.50,
-                                            letterSpacing: -0.14,
-                                          ),
+                                      ),
+                                      Text(
+                                        '생성한 레시피에 대한 별점을 남겨보세요',
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 14,
+                                          fontFamily: 'Pretendard',
+                                          fontWeight: FontWeight.w400,
+                                          height: 1.50,
+                                          letterSpacing: -0.14,
                                         ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   ),
-                                  Row(
+                                ),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  spacing: 5,
+                                  children: [],
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          Padding(
+                            padding: EdgeInsets.only(bottom: 40),
+                            child: StarRating(
+                              currentRating: currentRating,
+                              setRating: (value) {
+                                currentRating = value;
+                              },
+                            ),
+                          ),
+
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            decoration: BoxDecoration(color: const Color(0xFFF5F5F5) /* Grayscale-50 */),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              spacing: 8,
+                              children: [
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     crossAxisAlignment: CrossAxisAlignment.center,
-                                    spacing: 5,
-                                    children: [],
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            Padding(
-                              padding: EdgeInsets.only(bottom: 40),
-                              child: StarRating(
-                                currentRating: currentRating,
-                                setRating: (value) {
-                                  setState(() {
-                                    currentRating = value;
-                                  });
-                                },
-                              ),
-                            ),
-
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.symmetric(horizontal: 20),
-                              decoration: BoxDecoration(color: const Color(0xFFF5F5F5) /* Grayscale-50 */),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                spacing: 8,
-                                children: [
-                                  SizedBox(
-                                    width: double.infinity,
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      spacing: 8,
-                                      children: [
-                                        Expanded(
-                                          child: GestureDetector(
-                                            onTap: () {
-                                              Navigator.pop(context);
-                                            },
-                                            child: Container(
-                                              height: 54,
-                                              padding: const EdgeInsets.all(8),
-                                              decoration: ShapeDecoration(
-                                                color: Colors.white /* Grayscale-White */,
-                                                shape: RoundedRectangleBorder(
-                                                  side: BorderSide(width: 1, color: const Color(0xFF1D8163) /* Primary-700 */),
-                                                  borderRadius: BorderRadius.circular(8),
-                                                ),
-                                              ),
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                mainAxisAlignment: MainAxisAlignment.center,
-                                                crossAxisAlignment: CrossAxisAlignment.center,
-                                                spacing: 8,
-                                                children: [
-                                                  Text(
-                                                    '닫기',
-                                                    textAlign: TextAlign.center,
-                                                    style: TextStyle(
-                                                      color: const Color(0xFF1D8163) /* Primary-700 */,
-                                                      fontSize: 16,
-                                                      fontFamily: 'Pretendard',
-                                                      fontWeight: FontWeight.w600,
-                                                      height: 1.50,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        Expanded(
+                                    spacing: 8,
+                                    children: [
+                                      Expanded(
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            Navigator.pop(context);
+                                          },
                                           child: Container(
                                             height: 54,
                                             padding: const EdgeInsets.all(8),
                                             decoration: ShapeDecoration(
-                                              color: const Color(0xFF1D8163) /* Primary-700 */,
-                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                              color: Colors.white /* Grayscale-White */,
+                                              shape: RoundedRectangleBorder(
+                                                side: BorderSide(width: 1, color: const Color(0xFF1D8163) /* Primary-700 */),
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
                                             ),
                                             child: Row(
                                               mainAxisSize: MainAxisSize.min,
@@ -335,10 +328,10 @@ class _DetailRecipePageState extends State<DetailRecipePage> {
                                               spacing: 8,
                                               children: [
                                                 Text(
-                                                  '완료',
+                                                  '닫기',
                                                   textAlign: TextAlign.center,
                                                   style: TextStyle(
-                                                    color: Colors.white /* Grayscale-White */,
+                                                    color: const Color(0xFF1D8163) /* Primary-700 */,
                                                     fontSize: 16,
                                                     fontFamily: 'Pretendard',
                                                     fontWeight: FontWeight.w600,
@@ -349,18 +342,54 @@ class _DetailRecipePageState extends State<DetailRecipePage> {
                                             ),
                                           ),
                                         ),
-                                      ],
-                                    ),
+                                      ),
+                                      Expanded(
+                                        child: Container(
+                                          height: 54,
+                                          padding: const EdgeInsets.all(8),
+                                          decoration: ShapeDecoration(
+                                            color: const Color(0xFF1D8163) /* Primary-700 */,
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                            spacing: 8,
+                                            children: [
+                                              Text(
+                                                '완료',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  color: Colors.white /* Grayscale-White */,
+                                                  fontSize: 16,
+                                                  fontFamily: 'Pretendard',
+                                                  fontWeight: FontWeight.w600,
+                                                  height: 1.50,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                      );
-                    },
-                  );
-            },
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+          },
+          child: Container(
+            height: 28,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: ShapeDecoration(
+              shape: RoundedRectangleBorder(side: BorderSide(width: 1, color: AppColors.greyScale300), borderRadius: BorderRadius.circular(99999)),
+            ),
             child: Row(children: List.generate(5, (_) => Icon(Icons.star_border, size: 12, color: AppColors.greyScale800))),
           ),
         ),
@@ -368,54 +397,81 @@ class _DetailRecipePageState extends State<DetailRecipePage> {
     );
   }
 
-  Widget _buildImageSelector() {
+  Widget _buildImageSelector(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        final imageProvider = CachedNetworkImageProvider(widget.recipe.imageUrl!);
+        final imageProvider = CachedNetworkImageProvider(recipe.imageUrl!);
         showImageViewer(context, imageProvider, swipeDismissible: true, doubleTapZoomable: true, useSafeArea: true);
       },
-      child: AppCachedImage(imageUrl: widget.recipe.imageUrl!, fit: BoxFit.cover, height: 230, width: double.infinity),
+      child: AppCachedImage(imageUrl: recipe.imageUrl!, fit: BoxFit.cover, height: 230, width: double.infinity),
     );
   }
 }
 
-class ReviewCardList extends StatelessWidget {
-  const ReviewCardList({super.key});
+class ReviewCardList extends ConsumerWidget {
+  const ReviewCardList(this.recipe, {super.key});
+  final Recipe recipe;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(reviewsViewModelProvider(recipe.id));
+
+    final reviews = state.reviews.length > 5 ? state.reviews.sublist(0, 5) : state.reviews;
+    if (reviews.isEmpty) return SizedBox();
+
     return SizedBox(
       height: 120,
-      child: SingleChildScrollView(scrollDirection: Axis.horizontal, child: Row(children: List.generate(10, (index) => _buildReviewCard()))),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(children: reviews.map((review) => _buildReviewCard(context, ref, review)).toList()),
+      ),
     );
   }
 
-  Widget _buildReviewCard() {
+  Widget _buildReviewCard(BuildContext context, WidgetRef ref, Review review) {
     return Container(
-      width: 160,
+      width: 240,
+      height: 80,
       margin: const EdgeInsets.symmetric(horizontal: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(12), color: Colors.white),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(width: 40, height: 40, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(8))),
-          const SizedBox(width: 12),
+          review.imageUrls.isNotEmpty
+              ? _buildReviewImages(context, review)
+              : SizedBox(
+                width: 52,
+                height: 52,
+                child: ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.asset('assets/no_image.png', fit: BoxFit.cover)),
+              ),
+          SizedBox(width: 8),
+
           Expanded(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Row(
-                  children: List.generate(5, (i) {
-                    return Icon(i < 4 ? Icons.star : Icons.star_border, size: 14, color: Colors.black);
-                  }),
-                ),
+                StarRating(currentRating: review.rating, iconSize: 16, horizontalPadding: 0, setRating: null, alignment: MainAxisAlignment.start),
                 const SizedBox(height: 4),
-                const Text('community recipe review', style: TextStyle(fontSize: 12), overflow: TextOverflow.ellipsis),
+                if (review.reviewText?.isNotEmpty == true)
+                  Text(review.reviewText!, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13)),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildReviewImages(BuildContext context, Review review) {
+    final double imageDimension = 52;
+    return SizedBox(
+      width: imageDimension,
+      height: imageDimension,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: AppCachedImage(imageUrl: review.imageUrls.first, width: imageDimension, height: imageDimension, fit: BoxFit.cover),
       ),
     );
   }
