@@ -1,12 +1,18 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../app/constants/app_constants.dart';
 import '../../../../../data/repository/providers.dart';
 import '../../../../../domain/entity/recipe.dart';
+
+import '../../../../../presentation/widgets/app_cached_image.dart';
 import '../../../../../app/constants/app_colors.dart';
 import '../../../../../app/constants/app_strings.dart';
 import '../../../../pages/edit/recipe_edit_page.dart';
 import '../../../../../presentation/widgets/app_dialog.dart';
+import '../../../../../core/utils/snackbar_util.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 // Provider for the recipe list
 final savedRecipesProvider = FutureProvider<List<Recipe>>((ref) async {
@@ -35,9 +41,24 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
       data: (recipes) {
         List<Recipe> filtered = recipes;
 
-        // Tab categories don't filter by recipe.category
-        // They are just navigation tabs, so we show all recipes
-        // The actual filtering is done by selectedCuisines (which are real recipe categories)
+        // Filter by selected tab category
+        switch (selectedCategory) {
+          case AppConstants.recipeTabAll:
+            // Show all recipes - no additional filtering needed
+            break;
+          case AppConstants.recipeTabCreated:
+            // Show only generated recipes (recipes with 'generated' tag)
+            filtered = filtered.where((r) => r.tags.contains('generated')).toList();
+            break;
+          case AppConstants.recipeTabSaved:
+            // Show only saved recipes (recipes without 'generated' tag and not public)
+            filtered = filtered.where((r) => !r.tags.contains('generated') && !r.isPublic).toList();
+            break;
+          case AppConstants.recipeTabShared:
+            // Show only shared recipes (public recipes)
+            filtered = filtered.where((r) => r.isPublic).toList();
+            break;
+        }
 
         // Filter by cuisine categories if any selected
         if (selectedCuisines.isNotEmpty) {
@@ -144,6 +165,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                           selectedCuisines.remove(cuisine);
                         });
                       },
+                      isModalChip: false,
                     ),
                   ),
                   if (selectedSort.isNotEmpty)
@@ -154,6 +176,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                           selectedSort = '';
                         });
                       },
+                      isModalChip: false,
                     ),
                 ],
               ),
@@ -218,7 +241,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
             return Container(
               width: double.infinity,
               constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.9),
-              decoration: const BoxDecoration(color: Color(0xFFF5F5F5), borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+              decoration: const BoxDecoration(color: AppColors.greyScale50, borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
               child: SafeArea(
                 child: SingleChildScrollView(
                   child: Column(
@@ -240,32 +263,49 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('필터', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-                            const SizedBox(height: 16),
                             // Sort options
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: [
-                                _FilterChip(
-                                  label: AppConstants.sortByRating,
-                                  isSelected: tempSort == AppConstants.sortByRating,
-                                  onTap: () {
-                                    setModalState(() {
-                                      tempSort = tempSort == AppConstants.sortByRating ? '' : AppConstants.sortByRating;
-                                    });
-                                  },
-                                ),
-                                _FilterChip(
-                                  label: AppConstants.sortByCookTimeAsc,
-                                  isSelected: tempSort == AppConstants.sortByCookTimeAsc,
-                                  onTap: () {
-                                    setModalState(() {
-                                      tempSort = tempSort == AppConstants.sortByCookTimeAsc ? '' : AppConstants.sortByCookTimeAsc;
-                                    });
-                                  },
-                                ),
-                              ],
+                            const Text('정렬 기준', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                            const SizedBox(height: 12),
+                            LayoutBuilder(
+                              builder: (context, constraints) {
+                                const chipWidth = 100.0;
+                                const spacing = 8.0;
+                                final chipsPerRow = ((constraints.maxWidth - 24) / (chipWidth + spacing)).floor();
+                                final totalWidth = chipsPerRow * (chipWidth + spacing) - spacing;
+                                final horizontalPadding = (constraints.maxWidth - totalWidth) / 2;
+
+                                return Container(
+                                  width: double.infinity,
+                                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                                  child: Wrap(
+                                    alignment: WrapAlignment.start,
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children: [
+                                      _FilterChip(
+                                        label: AppConstants.sortByRating,
+                                        isSelected: tempSort == AppConstants.sortByRating,
+                                        onTap: () {
+                                          setModalState(() {
+                                            tempSort = tempSort == AppConstants.sortByRating ? '' : AppConstants.sortByRating;
+                                          });
+                                        },
+                                        isModalChip: true,
+                                      ),
+                                      _FilterChip(
+                                        label: AppConstants.sortByCookTimeAsc,
+                                        isSelected: tempSort == AppConstants.sortByCookTimeAsc,
+                                        onTap: () {
+                                          setModalState(() {
+                                            tempSort = tempSort == AppConstants.sortByCookTimeAsc ? '' : AppConstants.sortByCookTimeAsc;
+                                          });
+                                        },
+                                        isModalChip: true,
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
                             ),
                             const SizedBox(height: 20),
                             const Divider(height: 1, thickness: 1, color: AppColors.greyScale200),
@@ -273,26 +313,42 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                             // Cuisine filters
                             const Text('국가별', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
                             const SizedBox(height: 12),
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children:
-                                  cuisineCategories.map((cuisine) {
-                                    final isSelected = tempCuisines.contains(cuisine);
-                                    return _FilterChip(
-                                      label: cuisine,
-                                      isSelected: isSelected,
-                                      onTap: () {
-                                        setModalState(() {
-                                          if (isSelected) {
-                                            tempCuisines.remove(cuisine);
-                                          } else {
-                                            tempCuisines.add(cuisine);
-                                          }
-                                        });
-                                      },
-                                    );
-                                  }).toList(),
+                            LayoutBuilder(
+                              builder: (context, constraints) {
+                                const chipWidth = 100.0;
+                                const spacing = 8.0;
+                                final chipsPerRow = ((constraints.maxWidth - 24) / (chipWidth + spacing)).floor();
+                                final totalWidth = chipsPerRow * (chipWidth + spacing) - spacing;
+                                final horizontalPadding = (constraints.maxWidth - totalWidth) / 2;
+
+                                return Container(
+                                  width: double.infinity,
+                                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                                  child: Wrap(
+                                    alignment: WrapAlignment.start,
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children:
+                                        cuisineCategories.map((cuisine) {
+                                          final isSelected = tempCuisines.contains(cuisine);
+                                          return _FilterChip(
+                                            label: cuisine,
+                                            isSelected: isSelected,
+                                            onTap: () {
+                                              setModalState(() {
+                                                if (isSelected) {
+                                                  tempCuisines.remove(cuisine);
+                                                } else {
+                                                  tempCuisines.add(cuisine);
+                                                }
+                                              });
+                                            },
+                                            isModalChip: true,
+                                          );
+                                        }).toList(),
+                                  ),
+                                );
+                              },
                             ),
                             const SizedBox(height: 24),
                             // Action buttons
@@ -368,11 +424,11 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
               ),
 
               _PhotoModalStyleCard(
-                text: AppStrings.communityPost,
-                icon: Icons.people_outline,
+                text: recipe.isPublic ? AppStrings.communityUnpost : AppStrings.communityPost,
+                icon: recipe.isPublic ? Icons.public_off : Icons.public,
                 onTap: () {
                   Navigator.pop(context);
-                  // TODO: Implement community post action
+                  _toggleCommunityPost(recipe);
                 },
               ),
 
@@ -415,6 +471,14 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
   }
 
   void _showDeleteConfirmation(BuildContext context, Recipe recipe) {
+    // Add null checks
+    if (recipe.id.isEmpty) {
+      if (context.mounted) {
+        SnackbarUtil.showSnackBar(context, AppStrings.deleteError);
+      }
+      return;
+    }
+
     AppDialog.show(
       context: context,
       title: AppStrings.delete,
@@ -428,25 +492,59 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
   }
 
   Future<void> _deleteRecipe(String recipeId) async {
+    // Add null check for recipeId
+    if (recipeId.isEmpty) {
+      if (context.mounted) {
+        SnackbarUtil.showSnackBar(context, AppStrings.deleteError);
+      }
+      return;
+    }
+
+    try {
+      // Direct Firestore call to delete the recipe
+      final firestore = FirebaseFirestore.instance;
+      await firestore.collection('recipes').doc(recipeId).delete();
+
+      // Refresh the recipe list only if widget is still mounted
+      if (mounted) {
+        ref.invalidate(savedRecipesProvider);
+      }
+
+      // Show success message
+      if (mounted && context.mounted) {
+        SnackbarUtil.showSnackBar(context, AppStrings.deleteSuccess, showIcon: true);
+      }
+    } catch (e) {
+      // Show error message with more specific error handling
+      if (mounted && context.mounted) {
+        SnackbarUtil.showSnackBar(context, AppStrings.deleteError);
+      }
+      // Log the error for debugging
+      log('Delete error: $e');
+    }
+  }
+
+  Future<void> _toggleCommunityPost(Recipe recipe) async {
     try {
       final repository = ref.read(recipeRepositoryProvider);
-      await repository.deleteRecipe(recipeId);
+      await repository.toggleRecipeShare(recipe.id, !recipe.isPublic);
 
       // Refresh the recipe list
       ref.invalidate(savedRecipesProvider);
 
       // Show success message
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(AppStrings.deleteSuccess), backgroundColor: AppColors.primary));
+      if (mounted && context.mounted) {
+        SnackbarUtil.showSnackBar(context, recipe.isPublic ? AppStrings.unpostSuccess : AppStrings.postSuccess, showIcon: true);
       }
     } catch (e) {
       // Show error message
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(AppStrings.deleteError), backgroundColor: Colors.red));
+      if (mounted && context.mounted) {
+        SnackbarUtil.showSnackBar(context, AppStrings.postError);
       }
     }
   }
 
+  // ignore: unused_element
   Widget _buildRecipeGrid(List<Recipe> recipes, List<Recipe> filteredRecipes) {
     return RefreshIndicator(
       onRefresh: _refreshRecipes,
@@ -488,7 +586,7 @@ class _RecipeCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: AppColors.greyScale200),
         color: AppColors.white,
-        boxShadow: [BoxShadow(color: AppColors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
+        boxShadow: [BoxShadow(color: AppColors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -497,16 +595,13 @@ class _RecipeCard extends StatelessWidget {
             flex: 4,
             child: Stack(
               children: [
-                if (recipe.imageUrl != null)
-                  ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
-                    child: Image.network(recipe.imageUrl!, fit: BoxFit.cover, width: double.infinity, height: double.infinity),
-                  )
-                else
-                  Container(
-                    width: double.infinity,
-                    decoration: const BoxDecoration(color: AppColors.appBarGrey, borderRadius: BorderRadius.vertical(top: Radius.circular(12))),
-                  ),
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
+                  child:
+                      recipe.imageUrl != null
+                          ? Image.network(recipe.imageUrl!, fit: BoxFit.cover, width: double.infinity, height: double.infinity)
+                          : Image.asset('assets/no_image.png', fit: BoxFit.cover, width: double.infinity, height: double.infinity),
+                ),
                 Positioned(
                   top: 8,
                   right: 8,
@@ -558,19 +653,24 @@ class _FilterChip extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onDeleted;
   final bool isSelected;
+  final bool isModalChip;
 
-  const _FilterChip({required this.label, this.onTap, this.onDeleted, this.isSelected = false});
+  const _FilterChip({required this.label, this.onTap, this.onDeleted, this.isSelected = false, this.isModalChip = false});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        height: 26,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : AppColors.white,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: AppColors.greyScale200, width: 1),
+          color: isModalChip ? (isSelected ? AppColors.primary700 : AppColors.white) : (isSelected ? AppColors.primary50 : AppColors.primary50),
+          borderRadius: BorderRadius.circular(13),
+          border:
+              isModalChip
+                  ? Border.all(color: isSelected ? AppColors.primary800 : AppColors.white, width: 1)
+                  : Border.all(color: AppColors.primary700, width: 1),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -578,14 +678,19 @@ class _FilterChip extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? AppColors.white : AppColors.greyScale600,
+                color:
+                    isModalChip
+                        ? (isSelected ? AppColors.white : AppColors.greyScale600)
+                        : (isSelected ? AppColors.primary700 : AppColors.primary700),
                 fontSize: 12,
+                height: 1.2,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
               ),
             ),
             if (onDeleted != null) ...[
-              const SizedBox(width: 4),
-              GestureDetector(onTap: onDeleted, child: const Icon(Icons.close, size: 14, color: AppColors.primary)),
+              const SizedBox(width: 2),
+              GestureDetector(onTap: onDeleted, child: Icon(Icons.close, size: 14, color: isModalChip ? AppColors.white : AppColors.primary700)),
+              const SizedBox(width: 2),
             ],
           ],
         ),
