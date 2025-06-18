@@ -210,58 +210,85 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
     }
   }
 
+  bool _hasUnsavedChanges() {
+    final state = ref.read(writeReviewViewModelProvider(widget.review));
+    // If editing, check if anything changed from original
+    if (widget.review != null) {
+      final originalReview = widget.review!;
+      final textChanged =
+          _controller.text.trim() != originalReview.reviewText?.trim();
+      final ratingChanged = state.rating != originalReview.rating;
+      final imagesChanged =
+          state.selectedImages.length != originalReview.imageUrls.length ||
+          state.selectedImages.any((img) => img.isFile); // Any new file images
+      return textChanged || ratingChanged || imagesChanged;
+    }
+    // Check if text has changed
+    final hasTextChanges = _controller.text.trim().isNotEmpty;
+    // Check if rating has been set
+    final hasRatingChanges = state.rating > 0;
+    // Check if images have been added or modified
+    final hasImageChanges = state.selectedImages.isNotEmpty;
+    // For new reviews, check if any content has been added
+    return hasTextChanges || hasRatingChanges || hasImageChanges;
+  }
+
   @override
   Widget build(BuildContext context) {
     final isEditingMode = widget.review != null;
 
-    return GestureDetector(
-      onTap: FocusScope.of(context).unfocus,
-      child: Scaffold(
-        appBar: AppBar(
-          elevation: 1,
-          title: Text(
-            isEditingMode
-                ? strings(context).editReviewTitle
-                : strings(context).writeReviewTitle,
+    return GeneralUtil.buildUnsavedChangesPopScope(
+      context: context,
+      hasUnsavedChanges: () => _hasUnsavedChanges(),
+      child: GestureDetector(
+        onTap: FocusScope.of(context).unfocus,
+        child: Scaffold(
+          appBar: AppBar(
+            elevation: 1,
+            title: Text(
+              isEditingMode
+                  ? strings(context).editReviewTitle
+                  : strings(context).writeReviewTitle,
+            ),
+            actions: isEditingMode ? [_buildDeleteActionButton(context)] : null,
           ),
-          actions: isEditingMode ? [_buildDeleteActionButton(context)] : null,
-        ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Center(
-            child: ListView(
-              children: [
-                const SizedBox(height: 24),
-                _buildRecipeNameSection(),
-                const SizedBox(height: 13),
-                StarRating(
-                  currentRating: ref.watch(
-                    writeReviewViewModelProvider(
-                      widget.review,
-                    ).select((state) => state.rating),
+          body: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Center(
+              child: ListView(
+                children: [
+                  const SizedBox(height: 24),
+                  _buildRecipeNameSection(),
+                  const SizedBox(height: 13),
+                  StarRating(
+                    currentRating: ref.watch(
+                      writeReviewViewModelProvider(
+                        widget.review,
+                      ).select((state) => state.rating),
+                    ),
+                    iconSize: 32,
+                    setRating:
+                        (selectedRating) => ref
+                            .read(
+                              writeReviewViewModelProvider(
+                                widget.review,
+                              ).notifier,
+                            )
+                            .setRating(selectedRating),
                   ),
-                  iconSize: 32,
-                  setRating:
-                      (selectedRating) => ref
-                          .read(
-                            writeReviewViewModelProvider(
-                              widget.review,
-                            ).notifier,
-                          )
-                          .setRating(selectedRating),
-                ),
-                const SizedBox(height: 32),
-                _buildPhotoUploadSection(context),
-                const SizedBox(height: 24),
-                _buildPhotoThumbnails(),
-                const SizedBox(height: 18),
-                _buildTextInputSection(context),
-                const SizedBox(height: 32),
-              ],
+                  const SizedBox(height: 32),
+                  _buildPhotoUploadSection(context),
+                  const SizedBox(height: 24),
+                  _buildPhotoThumbnails(),
+                  const SizedBox(height: 18),
+                  _buildTextInputSection(context),
+                  const SizedBox(height: 32),
+                ],
+              ),
             ),
           ),
+          bottomNavigationBar: _buildSubmitButton(context),
         ),
-        bottomNavigationBar: _buildSubmitButton(context),
       ),
     );
   }

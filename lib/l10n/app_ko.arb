@@ -150,5 +150,7 @@
   "deleteReviewConfirmTitle": "리뷰 삭제",
   "deleteReviewConfirmMessage": "이 리뷰를 삭제하시겠습니까? 삭제된 리뷰는 복구할 수 없습니다.",
   "delete": "삭제",
-  "editReviewButtonText": "수정"
+  "editReviewButtonText": "수정",
+  "stopWritingConfirmTitle": "작성을 중단할까요?",
+  "stopWritingConfirmMessage": "작성중인 내용은 저장되지 않습니다",
 }
