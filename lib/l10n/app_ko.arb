@@ -221,5 +221,12 @@
   "recipeTabAll": "전체",
   "recipeTabCreated": "생성한 레시피",
   "recipeTabSaved": "저장한 레시피",
-  "recipeTabShared": "공유한 레시피"
+  "recipeTabShared": "공유한 레시피",
+  "review":"리뷰",
+  "amount":"개",
+  "average":"평균",
+  "score":"점",
+
+  "recipeReview":"레시피 평가하기",
+  "recipeRating":"생성한 레시피에 대한 별점을 남겨보세요"
 }
