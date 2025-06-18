@@ -1,5 +1,5 @@
 import 'package:cooki/app/constants/app_colors.dart';
-import 'package:cooki/presentation/pages/debug/test_recipe_list.dart';
+import 'package:cooki/presentation/pages/home/tabs/community/community_tab.dart';
 import 'package:cooki/presentation/pages/home/widgets/home_bottom_navigation_bar.dart';
 import 'package:cooki/presentation/pages/my/my_page.dart';
 import 'package:cooki/presentation/pages/home/tabs/saved_recipes/saved_recipes_tab.dart';
@@ -21,16 +21,38 @@ class HomePage extends ConsumerWidget {
       bottomNavigationBar: HomeBottomNavigationBar(),
       body: IndexedStack(
         index: currentIndex,
-        children: [MyRecipesPage(), RecipeDebugListPage(), MyPage()],
+        children: [MyRecipesPage(), CommunityPage(), MyPage()],
       ),
       floatingActionButton:
           currentIndex == 0 || currentIndex == 1
-              ? FloatingActionButton(
-                backgroundColor: AppColors.primary,
-                child: Icon(Icons.auto_awesome, size: 26, color: Colors.white),
-                onPressed: () {
-                  NavigationUtil.pushFromBottom(context, GenerateRecipePage());
-                },
+              ? Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    splashColor: AppColors.primary900,
+                    highlightColor: AppColors.primary900.withValues(alpha: 0.2),
+                    onTap: () {
+                      NavigationUtil.pushFromBottom(
+                        context,
+                        GenerateRecipePage(),
+                      );
+                    },
+                    child: Center(
+                      child: Image.asset(
+                        'assets/icons/cooki_logo_white_no_letters.png',
+                        width: 28,
+                        height: 28,
+                      ),
+                    ),
+                  ),
+                ),
               )
               : null,
     );
