@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cooki/data/data_source/image_download_data_source.dart';
 import 'package:cooki/data/data_source/recipe_generation_data_source.dart';
 import 'package:cooki/data/data_source/review_data_source.dart';
+import 'package:cooki/data/data_source/review_report_data_source.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:cloud_functions/cloud_functions.dart';
@@ -19,7 +20,7 @@ import 'image_storage_data_source.dart';
 
 // firebase_providers
 final firebaseAuthProvider = Provider((ref) => FirebaseAuth.instance);
-final firebaseFunctionsProvider = Provider((ref) => FirebaseFunctions.instance);
+final firebaseFunctionsProvider = Provider((ref) => FirebaseFunctions.instanceFor(region: 'asia-northeast3'));
 final firestoreProvider = Provider((ref) => FirebaseFirestore.instance);
 final firebaseAIProvider = Provider((ref) => FirebaseAI.googleAI());
 final firebaseStorageProvider = Provider((ref) => FirebaseStorage.instance);
@@ -52,3 +53,7 @@ final recipeGenerationDataSourceProvider = Provider<RecipeGenerationDataSource>(
 final imageDownloadDataSourceProvider = Provider<ImageDownloadDataSource>((ref) => DioImageDownloadDataSource(ref.read(dioProvider)));
 
 final reviewDataSourceProvider = Provider<ReviewDataSource>((ref) => ReviewFirestoreDataSource(ref.read(firestoreProvider)));
+
+final reportDataSourceProvider = Provider<ReviewReportDataSource>((ref) {
+  return ReviewReportFirestoreDataSource(ref.read(firestoreProvider));
+});

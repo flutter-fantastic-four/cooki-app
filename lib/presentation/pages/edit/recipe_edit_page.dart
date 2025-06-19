@@ -7,6 +7,7 @@ import 'package:cooki/presentation/pages/edit/widgets/cook_info_row.dart';
 import 'package:cooki/presentation/pages/edit/widgets/input_list_widget.dart';
 import 'package:cooki/presentation/pages/edit/widgets/title_field_widget.dart';
 import 'package:cooki/presentation/widgets/app_cached_image.dart';
+import 'package:cooki/presentation/widgets/app_dialog.dart';
 import 'package:cooki/presentation/widgets/category_selection_dialog.dart';
 import 'package:cooki/presentation/widgets/recipe_page_widgets.dart';
 import 'package:easy_image_viewer/easy_image_viewer.dart';
@@ -14,12 +15,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/constants/app_colors.dart';
-import '../../../core/utils/dialogue_util.dart';
 import '../../../core/utils/error_mappers.dart';
 import '../../../core/utils/general_util.dart';
 import '../../../domain/entity/recipe.dart';
 import '../../user_global_view_model.dart';
-import '../debug/test_recipe_list.dart';
+import '../home/tabs/saved_recipes/saved_recipes_tab.dart';
 
 class RecipeEditPage extends ConsumerStatefulWidget {
   final Recipe? recipe;
@@ -59,10 +59,10 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
       final errorKey =
           ref.read(recipeEditViewModelProvider(widget.recipe)).errorKey;
       if (mounted && errorKey != null) {
-        DialogueUtil.showAppCupertinoDialog(
+        AppDialog.show(
           context: context,
           title: strings(context).recipeSavingFailedTitle,
-          content: ErrorMapper.mapGenerateRecipeError(context, errorKey),
+          subText: ErrorMapper.mapGenerateRecipeError(context, errorKey),
         );
         vm.clearError();
         return;
@@ -74,9 +74,12 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
           strings(context).recipeSavedSuccessfully,
           showIcon: true,
         );
-        // TODO: Remove this and call VM method to be created
-        ref.invalidate(recipeListProvider);
-        Navigator.of(context).pop(true); // Return true to indicate success
+        // Refresh the recipe lists
+        ref.invalidate(
+          savedRecipesProvider,
+        ); // refresh the saved recipes list after saving
+        Navigator.of(context).popUntil((route) => route.isFirst);
+        // Navigator.of(context).pop(true); // Return true to indicate success
       }
     }
   }
@@ -340,10 +343,7 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
           const SizedBox(height: 6),
           Text(
             strings(context).isPublicLabel,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-            ),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           Switch.adaptive(

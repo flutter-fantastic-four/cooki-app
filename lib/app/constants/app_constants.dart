@@ -1,9 +1,28 @@
 import 'package:flutter/material.dart';
 
 import '../../core/utils/general_util.dart';
+import '../../data/data_source/review_data_source.dart';
+import '../../domain/entity/sort_option.dart';
 
 class AppConstants {
   static const appTitle = 'Cooki';
+
+  static List<SortOption> getSortOptions() {
+    return [
+      SortOption(
+        labelGetter: (context) => strings(context).newestFirst,
+        type: ReviewSortType.dateDescending,
+      ),
+      SortOption(
+        labelGetter: (context) => strings(context).highestRating,
+        type: ReviewSortType.ratingDescending,
+      ),
+      SortOption(
+        labelGetter: (context) => strings(context).lowestRating,
+        type: ReviewSortType.ratingAscending,
+      ),
+    ];
+  }
 
   static List<String> recipePreferences(BuildContext context) {
     final s = strings(context);
@@ -44,24 +63,14 @@ class AppConstants {
   }
 
   static List<String> recipeTabCategories(BuildContext context) {
-    // For now using hardcoded strings, should be moved to localization
-    return ['전체', '생성한 레시피', '저장한 레시피', '공유한 레시피'];
+    final s = strings(context);
+    return [
+      s.recipeTabAll,
+      s.recipeTabCreated,
+      s.recipeTabSaved,
+      s.recipeTabShared
+    ];
   }
-
-  static List<String> recipeSortOptions(BuildContext context) {
-    // For now using hardcoded strings, should be moved to localization
-    return ['별점순', '조리시간 빠른 순'];
-  }
-
-  // Recipe tab category constants
-  static const String recipeTabAll = '전체';
-  static const String recipeTabCreated = '생성한 레시피';
-  static const String recipeTabSaved = '저장한 레시피';
-  static const String recipeTabShared = '공유한 레시피';
-
-  // Sort option constants
-  static const String sortByRating = '별점순';
-  static const String sortByCookTimeAsc = '조리시간 빠른 순';
 
   // Placeholder constants
   /// Placeholder for user's text input in prompt templates.

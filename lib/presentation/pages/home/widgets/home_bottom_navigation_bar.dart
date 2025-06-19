@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/utils/general_util.dart';
 import '../home_view_model.dart';
 
 class HomeBottomNavigationBar extends StatelessWidget {
@@ -35,24 +36,24 @@ class HomeBottomNavigationBar extends StatelessWidget {
             ),
             unselectedLabelStyle: const TextStyle(fontSize: 12),
             selectedItemColor: Colors.black,
-            items: const [
+            items: [
               BottomNavigationBarItem(
                 icon: Icon(Icons.bookmark_border),
                 activeIcon: Icon(Icons.bookmark),
-                label: '나의 레시피',
-                tooltip: '나의 레시피',
+                label: strings(context).myRecipesTitle,
+                tooltip: strings(context).myRecipesTitle,
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.public),
                 activeIcon: Icon(Icons.public),
-                label: '커뮤니티',
-                tooltip: '커뮤니티',
+                label: strings(context).communityTitle,
+                tooltip: strings(context).communityTitle,
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.person_outline),
                 activeIcon: Icon(Icons.person),
-                label: '마이페이지',
-                tooltip: '마이페이지',
+                label: strings(context).myPage,
+                tooltip: strings(context).myPage,
               ),
             ],
           ),

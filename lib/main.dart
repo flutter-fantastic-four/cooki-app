@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cooki/firebase_options.dart';
 import 'package:cooki/presentation/pages/app_entry/app_entry_page.dart';
+import 'package:cooki/presentation/settings_global_view_model.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +24,9 @@ void main() async {
 
       // Firebase 초기화
       try {
-        await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+        await Firebase.initializeApp(
+          options: DefaultFirebaseOptions.currentPlatform,
+        );
       } catch (_) {} // Firebase가 이미 초기화된 경우 무시
 
       // 카카오 SDK 초기화
@@ -42,24 +45,29 @@ void main() async {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settingsState = ref.watch(settingsGlobalViewModelProvider);
+
     return MaterialApp(
       title: AppConstants.appTitle,
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.light,
       theme: AppTheme.buildTheme(),
-      localizationsDelegates: [
+      localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: [Locale('ko')],
-      locale: Locale(('ko')),
+      supportedLocales:
+          SupportedLanguage.values
+              .map((language) => Locale(language.code))
+              .toList(),
+      locale: settingsState.locale,
       home: const AppEntryPage(),
     );
   }

@@ -39,7 +39,7 @@ abstract class AppTheme {
           backgroundColor: AppColors.primary,
           disabledBackgroundColor: AppColors.inactiveButton,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(10),
           ),
           minimumSize: const Size(double.infinity, 50),
           textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),

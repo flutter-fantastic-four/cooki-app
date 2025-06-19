@@ -87,6 +87,8 @@ class RecipeEditViewModel
         userId: arg?.userId ?? user!.id,
         userName: arg?.userName ?? user!.name,
         userProfileImage: arg?.userProfileImage ?? user!.profileImage,
+        ratingCount: arg?.ratingCount,
+        ratingSum: arg?.ratingSum,
       );
 
       if (arg != null) {
@@ -99,6 +101,14 @@ class RecipeEditViewModel
       state = state.copyWith(errorKey: SaveRecipeErrorKey.saveFailed);
     } finally {
       state = state.copyWith(isSaving: false);
+    }
+  }
+
+  Future<void> deleteRecipe() async {
+    try {
+      await ref.read(recipeRepositoryProvider).deleteRecipe(arg!.id);
+    } catch (e, stack) {
+      logError(e, stack);
     }
   }
 
