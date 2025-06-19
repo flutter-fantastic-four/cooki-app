@@ -202,8 +202,34 @@
   "timeSeconds": "{count}s",
   "timeMinutes": "{count}m",
   "timeHours": "{count}h",
+
   "timeMonthDay": "{month}/{day}",
+  "@timeMonthDay": {
+    "placeholders": {
+      "month": {
+        "type": "int"
+      },
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+
   "timeYearMonthDay": "{month}/{day}/{year}",
+  "@timeYearMonthDay": {
+    "placeholders": {
+      "month": {
+        "type": "int"
+      },
+      "day": {
+        "type": "int"
+      },
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+
   "yesterday": "Yesterday",
 
   "communityTitle": "Community",
