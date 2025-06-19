@@ -52,7 +52,8 @@ class _InfoItemRowState extends State<InfoItemRow> {
                 _launchUrl(context, "https://flutter-fantastic-four.github.io/privacy_policy.html");
                 break;
               case InfoItem.contactTheDevelopersTeam:
-                _launchEmail();
+                _launchUrl(context, "https://github.com/flutter-fantastic-four/cooki-app#-개발팀");
+                // _launchEmail();
                 break;
               case InfoItem.version:
                 _launchStore();
@@ -74,7 +75,7 @@ class _InfoItemRowState extends State<InfoItemRow> {
   }
 
   Future<void> _launchEmail() async {
-    final Uri emailUri = Uri(scheme: 'mailto', path: 'yooilsong@gmail.com', queryParameters: {'subject': 'Cooki app feedback'});
+    final Uri emailUri = Uri(scheme: 'mailto', path: '@gmail.com', queryParameters: {'subject': 'Cooki app feedback'});
 
     if (await canLaunchUrl(emailUri)) {
       await launchUrl(emailUri, mode: LaunchMode.externalApplication);
@@ -82,7 +83,7 @@ class _InfoItemRowState extends State<InfoItemRow> {
       // If no email app, open browser-based mail client (Gmail)
       final fallbackUrl = Uri.parse(
         'https://mail.google.com/mail/?view=cm&fs=1'
-        '&to=${'yooilsong@gmail.com'}&su=${Uri.encodeComponent('Cooki app feedback')}',
+        '&to=${'@gmail.com'}&su=${Uri.encodeComponent('Cooki app feedback')}',
       );
       if (await canLaunchUrl(fallbackUrl)) {
         await launchUrl(fallbackUrl, mode: LaunchMode.externalApplication);
