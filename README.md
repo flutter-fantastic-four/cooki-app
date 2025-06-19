@@ -1,6 +1,6 @@
 # 🍪 Cooki - AI 레시피 커뮤니티 앱
 
-<p align="center"> <img src="assets/icons/launcher_icon.png" alt="Cooki 앱 아이콘" width="140"/> </p>
+<p align="center"> <img src="assets/icons/app_icon.png" alt="Cooki 앱 아이콘" width="140"/> </p>
 
 ## 📌 프로젝트 소개
 
