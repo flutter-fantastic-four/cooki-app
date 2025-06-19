@@ -205,8 +205,34 @@
   "timeSeconds": "{count}초",
   "timeMinutes": "{count}분",
   "timeHours": "{count}시간",
+
   "timeMonthDay": "{month}월 {day}일",
+  "@timeMonthDay": {
+    "placeholders": {
+      "month": {
+        "type": "int"
+      },
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+
   "timeYearMonthDay": "{year}년 {month}월 {day}일",
+  "@timeYearMonthDay": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      },
+      "month": {
+        "type": "int"
+      },
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+
   "yesterday": "어제",
 
   "communityTitle": "커뮤니티",
