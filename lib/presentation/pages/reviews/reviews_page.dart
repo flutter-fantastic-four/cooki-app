@@ -39,11 +39,11 @@ class ReviewsPage extends ConsumerWidget {
     final isMyReview = currentUser?.id == review.userId;
 
     final options = <ModalOption>[
-      ModalOption(
-        text: strings(context).translateReview,
-        icon: Icons.g_translate,
-        onTap: () => _translateReview(context, review),
-      ),
+      // ModalOption(
+      //   text: strings(context).translateReview,
+      //   icon: Icons.g_translate,
+      //   onTap: () => _translateReview(context, review),
+      // ),
       if (isMyReview)
         ModalOption(
           text: strings(context).editReview,
