@@ -1,6 +1,6 @@
 # 🍪 Cooki - AI 레시피 커뮤니티 앱
 
-<p align="center"> <img src="assets/icons/launcher_icon.png" alt="Cooki 앱 아이콘" width="150"/> </p>
+<p align="center"> <img src="assets/icons/launcher_icon.png" alt="Cooki 앱 아이콘" width="100"/> </p>
 
 ## 📌 프로젝트 소개
 
@@ -178,14 +178,7 @@ APPLE_CLIENT_ID="YOUR-ID-HERE"
 
 ## 🌟 개발팀
 
-## 개발자 소개 및 연락처
-
-| 이름                               | GitHub                                      | 이메일                  | 역할                                                                                                                                                                                                                                                           |
-| -------------------------------- | ------------------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **유일송**                          | [ilsong963](https://github.com/ilsong963)   | yooilsong@gmail.com  | • 회원가입 및 로그인 기능<br>&nbsp;&nbsp;&nbsp;• firebase auth<br>&nbsp;&nbsp;&nbsp;• apple, google, kakao<br>• 마이 페이지 및 세팅 화면<br>&nbsp;&nbsp;&nbsp;• 로그아웃<br>&nbsp;&nbsp;&nbsp;• 이용약관<br>• 상세 페이지                                                                     |
-| **임대한 (Penjan Antonio Eng Lim)** | [daehan-lim](https://github.com/daehan-lim) | penjan.eng@gmail.com | • AI 레시피 생성<br>&nbsp;&nbsp;&nbsp;• Gemini API 연동 (요청, 프롬프트 작성, 검증 등)<br>&nbsp;&nbsp;&nbsp;• Firestore로 레시피 업로드 (이미지 업로드 등)<br>• 레시피 수정 페이지 (수정, 삭제)<br>• 리뷰 기능 (리뷰 페이지, 리뷰 작성 페이지, 수정 기능)<br>• 레시피 외부 공유 기능 (텍스트 + 이미지)<br>• 리뷰 신고 기능<br>• 언어 설정 및 다국어 UI 지원 |
-| **이정찬**                          | [chandoli21](https://github.com/chandoli21) |                      | • 나의 레시피 페이지 구현<br>&nbsp;&nbsp;&nbsp;• 저장한 레시피 / 내 레시피 / 공유된 레시피 탭<br>• 커뮤니티 페이지<br>&nbsp;&nbsp;&nbsp;• 추천/탐색 기반 레시피 리스트<br>&nbsp;&nbsp;&nbsp;• 정렬/필터 기능 설계                                                                                                  |
-
+### 개발자 소개 및 연락처
 
 | 이름                           | GitHub                                      | 이메일                  |
 | ---------------------------- | ------------------------------------------- | -------------------- |
