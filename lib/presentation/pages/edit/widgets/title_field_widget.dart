@@ -135,7 +135,7 @@ class TitleFieldWidget extends ConsumerWidget {
   Widget _buildTextRow(BuildContext context, RecipeEditViewModel vm) {
     return Row(
       children: [
-        Flexible(
+        Expanded(
           child: Text(
             titleController.text.isNotEmpty
                 ? titleController.text

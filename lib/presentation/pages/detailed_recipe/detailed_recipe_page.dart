@@ -33,9 +33,17 @@ class DetailRecipePage extends ConsumerWidget {
               children: [
                 recipe.imageUrl != null
                     ? _buildImageSelector(context)
-                    : Image.asset('assets/no_image.png', fit: BoxFit.cover, width: double.infinity, height: 230),
+                    : Image.asset(
+                      'assets/no_image.png',
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: 230,
+                    ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 16,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -51,7 +59,10 @@ class DetailRecipePage extends ConsumerWidget {
                       const SizedBox(height: 16),
                       _ingredientsColumn(),
                       const SizedBox(height: 16),
-                      Text(strings(context).stepsLabel, style: RecipePageWidgets.sectionTitleStyle),
+                      Text(
+                        strings(context).stepsLabel,
+                        style: RecipePageWidgets.sectionTitleStyle,
+                      ),
                       const SizedBox(height: 16),
                       _stepsColumn(),
                     ],
@@ -68,22 +79,41 @@ class DetailRecipePage extends ConsumerWidget {
                     width: 40,
                     height: 40,
                     child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(elevation: 4, padding: EdgeInsets.zero, backgroundColor: Colors.white),
+                      style: ElevatedButton.styleFrom(
+                        elevation: 4,
+                        padding: EdgeInsets.zero,
+                        backgroundColor: Colors.white,
+                      ),
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      child: Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 24),
+                      child: Icon(
+                        Icons.arrow_back_ios_new,
+                        color: Colors.black,
+                        size: 24,
+                      ),
                     ),
                   ),
                   SizedBox(
                     width: 40,
                     height: 40,
                     child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(elevation: 4, padding: EdgeInsets.zero, backgroundColor: Colors.white),
+                      style: ElevatedButton.styleFrom(
+                        elevation: 4,
+                        padding: EdgeInsets.zero,
+                        backgroundColor: Colors.white,
+                      ),
                       onPressed: () {
-                        NavigationUtil.pushFromBottom(context, RecipeEditPage(recipe: recipe));
+                        NavigationUtil.pushFromBottom(
+                          context,
+                          RecipeEditPage(recipe: recipe),
+                        );
                       },
-                      child: Icon(Icons.edit_outlined, color: Colors.black, size: 24),
+                      child: Icon(
+                        Icons.edit_outlined,
+                        color: Colors.black,
+                        size: 24,
+                      ),
                     ),
                   ),
                 ],
@@ -98,9 +128,15 @@ class DetailRecipePage extends ConsumerWidget {
   Row _ingredientsLabel(BuildContext context) {
     return Row(
       children: [
-        Text(strings(context).ingredientsLabel, style: RecipePageWidgets.sectionTitleStyle),
+        Text(
+          strings(context).ingredientsLabel,
+          style: RecipePageWidgets.sectionTitleStyle,
+        ),
         const SizedBox(width: 3),
-        Text(strings(context).servingsLabel, style: RecipePageWidgets.servingsTitleStyle),
+        Text(
+          strings(context).servingsLabel,
+          style: RecipePageWidgets.servingsTitleStyle,
+        ),
       ],
     );
   }
@@ -113,7 +149,13 @@ class DetailRecipePage extends ConsumerWidget {
               children: [
                 GestureDetector(
                   onTap: () {
-                    NavigationUtil.pushFromBottom(context, ReviewsPage(recipeId: recipe.id, recipeName: recipe.recipeName));
+                    NavigationUtil.pushFromBottom(
+                      context,
+                      ReviewsPage(
+                        recipeId: recipe.id,
+                        recipeName: recipe.recipeName,
+                      ),
+                    );
                   },
                   child: Row(
                     children: [
@@ -147,7 +189,10 @@ class DetailRecipePage extends ConsumerWidget {
       children: [
         for (final item in recipe.ingredients) ...[
           RecipePageWidgets.divider,
-          Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12), child: Text(item)),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Text(item),
+          ),
         ],
       ],
     );
@@ -165,8 +210,14 @@ class DetailRecipePage extends ConsumerWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 14),
-                  decoration: BoxDecoration(color: AppColors.appBarGrey, borderRadius: RecipePageWidgets.inputBorderRadius),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 8,
+                    horizontal: 14,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.appBarGrey,
+                    borderRadius: RecipePageWidgets.inputBorderRadius,
+                  ),
                   child: Text(recipe.steps[i]),
                 ),
               ),
@@ -180,9 +231,17 @@ class DetailRecipePage extends ConsumerWidget {
 
   Row _title() {
     return Row(
+      crossAxisAlignment:
+          CrossAxisAlignment.start, // ensures multiline text aligns at the top
       children: [
-        Text(recipe.recipeName, style: RecipePageWidgets.sectionTitleStyle),
-        Spacer(),
+        Expanded(
+          child: Text(
+            recipe.recipeName,
+            style: RecipePageWidgets.sectionTitleStyle,
+            softWrap: true,
+            overflow: TextOverflow.visible,
+          ),
+        ),
         IconButton(onPressed: () {}, icon: Icon(Icons.bookmark_border)),
         IconButton(onPressed: () {}, icon: Icon(Icons.more_vert)),
       ],
@@ -215,15 +274,30 @@ class DetailRecipePage extends ConsumerWidget {
           onTap: () {
             int currentRating = 0;
             recipe.isPublic
-                ? NavigationUtil.pushFromBottom(context, WriteReviewPage(recipeId: recipe.id, recipeName: recipe.recipeName))
+                ? NavigationUtil.pushFromBottom(
+                  context,
+                  WriteReviewPage(
+                    recipeId: recipe.id,
+                    recipeName: recipe.recipeName,
+                  ),
+                )
                 : showModalBottomSheet(
                   context: context,
                   isScrollControlled: true,
                   backgroundColor: AppColors.greyScale50,
-                  shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(26))),
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(26),
+                    ),
+                  ),
                   builder: (context) {
                     return Padding(
-                      padding: const EdgeInsets.only(top: 8, bottom: 30, left: 15, right: 15),
+                      padding: const EdgeInsets.only(
+                        top: 8,
+                        bottom: 30,
+                        left: 15,
+                        right: 15,
+                      ),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -231,7 +305,10 @@ class DetailRecipePage extends ConsumerWidget {
                           Container(
                             width: 40,
                             height: 5,
-                            decoration: BoxDecoration(color: Colors.grey[400], borderRadius: BorderRadius.circular(10)),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[400],
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                             margin: const EdgeInsets.only(bottom: 12),
                           ),
                           Padding(
@@ -245,7 +322,8 @@ class DetailRecipePage extends ConsumerWidget {
                                   width: double.infinity,
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
                                     spacing: 4,
                                     children: [
                                       Text(
@@ -297,7 +375,9 @@ class DetailRecipePage extends ConsumerWidget {
                           Container(
                             width: double.infinity,
                             padding: const EdgeInsets.symmetric(horizontal: 20),
-                            decoration: BoxDecoration(color: const Color(0xFFF5F5F5) /* Grayscale-50 */),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF5F5F5) /* Grayscale-50 */,
+                            ),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               mainAxisAlignment: MainAxisAlignment.start,
@@ -309,7 +389,8 @@ class DetailRecipePage extends ConsumerWidget {
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
                                     spacing: 8,
                                     children: [
                                       Expanded(
@@ -321,23 +402,35 @@ class DetailRecipePage extends ConsumerWidget {
                                             height: 54,
                                             padding: const EdgeInsets.all(8),
                                             decoration: ShapeDecoration(
-                                              color: Colors.white /* Grayscale-White */,
+                                              color:
+                                                  Colors
+                                                      .white /* Grayscale-White */,
                                               shape: RoundedRectangleBorder(
-                                                side: BorderSide(width: 1, color: const Color(0xFF1D8163) /* Primary-700 */),
-                                                borderRadius: BorderRadius.circular(8),
+                                                side: BorderSide(
+                                                  width: 1,
+                                                  color: const Color(
+                                                    0xFF1D8163,
+                                                  ) /* Primary-700 */,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
                                               ),
                                             ),
                                             child: Row(
                                               mainAxisSize: MainAxisSize.min,
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              crossAxisAlignment: CrossAxisAlignment.center,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
                                               spacing: 8,
                                               children: [
                                                 Text(
                                                   strings(context).close,
                                                   textAlign: TextAlign.center,
                                                   style: TextStyle(
-                                                    color: const Color(0xFF1D8163) /* Primary-700 */,
+                                                    color: const Color(
+                                                      0xFF1D8163,
+                                                    ) /* Primary-700 */,
                                                     fontSize: 16,
                                                     fontFamily: 'Pretendard',
                                                     fontWeight: FontWeight.w600,
@@ -354,20 +447,29 @@ class DetailRecipePage extends ConsumerWidget {
                                           height: 54,
                                           padding: const EdgeInsets.all(8),
                                           decoration: ShapeDecoration(
-                                            color: const Color(0xFF1D8163) /* Primary-700 */,
-                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                            color: const Color(
+                                              0xFF1D8163,
+                                            ) /* Primary-700 */,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
                                           ),
                                           child: Row(
                                             mainAxisSize: MainAxisSize.min,
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
                                             spacing: 8,
                                             children: [
                                               Text(
                                                 strings(context).confirm,
                                                 textAlign: TextAlign.center,
                                                 style: TextStyle(
-                                                  color: Colors.white /* Grayscale-White */,
+                                                  color:
+                                                      Colors
+                                                          .white /* Grayscale-White */,
                                                   fontSize: 16,
                                                   fontFamily: 'Pretendard',
                                                   fontWeight: FontWeight.w600,
@@ -394,9 +496,21 @@ class DetailRecipePage extends ConsumerWidget {
             height: 28,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: ShapeDecoration(
-              shape: RoundedRectangleBorder(side: BorderSide(width: 1, color: AppColors.greyScale300), borderRadius: BorderRadius.circular(99999)),
+              shape: RoundedRectangleBorder(
+                side: BorderSide(width: 1, color: AppColors.greyScale300),
+                borderRadius: BorderRadius.circular(99999),
+              ),
             ),
-            child: Row(children: List.generate(5, (_) => Icon(Icons.star_border, size: 12, color: AppColors.greyScale800))),
+            child: Row(
+              children: List.generate(
+                5,
+                (_) => Icon(
+                  Icons.star_border,
+                  size: 12,
+                  color: AppColors.greyScale800,
+                ),
+              ),
+            ),
           ),
         ),
       ],
@@ -407,9 +521,20 @@ class DetailRecipePage extends ConsumerWidget {
     return GestureDetector(
       onTap: () {
         final imageProvider = CachedNetworkImageProvider(recipe.imageUrl!);
-        showImageViewer(context, imageProvider, swipeDismissible: true, doubleTapZoomable: true, useSafeArea: true);
+        showImageViewer(
+          context,
+          imageProvider,
+          swipeDismissible: true,
+          doubleTapZoomable: true,
+          useSafeArea: true,
+        );
       },
-      child: AppCachedImage(imageUrl: recipe.imageUrl!, fit: BoxFit.cover, height: 230, width: double.infinity),
+      child: AppCachedImage(
+        imageUrl: recipe.imageUrl!,
+        fit: BoxFit.cover,
+        height: 230,
+        width: double.infinity,
+      ),
     );
   }
 }
@@ -422,14 +547,20 @@ class ReviewCardList extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(reviewsViewModelProvider(recipe.id));
 
-    final reviews = state.reviews.length > 5 ? state.reviews.sublist(0, 5) : state.reviews;
+    final reviews =
+        state.reviews.length > 5 ? state.reviews.sublist(0, 5) : state.reviews;
     if (reviews.isEmpty) return SizedBox();
 
     return SizedBox(
       height: 120,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        child: Row(children: reviews.map((review) => _buildReviewCard(context, ref, review)).toList()),
+        child: Row(
+          children:
+              reviews
+                  .map((review) => _buildReviewCard(context, ref, review))
+                  .toList(),
+        ),
       ),
     );
   }
@@ -440,7 +571,11 @@ class ReviewCardList extends ConsumerWidget {
       height: 80,
       margin: const EdgeInsets.symmetric(horizontal: 8),
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(12), color: Colors.white),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(12),
+        color: Colors.white,
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -449,7 +584,10 @@ class ReviewCardList extends ConsumerWidget {
               : SizedBox(
                 width: 52,
                 height: 52,
-                child: ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.asset('assets/no_image.png', fit: BoxFit.cover)),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.asset('assets/no_image.png', fit: BoxFit.cover),
+                ),
               ),
           SizedBox(width: 8),
 
@@ -458,10 +596,21 @@ class ReviewCardList extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                StarRating(currentRating: review.rating, iconSize: 16, horizontalPadding: 0, setRating: null, alignment: MainAxisAlignment.start),
+                StarRating(
+                  currentRating: review.rating,
+                  iconSize: 16,
+                  horizontalPadding: 0,
+                  setRating: null,
+                  alignment: MainAxisAlignment.start,
+                ),
                 const SizedBox(height: 4),
                 if (review.reviewText?.isNotEmpty == true)
-                  Text(review.reviewText!, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13)),
+                  Text(
+                    review.reviewText!,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 13),
+                  ),
               ],
             ),
           ),
@@ -477,7 +626,12 @@ class ReviewCardList extends ConsumerWidget {
       height: imageDimension,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
-        child: AppCachedImage(imageUrl: review.imageUrls.first, width: imageDimension, height: imageDimension, fit: BoxFit.cover),
+        child: AppCachedImage(
+          imageUrl: review.imageUrls.first,
+          width: imageDimension,
+          height: imageDimension,
+          fit: BoxFit.cover,
+        ),
       ),
     );
   }
