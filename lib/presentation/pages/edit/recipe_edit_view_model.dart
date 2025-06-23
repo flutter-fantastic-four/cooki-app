@@ -13,16 +13,12 @@ class RecipeEditState {
   final bool isPublic;
   final bool isSaving;
   final SaveRecipeErrorKey? errorKey;
-  final bool isEditingTitle;
-  final String? currentTitle;
 
   const RecipeEditState({
     this.selectedCategory,
     this.isPublic = false,
     this.isSaving = false,
     this.errorKey,
-    this.isEditingTitle = false,
-    this.currentTitle,
   });
 
   RecipeEditState copyWith({
@@ -31,15 +27,11 @@ class RecipeEditState {
     bool? isSaving,
     SaveRecipeErrorKey? errorKey,
     bool clearErrorKey = false,
-    bool? isEditingTitle,
-    String? currentTitle,
   }) => RecipeEditState(
     selectedCategory: selectedCategory ?? this.selectedCategory,
     isPublic: isPublic ?? this.isPublic,
     isSaving: isSaving ?? this.isSaving,
     errorKey: clearErrorKey ? null : errorKey ?? this.errorKey,
-    isEditingTitle: isEditingTitle ?? this.isEditingTitle,
-    currentTitle: currentTitle ?? this.currentTitle,
   );
 }
 
@@ -50,7 +42,6 @@ class RecipeEditViewModel
     return RecipeEditState(
       selectedCategory: arg?.category,
       isPublic: arg?.isPublic ?? false,
-      currentTitle: arg?.recipeName,
     );
   }
 
@@ -122,18 +113,6 @@ class RecipeEditViewModel
 
   void clearError() {
     state = state.copyWith(clearErrorKey: true);
-  }
-
-  void startTitleEdit() {
-    state = state.copyWith(isEditingTitle: true);
-  }
-
-  void cancelTitleEdit() {
-    state = state.copyWith(isEditingTitle: false);
-  }
-
-  void confirmTitleEdit(String newTitle) {
-    state = state.copyWith(isEditingTitle: false, currentTitle: newTitle);
   }
 }
 
