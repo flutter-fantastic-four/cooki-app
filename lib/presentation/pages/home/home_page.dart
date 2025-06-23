@@ -31,7 +31,7 @@ class HomePage extends ConsumerWidget {
                 ),
                 backgroundColor: AppColors.primary,
                 child: Image.asset(
-                  'assets/icons/cooki_logo_white_no_letters.png',
+                  'assets/icons/cooki_logo_white_no_text.png',
                   width: 28,
                   height: 28,
                 ),

@@ -18,7 +18,7 @@ class SnackbarUtil {
   /// Returns the app logo icon from assets
   static Widget appLogoIcon() {
     return Image.asset(
-      'assets/icons/cooki_logo_white_no_letters.png',
+      'assets/icons/cooki_logo_white_no_text.png',
       width: 24,
       height: 24,
       fit: BoxFit.contain,
