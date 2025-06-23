@@ -89,22 +89,22 @@ class _LanguageSelectionPageState extends ConsumerState<LanguageSelectionPage> {
           .read(settingsGlobalViewModelProvider.notifier)
           .changeLanguage(_selectedLanguage);
 
-      if (mounted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
         SnackbarUtil.showSnackBar(
           context,
           strings(context).languageChangedSuccessfully,
           showIcon: true,
         );
         Navigator.of(context).pop();
-      }
+      });
     } catch (e) {
-      if (mounted) {
-        SnackbarUtil.showSnackBar(
-          context,
-          strings(context).languageChangeFailedError,
-          showIcon: true,
-        );
-      }
+      if (!mounted) return;
+      SnackbarUtil.showSnackBar(
+        context,
+        strings(context).languageChangeFailedError,
+        showIcon: true,
+      );
     }
   }
 }
