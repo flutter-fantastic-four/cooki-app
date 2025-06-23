@@ -5,6 +5,7 @@ import 'package:cooki/presentation/pages/app_entry/app_entry_page.dart';
 import 'package:cooki/presentation/settings_global_view_model.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,13 +25,14 @@ void main() async {
 
       // Firebase 초기화
       try {
-        await Firebase.initializeApp(
-          options: DefaultFirebaseOptions.currentPlatform,
-        );
+        await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
       } catch (_) {} // Firebase가 이미 초기화된 경우 무시
-
       // 카카오 SDK 초기화
-      KakaoSdk.init(nativeAppKey: dotenv.get('KAKAO_SDK_NATIVE_APP_KEY'));
+      final remoteConfig = FirebaseRemoteConfig.instance;
+      await remoteConfig.fetchAndActivate();
+
+      final nativeAppKey = remoteConfig.getString('kakao_native_key');
+      KakaoSdk.init(nativeAppKey: nativeAppKey);
 
       // 플러터 프레임워크 내부에서 발생하는 에러
       FlutterError.onError = (errorDetails) {
@@ -63,10 +65,7 @@ class MyApp extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales:
-          SupportedLanguage.values
-              .map((language) => Locale(language.code))
-              .toList(),
+      supportedLocales: SupportedLanguage.values.map((language) => Locale(language.code)).toList(),
       locale: settingsState.locale,
       home: const AppEntryPage(),
     );
