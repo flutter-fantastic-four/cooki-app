@@ -9,6 +9,8 @@ import '../../../../domain/entity/recipe.dart';
 import '../../../widgets/recipe_page_widgets.dart';
 import '../recipe_edit_view_model.dart';
 
+// final titleLengthProvider = StateProvider.autoDispose<int>((ref) => 0);
+
 class TitleFieldWidget extends ConsumerWidget {
   final Recipe? recipe;
   final TextEditingController titleController;
@@ -40,6 +42,8 @@ class TitleFieldWidget extends ConsumerWidget {
       ).select((state) => state.isEditingTitle),
     );
 
+    // ref.read(titleLengthProvider.notifier).state = titleController.text.length;
+
     if (isEditingTitle) {
       return _buildTextFieldRow(context, vm, ref);
     } else {
@@ -69,6 +73,8 @@ class TitleFieldWidget extends ConsumerWidget {
                   color: AppColors.greyScale800,
                   fontWeight: FontWeight.bold,
                 ),
+                minLines: 1,
+                maxLines: 2,
                 autofocus: true,
                 validator: (value) {
                   final error = RecipeValidator.validateTitle(value);
@@ -76,8 +82,13 @@ class TitleFieldWidget extends ConsumerWidget {
                       ? ErrorMapper.mapRecipeValidationError(context, error)
                       : null;
                 },
+                maxLength: 30,
                 onFieldSubmitted: (_) => _confirmTitleEdit(vm),
+                // onChanged: (text) {
+                //   ref.read(titleLengthProvider.notifier).state = text.length;
+                // },
                 decoration: InputDecoration(
+                  // counterText: ref.watch(titleLengthProvider) > 33 ? null : '',
                   hintText: strings(context).recipeTitleHint,
                   hintStyle: const TextStyle(color: Colors.grey),
                   contentPadding: const EdgeInsets.symmetric(
