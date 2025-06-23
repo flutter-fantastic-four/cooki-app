@@ -38,10 +38,11 @@ abstract class AppTheme {
           foregroundColor: Colors.white,
           backgroundColor: AppColors.primary,
           disabledBackgroundColor: AppColors.inactiveButton,
+          disabledForegroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(8),
           ),
-          minimumSize: const Size(double.infinity, 50),
+          minimumSize: const Size(double.infinity, 52),
           textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
         ),
       ),

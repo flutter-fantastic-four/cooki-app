@@ -46,7 +46,9 @@ class GenerateRecipePage extends ConsumerWidget {
     if (savedRecipe != null) {
       if (!context.mounted) return;
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => DetailRecipePage(recipe: savedRecipe)),
+        MaterialPageRoute(
+          builder: (_) => DetailRecipePage(recipe: savedRecipe),
+        ),
       );
     }
   }
@@ -98,7 +100,7 @@ class GenerateRecipePage extends ConsumerWidget {
           ),
           body: SelectionArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 18),
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
               child: _buildLayout(context, ref),
             ),
           ),
@@ -107,7 +109,7 @@ class GenerateRecipePage extends ConsumerWidget {
     );
   }
 
-  ListView _buildLayout(BuildContext context, WidgetRef ref) {
+  Widget _buildLayout(BuildContext context, WidgetRef ref) {
     return ListView(
       children: [
         const SizedBox(height: 10),
@@ -186,7 +188,7 @@ class GenerateRecipePage extends ConsumerWidget {
             child: Text(
               strings(context).recipeGenerationTip,
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey[700], fontSize: 14),
+              style: TextStyle(color: Colors.grey[700], fontSize: 13),
             ),
           ),
         ),

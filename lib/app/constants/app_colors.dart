@@ -15,7 +15,7 @@ abstract class AppColors {
   static const defaultProfileIcon = Color(0XFF7B7B7B);
   static const defaultProfilebackground = Color(0XFFD9D9D9);
 
-  static const inactiveButton = Color(0xFFEEEEEE);
+  static const inactiveButton = AppColors.greyScale200;
 
   static const kakaoLoginBackground = Color(0xFFFEE500);
 
