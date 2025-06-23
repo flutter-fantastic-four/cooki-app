@@ -19,9 +19,9 @@ class DetailRecipePage extends ConsumerWidget {
   final Recipe recipe;
   final String? category;
 
-  int currentRating = 0;
+  // int currentRating = 0;
 
-  DetailRecipePage({super.key, required this.recipe, this.category});
+  const DetailRecipePage({super.key, required this.recipe, this.category});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -50,7 +50,7 @@ class DetailRecipePage extends ConsumerWidget {
                       _infoChip(context),
                       const SizedBox(height: 12),
                       _title(),
-                      const SizedBox(height: 40),
+                      const SizedBox(height: 20),
                       TagChips(recipe.tags),
                       const SizedBox(height: 24),
                       _review(context),
@@ -231,8 +231,6 @@ class DetailRecipePage extends ConsumerWidget {
 
   Row _title() {
     return Row(
-      crossAxisAlignment:
-          CrossAxisAlignment.start, // ensures multiline text aligns at the top
       children: [
         Expanded(
           child: Text(
@@ -242,6 +240,7 @@ class DetailRecipePage extends ConsumerWidget {
             overflow: TextOverflow.visible,
           ),
         ),
+        SizedBox(width: 3),
         IconButton(onPressed: () {}, icon: Icon(Icons.bookmark_border)),
         IconButton(onPressed: () {}, icon: Icon(Icons.more_vert)),
       ],

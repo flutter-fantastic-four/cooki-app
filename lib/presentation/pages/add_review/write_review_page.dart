@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cooki/core/utils/snackbar_util.dart';
 import 'package:cooki/presentation/widgets/app_cached_image.dart';
+import 'package:cooki/presentation/widgets/bottom_button_wrapper.dart';
 import 'package:easy_image_viewer/easy_image_viewer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -254,37 +255,35 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
           ),
           body: Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Center(
-              child: ListView(
-                children: [
-                  const SizedBox(height: 24),
-                  _buildRecipeNameSection(),
-                  const SizedBox(height: 13),
-                  StarRating(
-                    currentRating: ref.watch(
-                      writeReviewViewModelProvider(
-                        widget.review,
-                      ).select((state) => state.rating),
-                    ),
-                    iconSize: 32,
-                    setRating:
-                        (selectedRating) => ref
-                            .read(
-                              writeReviewViewModelProvider(
-                                widget.review,
-                              ).notifier,
-                            )
-                            .setRating(selectedRating),
+            child: ListView(
+              children: [
+                const SizedBox(height: 24),
+                _buildRecipeNameSection(),
+                const SizedBox(height: 13),
+                StarRating(
+                  currentRating: ref.watch(
+                    writeReviewViewModelProvider(
+                      widget.review,
+                    ).select((state) => state.rating),
                   ),
-                  const SizedBox(height: 32),
-                  _buildPhotoUploadSection(context),
-                  const SizedBox(height: 24),
-                  _buildPhotoThumbnails(),
-                  const SizedBox(height: 18),
-                  _buildTextInputSection(context),
-                  const SizedBox(height: 32),
-                ],
-              ),
+                  iconSize: 32,
+                  setRating:
+                      (selectedRating) => ref
+                          .read(
+                            writeReviewViewModelProvider(
+                              widget.review,
+                            ).notifier,
+                          )
+                          .setRating(selectedRating),
+                ),
+                const SizedBox(height: 32),
+                _buildPhotoUploadSection(context),
+                const SizedBox(height: 24),
+                _buildPhotoThumbnails(),
+                const SizedBox(height: 18),
+                _buildTextInputSection(context),
+                const SizedBox(height: 32),
+              ],
             ),
           ),
           bottomNavigationBar: _buildSubmitButton(context),
@@ -480,29 +479,24 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
     );
     final isEditingMode = widget.review != null;
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 33),
-      child: SizedBox(
-        width: double.infinity,
-        height: 48,
-        child: ElevatedButton(
-          onPressed: canSubmit ? () => _submitReview(context) : null,
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-          ),
-          child:
-              isSaving
-                  ? const SizedBox(
-                    width: 21,
-                    height: 21,
-                    child: CupertinoActivityIndicator(radius: 10),
-                  )
-                  : Text(
-                    isEditingMode
-                        ? strings(context).editReviewButtonText
-                        : strings(context).saveReviewButtonText,
-                  ),
+    return BottomButtonWrapper(
+      child: ElevatedButton(
+        onPressed: canSubmit ? () => _submitReview(context) : null,
+        style: ElevatedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
         ),
+        child:
+            isSaving
+                ? const SizedBox(
+                  width: 21,
+                  height: 21,
+                  child: CupertinoActivityIndicator(radius: 10),
+                )
+                : Text(
+                  isEditingMode
+                      ? strings(context).editReviewButtonText
+                      : strings(context).saveReviewButtonText,
+                ),
       ),
     );
   }

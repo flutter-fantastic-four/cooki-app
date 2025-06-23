@@ -2,8 +2,6 @@ import 'dart:developer';
 
 import 'package:cooki/core/utils/error_mappers.dart';
 import 'package:cooki/core/utils/general_util.dart';
-import 'package:cooki/presentation/pages/detailed_recipe/detailed_recipe_page.dart';
-import 'package:cooki/presentation/pages/edit/recipe_edit_page.dart';
 import 'package:cooki/presentation/pages/generate/widgets/generate_button.dart';
 import 'package:cooki/presentation/pages/generate/widgets/image_selector.dart';
 import 'package:cooki/presentation/pages/generate/widgets/preference_chip.dart';
@@ -14,6 +12,7 @@ import '../../../app/constants/app_constants.dart';
 import '../../user_global_view_model.dart';
 import '../../widgets/input_decorations.dart';
 import '../../widgets/app_dialog.dart';
+import '../detailed_recipe/detailed_recipe_page.dart';
 import 'generate_recipe_view_model.dart';
 
 class GenerateRecipePage extends ConsumerWidget {
@@ -47,7 +46,9 @@ class GenerateRecipePage extends ConsumerWidget {
     if (savedRecipe != null) {
       if (!context.mounted) return;
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => RecipeEditPage(recipe: savedRecipe)),
+        MaterialPageRoute(
+          builder: (_) => DetailRecipePage(recipe: savedRecipe),
+        ),
       );
     }
   }
@@ -99,7 +100,7 @@ class GenerateRecipePage extends ConsumerWidget {
           ),
           body: SelectionArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 18),
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
               child: _buildLayout(context, ref),
             ),
           ),
@@ -108,7 +109,7 @@ class GenerateRecipePage extends ConsumerWidget {
     );
   }
 
-  ListView _buildLayout(BuildContext context, WidgetRef ref) {
+  Widget _buildLayout(BuildContext context, WidgetRef ref) {
     return ListView(
       children: [
         const SizedBox(height: 10),
@@ -187,7 +188,7 @@ class GenerateRecipePage extends ConsumerWidget {
             child: Text(
               strings(context).recipeGenerationTip,
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey[700], fontSize: 14),
+              style: TextStyle(color: Colors.grey[700], fontSize: 13),
             ),
           ),
         ),
