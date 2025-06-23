@@ -48,7 +48,7 @@ class _LanguageSelectionPageState extends ConsumerState<LanguageSelectionPage> {
                     text: language.displayName,
                     isSelected: _selectedLanguage == language,
                     horizontalPadding: 0,
-                    showCheckOnUnselected: true,
+                    isTwoOptions: true,
                     onTap: () {
                       setState(() {
                         _selectedLanguage = language;
