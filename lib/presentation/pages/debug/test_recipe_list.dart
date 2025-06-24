@@ -31,7 +31,10 @@ class RecipeDebugListPage extends ConsumerWidget {
       throw Exception('Unexpected state');
     }
 
-    return Scaffold(appBar: AppBar(title: const Text('모든 레시피 디버그')), body: body);
+    return Scaffold(
+      appBar: AppBar(title: const Text('모든 레시피 디버그')),
+      body: body,
+    );
   }
 
   Widget _buildRecipeList(BuildContext context, List<Recipe> recipes) {
@@ -45,7 +48,12 @@ class RecipeDebugListPage extends ConsumerWidget {
         final recipe = recipes[index];
         return InkWell(
           onTap: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => RecipeEditPage(recipe: recipe)));
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => RecipeEditPage(recipe: recipe),
+              ),
+            );
           },
           child: Card(
             elevation: 2,
@@ -56,12 +64,28 @@ class RecipeDebugListPage extends ConsumerWidget {
                 // Recipe title
                 Padding(
                   padding: const EdgeInsets.all(16),
-                  child: Text(recipe.recipeName, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  child: Text(
+                    recipe.recipeName,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 3,
+                    overflow: TextOverflow.fade,
+                    softWrap: true,
+                  ),
                 ),
 
                 // Recipe image if available
                 if (recipe.imageUrl != null)
-                  SizedBox(width: double.infinity, height: 180, child: AppCachedImage(imageUrl: recipe.imageUrl!, fit: BoxFit.cover)),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 180,
+                    child: AppCachedImage(
+                      imageUrl: recipe.imageUrl!,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
 
                 // Recipe details
                 Padding(
@@ -74,10 +98,17 @@ class RecipeDebugListPage extends ConsumerWidget {
                       _buildDetailRow('칼로리', '${recipe.calories}kcal'),
                       _buildDetailRow('공개 여부', recipe.isPublic ? '예' : '아니오'),
                       _buildDetailRow('사용자 이름', recipe.userName),
-                      _buildDetailRow('생성일', dateFormat.format(recipe.createdAt)),
+                      _buildDetailRow(
+                        '생성일',
+                        dateFormat.format(recipe.createdAt),
+                      ),
                       _buildDetailRow('리뷰개수', '${recipe.ratingCount}'),
                       _buildDetailRow('평점', '${recipe.ratingSum}'),
-                      if (recipe.updatedAt != null) _buildDetailRow('수정일', dateFormat.format(recipe.updatedAt!)),
+                      if (recipe.updatedAt != null)
+                        _buildDetailRow(
+                          '수정일',
+                          dateFormat.format(recipe.updatedAt!),
+                        ),
                       const SizedBox(height: 8),
                       _buildListSection('재료', recipe.ingredients),
                       _buildListSection('조리 단계', recipe.steps),
@@ -98,7 +129,16 @@ class RecipeDebugListPage extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [SizedBox(width: 90, child: Text('$label:', style: const TextStyle(fontWeight: FontWeight.w500))), Expanded(child: Text(value))],
+        children: [
+          SizedBox(
+            width: 90,
+            child: Text(
+              '$label:',
+              style: const TextStyle(fontWeight: FontWeight.w500),
+            ),
+          ),
+          Expanded(child: Text(value)),
+        ],
       ),
     );
   }
@@ -111,7 +151,12 @@ class RecipeDebugListPage extends ConsumerWidget {
       children: [
         Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
         const SizedBox(height: 4),
-        ...items.map((item) => Padding(padding: const EdgeInsets.only(left: 16, bottom: 2), child: Text('• $item'))),
+        ...items.map(
+          (item) => Padding(
+            padding: const EdgeInsets.only(left: 16, bottom: 2),
+            child: Text('• $item'),
+          ),
+        ),
         const SizedBox(height: 8),
       ],
     );
