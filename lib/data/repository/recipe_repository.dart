@@ -14,11 +14,27 @@ abstract class RecipeRepository {
 
   Future<List<Recipe>> getAllRecipes();
 
-  Future<List<Recipe>> getUserRecipes(String userId);
+  Future<List<Recipe>> getMyRecipes(
+    String userId, {
+    bool? isPublic,
+    RecipeSortType sortType,
+  });
 
-  Future<List<Recipe>> getSharedRecipes();
+  Future<List<Recipe>> getUserSavedRecipes(
+    String userId, {
+    RecipeSortType sortType,
+  });
 
-  Future<List<Recipe>> getCommunityRecipes();
+  Future<List<String>> getUserSavedRecipeIds(String userId);
+
+  Future<List<Recipe>> getCommunityRecipes(
+    String userId, {
+    RecipeSortType sortType,
+  });
+
+  Future<void> addToSavedRecipes(String userId, String recipeId);
+
+  Future<void> removeFromSavedRecipes(String userId, String recipeId);
 
   Future<void> toggleRecipeShare(String recipeId, bool isPublic);
 
@@ -33,14 +49,12 @@ class RecipeRepositoryImpl implements RecipeRepository {
 
   @override
   Future<String> saveRecipe(Recipe recipe) async {
-    return await _recipeDataSource.saveRecipe(
-      RecipeFirestoreDto.fromEntity(recipe),
-    );
+    return _recipeDataSource.saveRecipe(RecipeFirestoreDto.fromEntity(recipe));
   }
 
   @override
-  Future<void> editRecipe(Recipe recipe) async {
-    await _recipeDataSource.editRecipe(RecipeFirestoreDto.fromEntity(recipe));
+  Future<void> editRecipe(Recipe recipe) {
+    return _recipeDataSource.editRecipe(RecipeFirestoreDto.fromEntity(recipe));
   }
 
   @override
@@ -59,30 +73,65 @@ class RecipeRepositoryImpl implements RecipeRepository {
   }
 
   @override
-  Future<List<Recipe>> getUserRecipes(String userId) async {
-    final recipeDtoList = await _recipeDataSource.getUserRecipes(userId);
-    return recipeDtoList.map((dto) => dto.toEntity()).toList();
+  Future<List<Recipe>> getMyRecipes(
+    String userId, {
+    bool? isPublic,
+    RecipeSortType sortType = RecipeSortType.createdAtDescending,
+  }) async {
+    final dtoList = await _recipeDataSource.getMyRecipes(
+      userId,
+      isPublic: isPublic,
+      sortType: sortType,
+    );
+    return dtoList.map((dto) => dto.toEntity()).toList();
   }
 
   @override
-  Future<List<Recipe>> getSharedRecipes() async {
-    final recipeDtoList = await _recipeDataSource.getSharedRecipes();
-    return recipeDtoList.map((dto) => dto.toEntity()).toList();
+  Future<List<Recipe>> getUserSavedRecipes(
+    String userId, {
+    RecipeSortType sortType = RecipeSortType.createdAtDescending,
+  }) async {
+    final dtoList = await _recipeDataSource.getUserSavedRecipes(
+      userId,
+      sortType: sortType,
+    );
+    return dtoList.map((dto) => dto.toEntity()).toList();
   }
 
   @override
-  Future<List<Recipe>> getCommunityRecipes() async {
-    final recipeDtoList = await _recipeDataSource.getCommunityRecipes();
-    return recipeDtoList.map((dto) => dto.toEntity()).toList();
+  Future<List<String>> getUserSavedRecipeIds(String userId) {
+    return _recipeDataSource.getUserSavedRecipeIds(userId);
   }
 
   @override
-  Future<void> toggleRecipeShare(String recipeId, bool isPublic) async {
-    await _recipeDataSource.toggleRecipeShare(recipeId, isPublic);
+  Future<List<Recipe>> getCommunityRecipes(
+    String userId, {
+    RecipeSortType sortType = RecipeSortType.createdAtDescending,
+  }) async {
+    final dtoList = await _recipeDataSource.getCommunityRecipes(
+      userId,
+      sortType: sortType,
+    );
+    return dtoList.map((dto) => dto.toEntity()).toList();
   }
 
   @override
-  Future<void> deleteRecipe(String recipeId) async {
-    await _recipeDataSource.deleteRecipe(recipeId);
+  Future<void> addToSavedRecipes(String userId, String recipeId) {
+    return _recipeDataSource.addToSavedRecipes(userId, recipeId);
+  }
+
+  @override
+  Future<void> removeFromSavedRecipes(String userId, String recipeId) {
+    return _recipeDataSource.removeFromSavedRecipes(userId, recipeId);
+  }
+
+  @override
+  Future<void> toggleRecipeShare(String recipeId, bool isPublic) {
+    return _recipeDataSource.toggleRecipeShare(recipeId, isPublic);
+  }
+
+  @override
+  Future<void> deleteRecipe(String recipeId) {
+    return _recipeDataSource.deleteRecipe(recipeId);
   }
 }

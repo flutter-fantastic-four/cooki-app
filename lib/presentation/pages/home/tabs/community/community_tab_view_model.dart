@@ -1,5 +1,7 @@
+import 'package:cooki/presentation/user_global_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../../core/utils/logger.dart';
 import '../../../../../data/repository/providers.dart';
 import '../../../../../domain/entity/recipe.dart';
 import '../../../../../core/utils/general_util.dart';
@@ -62,7 +64,7 @@ class CommunityState {
 class CommunityViewModel extends AutoDisposeNotifier<CommunityState> {
   @override
   CommunityState build() {
-    loadRecipes();
+    Future.microtask(() => loadRecipes());
     return const CommunityState();
   }
 
@@ -71,9 +73,10 @@ class CommunityViewModel extends AutoDisposeNotifier<CommunityState> {
 
     try {
       final repository = ref.read(recipeRepositoryProvider);
-      final recipes = await repository.getSharedRecipes();
+      final recipes = await repository.getCommunityRecipes(ref.read(userGlobalViewModelProvider)!.id);
       state = state.copyWith(isLoading: false, recipes: recipes);
-    } catch (e) {
+    } catch (e, stack) {
+      logError(e, stack);
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }

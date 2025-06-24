@@ -74,14 +74,20 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                   ...state.selectedCuisines.map(
                     (cuisine) => _FilterChip(
                       label: cuisine,
-                      onDeleted: () => viewModel.removeCuisine(cuisine),
+                      onDeleted: () async {
+                        viewModel.removeCuisine(cuisine);
+                        await viewModel.loadRecipes();
+                      },
                       isModalChip: false,
                     ),
                   ),
                   if (state.selectedSort.isNotEmpty)
                     _FilterChip(
                       label: state.selectedSort,
-                      onDeleted: () => viewModel.clearSort(),
+                      onDeleted: () async {
+                        viewModel.clearSort();
+                        await viewModel.loadRecipes();
+                      },
                       isModalChip: false,
                     ),
                 ],
@@ -363,8 +369,9 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                               children: [
                                 Expanded(
                                   child: OutlinedButton(
-                                    onPressed: () {
+                                    onPressed: () async {
                                       viewModel.resetFilters();
+                                      await viewModel.loadRecipes();
                                       Navigator.pop(context);
                                     },
                                     child: Text(strings(context).reset),
@@ -373,11 +380,12 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: ElevatedButton(
-                                    onPressed: () {
+                                    onPressed: () async {
                                       viewModel.updateSelectedSort(tempSort);
                                       viewModel.updateSelectedCuisines(
                                         List.from(tempCuisines),
                                       );
+                                      await viewModel.loadRecipes();
                                       Navigator.pop(context);
                                     },
                                     style: ElevatedButton.styleFrom(
@@ -578,37 +586,37 @@ class _RecipeCard extends StatelessWidget {
                         ),
                       ],
                     ),
-                    Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 10,
-                          backgroundImage:
-                              recipe.userProfileImage != null
-                                  ? NetworkImage(recipe.userProfileImage!)
-                                  : null,
-                          backgroundColor: AppColors.greyScale200,
-                          child:
-                              recipe.userProfileImage == null
-                                  ? const Icon(
-                                    Icons.person,
-                                    size: 12,
-                                    color: AppColors.greyScale600,
-                                  )
-                                  : null,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            recipe.userName,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: AppColors.greyScale600,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
+                    // Row(
+                    //   children: [
+                    //     CircleAvatar(
+                    //       radius: 10,
+                    //       backgroundImage:
+                    //           recipe.userProfileImage != null
+                    //               ? NetworkImage(recipe.userProfileImage!)
+                    //               : null,
+                    //       backgroundColor: AppColors.greyScale200,
+                    //       child:
+                    //           recipe.userProfileImage == null
+                    //               ? const Icon(
+                    //                 Icons.person,
+                    //                 size: 12,
+                    //                 color: AppColors.greyScale600,
+                    //               )
+                    //               : null,
+                    //     ),
+                    //     const SizedBox(width: 8),
+                    //     Expanded(
+                    //       child: Text(
+                    //         recipe.userName,
+                    //         style: const TextStyle(
+                    //           fontSize: 12,
+                    //           color: AppColors.greyScale600,
+                    //         ),
+                    //         overflow: TextOverflow.ellipsis,
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
                   ],
                 ),
               ),
