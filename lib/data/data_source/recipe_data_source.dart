@@ -8,6 +8,8 @@ abstract class RecipeDataSource {
 
   Future<List<RecipeFirestoreDto>> getAllRecipes();
 
+  Future<List<RecipeFirestoreDto>> getUserRecipes(String userId);
+
   Future<List<RecipeFirestoreDto>> getSharedRecipes();
 
   Future<List<RecipeFirestoreDto>> getCommunityRecipes();
@@ -42,6 +44,20 @@ class RecipeFirestoreDataSource implements RecipeDataSource {
     final querySnapshot =
         await _firestore
             .collection('recipes')
+            .orderBy('createdAt', descending: true)
+            .get();
+
+    return querySnapshot.docs
+        .map((doc) => RecipeFirestoreDto.fromMap(doc.id, doc.data()))
+        .toList();
+  }
+
+  @override
+  Future<List<RecipeFirestoreDto>> getUserRecipes(String userId) async {
+    final querySnapshot =
+        await _firestore
+            .collection('recipes')
+            .where('userId', isEqualTo: userId)
             .orderBy('createdAt', descending: true)
             .get();
 
