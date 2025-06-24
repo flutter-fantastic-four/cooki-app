@@ -51,8 +51,8 @@ jobs:
           bundle-id: com.fantasticfour.cooki
           profile-type: IOS_APP_STORE
           api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
-          api-issuer-id: ${{ secrets.APPSTORE_API_ISSUER_ID }}
-          private-key-base64: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+          issuer-id: ${{ secrets.APPSTORE_API_ISSUER_ID }}
+          api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
 
       - name: Install Fastlane
         run: gem install fastlane -NV
