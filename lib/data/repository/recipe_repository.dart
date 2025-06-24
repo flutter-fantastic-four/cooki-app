@@ -14,6 +14,8 @@ abstract class RecipeRepository {
 
   Future<List<Recipe>> getAllRecipes();
 
+  Future<List<Recipe>> getUserRecipes(String userId);
+
   Future<List<Recipe>> getSharedRecipes();
 
   Future<List<Recipe>> getCommunityRecipes();
@@ -53,6 +55,12 @@ class RecipeRepositoryImpl implements RecipeRepository {
   @override
   Future<List<Recipe>> getAllRecipes() async {
     final recipeDtoList = await _recipeDataSource.getAllRecipes();
+    return recipeDtoList.map((dto) => dto.toEntity()).toList();
+  }
+
+  @override
+  Future<List<Recipe>> getUserRecipes(String userId) async {
+    final recipeDtoList = await _recipeDataSource.getUserRecipes(userId);
     return recipeDtoList.map((dto) => dto.toEntity()).toList();
   }
 

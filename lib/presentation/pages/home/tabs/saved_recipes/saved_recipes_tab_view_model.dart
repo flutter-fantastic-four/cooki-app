@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../../data/repository/providers.dart';
 import '../../../../../domain/entity/recipe.dart';
 import '../../../../../core/utils/general_util.dart';
+import '../../../../user_global_view_model.dart';
 
 class SavedRecipesState {
   final bool isLoading;
@@ -51,18 +52,16 @@ class SavedRecipesState {
 
     // Filter by selected tab category
     if (selectedCategory == strings(context).recipeTabAll) {
-      // Show all recipes - no additional filtering needed
+      // Show all user recipes (both public and private)
+      // No additional filtering needed since we already get only user recipes
     } else if (selectedCategory == strings(context).recipeTabCreated) {
-      // Show only generated recipes (recipes with 'generated' tag)
+      // Show only AI-generated recipes (recipes with 'generated' tag)
       filtered = filtered.where((r) => r.tags.contains('generated')).toList();
     } else if (selectedCategory == strings(context).recipeTabSaved) {
-      // Show only saved recipes (recipes without 'generated' tag and not public)
-      filtered =
-          filtered
-              .where((r) => !r.tags.contains('generated') && !r.isPublic)
-              .toList();
+      // Show only user's private recipes (not shared)
+      filtered = filtered.where((r) => !r.isPublic).toList();
     } else if (selectedCategory == strings(context).recipeTabShared) {
-      // Show only shared recipes (public recipes)
+      // Show only user's shared recipes (public recipes)
       filtered = filtered.where((r) => r.isPublic).toList();
     }
 
@@ -98,8 +97,14 @@ class SavedRecipesViewModel extends AutoDisposeNotifier<SavedRecipesState> {
     state = state.copyWith(isLoading: true, clearError: true);
 
     try {
+      final currentUser = ref.read(userGlobalViewModelProvider);
+      if (currentUser == null) {
+        state = state.copyWith(isLoading: false, error: 'User not logged in');
+        return;
+      }
+
       final repository = ref.read(recipeRepositoryProvider);
-      final recipes = await repository.getAllRecipes();
+      final recipes = await repository.getUserRecipes(currentUser.id);
       state = state.copyWith(isLoading: false, recipes: recipes);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
