@@ -30,7 +30,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
 
     // Use post-frame callback to avoid modifying provider during build
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final viewModel = ref.read(savedRecipesViewModelProvider.notifier);
+      final viewModel = ref.read(savedRecipesViewModelProvider(strings(context)).notifier);
       viewModel.setSelectedCategory(defaultCategory);
       // Ensure recipes are refreshed when tab is first loaded
       viewModel.refreshRecipes();
@@ -46,7 +46,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
   bool _onScrollNotification(ScrollNotification notification) {
     if (notification is ScrollUpdateNotification) {
       final shouldShow = notification.metrics.pixels > 0;
-      final viewModel = ref.read(savedRecipesViewModelProvider.notifier);
+      final viewModel = ref.read(savedRecipesViewModelProvider(strings(context)).notifier);
       viewModel.setShowTabBorder(shouldShow);
     }
     return false;
@@ -60,11 +60,11 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(savedRecipesViewModelProvider);
-    final viewModel = ref.read(savedRecipesViewModelProvider.notifier);
+    final state = ref.watch(savedRecipesViewModelProvider(strings(context)));
+    final viewModel = ref.read(savedRecipesViewModelProvider(strings(context)).notifier);
 
     // Show error snackbar if there's an error
-    ref.listen(savedRecipesViewModelProvider, (previous, next) {
+    ref.listen(savedRecipesViewModelProvider(strings(context)), (previous, next) {
       if (next.error != null) {
         if (next.error == 'delete_success') {
           SnackbarUtil.showSnackBar(
@@ -188,14 +188,20 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                   ...state.selectedCuisines.map(
                     (cuisine) => _FilterChip(
                       label: cuisine,
-                      onDeleted: () => viewModel.removeCuisine(cuisine),
+                      onDeleted: () async {
+                        viewModel.removeCuisine(cuisine);
+                        await viewModel.loadRecipes();
+                      },
                       isModalChip: false,
                     ),
                   ),
                   if (state.selectedSort.isNotEmpty)
                     _FilterChip(
                       label: state.selectedSort,
-                      onDeleted: () => viewModel.clearSort(),
+                      onDeleted: () async {
+                        viewModel.clearSort();
+                        await viewModel.loadRecipes();
+                      },
                       isModalChip: false,
                     ),
                 ],
@@ -205,10 +211,10 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
           Expanded(
             child: PageView.builder(
               controller: _pageController,
-              onPageChanged: (index) {
-                final category =
-                    AppConstants.recipeTabCategories(context)[index];
+              onPageChanged: (index) async {
+                final category = AppConstants.recipeTabCategories(context)[index];
                 viewModel.setSelectedCategory(category);
+                await viewModel.loadRecipes();
               },
               itemCount: AppConstants.recipeTabCategories(context).length,
               itemBuilder: (context, index) {
@@ -241,7 +247,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                                     delegate: SliverChildBuilderDelegate(
                                       (context, recipeIndex) {
                                         final filteredRecipes = state
-                                            .getFilteredRecipes(context);
+                                            .recipes;
                                         final recipe =
                                             filteredRecipes[recipeIndex];
                                         return _RecipeCard(
@@ -256,7 +262,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                                       },
                                       childCount:
                                           state
-                                              .getFilteredRecipes(context)
+                                              .recipes
                                               .length,
                                     ),
                                   ),
@@ -277,8 +283,8 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
   }
 
   void _showFilterModal(BuildContext context) {
-    final state = ref.read(savedRecipesViewModelProvider);
-    final viewModel = ref.read(savedRecipesViewModelProvider.notifier);
+    final state = ref.read(savedRecipesViewModelProvider(strings(context)));
+    final viewModel = ref.read(savedRecipesViewModelProvider(strings(context)).notifier);
 
     String tempSort = state.selectedSort;
     List<String> tempCuisines = List.from(state.selectedCuisines);
@@ -447,11 +453,12 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: ElevatedButton(
-                                    onPressed: () {
+                                    onPressed: () async {
                                       viewModel.updateSelectedSort(tempSort);
                                       viewModel.updateSelectedCuisines(
                                         List.from(tempCuisines),
                                       );
+                                      await viewModel.loadRecipes();
                                       Navigator.pop(context);
                                     },
                                     style: ElevatedButton.styleFrom(
@@ -484,7 +491,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
   }
 
   void _showOptionsModal(BuildContext context, Recipe recipe) {
-    final viewModel = ref.read(savedRecipesViewModelProvider.notifier);
+    final viewModel = ref.read(savedRecipesViewModelProvider(strings(context)).notifier);
 
     showModalBottomSheet(
       context: context,
@@ -580,7 +587,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
   }
 
   void _showDeleteConfirmation(BuildContext context, Recipe recipe) {
-    final viewModel = ref.read(savedRecipesViewModelProvider.notifier);
+    final viewModel = ref.read(savedRecipesViewModelProvider(strings(context)).notifier);
 
     if (recipe.id.isEmpty) {
       SnackbarUtil.showSnackBar(context, strings(context).deleteError);

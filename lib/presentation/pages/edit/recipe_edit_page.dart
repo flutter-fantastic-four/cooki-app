@@ -75,7 +75,7 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
           showIcon: true,
         );
         // Refresh the recipe lists
-        ref.read(savedRecipesViewModelProvider.notifier).refreshRecipes();
+        ref.read(savedRecipesViewModelProvider(strings(context)).notifier).refreshRecipes();
         Navigator.of(context).popUntil((route) => route.isFirst);
         // Navigator.of(context).pop(true); // Return true to indicate success
       }
