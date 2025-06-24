@@ -19,7 +19,7 @@ import '../../../core/utils/error_mappers.dart';
 import '../../../core/utils/general_util.dart';
 import '../../../domain/entity/recipe.dart';
 import '../../user_global_view_model.dart';
-import '../home/tabs/saved_recipes/saved_recipes_tab.dart';
+import '../home/tabs/saved_recipes/saved_recipes_tab_view_model.dart';
 
 class RecipeEditPage extends ConsumerStatefulWidget {
   final Recipe? recipe;
@@ -76,7 +76,7 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
         );
         // Refresh the recipe lists
         ref.invalidate(
-          savedRecipesProvider,
+          savedRecipesViewModelProvider,
         ); // refresh the saved recipes list after saving
         Navigator.of(context).popUntil((route) => route.isFirst);
         // Navigator.of(context).pop(true); // Return true to indicate success
