@@ -1,10 +1,11 @@
 import 'dart:developer';
-import 'package:flutter/material.dart';
+import 'package:cooki/core/utils/logger.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../../../data/data_source/recipe_data_source.dart';
 import '../../../../../data/repository/providers.dart';
 import '../../../../../domain/entity/recipe.dart';
-import '../../../../../core/utils/general_util.dart';
+import '../../../../../gen/l10n/app_localizations.dart';
 import '../../../../user_global_view_model.dart';
 
 class SavedRecipesState {
@@ -47,49 +48,14 @@ class SavedRecipesState {
     );
   }
 
-  List<Recipe> getFilteredRecipes(BuildContext context) {
-    List<Recipe> filtered = recipes;
-
-    // Filter by selected tab category
-    if (selectedCategory == strings(context).recipeTabAll) {
-      // Show all user recipes (both public and private)
-      // No additional filtering needed since we already get only user recipes
-    } else if (selectedCategory == strings(context).recipeTabCreated) {
-      // Show only AI-generated recipes (recipes with 'generated' tag)
-      filtered = filtered.where((r) => r.tags.contains('generated')).toList();
-    } else if (selectedCategory == strings(context).recipeTabSaved) {
-      // Show only user's private recipes (not shared)
-      filtered = filtered.where((r) => !r.isPublic).toList();
-    } else if (selectedCategory == strings(context).recipeTabShared) {
-      // Show only user's shared recipes (public recipes)
-      filtered = filtered.where((r) => r.isPublic).toList();
-    }
-
-    // Filter by cuisine categories if any selected
-    if (selectedCuisines.isNotEmpty) {
-      filtered =
-          filtered.where((r) => selectedCuisines.contains(r.category)).toList();
-    }
-
-    // Apply sort option if selected
-    if (selectedSort == strings(context).sortByRating) {
-      // Sort by rating
-      filtered.sort((a, b) => b.ratingSum.compareTo(a.ratingSum));
-    } else if (selectedSort == strings(context).sortByCookTime) {
-      filtered.sort((a, b) => a.cookTime.compareTo(b.cookTime));
-    }
-
-    return filtered;
-  }
-
   bool get hasActiveFilters =>
       selectedCuisines.isNotEmpty || selectedSort.isNotEmpty;
 }
 
-class SavedRecipesViewModel extends AutoDisposeNotifier<SavedRecipesState> {
+class SavedRecipesViewModel extends AutoDisposeFamilyNotifier<SavedRecipesState, AppLocalizations> {
   @override
-  SavedRecipesState build() {
-    loadRecipes();
+  SavedRecipesState build(AppLocalizations arg) {
+    Future.microtask(() => loadRecipes());
     return const SavedRecipesState();
   }
 
@@ -104,9 +70,54 @@ class SavedRecipesViewModel extends AutoDisposeNotifier<SavedRecipesState> {
       }
 
       final repository = ref.read(recipeRepositoryProvider);
-      final recipes = await repository.getUserRecipes(currentUser.id);
+
+      final selectedCategory = state.selectedCategory;
+
+      RecipeSortType? sortType;
+      if (state.selectedSort == arg.sortByRating) {
+        sortType = RecipeSortType.ratingDescending;
+      } else if (state.selectedSort == arg.sortByCookTime) {
+        sortType = RecipeSortType.cookTimeAscending;
+      }
+
+      List<Recipe> recipes;
+
+      if (selectedCategory == arg.recipeTabAll) {
+        recipes = await repository.getMyRecipes(
+          currentUser.id,
+          sortType: sortType ?? RecipeSortType.createdAtDescending,
+        );
+      } else if (selectedCategory == arg.recipeTabCreated) {
+        recipes = await repository.getMyRecipes(
+          currentUser.id,
+          isPublic: false,
+          sortType: sortType ?? RecipeSortType.createdAtDescending,
+        );
+      } else if (selectedCategory == arg.recipeTabShared) {
+        recipes = await repository.getMyRecipes(
+          currentUser.id,
+          isPublic: true,
+          sortType: sortType ?? RecipeSortType.createdAtDescending,
+        );
+      } else if (selectedCategory == arg.recipeTabSaved) {
+        recipes = await repository.getUserSavedRecipes(
+          currentUser.id,
+          sortType: sortType ?? RecipeSortType.createdAtDescending,
+        );
+      } else {
+        recipes = [];
+      }
+
+      // Filter by cuisine (still needed)
+      if (state.selectedCuisines.isNotEmpty) {
+        recipes = recipes
+            .where((r) => state.selectedCuisines.contains(r.category))
+            .toList();
+      }
+
       state = state.copyWith(isLoading: false, recipes: recipes);
-    } catch (e) {
+    } catch (e, stack) {
+      logError(e, stack);
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
@@ -156,7 +167,8 @@ class SavedRecipesViewModel extends AutoDisposeNotifier<SavedRecipesState> {
 
       // Set success message
       state = state.copyWith(error: 'delete_success');
-    } catch (e) {
+    } catch (e, stack) {
+      logError(e, stack);
       log('Delete error: $e');
       state = state.copyWith(error: 'Failed to delete recipe');
     }
@@ -169,7 +181,8 @@ class SavedRecipesViewModel extends AutoDisposeNotifier<SavedRecipesState> {
 
       // Refresh the recipe list
       await loadRecipes();
-    } catch (e) {
+    } catch (e, stack) {
+      logError(e, stack);
       state = state.copyWith(error: 'Failed to update recipe sharing status');
     }
   }
@@ -184,6 +197,6 @@ class SavedRecipesViewModel extends AutoDisposeNotifier<SavedRecipesState> {
 }
 
 final savedRecipesViewModelProvider =
-    NotifierProvider.autoDispose<SavedRecipesViewModel, SavedRecipesState>(
+    NotifierProvider.autoDispose.family<SavedRecipesViewModel, SavedRecipesState, AppLocalizations>(
       SavedRecipesViewModel.new,
     );

@@ -1,18 +1,39 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../dto/recipe_firestore_dto.dart';
 
+enum RecipeSortType {
+  createdAtDescending, // default
+  ratingDescending, // most stars
+  cookTimeAscending, // fastest first
+}
+
 abstract class RecipeDataSource {
+  Future<List<RecipeFirestoreDto>> getMyRecipes(
+    String userId, {
+    bool? isPublic,
+    RecipeSortType sortType = RecipeSortType.ratingDescending,
+  });
+
+  Future<List<String>> getUserSavedRecipeIds(String userId);
+  
+  Future<List<RecipeFirestoreDto>> getUserSavedRecipes(
+    String userId, {
+    RecipeSortType sortType = RecipeSortType.ratingDescending,
+  });
+
+  Future<List<RecipeFirestoreDto>> getCommunityRecipes(
+    String userId, {
+    RecipeSortType sortType = RecipeSortType.ratingDescending,
+  });
+
+  Future<void> addToSavedRecipes(String userId, String recipeId);
+  Future<void> removeFromSavedRecipes(String userId, String recipeId);
+
   Future<String> saveRecipe(RecipeFirestoreDto recipe);
 
   Future<void> editRecipe(RecipeFirestoreDto recipeDto);
 
   Future<List<RecipeFirestoreDto>> getAllRecipes();
-
-  Future<List<RecipeFirestoreDto>> getUserRecipes(String userId);
-
-  Future<List<RecipeFirestoreDto>> getSharedRecipes();
-
-  Future<List<RecipeFirestoreDto>> getCommunityRecipes();
 
   Future<void> toggleRecipeShare(String recipeId, bool isPublic);
 
@@ -52,58 +73,108 @@ class RecipeFirestoreDataSource implements RecipeDataSource {
         .toList();
   }
 
+  Query<Map<String, dynamic>> _applySort(
+    Query<Map<String, dynamic>> query,
+    RecipeSortType sortType,
+  ) {
+    switch (sortType) {
+      case RecipeSortType.ratingDescending:
+        return query.orderBy('ratingSum', descending: true);
+      case RecipeSortType.cookTimeAscending:
+        return query.orderBy('cookTime', descending: false);
+      case RecipeSortType.createdAtDescending:
+        return query.orderBy('createdAt', descending: true);
+    }
+  }
+
   @override
-  Future<List<RecipeFirestoreDto>> getUserRecipes(String userId) async {
-    final querySnapshot =
-        await _firestore
-            .collection('recipes')
-            .where('userId', isEqualTo: userId)
-            .get();
+  Future<List<RecipeFirestoreDto>> getMyRecipes(
+    String userId, {
+    bool? isPublic,
+    RecipeSortType sortType = RecipeSortType.createdAtDescending,
+  }) async {
+    var query = _firestore
+        .collection('recipes')
+        .where('userId', isEqualTo: userId);
 
-    // Sort by createdAt in memory instead of using Firestore orderBy
-    final docs = querySnapshot.docs;
-    docs.sort((a, b) {
-      final aTimestamp = a.data()['createdAt'] as Timestamp?;
-      final bTimestamp = b.data()['createdAt'] as Timestamp?;
+    if (isPublic != null) {
+      query = query.where('isPublic', isEqualTo: isPublic);
+    }
 
-      if (aTimestamp == null && bTimestamp == null) return 0;
-      if (aTimestamp == null) return 1;
-      if (bTimestamp == null) return -1;
+    query = _applySort(query, sortType);
 
-      return bTimestamp.compareTo(aTimestamp); // Descending order
+    final snapshot = await query.get();
+    return snapshot.docs
+        .map((doc) => RecipeFirestoreDto.fromMap(doc.id, doc.data()))
+        .toList();
+  }
+
+  @override
+  Future<List<String>> getUserSavedRecipeIds(String userId) async {
+    final snapshot = await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('savedRecipes')
+        .get();
+    return snapshot.docs.map((doc) => doc.id).toList();
+  }
+
+  @override
+  Future<List<RecipeFirestoreDto>> getUserSavedRecipes(
+    String userId, {
+    RecipeSortType sortType = RecipeSortType.createdAtDescending,
+  }) async {
+    final savedRecipeIds = await getUserSavedRecipeIds(userId);
+    if (savedRecipeIds.isEmpty) return [];
+
+    var query = _firestore
+        .collection('recipes')
+        .where(FieldPath.documentId, whereIn: savedRecipeIds);
+    query = _applySort(query, sortType);
+
+    final recipeSnapshot = await query.get();
+    return recipeSnapshot.docs
+        .map((doc) => RecipeFirestoreDto.fromMap(doc.id, doc.data()))
+        .toList();
+  }
+
+  @override
+  Future<List<RecipeFirestoreDto>> getCommunityRecipes(
+    String userId, {
+    RecipeSortType sortType = RecipeSortType.createdAtDescending,
+  }) async {
+    var query = _firestore
+        .collection('recipes')
+        .where('isPublic', isEqualTo: true)
+        .where('userId', isNotEqualTo: userId);
+    query = _applySort(query, sortType);
+
+    final snapshot = await query.get();
+    return snapshot.docs
+        .map((doc) => RecipeFirestoreDto.fromMap(doc.id, doc.data()))
+        .toList();
+  }
+
+  @override
+  Future<void> addToSavedRecipes(String userId, String recipeId) async {
+    await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('savedRecipes')
+        .doc(recipeId)
+        .set({
+      'savedAt': FieldValue.serverTimestamp(),
     });
-
-    return docs
-        .map((doc) => RecipeFirestoreDto.fromMap(doc.id, doc.data()))
-        .toList();
   }
 
   @override
-  Future<List<RecipeFirestoreDto>> getSharedRecipes() async {
-    final querySnapshot =
-        await _firestore
-            .collection('recipes')
-            .where('isPublic', isEqualTo: true)
-            .orderBy('createdAt', descending: true)
-            .get();
-
-    return querySnapshot.docs
-        .map((doc) => RecipeFirestoreDto.fromMap(doc.id, doc.data()))
-        .toList();
-  }
-
-  @override
-  Future<List<RecipeFirestoreDto>> getCommunityRecipes() async {
-    final querySnapshot =
-        await _firestore
-            .collection('recipes')
-            .where('isPublic', isEqualTo: true)
-            .orderBy('createdAt', descending: true)
-            .get();
-
-    return querySnapshot.docs
-        .map((doc) => RecipeFirestoreDto.fromMap(doc.id, doc.data()))
-        .toList();
+  Future<void> removeFromSavedRecipes(String userId, String recipeId) async {
+    await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('savedRecipes')
+        .doc(recipeId)
+        .delete();
   }
 
   @override
