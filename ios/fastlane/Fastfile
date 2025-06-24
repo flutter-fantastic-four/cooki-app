@@ -7,7 +7,7 @@ platform :ios do
       scheme: "Runner",
       export_method: "app-store",
       export_options: {
-        signingStyle: "automatic",
+        signingStyle: "manual",  # Changed from "automatic" to "manual"
         provisioningProfiles: {
           "com.fantasticfour.cooki" => "iOS Team Store Provisioning Profile: com.fantasticfour.cooki"
         },
