@@ -36,19 +36,8 @@ class TitleFieldWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final vm = ref.read(recipeEditViewModelProvider(recipe).notifier);
-    final isEditingTitle = ref.watch(
-      recipeEditViewModelProvider(
-        recipe,
-      ).select((state) => state.isEditingTitle),
-    );
 
-    // ref.read(titleLengthProvider.notifier).state = titleController.text.length;
-
-    if (isEditingTitle) {
-      return _buildTextFieldRow(context, vm, ref);
-    } else {
-      return _buildTextRow(context, vm);
-    }
+    return _buildTextFieldRow(context, vm, ref);
   }
 
   Widget _buildTextFieldRow(
@@ -56,121 +45,45 @@ class TitleFieldWidget extends ConsumerWidget {
     RecipeEditViewModel vm,
     WidgetRef ref,
   ) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Flexible(
-          child: IntrinsicWidth(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width - 100,
-              ),
-              child: TextFormField(
-                controller: titleController,
-                // maxLength: RecipePageWidgets.titleMaxLength,
-                style: TextStyle(
-                  fontSize: 20,
-                  color: AppColors.greyScale800,
-                  fontWeight: FontWeight.bold,
-                ),
-                minLines: 1,
-                maxLines: 2,
-                autofocus: true,
-                validator: (value) {
-                  final error = RecipeValidator.validateTitle(value);
-                  return error != null
-                      ? ErrorMapper.mapRecipeValidationError(context, error)
-                      : null;
-                },
-                maxLength: 30,
-                onFieldSubmitted: (_) => _confirmTitleEdit(vm),
-                // onChanged: (text) {
-                //   ref.read(titleLengthProvider.notifier).state = text.length;
-                // },
-                decoration: InputDecoration(
-                  // counterText: ref.watch(titleLengthProvider) > 33 ? null : '',
-                  hintText: strings(context).recipeTitleHint,
-                  hintStyle: const TextStyle(color: Colors.grey),
-                  contentPadding: const EdgeInsets.symmetric(
-                    vertical: 12,
-                    horizontal: 14,
-                  ),
-                  filled: true,
-                  fillColor: AppColors.appBarGrey,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-            ),
+    return SizedBox(
+      width: MediaQuery.of(context).size.width - 48, // Fixed width with padding
+      child: TextFormField(
+        controller: titleController,
+        style: TextStyle(
+          fontSize: 20,
+          color: AppColors.greyScale800,
+          fontWeight: FontWeight.bold,
+        ),
+        minLines: 1,
+        maxLines: null, // Allow unlimited lines for auto-expansion
+        autofocus: true,
+        validator: (value) {
+          final error = RecipeValidator.validateTitle(value);
+          return error != null
+              ? ErrorMapper.mapRecipeValidationError(context, error)
+              : null;
+        },
+        maxLength: 30,
+        onFieldSubmitted: (_) => _confirmTitleEdit(vm),
+        decoration: InputDecoration(
+          hintText: strings(context).recipeTitleHint,
+          hintStyle: const TextStyle(color: Colors.grey),
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 12,
+            horizontal: 14,
           ),
-        ),
-        const SizedBox(width: 4),
-        _buildTitleActionButton(
-          onPressed: () => _confirmTitleEdit(vm),
-          icon: Icons.check,
-          color: AppColors.primary,
-        ),
-        _buildTitleActionButton(
-          onPressed: () {
-            final confirmedTitle =
-                ref.read(recipeEditViewModelProvider(recipe)).currentTitle;
-            _cancelTitleEdit(vm, confirmedTitle);
-          },
-          icon: Icons.close,
-          color: AppColors.greyScale500,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTitleActionButton({
-    required VoidCallback onPressed,
-    required IconData icon,
-    Color? color,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 10),
-      child: SizedBox.square(
-        dimension: 27,
-        child: IconButton(
-          padding: EdgeInsets.zero,
-          onPressed: onPressed,
-          icon: Icon(icon, color: color, size: 18),
+          filled: true,
+          fillColor: AppColors.appBarGrey,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          counterStyle: const TextStyle(
+            fontSize: 12,
+            color: AppColors.greyScale600,
+          ),
         ),
       ),
-    );
-  }
-
-  Widget _buildTextRow(BuildContext context, RecipeEditViewModel vm) {
-    return Row(
-      children: [
-        Flexible(
-          child: Text(
-            titleController.text.isNotEmpty
-                ? titleController.text
-                : strings(context).recipeTitleHint,
-            style: RecipePageWidgets.sectionTitleStyle.copyWith(
-              color:
-                  titleController.text.isNotEmpty ? Colors.black : Colors.grey,
-            ),
-            overflow: TextOverflow.ellipsis,
-            maxLines: 2,
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(bottom: 3),
-          child: SizedBox.square(
-            dimension: 30,
-            child: IconButton(
-              padding: EdgeInsets.zero,
-              onPressed: () => vm.startTitleEdit(),
-              icon: const Icon(Icons.edit, size: 15),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

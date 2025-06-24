@@ -3,6 +3,7 @@
 import 'package:cooki/core/utils/navigation_util.dart';
 import 'package:cooki/presentation/pages/detailed_recipe/detailed_recipe_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../app/constants/app_constants.dart';
 import '../../../../../core/utils/sharing_util.dart';
@@ -22,6 +23,14 @@ class CommunityPage extends ConsumerStatefulWidget {
 }
 
 class _CommunityPageState extends ConsumerState<CommunityPage> {
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(communityViewModelProvider);
@@ -37,30 +46,10 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        titleSpacing: 20,
-        title: Text(
-          strings(context).communityTitle,
-          style: const TextStyle(
-            color: Colors.black,
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: FilterIconWithDot(showDot: state.hasActiveFilters),
-            onPressed: () => _showFilterModal(context),
-          ),
-          IconButton(
-            icon: const Icon(Icons.search, color: Colors.black, size: 24),
-            onPressed: () {},
-          ),
-        ],
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: false,
-      ),
+      appBar:
+          state.isSearchActive
+              ? _buildSearchAppBar(context, state, viewModel)
+              : _buildNormalAppBar(context, state, viewModel),
       body: Column(
         children: [
           // Active filters
@@ -158,35 +147,69 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
 
     final filteredRecipes = state.getFilteredRecipes(context);
     if (filteredRecipes.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.restaurant_menu,
-              size: 64,
-              color: AppColors.greyScale400,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              strings(context).noSharedRecipes,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: AppColors.greyScale600,
+      if (state.searchQuery.isNotEmpty) {
+        // Show no search results
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                CupertinoIcons.search,
+                size: 64,
+                color: AppColors.greyScale400,
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              strings(context).shareFirstRecipe,
-              style: const TextStyle(
-                fontSize: 14,
-                color: AppColors.greyScale500,
+              const SizedBox(height: 16),
+              Text(
+                strings(context).noRecipes,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.greyScale600,
+                ),
               ),
-            ),
-          ],
-        ),
-      );
+              const SizedBox(height: 8),
+              Text(
+                "Try different keywords",
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: AppColors.greyScale500,
+                ),
+              ),
+            ],
+          ),
+        );
+      } else {
+        // Show general empty state
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.restaurant_menu,
+                size: 64,
+                color: AppColors.greyScale400,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                strings(context).noSharedRecipes,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.greyScale600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                strings(context).shareFirstRecipe,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: AppColors.greyScale500,
+                ),
+              ),
+            ],
+          ),
+        );
+      }
     }
 
     return GridView.builder(
@@ -414,6 +437,104 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
           },
         );
       },
+    );
+  }
+
+  PreferredSizeWidget _buildNormalAppBar(
+    BuildContext context,
+    CommunityState state,
+    CommunityViewModel viewModel,
+  ) {
+    return AppBar(
+      titleSpacing: 20,
+      title: Text(
+        strings(context).communityTitle,
+        style: const TextStyle(
+          color: Colors.black,
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      actions: [
+        IconButton(
+          icon: FilterIconWithDot(showDot: state.hasActiveFilters),
+          onPressed: () => _showFilterModal(context),
+        ),
+        IconButton(
+          icon: const Icon(
+            CupertinoIcons.search,
+            color: Colors.black,
+            size: 24,
+          ),
+          onPressed: () => viewModel.toggleSearch(),
+        ),
+      ],
+      backgroundColor: Colors.white,
+      elevation: 0,
+      centerTitle: false,
+    );
+  }
+
+  PreferredSizeWidget _buildSearchAppBar(
+    BuildContext context,
+    CommunityState state,
+    CommunityViewModel viewModel,
+  ) {
+    return AppBar(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      leading: IconButton(
+        icon: const Icon(CupertinoIcons.back, color: Colors.black, size: 24),
+        onPressed: () {
+          _searchController.clear();
+          viewModel.clearSearch();
+        },
+      ),
+      title: Container(
+        height: 28,
+        width: 267,
+        decoration: BoxDecoration(
+          color: Colors.grey[200],
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: TextField(
+          controller: _searchController,
+          autofocus: true,
+          onChanged: (query) => viewModel.updateSearchQuery(query),
+          decoration: InputDecoration(
+            hintText: strings(context).search,
+            hintStyle: TextStyle(color: AppColors.greyScale400, fontSize: 14),
+            border: InputBorder.none,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 10,
+              vertical: 10,
+            ),
+          ),
+          style: const TextStyle(
+            color: Colors.black,
+            fontSize: 14,
+            height: 1.2,
+          ),
+          cursorHeight: 16,
+          textAlignVertical: TextAlignVertical.center,
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            _searchController.clear();
+            viewModel.clearSearch();
+          },
+          child: Text(
+            strings(context).cancel,
+            style: const TextStyle(
+              color: Colors.black,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ],
     );
   }
 

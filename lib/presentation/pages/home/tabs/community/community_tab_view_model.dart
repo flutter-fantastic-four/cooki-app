@@ -12,6 +12,8 @@ class CommunityState {
   final String? error;
   final List<String> selectedCuisines;
   final String selectedSort;
+  final String searchQuery;
+  final bool isSearchActive;
 
   const CommunityState({
     this.isLoading = false,
@@ -19,6 +21,8 @@ class CommunityState {
     this.error,
     this.selectedCuisines = const [],
     this.selectedSort = '',
+    this.searchQuery = '',
+    this.isSearchActive = false,
   });
 
   CommunityState copyWith({
@@ -28,6 +32,8 @@ class CommunityState {
     bool clearError = false,
     List<String>? selectedCuisines,
     String? selectedSort,
+    String? searchQuery,
+    bool? isSearchActive,
   }) {
     return CommunityState(
       isLoading: isLoading ?? this.isLoading,
@@ -35,11 +41,27 @@ class CommunityState {
       error: clearError ? null : error ?? this.error,
       selectedCuisines: selectedCuisines ?? this.selectedCuisines,
       selectedSort: selectedSort ?? this.selectedSort,
+      searchQuery: searchQuery ?? this.searchQuery,
+      isSearchActive: isSearchActive ?? this.isSearchActive,
     );
   }
 
   List<Recipe> getFilteredRecipes(BuildContext context) {
     List<Recipe> filtered = recipes;
+
+    // Apply search filter first
+    if (searchQuery.isNotEmpty) {
+      final query = searchQuery.toLowerCase();
+      filtered =
+          filtered.where((recipe) {
+            return recipe.recipeName.toLowerCase().contains(query) ||
+                recipe.category.toLowerCase().contains(query) ||
+                recipe.ingredients.any(
+                  (ingredient) => ingredient.toLowerCase().contains(query),
+                ) ||
+                recipe.steps.any((step) => step.toLowerCase().contains(query));
+          }).toList();
+    }
 
     // Filter by cuisine categories if any selected
     if (selectedCuisines.isNotEmpty) {
@@ -58,7 +80,9 @@ class CommunityState {
   }
 
   bool get hasActiveFilters =>
-      selectedCuisines.isNotEmpty || selectedSort.isNotEmpty;
+      selectedCuisines.isNotEmpty ||
+      selectedSort.isNotEmpty ||
+      searchQuery.isNotEmpty;
 }
 
 class CommunityViewModel extends AutoDisposeNotifier<CommunityState> {
@@ -73,7 +97,9 @@ class CommunityViewModel extends AutoDisposeNotifier<CommunityState> {
 
     try {
       final repository = ref.read(recipeRepositoryProvider);
-      final recipes = await repository.getCommunityRecipes(ref.read(userGlobalViewModelProvider)!.id);
+      final recipes = await repository.getCommunityRecipes(
+        ref.read(userGlobalViewModelProvider)!.id,
+      );
       state = state.copyWith(isLoading: false, recipes: recipes);
     } catch (e, stack) {
       logError(e, stack);
@@ -109,6 +135,21 @@ class CommunityViewModel extends AutoDisposeNotifier<CommunityState> {
 
   void clearError() {
     state = state.copyWith(clearError: true);
+  }
+
+  void toggleSearch() {
+    state = state.copyWith(
+      isSearchActive: !state.isSearchActive,
+      searchQuery: !state.isSearchActive ? state.searchQuery : '',
+    );
+  }
+
+  void updateSearchQuery(String query) {
+    state = state.copyWith(searchQuery: query);
+  }
+
+  void clearSearch() {
+    state = state.copyWith(searchQuery: '', isSearchActive: false);
   }
 }
 
