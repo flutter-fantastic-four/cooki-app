@@ -29,7 +29,7 @@ class NoRecipeNotice extends StatelessWidget {
                 Image.asset('assets/icons/cooki_logo_white_no_text.png', width: 24, height: 24),
                 SizedBox(width: 4),
 
-                Text('레시피 생성하기', style: TextStyle(color: AppColors.white)),
+                Text('레시피 생성하기', style: TextStyle(color: AppColors.white, fontSize: 14)),
               ],
             ),
           ),
