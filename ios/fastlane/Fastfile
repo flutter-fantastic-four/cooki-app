@@ -6,13 +6,6 @@ platform :ios do
     build_app(
       scheme: "Runner",
       export_method: "app-store",
-      export_options: {
-        signingStyle: "manual",  # Changed from "automatic" to "manual"
-        provisioningProfiles: {
-          "com.fantasticfour.cooki" => "iOS Team Store Provisioning Profile: com.fantasticfour.cooki"
-        },
-        signingCertificate: "Apple Distribution"
-      },
       xcargs: "-allowProvisioningUpdates"
     )
 
