@@ -3,9 +3,9 @@ default_platform(:ios)
 platform :ios do
   desc "Build and upload to TestFlight"
   lane :beta do
-    app_store_connect_api_key(
-      key_id: ENV["APP_STORE_CONNECT_API_KEY_ID"],
-      issuer_id: ENV["APP_STORE_CONNECT_API_ISSUER_ID"],
+    key = app_store_connect_api_key(
+      key_id:     ENV["APP_STORE_CONNECT_API_KEY_ID"],
+      issuer_id:  ENV["APP_STORE_CONNECT_API_ISSUER_ID"],
       key_content: ENV["APP_STORE_CONNECT_API_PRIVATE_KEY"],
       in_house: false
     )
@@ -13,12 +13,11 @@ platform :ios do
     build_app(
       scheme: "Runner",
       export_method: "app-store",
+      api_key: key,                     # ← **this is the missing piece**
       xcargs: "-allowProvisioningUpdates",
-      export_options: {
-        signingStyle: "automatic"
-      }
+      export_options: { signingStyle: "automatic" }
     )
 
-    upload_to_testflight
+    upload_to_testflight(api_key: key) # safe to reuse
   end
 end
