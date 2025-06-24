@@ -74,22 +74,22 @@ class _InfoItemRowState extends State<InfoItemRow> {
     );
   }
 
-  Future<void> _launchEmail() async {
-    final Uri emailUri = Uri(scheme: 'mailto', path: '@gmail.com', queryParameters: {'subject': 'Cooki app feedback'});
-
-    if (await canLaunchUrl(emailUri)) {
-      await launchUrl(emailUri, mode: LaunchMode.externalApplication);
-    } else {
-      // If no email app, open browser-based mail client (Gmail)
-      final fallbackUrl = Uri.parse(
-        'https://mail.google.com/mail/?view=cm&fs=1'
-        '&to=${'@gmail.com'}&su=${Uri.encodeComponent('Cooki app feedback')}',
-      );
-      if (await canLaunchUrl(fallbackUrl)) {
-        await launchUrl(fallbackUrl, mode: LaunchMode.externalApplication);
-      }
-    }
-  }
+  // Future<void> _launchEmail() async {
+  //   final Uri emailUri = Uri(scheme: 'mailto', path: '@gmail.com', queryParameters: {'subject': 'Cooki app feedback'});
+  //
+  //   if (await canLaunchUrl(emailUri)) {
+  //     await launchUrl(emailUri, mode: LaunchMode.externalApplication);
+  //   } else {
+  //     // If no email app, open browser-based mail client (Gmail)
+  //     final fallbackUrl = Uri.parse(
+  //       'https://mail.google.com/mail/?view=cm&fs=1'
+  //       '&to=${'@gmail.com'}&su=${Uri.encodeComponent('Cooki app feedback')}',
+  //     );
+  //     if (await canLaunchUrl(fallbackUrl)) {
+  //       await launchUrl(fallbackUrl, mode: LaunchMode.externalApplication);
+  //     }
+  //   }
+  // }
 
   Future<void> _launchUrl(BuildContext context, String url) async {
     final uri = Uri.parse(url);

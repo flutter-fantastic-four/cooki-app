@@ -13,7 +13,6 @@ import '../../../app/constants/app_constants.dart';
 import '../../user_global_view_model.dart';
 import '../../widgets/input_decorations.dart';
 import '../../widgets/app_dialog.dart';
-import '../detailed_recipe/detailed_recipe_page.dart';
 import 'generate_recipe_view_model.dart';
 
 class GenerateRecipePage extends ConsumerWidget {
