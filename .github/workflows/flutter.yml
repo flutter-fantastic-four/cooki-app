@@ -39,13 +39,13 @@ jobs:
       #      - name: Run tests
       #        run: flutter test
 
-      - name: Set up signing certificate
+      - name: Import signing certificate (.p12)
         uses: apple-actions/import-codesign-certs@v2
         with:
           p12-file-base64: ${{ secrets.APPLE_P12_BASE64 }}
           p12-password: ${{ secrets.APPLE_P12_PASSWORD }}
 
-      - name: Set up provisioning profile
+      - name: Download provisioning profile
         uses: apple-actions/download-provisioning-profiles@v2
         with:
           bundle-id: com.fantasticfour.cooki
@@ -54,18 +54,17 @@ jobs:
           api-issuer-id: ${{ secrets.APPSTORE_API_ISSUER_ID }}
           private-key-base64: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
 
-      - name: Build IPA
-        run: |
-          flutter build ipa --release \
-            --export-options-plist=ios/ExportOptions.plist
+      - name: Install Fastlane
+        run: gem install fastlane -NV
 
-      - name: Upload to TestFlight
-        uses: apple-actions/upload-testflight@v1
-        with:
-          app-path: build/ios/ipa
-          issuer-id: ${{ secrets.APPSTORE_API_ISSUER_ID }}
-          api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
-          api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+      - name: Build & Submit via Fastlane
+        working-directory: ios
+        env:
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
+          APP_STORE_CONNECT_API_PRIVATE_KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+        run: |
+          fastlane beta
 
 #  test:
 #    if: github.ref == 'refs/heads/master' || github.event_name == 'pull_request'
