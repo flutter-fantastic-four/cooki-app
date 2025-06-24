@@ -3,7 +3,19 @@ default_platform(:ios)
 platform :ios do
   desc "Build and upload to TestFlight"
   lane :beta do
-    build_app(scheme: "Runner")
+    build_app(
+      scheme: "Runner",
+      export_method: "app-store",
+      export_options: {
+        signingStyle: "automatic",
+        provisioningProfiles: {
+          "com.fantasticfour.cooki" => "iOS Team Store Provisioning Profile: com.fantasticfour.cooki"
+        },
+        signingCertificate: "Apple Distribution"
+      },
+      xcargs: "-allowProvisioningUpdates"
+    )
+
     upload_to_testflight
   end
 end
