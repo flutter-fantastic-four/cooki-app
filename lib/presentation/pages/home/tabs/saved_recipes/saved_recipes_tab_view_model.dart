@@ -48,12 +48,10 @@ class SavedRecipesState {
     );
   }
 
-  bool get hasActiveFilters =>
-      selectedCuisines.isNotEmpty || selectedSort.isNotEmpty;
+  bool get hasActiveFilters => selectedCuisines.isNotEmpty || selectedSort.isNotEmpty;
 }
 
-class SavedRecipesViewModel
-    extends AutoDisposeFamilyNotifier<SavedRecipesState, AppLocalizations> {
+class SavedRecipesViewModel extends AutoDisposeFamilyNotifier<SavedRecipesState, AppLocalizations> {
   @override
   SavedRecipesState build(AppLocalizations arg) {
     Future.microtask(() => loadRecipes());
@@ -66,7 +64,7 @@ class SavedRecipesViewModel
     try {
       final currentUser = ref.read(userGlobalViewModelProvider);
       if (currentUser == null) {
-        state = state.copyWith(isLoading: false, error: 'User not logged in');
+        state = state.copyWith(isLoading: false);
         return;
       }
 
@@ -84,37 +82,20 @@ class SavedRecipesViewModel
       List<Recipe> recipes;
 
       if (selectedCategory == arg.recipeTabAll) {
-        recipes = await repository.getMyRecipes(
-          currentUser.id,
-          sortType: sortType ?? RecipeSortType.createdAtDescending,
-        );
+        recipes = await repository.getMyRecipes(currentUser.id, sortType: sortType ?? RecipeSortType.createdAtDescending);
       } else if (selectedCategory == arg.recipeTabCreated) {
-        recipes = await repository.getMyRecipes(
-          currentUser.id,
-          isPublic: false,
-          sortType: sortType ?? RecipeSortType.createdAtDescending,
-        );
+        recipes = await repository.getMyRecipes(currentUser.id, isPublic: false, sortType: sortType ?? RecipeSortType.createdAtDescending);
       } else if (selectedCategory == arg.recipeTabShared) {
-        recipes = await repository.getMyRecipes(
-          currentUser.id,
-          isPublic: true,
-          sortType: sortType ?? RecipeSortType.createdAtDescending,
-        );
+        recipes = await repository.getMyRecipes(currentUser.id, isPublic: true, sortType: sortType ?? RecipeSortType.createdAtDescending);
       } else if (selectedCategory == arg.recipeTabSaved) {
-        recipes = await repository.getUserSavedRecipes(
-          currentUser.id,
-          sortType: sortType ?? RecipeSortType.createdAtDescending,
-        );
+        recipes = await repository.getUserSavedRecipes(currentUser.id, sortType: sortType ?? RecipeSortType.createdAtDescending);
       } else {
         recipes = [];
       }
 
       // Filter by cuisine (still needed)
       if (state.selectedCuisines.isNotEmpty) {
-        recipes =
-            recipes
-                .where((r) => state.selectedCuisines.contains(r.category))
-                .toList();
+        recipes = recipes.where((r) => state.selectedCuisines.contains(r.category)).toList();
       }
 
       state = state.copyWith(isLoading: false, recipes: recipes);
@@ -198,7 +179,6 @@ class SavedRecipesViewModel
   }
 }
 
-final savedRecipesViewModelProvider = NotifierProvider.autoDispose
-    .family<SavedRecipesViewModel, SavedRecipesState, AppLocalizations>(
-      SavedRecipesViewModel.new,
-    );
+final savedRecipesViewModelProvider = NotifierProvider.autoDispose.family<SavedRecipesViewModel, SavedRecipesState, AppLocalizations>(
+  SavedRecipesViewModel.new,
+);
