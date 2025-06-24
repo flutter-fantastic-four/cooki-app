@@ -1,9 +1,11 @@
 import 'package:cooki/core/utils/general_util.dart';
 import 'package:cooki/presentation/pages/my/widgets/account_action_button.dart';
+import 'package:cooki/presentation/pages/my/widgets/guest_redirect_login_button.dart';
 import 'package:cooki/presentation/pages/my/widgets/info_column.dart';
 import 'package:cooki/presentation/pages/my/widgets/language_settings_page.dart';
 import 'package:cooki/presentation/pages/my/widgets/nick_name_row.dart';
 import 'package:cooki/presentation/pages/my/widgets/profile_image.dart';
+import 'package:cooki/presentation/user_global_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -12,6 +14,7 @@ class MyPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final vm = ref.read(userGlobalViewModelProvider);
     return Scaffold(
       appBar: AppBar(
         titleSpacing: 20,
@@ -30,7 +33,11 @@ class MyPage extends ConsumerWidget {
             },
             child: Text(
               strings(context).languageSettings,
-              style: TextStyle(fontSize: 16.4, color: Colors.black, fontWeight: FontWeight.w500),
+              style: TextStyle(
+                fontSize: 16.4,
+                color: Colors.black,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ],
@@ -38,13 +45,20 @@ class MyPage extends ConsumerWidget {
       body: Column(
         children: [
           const SizedBox(height: 24),
-          ProfileImage(),
-          const SizedBox(height: 16),
-          NickNameRow(),
+          vm == null
+              ? GuestRedirectLoginButton()
+              : Column(
+                children: [
+                  ProfileImage(),
+                  const SizedBox(height: 16),
+                  NickNameRow(),
+                ],
+              ),
+
           const SizedBox(height: 24),
           InfoColumn(),
           Spacer(),
-          AccountActionButton(),
+          vm == null ? SizedBox() : AccountActionButton(),
         ],
       ),
     );

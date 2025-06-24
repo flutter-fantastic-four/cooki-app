@@ -52,7 +52,8 @@ class SavedRecipesState {
       selectedCuisines.isNotEmpty || selectedSort.isNotEmpty;
 }
 
-class SavedRecipesViewModel extends AutoDisposeFamilyNotifier<SavedRecipesState, AppLocalizations> {
+class SavedRecipesViewModel
+    extends AutoDisposeFamilyNotifier<SavedRecipesState, AppLocalizations> {
   @override
   SavedRecipesState build(AppLocalizations arg) {
     Future.microtask(() => loadRecipes());
@@ -110,9 +111,10 @@ class SavedRecipesViewModel extends AutoDisposeFamilyNotifier<SavedRecipesState,
 
       // Filter by cuisine (still needed)
       if (state.selectedCuisines.isNotEmpty) {
-        recipes = recipes
-            .where((r) => state.selectedCuisines.contains(r.category))
-            .toList();
+        recipes =
+            recipes
+                .where((r) => state.selectedCuisines.contains(r.category))
+                .toList();
       }
 
       state = state.copyWith(isLoading: false, recipes: recipes);
@@ -196,7 +198,7 @@ class SavedRecipesViewModel extends AutoDisposeFamilyNotifier<SavedRecipesState,
   }
 }
 
-final savedRecipesViewModelProvider =
-    NotifierProvider.autoDispose.family<SavedRecipesViewModel, SavedRecipesState, AppLocalizations>(
+final savedRecipesViewModelProvider = NotifierProvider.autoDispose
+    .family<SavedRecipesViewModel, SavedRecipesState, AppLocalizations>(
       SavedRecipesViewModel.new,
     );

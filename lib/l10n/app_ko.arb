@@ -254,5 +254,7 @@
   "score":"점",
 
   "recipeReview":"레시피 평가하기",
-  "recipeRating":"생성한 레시피에 대한 별점을 남겨보세요"
+  "recipeRating":"생성한 레시피에 대한 별점을 남겨보세요",
+  "skipLogin":"나중에 로그인 할게요",
+  "pleaseLogin":"로그인 해주세요"
 }

@@ -1,5 +1,6 @@
 import 'package:cooki/app/enum/sign_in_method.dart';
 import 'package:cooki/core/utils/general_util.dart';
+import 'package:cooki/presentation/pages/login/widget/login_skip_button.dart';
 import 'package:cooki/presentation/pages/login/widget/login_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,6 +33,8 @@ class LoginPage extends ConsumerWidget {
                   LoginButton(signInMethod: SignInMethod.apple),
                   const SizedBox(height: 16),
                   LoginButton(signInMethod: SignInMethod.google),
+                  const SizedBox(height: 16),
+                  LoginSkipButton(),
                   const SizedBox(height: 30),
                 ],
               ),

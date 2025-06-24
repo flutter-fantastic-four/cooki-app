@@ -251,5 +251,7 @@
   "score": "",
 
   "recipeReview": "Rate Recipe",
-  "recipeRating": "Rate your generated recipe"
+  "recipeRating": "Rate your generated recipe",
+  "skipLogin":"Skip for now",
+  "pleaseLogin":"Please Log In"
 }
