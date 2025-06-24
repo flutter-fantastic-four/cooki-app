@@ -108,7 +108,6 @@ class SavedRecipesViewModel extends AutoDisposeFamilyNotifier<SavedRecipesState,
         recipes = [];
       }
 
-      // Filter by cuisine (still needed)
       if (state.selectedCuisines.isNotEmpty) {
         recipes = recipes
             .where((r) => state.selectedCuisines.contains(r.category))
