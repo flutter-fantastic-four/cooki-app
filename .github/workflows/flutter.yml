@@ -33,6 +33,12 @@ jobs:
           mkdir -p lib
           echo "${{ secrets.FIREBASE_DART_OPTIONS }}" | base64 --decode > lib/firebase_options.dart
 
+      - name: Install CocoaPods
+        run: |
+          cd ios
+          pod install
+        shell: bash
+
       #      - name: Analyze project
       #        run: flutter analyze
       #
