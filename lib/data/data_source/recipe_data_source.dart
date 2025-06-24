@@ -58,10 +58,22 @@ class RecipeFirestoreDataSource implements RecipeDataSource {
         await _firestore
             .collection('recipes')
             .where('userId', isEqualTo: userId)
-            .orderBy('createdAt', descending: true)
             .get();
 
-    return querySnapshot.docs
+    // Sort by createdAt in memory instead of using Firestore orderBy
+    final docs = querySnapshot.docs;
+    docs.sort((a, b) {
+      final aTimestamp = a.data()['createdAt'] as Timestamp?;
+      final bTimestamp = b.data()['createdAt'] as Timestamp?;
+
+      if (aTimestamp == null && bTimestamp == null) return 0;
+      if (aTimestamp == null) return 1;
+      if (bTimestamp == null) return -1;
+
+      return bTimestamp.compareTo(aTimestamp); // Descending order
+    });
+
+    return docs
         .map((doc) => RecipeFirestoreDto.fromMap(doc.id, doc.data()))
         .toList();
   }
