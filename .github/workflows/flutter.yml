@@ -1,0 +1,107 @@
+name: Flutter CI/CD
+
+on:
+  push:
+    branches: [ master, test-flight ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  deploy-test-flight:
+    if: github.ref == 'refs/heads/test-flight'
+    name: Build & Upload iOS to TestFlight
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.29.2'
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Decode GoogleService-Info.plist
+        run: |
+          mkdir -p ios/Runner
+          echo "${{ secrets.FIREBASE_GOOGLE_PLIST }}" | base64 --decode > ios/Runner/GoogleService-Info.plist
+
+      - name: Decode firebase_options.dart
+        run: |
+          mkdir -p lib
+          echo "${{ secrets.FIREBASE_DART_OPTIONS }}" | base64 --decode > lib/firebase_options.dart
+
+      #      - name: Analyze project
+      #        run: flutter analyze
+      #
+      #      - name: Run tests
+      #        run: flutter test
+
+      - name: Set up signing certificate
+        uses: apple-actions/import-codesign-certs@v2
+        with:
+          p12-file-base64: ${{ secrets.APPLE_P12_BASE64 }}
+          p12-password: ${{ secrets.APPLE_P12_PASSWORD }}
+
+      - name: Set up provisioning profile
+        uses: apple-actions/download-provisioning-profiles@v2
+        with:
+          bundle-id: com.fantasticfour.cooki
+          profile-type: IOS_APP_STORE
+          api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
+          api-issuer-id: ${{ secrets.APPSTORE_API_ISSUER_ID }}
+          private-key-base64: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+
+      - name: Build IPA
+        run: |
+          flutter build ipa --release \
+            --export-options-plist=ios/ExportOptions.plist
+
+      - name: Upload to TestFlight
+        uses: apple-actions/upload-testflight@v1
+        with:
+          app-path: build/ios/ipa
+          issuer-id: ${{ secrets.APPSTORE_API_ISSUER_ID }}
+          api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
+          api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+
+#  test:
+#    if: github.ref == 'refs/heads/master' || github.event_name == 'pull_request'
+#    name: Run tests
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v3
+#
+#      - name: Setup Flutter
+#        uses: subosito/flutter-action@v2
+#        with:
+#          flutter-version: '3.29.2'
+#          channel: 'stable'
+#
+#      - name: Install dependencies
+#        run: flutter pub get
+#
+#      - name: Create empty .env file
+#        run: echo "" > .env
+#
+#      - name: Decode google-services.json
+#        run: |
+#          echo "${{ secrets.FIREBASE_GOOGLE_SERVICES_JSON }}" | base64 --decode > android/app/google-services.json
+#
+#      - name: Decode GoogleService-Info.plist
+#        run: |
+#          mkdir -p ios/Runner
+#          echo "${{ secrets.FIREBASE_GOOGLE_PLIST }}" | base64 --decode > ios/Runner/GoogleService-Info.plist
+#
+#      - name: Decode firebase_options.dart
+#        run: |
+#          mkdir -p lib
+#          echo "${{ secrets.FIREBASE_DART_OPTIONS }}" | base64 --decode > lib/firebase_options.dart
+#
+#      - name: Analyze project
+#        run: flutter analyze
+#
+#      - name: Run tests
+#        run: flutter test
