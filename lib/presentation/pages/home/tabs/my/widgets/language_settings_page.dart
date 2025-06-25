@@ -1,11 +1,10 @@
+import 'package:cooki/core/utils/general_util.dart';
+import 'package:cooki/core/utils/snackbar_util.dart';
 import 'package:cooki/presentation/settings_global_view_model.dart';
 import 'package:cooki/presentation/widgets/big_title_widget.dart';
 import 'package:cooki/presentation/widgets/selectable_option_row.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../../../../../../core/utils/general_util.dart';
-import '../../../../../../core/utils/snackbar_util.dart';
 
 class LanguageSelectionPage extends ConsumerStatefulWidget {
   const LanguageSelectionPage({super.key});

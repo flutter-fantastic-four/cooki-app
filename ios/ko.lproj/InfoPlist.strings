@@ -1,2 +1,2 @@
-NSCameraUsageDescription = "이 앱은 사진을 찍기 위해 카메라 접근 권한이 필요합니다.";
-NSPhotoLibraryUsageDescription = "이 앱은 이미지를 업로드하기 위해 사진 라이브러리 접근 권한이 필요합니다.";
+NSCameraUsageDescription = "프로필 변경 및 레시피에 사용될 음식 사진을 위해 카메라 권한을 허락해 주세요.";
+NSPhotoLibraryUsageDescription = "프로필 변경 및 레시피에 사용될 음식 사진을 위해 앨범 권한을 허락해 주세요.";
