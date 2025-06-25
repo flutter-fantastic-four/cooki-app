@@ -67,7 +67,7 @@ class ReviewsViewModel extends AutoDisposeFamilyNotifier<ReviewsState, String> {
           .read(reviewRepositoryProvider)
           .getReviewsByRecipeId(arg, sortType: state.currentSortType);
 
-      state = state.copyWith(reviews: reviews);
+      state = state.copyWith(reviews: reviews, translatedTexts: const {});
     } catch (e, stack) {
       logError(e, stack);
       state = state.copyWith(errorKey: ReviewsErrorKey.loadFailed);
