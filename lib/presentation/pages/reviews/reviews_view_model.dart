@@ -100,6 +100,12 @@ class ReviewsViewModel extends AutoDisposeFamilyNotifier<ReviewsState, String> {
     return state.expandedReviews.contains(reviewId);
   }
 
+  bool shouldShowTranslate(Review review, String currentAppLanguage) {
+    return review.reviewText?.isNotEmpty == true &&
+        review.language != null &&
+        review.language != currentAppLanguage;
+  }
+
   Future<void> deleteReview(String reviewId) async {
     state = state.copyWith(isLoading: true);
     try {

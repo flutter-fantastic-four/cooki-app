@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cooki/app/constants/app_constants.dart';
 import 'package:cooki/core/utils/date_time_util.dart';
@@ -16,6 +18,7 @@ import '../../../app/constants/app_colors.dart';
 import '../../../core/utils/general_util.dart';
 import '../../../core/utils/snackbar_util.dart';
 import '../../../domain/entity/review.dart';
+import '../../settings_global_view_model.dart';
 import '../../user_global_view_model.dart';
 import '../add_review/write_review_page.dart';
 import 'reviews_view_model.dart';
@@ -37,13 +40,20 @@ class ReviewsPage extends ConsumerWidget {
   ) {
     final currentUser = ref.read(userGlobalViewModelProvider);
     final isMyReview = currentUser?.id == review.userId;
+    final currentAppLanguage =
+        ref.read(settingsGlobalViewModelProvider).selectedLanguage.code;
+    final shouldShowTranslate = ref
+        .read(reviewsViewModelProvider(recipeId).notifier)
+        .shouldShowTranslate(review, currentAppLanguage);
+    log(review.language ?? 'lang null');
 
     final options = <ModalOption>[
-      // ModalOption(
-      //   text: strings(context).translateReview,
-      //   icon: Icons.g_translate,
-      //   onTap: () => _translateReview(context, review),
-      // ),
+      if (shouldShowTranslate)
+        ModalOption(
+          text: strings(context).translateReview,
+          icon: Icons.g_translate,
+          onTap: () => _translateReview(context, review),
+        ),
       if (isMyReview)
         ModalOption(
           text: strings(context).editReview,
