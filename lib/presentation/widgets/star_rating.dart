@@ -6,6 +6,8 @@ class StarRating extends StatelessWidget {
   final double horizontalPadding;
   final Function(int)? setRating;
   final MainAxisAlignment alignment;
+  final Color? filledStarColor;
+  final Color? emptyStarColor;
 
   const StarRating({
     super.key,
@@ -14,6 +16,8 @@ class StarRating extends StatelessWidget {
     this.horizontalPadding = 4,
     this.setRating,
     this.alignment = MainAxisAlignment.center,
+    this.filledStarColor,
+    this.emptyStarColor,
   });
 
   @override
@@ -30,7 +34,10 @@ class StarRating extends StatelessWidget {
               icon: Icon(
                 index < currentRating ? Icons.star : Icons.star_border,
                 size: iconSize,
-                color: index < currentRating ? Colors.black : Colors.black,
+                color:
+                    index < currentRating
+                        ? (filledStarColor ?? Colors.black)
+                        : (emptyStarColor ?? Colors.black),
               ),
               onPressed:
                   setRating == null

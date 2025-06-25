@@ -26,6 +26,8 @@ class HomePage extends ConsumerWidget {
       floatingActionButton:
           currentIndex == 0 || currentIndex == 1
               ? FloatingActionButton(
+                elevation: 4,
+                highlightElevation: 6,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),

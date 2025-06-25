@@ -11,15 +11,59 @@ import 'package:cooki/presentation/pages/reviews/reviews_view_model.dart';
 import 'package:cooki/presentation/widgets/app_cached_image.dart';
 import 'package:cooki/presentation/widgets/recipe_page_widgets.dart';
 import 'package:cooki/presentation/widgets/star_rating.dart';
+import 'package:cooki/data/repository/providers.dart';
+import 'package:cooki/presentation/user_global_view_model.dart';
 import 'package:easy_image_viewer/easy_image_viewer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+// Provider for user rating that can be refreshed
+final userRatingProvider = FutureProvider.family.autoDispose<int?, String>((
+  ref,
+  recipeId,
+) async {
+  try {
+    final currentUser = ref.read(userGlobalViewModelProvider);
+    if (currentUser == null) return null;
+
+    final reviewRepository = ref.read(reviewRepositoryProvider);
+    final userReview = await reviewRepository.getUserReviewForRecipe(
+      recipeId: recipeId,
+      userId: currentUser.id,
+    );
+    return userReview?.rating;
+  } catch (e) {
+    return null;
+  }
+});
+
+// Provider for actual average rating calculation (excluding deleted reviews)
+final actualAverageRatingProvider = FutureProvider.family
+    .autoDispose<Map<String, dynamic>, String>((ref, recipeId) async {
+      try {
+        final reviewRepository = ref.read(reviewRepositoryProvider);
+        final reviews = await reviewRepository.getReviewsByRecipeId(recipeId);
+
+        if (reviews.isEmpty) {
+          return {'average': 0.0, 'count': 0};
+        }
+
+        final totalRating = reviews.fold<int>(
+          0,
+          (sum, review) => sum + review.rating,
+        );
+        final average = totalRating / reviews.length;
+
+        return {'average': average, 'count': reviews.length};
+      } catch (e) {
+        return {'average': 0.0, 'count': 0};
+      }
+    });
+
 class DetailRecipePage extends ConsumerWidget {
   final Recipe recipe;
   final String? category;
-
-  // int currentRating = 0;
+  static bool _hasRatingBeenPosted = false;
 
   const DetailRecipePage({super.key, required this.recipe, this.category});
 
@@ -47,13 +91,13 @@ class DetailRecipePage extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _infoChip(context),
+                      _infoChip(context, ref),
                       const SizedBox(height: 12),
                       _title(),
                       const SizedBox(height: 20),
                       TagChips(recipe.tags),
                       const SizedBox(height: 24),
-                      _review(context),
+                      _review(context, ref),
                       const SizedBox(height: 24),
                       _ingredientsLabel(context),
                       const SizedBox(height: 16),
@@ -85,7 +129,12 @@ class DetailRecipePage extends ConsumerWidget {
                         backgroundColor: Colors.white,
                       ),
                       onPressed: () {
-                        Navigator.pop(context);
+                        Navigator.pop(
+                          context,
+                          DetailRecipePage._hasRatingBeenPosted,
+                        );
+                        DetailRecipePage._hasRatingBeenPosted =
+                            false; // Reset after use
                       },
                       child: Icon(
                         Icons.arrow_back_ios_new,
@@ -141,40 +190,86 @@ class DetailRecipePage extends ConsumerWidget {
     );
   }
 
-  Widget _review(BuildContext context) {
+  Widget _review(BuildContext context, WidgetRef ref) {
     return recipe.isPublic
         ? Column(
           children: [
-            Row(
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    NavigationUtil.pushFromBottom(
-                      context,
-                      ReviewsPage(
-                        recipeId: recipe.id,
-                        recipeName: recipe.recipeName,
-                      ),
+            Consumer(
+              builder: (context, ref, child) {
+                final averageRatingAsync = ref.watch(
+                  actualAverageRatingProvider(recipe.id),
+                );
+
+                return averageRatingAsync.when(
+                  data: (ratingData) {
+                    final average = ratingData['average'] as double;
+                    final count = ratingData['count'] as int;
+
+                    return Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            NavigationUtil.pushFromBottom(
+                              context,
+                              ReviewsPage(
+                                recipeId: recipe.id,
+                                recipeName: recipe.recipeName,
+                              ),
+                            );
+                          },
+                          child: Row(
+                            children: [
+                              Text(
+                                '${strings(context).review} ${count > 999 ? '999+' : count}${strings(context).amount}',
+                                style: RecipePageWidgets.sectionTitleStyle,
+                              ),
+                              Icon(Icons.arrow_forward_ios),
+                            ],
+                          ),
+                        ),
+                        Spacer(),
+                        Icon(Icons.star, color: AppColors.secondary600),
+                        Text(
+                          '${strings(context).average} ${count == 0 ? '0' : average.toStringAsFixed(1)}${strings(context).score}',
+                          style: RecipePageWidgets.sectionTitleStyle,
+                        ),
+                      ],
                     );
                   },
-                  child: Row(
-                    children: [
-                      Text(
-                        '${strings(context).review} ${recipe.ratingCount > 999 ? '999+' : recipe.ratingCount}${strings(context).amount}',
-                        style: RecipePageWidgets.sectionTitleStyle,
+                  loading:
+                      () => Row(
+                        children: [
+                          Text(
+                            '${strings(context).review} ${recipe.ratingCount}${strings(context).amount}',
+                            style: RecipePageWidgets.sectionTitleStyle,
+                          ),
+                          Icon(Icons.arrow_forward_ios),
+                          Spacer(),
+                          Icon(Icons.star, color: AppColors.secondary600),
+                          Text(
+                            '${strings(context).average} ...${strings(context).score}',
+                            style: RecipePageWidgets.sectionTitleStyle,
+                          ),
+                        ],
                       ),
-
-                      Icon(Icons.arrow_forward_ios),
-                    ],
-                  ),
-                ),
-                Spacer(),
-                Icon(Icons.star, color: AppColors.secondary600),
-                Text(
-                  '${strings(context).average} ${recipe.ratingSum == 0.0 ? '0' : recipe.ratingSum}${strings(context).score}',
-                  style: RecipePageWidgets.sectionTitleStyle,
-                ),
-              ],
+                  error:
+                      (error, stack) => Row(
+                        children: [
+                          Text(
+                            '${strings(context).review} ${recipe.ratingCount}${strings(context).amount}',
+                            style: RecipePageWidgets.sectionTitleStyle,
+                          ),
+                          Icon(Icons.arrow_forward_ios),
+                          Spacer(),
+                          Icon(Icons.star, color: AppColors.secondary600),
+                          Text(
+                            '${strings(context).average} 0${strings(context).score}',
+                            style: RecipePageWidgets.sectionTitleStyle,
+                          ),
+                        ],
+                      ),
+                );
+              },
             ),
             const SizedBox(height: 16),
             ReviewCardList(recipe),
@@ -247,7 +342,7 @@ class DetailRecipePage extends ConsumerWidget {
     );
   }
 
-  Row _infoChip(BuildContext context) {
+  Row _infoChip(BuildContext context, WidgetRef ref) {
     return Row(
       children: [
         category != null
@@ -270,226 +365,56 @@ class DetailRecipePage extends ConsumerWidget {
             )
             : SizedBox(),
         GestureDetector(
-          onTap: () {
-            int currentRating = 0;
-            recipe.isPublic
-                ? NavigationUtil.pushFromBottom(
-                  context,
-                  WriteReviewPage(
-                    recipeId: recipe.id,
-                    recipeName: recipe.recipeName,
-                  ),
-                )
-                : showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: AppColors.greyScale50,
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(26),
-                    ),
-                  ),
-                  builder: (context) {
-                    return Padding(
-                      padding: const EdgeInsets.only(
-                        top: 8,
-                        bottom: 30,
-                        left: 15,
-                        right: 15,
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Top handle
-                          Container(
-                            width: 40,
-                            height: 5,
-                            decoration: BoxDecoration(
-                              color: Colors.grey[400],
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            margin: const EdgeInsets.only(bottom: 12),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(top: 40),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              spacing: 24,
-                              children: [
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    spacing: 4,
-                                    children: [
-                                      Text(
-                                        strings(context).recipeReview,
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 20,
-                                          fontFamily: 'Pretendard',
-                                          fontWeight: FontWeight.w700,
-                                          height: 1.50,
-                                        ),
-                                      ),
-                                      Text(
-                                        strings(context).recipeRating,
-                                        style: TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 14,
-                                          fontFamily: 'Pretendard',
-                                          fontWeight: FontWeight.w400,
-                                          height: 1.50,
-                                          letterSpacing: -0.14,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  spacing: 5,
-                                  children: [],
-                                ),
-                              ],
-                            ),
-                          ),
+          onTap: () async {
+            final currentRef = ref; // Capture ref for use in modal
+            bool? ratingPosted = false;
 
-                          Padding(
-                            padding: EdgeInsets.only(bottom: 40),
-                            child: StarRating(
-                              currentRating: currentRating,
-                              setRating: (value) {
-                                currentRating = value;
-                              },
-                            ),
-                          ),
+            if (recipe.isPublic) {
+              // Fetch existing review if any
+              Review? existingReview;
+              try {
+                final currentUser = ref.read(userGlobalViewModelProvider);
+                if (currentUser != null) {
+                  final reviewRepository = ref.read(reviewRepositoryProvider);
+                  existingReview = await reviewRepository
+                      .getUserReviewForRecipe(
+                        recipeId: recipe.id,
+                        userId: currentUser.id,
+                      );
+                }
+              } catch (e) {
+                // If fetching fails, proceed without existing review
+                existingReview = null;
+              }
 
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF5F5F5) /* Grayscale-50 */,
-                            ),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              spacing: 8,
-                              children: [
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    spacing: 8,
-                                    children: [
-                                      Expanded(
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            Navigator.pop(context);
-                                          },
-                                          child: Container(
-                                            height: 54,
-                                            padding: const EdgeInsets.all(8),
-                                            decoration: ShapeDecoration(
-                                              color:
-                                                  Colors
-                                                      .white /* Grayscale-White */,
-                                              shape: RoundedRectangleBorder(
-                                                side: BorderSide(
-                                                  width: 1,
-                                                  color: const Color(
-                                                    0xFF1D8163,
-                                                  ) /* Primary-700 */,
-                                                ),
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                              ),
-                                            ),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              spacing: 8,
-                                              children: [
-                                                Text(
-                                                  strings(context).close,
-                                                  textAlign: TextAlign.center,
-                                                  style: TextStyle(
-                                                    color: const Color(
-                                                      0xFF1D8163,
-                                                    ) /* Primary-700 */,
-                                                    fontSize: 16,
-                                                    fontFamily: 'Pretendard',
-                                                    fontWeight: FontWeight.w600,
-                                                    height: 1.50,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      Expanded(
-                                        child: Container(
-                                          height: 54,
-                                          padding: const EdgeInsets.all(8),
-                                          decoration: ShapeDecoration(
-                                            color: const Color(
-                                              0xFF1D8163,
-                                            ) /* Primary-700 */,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            spacing: 8,
-                                            children: [
-                                              Text(
-                                                strings(context).confirm,
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                  color:
-                                                      Colors
-                                                          .white /* Grayscale-White */,
-                                                  fontSize: 16,
-                                                  fontFamily: 'Pretendard',
-                                                  fontWeight: FontWeight.w600,
-                                                  height: 1.50,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                );
+              ratingPosted = await NavigationUtil.pushFromBottomAndWait<bool>(
+                context,
+                WriteReviewPage(
+                  recipeId: recipe.id,
+                  recipeName: recipe.recipeName,
+                  review: existingReview, // Pass existing review if found
+                ),
+              );
+            } else {
+              ratingPosted = await showModalBottomSheet<bool>(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: AppColors.greyScale50,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+                ),
+                builder: (context) {
+                  return _RatingModal(recipe: recipe, currentRef: currentRef);
+                },
+              );
+            }
+
+            // Store the result in a static variable or pass it through navigation
+            if (ratingPosted == true) {
+              DetailRecipePage._hasRatingBeenPosted = true;
+              // Invalidate the rating provider to force refresh
+              ref.invalidate(userRatingProvider(recipe.id));
+            }
           },
           child: Container(
             height: 28,
@@ -500,15 +425,49 @@ class DetailRecipePage extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(99999),
               ),
             ),
-            child: Row(
-              children: List.generate(
-                5,
-                (_) => Icon(
-                  Icons.star_border,
-                  size: 12,
-                  color: AppColors.greyScale800,
-                ),
-              ),
+            child: Consumer(
+              builder: (context, ref, child) {
+                final userRatingAsync = ref.watch(
+                  userRatingProvider(recipe.id),
+                );
+                return userRatingAsync.when(
+                  data: (userRating) {
+                    final rating = userRating ?? 0;
+                    return Row(
+                      children: List.generate(5, (index) {
+                        return Icon(
+                          index < rating ? Icons.star : Icons.star_border,
+                          color:
+                              index < rating
+                                  ? AppColors.secondary600
+                                  : AppColors.greyScale300,
+                          size: 12,
+                        );
+                      }),
+                    );
+                  },
+                  loading:
+                      () => Row(
+                        children: List.generate(5, (index) {
+                          return Icon(
+                            Icons.star_border,
+                            color: AppColors.greyScale300,
+                            size: 12,
+                          );
+                        }),
+                      ),
+                  error:
+                      (error, stack) => Row(
+                        children: List.generate(5, (index) {
+                          return Icon(
+                            Icons.star_border,
+                            color: AppColors.greyScale300,
+                            size: 12,
+                          );
+                        }),
+                      ),
+                );
+              },
             ),
           ),
         ),
@@ -599,6 +558,8 @@ class ReviewCardList extends ConsumerWidget {
                   currentRating: review.rating,
                   iconSize: 16,
                   horizontalPadding: 0,
+                  filledStarColor: AppColors.secondary600,
+                  emptyStarColor: AppColors.greyScale300,
                   setRating: null,
                   alignment: MainAxisAlignment.start,
                 ),
@@ -631,6 +592,244 @@ class ReviewCardList extends ConsumerWidget {
           height: imageDimension,
           fit: BoxFit.cover,
         ),
+      ),
+    );
+  }
+}
+
+class _RatingModal extends StatefulWidget {
+  final Recipe recipe;
+  final WidgetRef currentRef;
+
+  const _RatingModal({required this.recipe, required this.currentRef});
+
+  @override
+  State<_RatingModal> createState() => _RatingModalState();
+}
+
+class _RatingModalState extends State<_RatingModal> {
+  int currentRating = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8, bottom: 30, left: 15, right: 15),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Top handle
+          Container(
+            width: 40,
+            height: 5,
+            decoration: BoxDecoration(
+              color: AppColors.greyScale400,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            margin: const EdgeInsets.only(bottom: 12),
+          ),
+          Padding(
+            padding: EdgeInsets.only(top: 40),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              spacing: 24,
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    spacing: 4,
+                    children: [
+                      Text(
+                        strings(context).recipeReview,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                          fontFamily: 'Pretendard',
+                          fontWeight: FontWeight.w700,
+                          height: 1.50,
+                        ),
+                      ),
+                      Text(
+                        strings(context).recipeRating,
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 14,
+                          fontFamily: 'Pretendard',
+                          fontWeight: FontWeight.w400,
+                          height: 1.50,
+                          letterSpacing: -0.14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  spacing: 5,
+                  children: [],
+                ),
+              ],
+            ),
+          ),
+
+          Padding(
+            padding: EdgeInsets.only(bottom: 40),
+            child: StarRating(
+              currentRating: currentRating,
+              filledStarColor: AppColors.secondary600,
+              emptyStarColor: AppColors.greyScale300,
+              setRating: (value) {
+                setState(() {
+                  currentRating = value;
+                });
+              },
+            ),
+          ),
+
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF5F5F5) /* Grayscale-50 */,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 8,
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    spacing: 8,
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.pop(context);
+                          },
+                          child: Container(
+                            height: 54,
+                            padding: const EdgeInsets.all(8),
+                            decoration: ShapeDecoration(
+                              color: Colors.white /* Grayscale-White */,
+                              shape: RoundedRectangleBorder(
+                                side: BorderSide(
+                                  width: 1,
+                                  color: const Color(
+                                    0xFF1D8163,
+                                  ) /* Primary-700 */,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              spacing: 8,
+                              children: [
+                                Text(
+                                  strings(context).close,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: const Color(
+                                      0xFF1D8163,
+                                    ) /* Primary-700 */,
+                                    fontSize: 16,
+                                    fontFamily: 'Pretendard',
+                                    fontWeight: FontWeight.w600,
+                                    height: 1.50,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () async {
+                            if (currentRating > 0) {
+                              try {
+                                final currentUser = widget.currentRef.read(
+                                  userGlobalViewModelProvider,
+                                );
+                                if (currentUser != null) {
+                                  final review = Review(
+                                    id: '',
+                                    reviewText: null,
+                                    rating: currentRating,
+                                    imageUrls: [],
+                                    userId: currentUser.id,
+                                    userName: currentUser.name,
+                                    userImageUrl: currentUser.profileImage,
+                                  );
+                                  await widget.currentRef
+                                      .read(reviewRepositoryProvider)
+                                      .saveReview(
+                                        recipeId: widget.recipe.id,
+                                        review: review,
+                                      );
+                                  if (!context.mounted) return;
+                                  Navigator.pop(context, true);
+                                }
+                              } catch (e) {
+                                if (!context.mounted) return;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('평점 저장에 실패했습니다: $e')),
+                                );
+                              }
+                            } else {
+                              Navigator.pop(context);
+                            }
+                          },
+                          child: Container(
+                            height: 54,
+                            padding: const EdgeInsets.all(8),
+                            decoration: ShapeDecoration(
+                              color: const Color(0xFF1D8163) /* Primary-700 */,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              spacing: 8,
+                              children: [
+                                Text(
+                                  strings(context).confirm,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Colors.white /* Grayscale-White */,
+                                    fontSize: 16,
+                                    fontFamily: 'Pretendard',
+                                    fontWeight: FontWeight.w600,
+                                    height: 1.50,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

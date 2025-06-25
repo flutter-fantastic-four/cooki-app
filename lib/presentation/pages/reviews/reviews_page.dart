@@ -351,6 +351,8 @@ class ReviewsPage extends ConsumerWidget {
             currentRating: review.rating,
             iconSize: 16,
             horizontalPadding: 0,
+            filledStarColor: AppColors.secondary600,
+            emptyStarColor: AppColors.greyScale300,
             setRating: null,
             alignment: MainAxisAlignment.start,
           ),

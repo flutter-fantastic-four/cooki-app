@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 import '../../gen/l10n/app_localizations.dart';
-import 'dialogue_util.dart';
+import '../../presentation/widgets/app_dialog.dart';
 
 AppLocalizations strings(BuildContext context) {
   return AppLocalizations.of(context)!;
@@ -39,7 +39,7 @@ class GeneralUtil {
       imageFile.absolute.path,
       targetPath,
       quality: quality,
-      format: format
+      format: format,
     );
 
     return compressedFile != null ? File(compressedFile.path) : imageFile;
@@ -55,14 +55,15 @@ class GeneralUtil {
       onPopInvokedWithResult: (bool didPop, Object? result) async {
         if (!didPop) {
           if (hasUnsavedChanges()) {
-            final confirm = await DialogueUtil.showAppCupertinoDialog(
+            final confirm = await AppDialog.show(
               context: context,
               title: strings(context).stopWritingConfirmTitle,
-              content: strings(context).stopWritingConfirmMessage,
-              showCancel: true,
+              subText: strings(context).stopWritingConfirmMessage,
+              primaryButtonText: strings(context).confirm,
+              secondaryButtonText: strings(context).cancel,
             );
 
-            if (confirm == AppDialogResult.confirm) {
+            if (confirm == true) {
               if (!context.mounted) return;
               Navigator.of(context).pop();
             }

@@ -2,6 +2,7 @@ import 'package:cooki/core/utils/navigation_util.dart';
 import 'package:cooki/presentation/pages/detailed_recipe/detailed_recipe_page.dart';
 import 'package:cooki/core/utils/sharing_util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../app/constants/app_constants.dart';
 import '../../../../../data/repository/providers.dart';
@@ -22,6 +23,7 @@ class MyRecipesPage extends ConsumerStatefulWidget {
 
 class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
   late PageController _pageController;
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void didChangeDependencies() {
@@ -30,7 +32,9 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
 
     // Use post-frame callback to avoid modifying provider during build
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final viewModel = ref.read(savedRecipesViewModelProvider(strings(context)).notifier);
+      final viewModel = ref.read(
+        savedRecipesViewModelProvider(strings(context)).notifier,
+      );
       viewModel.setSelectedCategory(defaultCategory);
       // Ensure recipes are refreshed when tab is first loaded
       viewModel.refreshRecipes();
@@ -46,7 +50,9 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
   bool _onScrollNotification(ScrollNotification notification) {
     if (notification is ScrollUpdateNotification) {
       final shouldShow = notification.metrics.pixels > 0;
-      final viewModel = ref.read(savedRecipesViewModelProvider(strings(context)).notifier);
+      final viewModel = ref.read(
+        savedRecipesViewModelProvider(strings(context)).notifier,
+      );
       viewModel.setShowTabBorder(shouldShow);
     }
     return false;
@@ -55,16 +61,22 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
   @override
   void dispose() {
     _pageController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(savedRecipesViewModelProvider(strings(context)));
-    final viewModel = ref.read(savedRecipesViewModelProvider(strings(context)).notifier);
+    final viewModel = ref.read(
+      savedRecipesViewModelProvider(strings(context)).notifier,
+    );
 
     // Show error snackbar if there's an error
-    ref.listen(savedRecipesViewModelProvider(strings(context)), (previous, next) {
+    ref.listen(savedRecipesViewModelProvider(strings(context)), (
+      previous,
+      next,
+    ) {
       if (next.error != null) {
         if (next.error == 'delete_success') {
           SnackbarUtil.showSnackBar(
@@ -81,138 +93,154 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        titleSpacing: 20,
-        title: Text(
-          strings(context).myRecipesTitle,
-          style: const TextStyle(
-            color: Colors.black,
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: FilterIconWithDot(showDot: state.hasActiveFilters),
-            onPressed: () => _showFilterModal(context),
-          ),
-          IconButton(
-            icon: const Icon(Icons.search, color: Colors.black, size: 24),
-            onPressed: () {},
-          ),
-        ],
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: false,
-      ),
+      appBar:
+          state.isSearchActive
+              ? _buildSearchAppBar(context, state, viewModel)
+              : _buildNormalAppBar(context, state, viewModel),
       body: Column(
         children: [
           // Category tabs
           Container(
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: AppColors.greyScale50, width: 1),
-              ),
-            ),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.fromLTRB(16, 2, 16, 0),
-              child: Row(
-                children:
-                    AppConstants.recipeTabCategories(
-                      context,
-                    ).asMap().entries.map((entry) {
-                      final index = entry.key;
-                      final category = entry.value;
-                      final isSelected = state.selectedCategory == category;
-                      final isLastTab =
-                          index ==
-                          AppConstants.recipeTabCategories(context).length - 1;
-                      return Padding(
-                        padding: EdgeInsets.only(right: isLastTab ? 0 : 8),
-                        child: GestureDetector(
-                          onTap: () {
-                            _pageController.animateToPage(
-                              AppConstants.recipeTabCategories(
-                                context,
-                              ).indexOf(category),
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
-                            );
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              border: Border(
-                                bottom: BorderSide(
-                                  color:
-                                      isSelected
-                                          ? AppColors.primary
-                                          : Colors.transparent,
-                                  width: 2,
+            height: 42,
+            child: Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children:
+                          AppConstants.recipeTabCategories(
+                            context,
+                          ).asMap().entries.map((entry) {
+                            final index = entry.key;
+                            final category = entry.value;
+                            final isSelected =
+                                state.selectedCategory == category;
+                            final isLastTab =
+                                index ==
+                                AppConstants.recipeTabCategories(
+                                      context,
+                                    ).length -
+                                    1;
+                            return Padding(
+                              padding: EdgeInsets.only(
+                                left: index == 0 ? 16 : 0,
+                                right: isLastTab ? 16 : 8,
+                              ),
+                              child: GestureDetector(
+                                onTap: () {
+                                  _pageController.animateToPage(
+                                    AppConstants.recipeTabCategories(
+                                      context,
+                                    ).indexOf(category),
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeInOut,
+                                  );
+                                },
+                                child: Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    Container(
+                                      height: 26,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        category,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight:
+                                              isSelected
+                                                  ? FontWeight.w600
+                                                  : FontWeight.w400,
+                                          color:
+                                              isSelected
+                                                  ? AppColors.primary700
+                                                  : AppColors.greyScale800,
+                                        ),
+                                      ),
+                                    ),
+                                    if (isSelected)
+                                      Positioned(
+                                        bottom: 0,
+                                        left: 4,
+                                        right: 4,
+                                        child: Container(
+                                          height: 2,
+                                          decoration: BoxDecoration(
+                                            color: AppColors.primary,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
                                 ),
                               ),
-                            ),
-                            child: Text(
-                              category,
-                              style: TextStyle(
-                                fontSize: 13.5,
-                                fontWeight:
-                                    isSelected
-                                        ? FontWeight.w600
-                                        : FontWeight.w400,
-                                color:
-                                    isSelected
-                                        ? AppColors.primary700
-                                        : AppColors.greyScale800,
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
-              ),
+                            );
+                          }).toList(),
+                    ),
+                  ),
+                ),
+                if (!state.hasActiveFilters)
+                  Container(
+                    width: double.infinity,
+                    height: 1,
+                    color: AppColors.greyScale50,
+                  ),
+              ],
             ),
           ),
           // Active filters
           if (state.hasActiveFilters)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  ...state.selectedCuisines.map(
-                    (cuisine) => _FilterChip(
-                      label: cuisine,
-                      onDeleted: () async {
-                        viewModel.removeCuisine(cuisine);
-                        await viewModel.loadRecipes();
-                      },
-                      isModalChip: false,
+            Column(
+              children: [
+                Container(
+                  height: 38,
+                  margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        ...state.selectedCuisines.map(
+                          (cuisine) => Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: _FilterChip(
+                              label: cuisine,
+                              onDeleted: () async {
+                                viewModel.removeCuisine(cuisine);
+                                await viewModel.loadRecipes();
+                              },
+                              isModalChip: false,
+                            ),
+                          ),
+                        ),
+                        if (state.selectedSort.isNotEmpty)
+                          _FilterChip(
+                            label: state.selectedSort,
+                            onDeleted: () async {
+                              viewModel.clearSort();
+                              await viewModel.loadRecipes();
+                            },
+                            isModalChip: false,
+                          ),
+                      ],
                     ),
                   ),
-                  if (state.selectedSort.isNotEmpty)
-                    _FilterChip(
-                      label: state.selectedSort,
-                      onDeleted: () async {
-                        viewModel.clearSort();
-                        await viewModel.loadRecipes();
-                      },
-                      isModalChip: false,
-                    ),
-                ],
-              ),
+                ),
+                const Divider(
+                  height: 1,
+                  thickness: 1,
+                  color: AppColors.greyScale50,
+                ),
+              ],
             ),
           // Recipe grid
           Expanded(
             child: PageView.builder(
               controller: _pageController,
               onPageChanged: (index) async {
-                final category = AppConstants.recipeTabCategories(context)[index];
+                final category =
+                    AppConstants.recipeTabCategories(context)[index];
                 viewModel.setSelectedCategory(category);
                 await viewModel.loadRecipes();
               },
@@ -227,6 +255,9 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                     child:
                         state.isLoading
                             ? const Center(child: CircularProgressIndicator())
+                            : state.filteredRecipes.isEmpty &&
+                                state.searchQuery.isNotEmpty
+                            ? _buildNoResultsView()
                             : CustomScrollView(
                               slivers: [
                                 SliverPadding(
@@ -240,14 +271,15 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                                     gridDelegate:
                                         const SliverGridDelegateWithFixedCrossAxisCount(
                                           crossAxisCount: 2,
-                                          crossAxisSpacing: 12,
+                                          crossAxisSpacing: 15,
                                           mainAxisSpacing: 16,
-                                          childAspectRatio: 0.75,
+                                          childAspectRatio:
+                                              160 / 184, // 160x184 card size
                                         ),
                                     delegate: SliverChildBuilderDelegate(
                                       (context, recipeIndex) {
-                                        final filteredRecipes = state
-                                            .recipes;
+                                        final filteredRecipes =
+                                            state.filteredRecipes;
                                         final recipe =
                                             filteredRecipes[recipeIndex];
                                         return _RecipeCard(
@@ -258,12 +290,10 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                                                 recipe,
                                               ),
                                           category: state.selectedCategory,
+                                          viewModel: viewModel,
                                         );
                                       },
-                                      childCount:
-                                          state
-                                              .recipes
-                                              .length,
+                                      childCount: state.filteredRecipes.length,
                                     ),
                                   ),
                                 ),
@@ -282,9 +312,125 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
     );
   }
 
+  PreferredSizeWidget _buildNormalAppBar(
+    BuildContext context,
+    SavedRecipesState state,
+    SavedRecipesViewModel viewModel,
+  ) {
+    return AppBar(
+      titleSpacing: 20,
+      title: Text(
+        strings(context).myRecipesTitle,
+        style: const TextStyle(
+          color: Colors.black,
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      actions: [
+        IconButton(
+          icon: FilterIconWithDot(showDot: state.hasActiveFilters),
+          onPressed: () => _showFilterModal(context),
+        ),
+        IconButton(
+          icon: const Icon(
+            CupertinoIcons.search,
+            color: Colors.black,
+            size: 24,
+          ),
+          onPressed: () => viewModel.toggleSearch(),
+        ),
+        const SizedBox(width: 8),
+      ],
+      backgroundColor: Colors.white,
+      elevation: 0,
+      centerTitle: false,
+    );
+  }
+
+  PreferredSizeWidget _buildSearchAppBar(
+    BuildContext context,
+    SavedRecipesState state,
+    SavedRecipesViewModel viewModel,
+  ) {
+    return AppBar(
+      backgroundColor: Colors.white,
+      elevation: 0,
+      leadingWidth: 56, // 20 + 24 + 12
+      leading: Padding(
+        padding: const EdgeInsets.only(left: 20),
+        child: IconButton(
+          icon: const Icon(CupertinoIcons.back, color: Colors.black, size: 24),
+          onPressed: () {
+            _searchController.clear();
+            viewModel.clearSearch();
+          },
+        ),
+      ),
+      titleSpacing: 12,
+      title: TextField(
+        controller: _searchController,
+        autofocus: true,
+        onChanged: (query) => viewModel.updateSearchQuery(query),
+        decoration: InputDecoration(
+          hintText: strings(context).searchPlaceholder,
+          hintStyle: TextStyle(color: AppColors.greyScale400, fontSize: 16),
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.zero,
+        ),
+        style: const TextStyle(color: Colors.black, fontSize: 16),
+      ),
+      actions: [
+        if (state.searchQuery.isNotEmpty) ...[
+          const SizedBox(width: 8),
+          IconButton(
+            icon: const Icon(
+              Icons.cancel,
+              color: AppColors.greyScale500,
+              size: 18,
+            ),
+            onPressed: () {
+              _searchController.clear();
+              viewModel.updateSearchQuery('');
+            },
+          ),
+        ] else
+          const SizedBox(width: 28), // 8 + 20 when no clear button
+        const SizedBox(width: 20),
+      ],
+    );
+  }
+
+  Widget _buildNoResultsView() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.cancel_outlined, size: 64, color: AppColors.greyScale400),
+          const SizedBox(height: 16),
+          Text(
+            strings(context).noRecipes,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: AppColors.greyScale600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            strings(context).noSearchResult,
+            style: const TextStyle(fontSize: 14, color: AppColors.greyScale500),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showFilterModal(BuildContext context) {
     final state = ref.read(savedRecipesViewModelProvider(strings(context)));
-    final viewModel = ref.read(savedRecipesViewModelProvider(strings(context)).notifier);
+    final viewModel = ref.read(
+      savedRecipesViewModelProvider(strings(context)).notifier,
+    );
 
     String tempSort = state.selectedSort;
     List<String> tempCuisines = List.from(state.selectedCuisines);
@@ -491,7 +637,9 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
   }
 
   void _showOptionsModal(BuildContext context, Recipe recipe) {
-    final viewModel = ref.read(savedRecipesViewModelProvider(strings(context)).notifier);
+    final viewModel = ref.read(
+      savedRecipesViewModelProvider(strings(context)).notifier,
+    );
 
     showModalBottomSheet(
       context: context,
@@ -587,7 +735,9 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
   }
 
   void _showDeleteConfirmation(BuildContext context, Recipe recipe) {
-    final viewModel = ref.read(savedRecipesViewModelProvider(strings(context)).notifier);
+    final viewModel = ref.read(
+      savedRecipesViewModelProvider(strings(context)).notifier,
+    );
 
     if (recipe.id.isEmpty) {
       SnackbarUtil.showSnackBar(context, strings(context).deleteError);
@@ -611,18 +761,20 @@ class _RecipeCard extends StatelessWidget {
   final Recipe recipe;
   final VoidCallback onOptionsTap;
   final String category;
+  final SavedRecipesViewModel viewModel;
 
   const _RecipeCard({
     required this.recipe,
     required this.onOptionsTap,
     required this.category,
+    required this.viewModel,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        NavigationUtil.pushFromBottom(
+      onTap: () async {
+        final result = await NavigationUtil.pushFromBottomAndWait<bool>(
           context,
           DetailRecipePage(
             recipe: recipe,
@@ -630,6 +782,10 @@ class _RecipeCard extends StatelessWidget {
                 category == strings(context).recipeTabAll ? null : category,
           ),
         );
+        // If a rating was posted, refresh the recipes
+        if (result == true && context.mounted) {
+          viewModel.loadRecipes();
+        }
       },
       child: Container(
         decoration: BoxDecoration(
@@ -647,82 +803,91 @@ class _RecipeCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              flex: 4,
-              child: Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(6),
-                    ),
-                    child:
-                        recipe.imageUrl != null
-                            ? Image.network(
-                              recipe.imageUrl!,
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                              height: double.infinity,
-                            )
-                            : Image.asset(
-                              'assets/no_image.png',
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                              height: double.infinity,
-                            ),
-                  ),
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: GestureDetector(
-                      onTap: onOptionsTap,
-                      child: const Icon(
-                        Icons.more_vert,
-                        size: 20,
-                        color: AppColors.black,
-                      ),
-                    ),
-                  ),
-                ],
+            SizedBox(
+              height: 120,
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(6),
+                ),
+                child:
+                    recipe.imageUrl != null
+                        ? Image.network(
+                          recipe.imageUrl!,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
+                        )
+                        : Image.asset(
+                          'assets/no_image.png',
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
+                        ),
               ),
             ),
-            Expanded(
-              flex: 3,
+            SizedBox(
+              height: 64,
               child: Padding(
-                padding: const EdgeInsets.all(12.0),
+                padding: const EdgeInsets.only(
+                  left: 12.0,
+                  right: 12.0,
+                  top: 12.0,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    SizedBox(
-                      height:
-                          42, // Approximately 2 lines of text at fontSize 15 with 1.2 height
-                      child: Text(
-                        recipe.recipeName,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.greyScale800,
-                          height: 1.2,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            recipe.recipeName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.greyScale800,
+                              height: 1.2,
+                            ),
+                          ),
                         ),
-                      ),
+                        GestureDetector(
+                          onTap: onOptionsTap,
+                          child: const Icon(
+                            Icons.more_vert,
+                            size: 20,
+                            color: AppColors.black,
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        ...List.generate(5, (index) {
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 2),
-                            child: Icon(
-                              index < recipe.ratingSum
-                                  ? Icons.star
-                                  : Icons.star_border,
-                              color: AppColors.black,
-                              size: 14,
-                            ),
-                          );
-                        }),
+                        // Show user's rating as five-star system
+                        Builder(
+                          builder: (context) {
+                            final userRating = viewModel.getUserRatingForRecipe(
+                              recipe.id,
+                            );
+                            return Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: List.generate(5, (index) {
+                                return Icon(
+                                  index < (userRating ?? 0)
+                                      ? Icons.star
+                                      : Icons.star_border,
+                                  color:
+                                      index < (userRating ?? 0)
+                                          ? AppColors.secondary600
+                                          : AppColors.greyScale300,
+                                  size: 14,
+                                );
+                              }),
+                            );
+                          },
+                        ),
                       ],
                     ),
                   ],
@@ -786,7 +951,7 @@ class _FilterChip extends StatelessWidget {
                         : (isSelected
                             ? AppColors.primary700
                             : AppColors.primary700),
-                fontSize: 13,
+                fontSize: 12,
                 height: 1.2,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
               ),

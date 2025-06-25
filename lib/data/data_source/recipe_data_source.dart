@@ -15,7 +15,7 @@ abstract class RecipeDataSource {
   });
 
   Future<List<String>> getUserSavedRecipeIds(String userId);
-  
+
   Future<List<RecipeFirestoreDto>> getUserSavedRecipes(
     String userId, {
     RecipeSortType sortType = RecipeSortType.ratingDescending,
@@ -111,11 +111,12 @@ class RecipeFirestoreDataSource implements RecipeDataSource {
 
   @override
   Future<List<String>> getUserSavedRecipeIds(String userId) async {
-    final snapshot = await _firestore
-        .collection('users')
-        .doc(userId)
-        .collection('savedRecipes')
-        .get();
+    final snapshot =
+        await _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('savedRecipes')
+            .get();
     return snapshot.docs.map((doc) => doc.id).toList();
   }
 
@@ -162,9 +163,7 @@ class RecipeFirestoreDataSource implements RecipeDataSource {
         .doc(userId)
         .collection('savedRecipes')
         .doc(recipeId)
-        .set({
-      'savedAt': FieldValue.serverTimestamp(),
-    });
+        .set({'savedAt': FieldValue.serverTimestamp()});
   }
 
   @override

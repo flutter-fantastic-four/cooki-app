@@ -7,6 +7,7 @@ import '../../../data/repository/providers.dart';
 import '../../../domain/entity/app_user.dart';
 import '../../../domain/entity/local_or_remote_image.dart';
 import '../../../domain/entity/review.dart';
+import '../detailed_recipe/detailed_recipe_page.dart';
 
 class WriteReviewState {
   final int rating;
@@ -92,6 +93,9 @@ class WriteReviewViewModel
             .read(reviewRepositoryProvider)
             .saveReview(recipeId: recipeId, review: review);
       }
+
+      // Invalidate the average rating provider to refresh the display
+      ref.invalidate(actualAverageRatingProvider(recipeId));
     } catch (e, stack) {
       logError(e, stack);
       state = state.copyWith(errorKey: WriteReviewErrorKey.saveFailed);
@@ -161,6 +165,9 @@ class WriteReviewViewModel
       await ref
           .read(reviewRepositoryProvider)
           .deleteReview(recipeId: recipeId, reviewId: reviewId);
+
+      // Invalidate the average rating provider to refresh the display
+      ref.invalidate(actualAverageRatingProvider(recipeId));
     } catch (e, stack) {
       logError(e, stack);
       state = state.copyWith(errorKey: WriteReviewErrorKey.deleteFailed);
