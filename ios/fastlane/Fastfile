@@ -1,0 +1,37 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "Build and upload to TestFlight"
+  lane :beta do
+    api_key = app_store_connect_api_key(
+      key_id: ENV["APP_STORE_CONNECT_API_KEY_ID"],
+      issuer_id: ENV["APP_STORE_CONNECT_API_ISSUER_ID"],
+      key_content: ENV["APP_STORE_CONNECT_API_PRIVATE_KEY"],
+      in_house: false
+    )
+
+    # Force manual signing with explicit provisioning profile
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "Runner.xcodeproj",
+      code_sign_identity: "iPhone Distribution",
+      bundle_identifier: "com.fantasticfour.cooki",
+      profile_uuid: "1c62c843-ce6a-476f-b808-afd52c1266fe"
+    )
+
+    build_app(
+      scheme: "Runner",
+      export_method: "app-store",
+      codesigning_identity: "iPhone Distribution",
+      export_options: {
+        method: "app-store",
+        signingStyle: "manual",
+        provisioningProfiles: {
+          "com.fantasticfour.cooki" => "Appstore_cooki_with_signin"
+        }
+      }
+    )
+
+    upload_to_testflight(api_key: api_key)
+  end
+end

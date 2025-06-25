@@ -16,6 +16,8 @@ class SavedRecipesState {
   final List<String> selectedCuisines;
   final String selectedSort;
   final bool showTabBorder;
+  final String searchQuery;
+  final bool isSearchActive;
 
   const SavedRecipesState({
     this.isLoading = false,
@@ -25,6 +27,8 @@ class SavedRecipesState {
     this.selectedCuisines = const [],
     this.selectedSort = '',
     this.showTabBorder = false,
+    this.searchQuery = '',
+    this.isSearchActive = false,
   });
 
   SavedRecipesState copyWith({
@@ -36,6 +40,8 @@ class SavedRecipesState {
     List<String>? selectedCuisines,
     String? selectedSort,
     bool? showTabBorder,
+    String? searchQuery,
+    bool? isSearchActive,
   }) {
     return SavedRecipesState(
       isLoading: isLoading ?? this.isLoading,
@@ -45,10 +51,24 @@ class SavedRecipesState {
       selectedCuisines: selectedCuisines ?? this.selectedCuisines,
       selectedSort: selectedSort ?? this.selectedSort,
       showTabBorder: showTabBorder ?? this.showTabBorder,
+      searchQuery: searchQuery ?? this.searchQuery,
+      isSearchActive: isSearchActive ?? this.isSearchActive,
     );
   }
 
-  bool get hasActiveFilters => selectedCuisines.isNotEmpty || selectedSort.isNotEmpty;
+  bool get hasActiveFilters => selectedCuisines.isNotEmpty || selectedSort.isNotEmpty || searchQuery.isNotEmpty;
+
+  List<Recipe> get filteredRecipes {
+    if (searchQuery.isEmpty) return recipes;
+
+    final query = searchQuery.toLowerCase();
+    return recipes.where((recipe) {
+      return recipe.recipeName.toLowerCase().contains(query) ||
+          recipe.category.toLowerCase().contains(query) ||
+          recipe.ingredients.any((ingredient) => ingredient.toLowerCase().contains(query)) ||
+          recipe.steps.any((step) => step.toLowerCase().contains(query));
+    }).toList();
+  }
 }
 
 class SavedRecipesViewModel extends AutoDisposeFamilyNotifier<SavedRecipesState, AppLocalizations> {
@@ -93,7 +113,6 @@ class SavedRecipesViewModel extends AutoDisposeFamilyNotifier<SavedRecipesState,
         recipes = [];
       }
 
-      // Filter by cuisine (still needed)
       if (state.selectedCuisines.isNotEmpty) {
         recipes = recipes.where((r) => state.selectedCuisines.contains(r.category)).toList();
       }
@@ -176,6 +195,18 @@ class SavedRecipesViewModel extends AutoDisposeFamilyNotifier<SavedRecipesState,
 
   void clearError() {
     state = state.copyWith(clearError: true);
+  }
+
+  void toggleSearch() {
+    state = state.copyWith(isSearchActive: !state.isSearchActive, searchQuery: !state.isSearchActive ? state.searchQuery : '');
+  }
+
+  void updateSearchQuery(String query) {
+    state = state.copyWith(searchQuery: query);
+  }
+
+  void clearSearch() {
+    state = state.copyWith(searchQuery: '', isSearchActive: false);
   }
 }
 
