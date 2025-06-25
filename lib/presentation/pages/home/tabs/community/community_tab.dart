@@ -185,8 +185,8 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
 
     final filteredRecipes = state.getFilteredRecipes(context);
     if (filteredRecipes.isEmpty) {
-      if (state.searchQuery.isNotEmpty) {
-        // Show no search results
+      if (state.hasActiveFilters) {
+        // Show no filtered results
         return Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -203,14 +203,6 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                   color: AppColors.greyScale600,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                strings(context).noSearchResult,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: AppColors.greyScale500,
                 ),
               ),
             ],
