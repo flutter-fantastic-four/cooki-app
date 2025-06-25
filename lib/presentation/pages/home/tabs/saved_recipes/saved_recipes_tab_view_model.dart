@@ -56,10 +56,7 @@ class SavedRecipesState {
     );
   }
 
-  bool get hasActiveFilters =>
-      selectedCuisines.isNotEmpty ||
-      selectedSort.isNotEmpty ||
-      searchQuery.isNotEmpty;
+  bool get hasActiveFilters => selectedCuisines.isNotEmpty || selectedSort.isNotEmpty || searchQuery.isNotEmpty;
 
   List<Recipe> get filteredRecipes {
     if (searchQuery.isEmpty) return recipes;
@@ -68,16 +65,13 @@ class SavedRecipesState {
     return recipes.where((recipe) {
       return recipe.recipeName.toLowerCase().contains(query) ||
           recipe.category.toLowerCase().contains(query) ||
-          recipe.ingredients.any(
-            (ingredient) => ingredient.toLowerCase().contains(query),
-          ) ||
+          recipe.ingredients.any((ingredient) => ingredient.toLowerCase().contains(query)) ||
           recipe.steps.any((step) => step.toLowerCase().contains(query));
     }).toList();
   }
 }
 
-class SavedRecipesViewModel
-    extends AutoDisposeFamilyNotifier<SavedRecipesState, AppLocalizations> {
+class SavedRecipesViewModel extends AutoDisposeFamilyNotifier<SavedRecipesState, AppLocalizations> {
   @override
   SavedRecipesState build(AppLocalizations arg) {
     Future.microtask(() => loadRecipes());
@@ -90,7 +84,7 @@ class SavedRecipesViewModel
     try {
       final currentUser = ref.read(userGlobalViewModelProvider);
       if (currentUser == null) {
-        state = state.copyWith(isLoading: false, error: 'User not logged in');
+        state = state.copyWith(isLoading: false);
         return;
       }
 
@@ -108,36 +102,19 @@ class SavedRecipesViewModel
       List<Recipe> recipes;
 
       if (selectedCategory == arg.recipeTabAll) {
-        recipes = await repository.getMyRecipes(
-          currentUser.id,
-          sortType: sortType ?? RecipeSortType.createdAtDescending,
-        );
+        recipes = await repository.getMyRecipes(currentUser.id, sortType: sortType ?? RecipeSortType.createdAtDescending);
       } else if (selectedCategory == arg.recipeTabCreated) {
-        recipes = await repository.getMyRecipes(
-          currentUser.id,
-          isPublic: false,
-          sortType: sortType ?? RecipeSortType.createdAtDescending,
-        );
+        recipes = await repository.getMyRecipes(currentUser.id, isPublic: false, sortType: sortType ?? RecipeSortType.createdAtDescending);
       } else if (selectedCategory == arg.recipeTabShared) {
-        recipes = await repository.getMyRecipes(
-          currentUser.id,
-          isPublic: true,
-          sortType: sortType ?? RecipeSortType.createdAtDescending,
-        );
+        recipes = await repository.getMyRecipes(currentUser.id, isPublic: true, sortType: sortType ?? RecipeSortType.createdAtDescending);
       } else if (selectedCategory == arg.recipeTabSaved) {
-        recipes = await repository.getUserSavedRecipes(
-          currentUser.id,
-          sortType: sortType ?? RecipeSortType.createdAtDescending,
-        );
+        recipes = await repository.getUserSavedRecipes(currentUser.id, sortType: sortType ?? RecipeSortType.createdAtDescending);
       } else {
         recipes = [];
       }
 
       if (state.selectedCuisines.isNotEmpty) {
-        recipes =
-            recipes
-                .where((r) => state.selectedCuisines.contains(r.category))
-                .toList();
+        recipes = recipes.where((r) => state.selectedCuisines.contains(r.category)).toList();
       }
 
       state = state.copyWith(isLoading: false, recipes: recipes);
@@ -221,10 +198,7 @@ class SavedRecipesViewModel
   }
 
   void toggleSearch() {
-    state = state.copyWith(
-      isSearchActive: !state.isSearchActive,
-      searchQuery: !state.isSearchActive ? state.searchQuery : '',
-    );
+    state = state.copyWith(isSearchActive: !state.isSearchActive, searchQuery: !state.isSearchActive ? state.searchQuery : '');
   }
 
   void updateSearchQuery(String query) {
@@ -236,7 +210,6 @@ class SavedRecipesViewModel
   }
 }
 
-final savedRecipesViewModelProvider = NotifierProvider.autoDispose
-    .family<SavedRecipesViewModel, SavedRecipesState, AppLocalizations>(
-      SavedRecipesViewModel.new,
-    );
+final savedRecipesViewModelProvider = NotifierProvider.autoDispose.family<SavedRecipesViewModel, SavedRecipesState, AppLocalizations>(
+  SavedRecipesViewModel.new,
+);

@@ -252,6 +252,22 @@
 
   "recipeReview": "Rate Recipe",
   "recipeRating": "Rate your generated recipe",
+  "skipLogin": "I'll log in later",
+  "pleaseLogin": "Please log in",
+
+  "noRecipeNoticeRecentFood": "Do you recall any delicious food you've recently enjoyed?",
+  "noRecipeNoticeTakePhoto": "One photo and a brief description are enough",
+  "goCommunity": "Browse Community",
+
+  "noRecipeNoticeemptyCategoryMessage": "No {category} yet",
+  "@noRecipeNoticeemptyCategoryMessage": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "guestSignUpPrompt":"With a simple sign-up\nyou can enjoy all of Cookie's services.",
 
   "undoTranslation": "Show original",
   "translationFailed": "Translation failed. Please try again."

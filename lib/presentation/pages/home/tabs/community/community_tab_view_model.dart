@@ -56,17 +56,14 @@ class CommunityState {
           filtered.where((recipe) {
             return recipe.recipeName.toLowerCase().contains(query) ||
                 recipe.category.toLowerCase().contains(query) ||
-                recipe.ingredients.any(
-                  (ingredient) => ingredient.toLowerCase().contains(query),
-                ) ||
+                recipe.ingredients.any((ingredient) => ingredient.toLowerCase().contains(query)) ||
                 recipe.steps.any((step) => step.toLowerCase().contains(query));
           }).toList();
     }
 
     // Filter by cuisine categories if any selected
     if (selectedCuisines.isNotEmpty) {
-      filtered =
-          filtered.where((r) => selectedCuisines.contains(r.category)).toList();
+      filtered = filtered.where((r) => selectedCuisines.contains(r.category)).toList();
     }
 
     // Apply sort option if selected
@@ -79,10 +76,7 @@ class CommunityState {
     return filtered;
   }
 
-  bool get hasActiveFilters =>
-      selectedCuisines.isNotEmpty ||
-      selectedSort.isNotEmpty ||
-      searchQuery.isNotEmpty;
+  bool get hasActiveFilters => selectedCuisines.isNotEmpty || selectedSort.isNotEmpty || searchQuery.isNotEmpty;
 }
 
 class CommunityViewModel extends AutoDisposeNotifier<CommunityState> {
@@ -97,9 +91,7 @@ class CommunityViewModel extends AutoDisposeNotifier<CommunityState> {
 
     try {
       final repository = ref.read(recipeRepositoryProvider);
-      final recipes = await repository.getCommunityRecipes(
-        ref.read(userGlobalViewModelProvider)!.id,
-      );
+      final recipes = await repository.getCommunityRecipes(ref.read(userGlobalViewModelProvider)?.id);
       state = state.copyWith(isLoading: false, recipes: recipes);
     } catch (e, stack) {
       logError(e, stack);
@@ -138,10 +130,7 @@ class CommunityViewModel extends AutoDisposeNotifier<CommunityState> {
   }
 
   void toggleSearch() {
-    state = state.copyWith(
-      isSearchActive: !state.isSearchActive,
-      searchQuery: !state.isSearchActive ? state.searchQuery : '',
-    );
+    state = state.copyWith(isSearchActive: !state.isSearchActive, searchQuery: !state.isSearchActive ? state.searchQuery : '');
   }
 
   void updateSearchQuery(String query) {
@@ -153,7 +142,4 @@ class CommunityViewModel extends AutoDisposeNotifier<CommunityState> {
   }
 }
 
-final communityViewModelProvider =
-    NotifierProvider.autoDispose<CommunityViewModel, CommunityState>(
-      CommunityViewModel.new,
-    );
+final communityViewModelProvider = NotifierProvider.autoDispose<CommunityViewModel, CommunityState>(CommunityViewModel.new);

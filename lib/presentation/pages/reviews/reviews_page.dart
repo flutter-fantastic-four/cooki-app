@@ -203,10 +203,8 @@ class ReviewsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(reviewsViewModelProvider(recipeId));
 
-    ref.listen<ReviewsState>(reviewsViewModelProvider(recipeId), (
-      previous,
-      next,
-    ) {
+    final userViewModel = ref.watch(userGlobalViewModelProvider);
+    ref.listen<ReviewsState>(reviewsViewModelProvider(recipeId), (previous, next) {
       if (next.errorKey != null) {
         _showErrorDialog(context, next.errorKey!, ref);
         return;
@@ -217,31 +215,23 @@ class ReviewsPage extends ConsumerWidget {
       appBar: AppBar(
         title: Text(strings(context).recipeReviews),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 4),
-            child: IconButton(
-              tooltip: strings(context).writeReviewTitle,
-              onPressed: () async {
-                final existingReview = await ref
-                    .read(reviewsViewModelProvider(recipeId).notifier)
-                    .getUserReviewForRecipe(
-                      ref.read(userGlobalViewModelProvider)!.id,
-                    );
-                if (context.mounted) {
-                  _navigateToWriteOrEditReview(
-                    context,
-                    ref,
-                    review: existingReview,
-                  );
-                }
-              },
-              icon: const Icon(
-                Icons.edit_outlined,
-                size: 22,
-                color: Colors.black87,
-              ),
-            ),
-          ),
+          userViewModel != null
+              ? Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: IconButton(
+                  tooltip: strings(context).writeReviewTitle,
+                  onPressed: () async {
+                    final existingReview = await ref
+                        .read(reviewsViewModelProvider(recipeId).notifier)
+                        .getUserReviewForRecipe(ref.read(userGlobalViewModelProvider)!.id);
+                    if (context.mounted) {
+                      _navigateToWriteOrEditReview(context, ref, review: existingReview);
+                    }
+                  },
+                  icon: const Icon(Icons.edit_outlined, size: 22, color: Colors.black87),
+                ),
+              )
+              : SizedBox(),
         ],
       ),
       body:

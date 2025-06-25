@@ -14,23 +14,13 @@ abstract class RecipeRepository {
 
   Future<List<Recipe>> getAllRecipes();
 
-  Future<List<Recipe>> getMyRecipes(
-    String userId, {
-    bool? isPublic,
-    RecipeSortType sortType,
-  });
+  Future<List<Recipe>> getMyRecipes(String userId, {bool? isPublic, RecipeSortType sortType});
 
-  Future<List<Recipe>> getUserSavedRecipes(
-    String userId, {
-    RecipeSortType sortType,
-  });
+  Future<List<Recipe>> getUserSavedRecipes(String userId, {RecipeSortType sortType});
 
   Future<List<String>> getUserSavedRecipeIds(String userId);
 
-  Future<List<Recipe>> getCommunityRecipes(
-    String userId, {
-    RecipeSortType sortType,
-  });
+  Future<List<Recipe>> getCommunityRecipes(String? userId, {RecipeSortType sortType});
 
   Future<void> addToSavedRecipes(String userId, String recipeId);
 
@@ -59,11 +49,7 @@ class RecipeRepositoryImpl implements RecipeRepository {
 
   @override
   Future<String> uploadImageBytes(Uint8List imageBytes, String uid) {
-    return _imageStorageDataSource.uploadImageBytes(
-      imageBytes,
-      uid,
-      'recipe_images',
-    );
+    return _imageStorageDataSource.uploadImageBytes(imageBytes, uid, 'recipe_images');
   }
 
   @override
@@ -73,28 +59,14 @@ class RecipeRepositoryImpl implements RecipeRepository {
   }
 
   @override
-  Future<List<Recipe>> getMyRecipes(
-    String userId, {
-    bool? isPublic,
-    RecipeSortType sortType = RecipeSortType.createdAtDescending,
-  }) async {
-    final dtoList = await _recipeDataSource.getMyRecipes(
-      userId,
-      isPublic: isPublic,
-      sortType: sortType,
-    );
+  Future<List<Recipe>> getMyRecipes(String userId, {bool? isPublic, RecipeSortType sortType = RecipeSortType.createdAtDescending}) async {
+    final dtoList = await _recipeDataSource.getMyRecipes(userId, isPublic: isPublic, sortType: sortType);
     return dtoList.map((dto) => dto.toEntity()).toList();
   }
 
   @override
-  Future<List<Recipe>> getUserSavedRecipes(
-    String userId, {
-    RecipeSortType sortType = RecipeSortType.createdAtDescending,
-  }) async {
-    final dtoList = await _recipeDataSource.getUserSavedRecipes(
-      userId,
-      sortType: sortType,
-    );
+  Future<List<Recipe>> getUserSavedRecipes(String userId, {RecipeSortType sortType = RecipeSortType.createdAtDescending}) async {
+    final dtoList = await _recipeDataSource.getUserSavedRecipes(userId, sortType: sortType);
     return dtoList.map((dto) => dto.toEntity()).toList();
   }
 
@@ -104,14 +76,8 @@ class RecipeRepositoryImpl implements RecipeRepository {
   }
 
   @override
-  Future<List<Recipe>> getCommunityRecipes(
-    String userId, {
-    RecipeSortType sortType = RecipeSortType.createdAtDescending,
-  }) async {
-    final dtoList = await _recipeDataSource.getCommunityRecipes(
-      userId,
-      sortType: sortType,
-    );
+  Future<List<Recipe>> getCommunityRecipes(String? userId, {RecipeSortType sortType = RecipeSortType.createdAtDescending}) async {
+    final dtoList = await _recipeDataSource.getCommunityRecipes(userId, sortType: sortType);
     return dtoList.map((dto) => dto.toEntity()).toList();
   }
 
