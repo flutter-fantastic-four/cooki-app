@@ -254,5 +254,8 @@
   "score":"점",
 
   "recipeReview":"레시피 평가하기",
-  "recipeRating":"생성한 레시피에 대한 별점을 남겨보세요"
+  "recipeRating":"생성한 레시피에 대한 별점을 남겨보세요",
+
+  "undoTranslation": "원본 보기",
+  "translationFailed": "번역에 실패했습니다. 다시 시도해 주세요."
 }

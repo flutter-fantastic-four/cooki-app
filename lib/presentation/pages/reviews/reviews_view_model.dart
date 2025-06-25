@@ -13,6 +13,12 @@ class ReviewsState {
   final ReviewsErrorKey? errorKey;
   final Set<String> expandedReviews;
 
+  /// Stores translated texts by reviewId
+  final Map<String, String> translatedTexts;
+
+  /// Tracks which reviews are being translated
+  final Set<String> translatingReviews;
+
   const ReviewsState({
     this.reviews = const [],
     this.isLoading = false,
@@ -20,6 +26,8 @@ class ReviewsState {
     this.currentSortType = ReviewSortType.dateDescending,
     this.errorKey,
     this.expandedReviews = const {},
+    this.translatedTexts = const {},
+    this.translatingReviews = const {},
   });
 
   ReviewsState copyWith({
@@ -30,6 +38,8 @@ class ReviewsState {
     ReviewsErrorKey? errorKey,
     bool clearErrorKey = false,
     Set<String>? expandedReviews,
+    Map<String, String>? translatedTexts,
+    Set<String>? translatingReviews,
   }) {
     return ReviewsState(
       reviews: reviews ?? this.reviews,
@@ -38,6 +48,8 @@ class ReviewsState {
       currentSortType: currentSortType ?? this.currentSortType,
       errorKey: clearErrorKey ? null : errorKey ?? this.errorKey,
       expandedReviews: expandedReviews ?? this.expandedReviews,
+      translatedTexts: translatedTexts ?? this.translatedTexts,
+      translatingReviews: translatingReviews ?? this.translatingReviews,
     );
   }
 }
@@ -100,12 +112,6 @@ class ReviewsViewModel extends AutoDisposeFamilyNotifier<ReviewsState, String> {
     return state.expandedReviews.contains(reviewId);
   }
 
-  bool shouldShowTranslate(Review review, String currentAppLanguage) {
-    return review.reviewText?.isNotEmpty == true &&
-        review.language != null &&
-        review.language != currentAppLanguage;
-  }
-
   Future<void> deleteReview(String reviewId) async {
     state = state.copyWith(isLoading: true);
     try {
@@ -138,6 +144,75 @@ class ReviewsViewModel extends AutoDisposeFamilyNotifier<ReviewsState, String> {
     } finally {
       state = state.copyWith(isLoading: false);
     }
+  }
+
+  /// Checks if translate option should be shown
+  bool shouldShowTranslate(Review review, String currentAppLanguage) {
+    return review.reviewText?.isNotEmpty == true &&
+        review.language != null &&
+        review.language != currentAppLanguage;
+  }
+
+  Future<void> translateReview(String reviewId, String currentLanguage) async {
+    final review = state.reviews.firstWhere((r) => r.id == reviewId);
+
+    // Add to translating set
+    final updatedTranslatingReviews = Set<String>.from(
+      state.translatingReviews,
+    );
+    updatedTranslatingReviews.add(reviewId);
+    state = state.copyWith(translatingReviews: updatedTranslatingReviews);
+
+    try {
+      final translationResult = await ref
+          .read(reviewRepositoryProvider)
+          .translateReviewText(
+            text: review.reviewText!,
+            targetLanguage: currentLanguage,
+            sourceLanguage: review.language,
+          );
+
+      // Update translated texts
+      final updatedTranslatedTexts = Map<String, String>.from(
+        state.translatedTexts,
+      );
+      updatedTranslatedTexts[reviewId] = translationResult.translatedText;
+      state = state.copyWith(translatedTexts: updatedTranslatedTexts);
+    } catch (e, stack) {
+      logError(e, stack);
+      state = state.copyWith(errorKey: ReviewsErrorKey.translationFailed);
+    } finally {
+      // Remove from translating set
+      final updatedTranslatingReviews = Set<String>.from(
+        state.translatingReviews,
+      );
+      updatedTranslatingReviews.remove(reviewId);
+      state = state.copyWith(translatingReviews: updatedTranslatingReviews);
+    }
+  }
+
+  /// Gets translated text for a review
+  String? getTranslatedText(String reviewId) {
+    return state.translatedTexts[reviewId];
+  }
+
+  /// Checks if review is being translated
+  bool isReviewTranslating(String reviewId) {
+    return state.translatingReviews.contains(reviewId);
+  }
+
+  /// Checks if review has been translated
+  bool hasTranslation(String reviewId) {
+    return state.translatedTexts.containsKey(reviewId);
+  }
+
+  // Clear translation for a review (undo translation)
+  void clearTranslation(String reviewId) {
+    final updatedTranslatedTexts = Map<String, String>.from(
+      state.translatedTexts,
+    );
+    updatedTranslatedTexts.remove(reviewId);
+    state = state.copyWith(translatedTexts: updatedTranslatedTexts);
   }
 
   void clearError() {

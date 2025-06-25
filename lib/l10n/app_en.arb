@@ -251,5 +251,8 @@
   "score": "",
 
   "recipeReview": "Rate Recipe",
-  "recipeRating": "Rate your generated recipe"
+  "recipeRating": "Rate your generated recipe",
+
+  "undoTranslation": "Show original",
+  "translationFailed": "Translation failed. Please try again."
 }
