@@ -204,7 +204,10 @@ class ReviewsPage extends ConsumerWidget {
     final state = ref.watch(reviewsViewModelProvider(recipeId));
 
     final userViewModel = ref.watch(userGlobalViewModelProvider);
-    ref.listen<ReviewsState>(reviewsViewModelProvider(recipeId), (previous, next) {
+    ref.listen<ReviewsState>(reviewsViewModelProvider(recipeId), (
+      previous,
+      next,
+    ) {
       if (next.errorKey != null) {
         _showErrorDialog(context, next.errorKey!, ref);
         return;
@@ -223,12 +226,22 @@ class ReviewsPage extends ConsumerWidget {
                   onPressed: () async {
                     final existingReview = await ref
                         .read(reviewsViewModelProvider(recipeId).notifier)
-                        .getUserReviewForRecipe(ref.read(userGlobalViewModelProvider)!.id);
+                        .getUserReviewForRecipe(
+                          ref.read(userGlobalViewModelProvider)!.id,
+                        );
                     if (context.mounted) {
-                      _navigateToWriteOrEditReview(context, ref, review: existingReview);
+                      _navigateToWriteOrEditReview(
+                        context,
+                        ref,
+                        review: existingReview,
+                      );
                     }
                   },
-                  icon: const Icon(Icons.edit_outlined, size: 22, color: Colors.black87),
+                  icon: const Icon(
+                    Icons.edit_outlined,
+                    size: 22,
+                    color: Colors.black87,
+                  ),
                 ),
               )
               : SizedBox(),
