@@ -2,12 +2,15 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cooki/app/constants/app_colors.dart';
 import 'package:cooki/core/utils/general_util.dart';
 import 'package:cooki/core/utils/navigation_util.dart';
+import 'package:cooki/domain/entity/app_user.dart';
 import 'package:cooki/domain/entity/recipe.dart';
 import 'package:cooki/domain/entity/review.dart';
 import 'package:cooki/presentation/pages/add_review/write_review_page.dart';
 import 'package:cooki/presentation/pages/edit/recipe_edit_page.dart';
+import 'package:cooki/presentation/pages/login/guest_login_page.dart';
 import 'package:cooki/presentation/pages/reviews/reviews_page.dart';
 import 'package:cooki/presentation/pages/reviews/reviews_view_model.dart';
+import 'package:cooki/presentation/user_global_view_model.dart';
 import 'package:cooki/presentation/widgets/app_cached_image.dart';
 import 'package:cooki/presentation/widgets/recipe_page_widgets.dart';
 import 'package:cooki/presentation/widgets/star_rating.dart';
@@ -25,6 +28,7 @@ class DetailRecipePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.read(userGlobalViewModelProvider);
     return Scaffold(
       body: SafeArea(
         child: Stack(
@@ -39,7 +43,7 @@ class DetailRecipePage extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _infoChip(context),
+                      _infoChip(context, user),
                       const SizedBox(height: 12),
                       _title(),
                       const SizedBox(height: 20),
@@ -192,7 +196,7 @@ class DetailRecipePage extends ConsumerWidget {
     );
   }
 
-  Row _infoChip(BuildContext context) {
+  Row _infoChip(BuildContext context, AppUser? user) {
     return Row(
       children: [
         category != null
@@ -217,118 +221,152 @@ class DetailRecipePage extends ConsumerWidget {
         GestureDetector(
           onTap: () {
             int currentRating = 0;
-            recipe.isPublic
-                ? NavigationUtil.pushFromBottom(context, WriteReviewPage(recipeId: recipe.id, recipeName: recipe.recipeName))
-                : showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: AppColors.greyScale50,
-                  shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(26))),
-                  builder: (context) {
-                    return Padding(
-                      padding: const EdgeInsets.only(top: 8, bottom: 30, left: 15, right: 15),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Top handle
-                          Container(
-                            width: 40,
-                            height: 5,
-                            decoration: BoxDecoration(color: Colors.grey[400], borderRadius: BorderRadius.circular(10)),
-                            margin: const EdgeInsets.only(bottom: 12),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(top: 40),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              spacing: 24,
-                              children: [
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    spacing: 4,
-                                    children: [
-                                      Text(
-                                        strings(context).recipeReview,
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 20,
-                                          fontFamily: 'Pretendard',
-                                          fontWeight: FontWeight.w700,
-                                          height: 1.50,
+
+            if (user == null) {
+              NavigationUtil.pushFromBottom(context, GuestLoginPage());
+            } else {
+              recipe.isPublic
+                  ? NavigationUtil.pushFromBottom(context, WriteReviewPage(recipeId: recipe.id, recipeName: recipe.recipeName))
+                  : showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: AppColors.greyScale50,
+                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(26))),
+                    builder: (context) {
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 8, bottom: 30, left: 15, right: 15),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Top handle
+                            Container(
+                              width: 40,
+                              height: 5,
+                              decoration: BoxDecoration(color: Colors.grey[400], borderRadius: BorderRadius.circular(10)),
+                              margin: const EdgeInsets.only(bottom: 12),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(top: 40),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                spacing: 24,
+                                children: [
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      spacing: 4,
+                                      children: [
+                                        Text(
+                                          strings(context).recipeReview,
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 20,
+                                            fontFamily: 'Pretendard',
+                                            fontWeight: FontWeight.w700,
+                                            height: 1.50,
+                                          ),
                                         ),
-                                      ),
-                                      Text(
-                                        strings(context).recipeRating,
-                                        style: TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 14,
-                                          fontFamily: 'Pretendard',
-                                          fontWeight: FontWeight.w400,
-                                          height: 1.50,
-                                          letterSpacing: -0.14,
+                                        Text(
+                                          strings(context).recipeRating,
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 14,
+                                            fontFamily: 'Pretendard',
+                                            fontWeight: FontWeight.w400,
+                                            height: 1.50,
+                                            letterSpacing: -0.14,
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  spacing: 5,
-                                  children: [],
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          Padding(
-                            padding: EdgeInsets.only(bottom: 40),
-                            child: StarRating(
-                              currentRating: currentRating,
-                              setRating: (value) {
-                                currentRating = value;
-                              },
-                            ),
-                          ),
-
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            decoration: BoxDecoration(color: const Color(0xFFF5F5F5) /* Grayscale-50 */),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              spacing: 8,
-                              children: [
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: Row(
+                                  Row(
                                     mainAxisSize: MainAxisSize.min,
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     crossAxisAlignment: CrossAxisAlignment.center,
-                                    spacing: 8,
-                                    children: [
-                                      Expanded(
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            Navigator.pop(context);
-                                          },
+                                    spacing: 5,
+                                    children: [],
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            Padding(
+                              padding: EdgeInsets.only(bottom: 40),
+                              child: StarRating(
+                                currentRating: currentRating,
+                                setRating: (value) {
+                                  currentRating = value;
+                                },
+                              ),
+                            ),
+
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(horizontal: 20),
+                              decoration: BoxDecoration(color: const Color(0xFFF5F5F5) /* Grayscale-50 */),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                spacing: 8,
+                                children: [
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      spacing: 8,
+                                      children: [
+                                        Expanded(
+                                          child: GestureDetector(
+                                            onTap: () {
+                                              Navigator.pop(context);
+                                            },
+                                            child: Container(
+                                              height: 54,
+                                              padding: const EdgeInsets.all(8),
+                                              decoration: ShapeDecoration(
+                                                color: Colors.white /* Grayscale-White */,
+                                                shape: RoundedRectangleBorder(
+                                                  side: BorderSide(width: 1, color: const Color(0xFF1D8163) /* Primary-700 */),
+                                                  borderRadius: BorderRadius.circular(8),
+                                                ),
+                                              ),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                spacing: 8,
+                                                children: [
+                                                  Text(
+                                                    strings(context).close,
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                      color: const Color(0xFF1D8163) /* Primary-700 */,
+                                                      fontSize: 16,
+                                                      fontFamily: 'Pretendard',
+                                                      fontWeight: FontWeight.w600,
+                                                      height: 1.50,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        Expanded(
                                           child: Container(
                                             height: 54,
                                             padding: const EdgeInsets.all(8),
                                             decoration: ShapeDecoration(
-                                              color: Colors.white /* Grayscale-White */,
-                                              shape: RoundedRectangleBorder(
-                                                side: BorderSide(width: 1, color: const Color(0xFF1D8163) /* Primary-700 */),
-                                                borderRadius: BorderRadius.circular(8),
-                                              ),
+                                              color: const Color(0xFF1D8163) /* Primary-700 */,
+                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                             ),
                                             child: Row(
                                               mainAxisSize: MainAxisSize.min,
@@ -337,10 +375,10 @@ class DetailRecipePage extends ConsumerWidget {
                                               spacing: 8,
                                               children: [
                                                 Text(
-                                                  strings(context).close,
+                                                  strings(context).confirm,
                                                   textAlign: TextAlign.center,
                                                   style: TextStyle(
-                                                    color: const Color(0xFF1D8163) /* Primary-700 */,
+                                                    color: Colors.white /* Grayscale-White */,
                                                     fontSize: 16,
                                                     fontFamily: 'Pretendard',
                                                     fontWeight: FontWeight.w600,
@@ -351,47 +389,18 @@ class DetailRecipePage extends ConsumerWidget {
                                             ),
                                           ),
                                         ),
-                                      ),
-                                      Expanded(
-                                        child: Container(
-                                          height: 54,
-                                          padding: const EdgeInsets.all(8),
-                                          decoration: ShapeDecoration(
-                                            color: const Color(0xFF1D8163) /* Primary-700 */,
-                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            crossAxisAlignment: CrossAxisAlignment.center,
-                                            spacing: 8,
-                                            children: [
-                                              Text(
-                                                strings(context).confirm,
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                  color: Colors.white /* Grayscale-White */,
-                                                  fontSize: 16,
-                                                  fontFamily: 'Pretendard',
-                                                  fontWeight: FontWeight.w600,
-                                                  height: 1.50,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                );
+                          ],
+                        ),
+                      );
+                    },
+                  );
+            }
           },
           child: Container(
             height: 28,
