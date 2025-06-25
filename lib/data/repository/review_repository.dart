@@ -2,8 +2,10 @@ import 'dart:io';
 import 'package:cooki/data/dto/review_dto.dart';
 
 import '../../domain/entity/review.dart';
+import '../../domain/entity/translation_entities.dart';
 import '../data_source/image_storage_data_source.dart';
 import '../data_source/review_data_source.dart';
+import '../data_source/translation_data_source.dart';
 
 abstract class ReviewRepository {
   Future<String> saveReview({required String recipeId, required Review review});
@@ -32,13 +34,26 @@ abstract class ReviewRepository {
   });
 
   Future<String> uploadReviewImage(File imageFile, String uid);
+
+  Future<TranslationResult> translateReviewText({
+    required String text,
+    required String targetLanguage,
+    String? sourceLanguage,
+  });
+
+  Future<LanguageDetectionResult> detectReviewLanguage({required String text});
 }
 
 class ReviewRepositoryImpl implements ReviewRepository {
   final ReviewDataSource _reviewDataSource;
   final ImageStorageDataSource _imageStorageDataSource;
+  final TranslationDataSource _translationDataSource;
 
-  ReviewRepositoryImpl(this._reviewDataSource, this._imageStorageDataSource);
+  ReviewRepositoryImpl(
+    this._reviewDataSource,
+    this._imageStorageDataSource,
+    this._translationDataSource,
+  );
 
   @override
   Future<String> saveReview({
@@ -119,5 +134,25 @@ class ReviewRepositoryImpl implements ReviewRepository {
       uid,
       'review_images',
     );
+  }
+
+  @override
+  Future<TranslationResult> translateReviewText({
+    required String text,
+    required String targetLanguage,
+    String? sourceLanguage,
+  }) async {
+    return await _translationDataSource.translateText(
+      text: text,
+      targetLanguage: targetLanguage,
+      sourceLanguage: sourceLanguage,
+    );
+  }
+
+  @override
+  Future<LanguageDetectionResult> detectReviewLanguage({
+    required String text,
+  }) async {
+    return await _translationDataSource.detectLanguage(text: text);
   }
 }
