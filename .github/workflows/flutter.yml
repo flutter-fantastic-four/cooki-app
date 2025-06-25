@@ -33,39 +33,54 @@ jobs:
           mkdir -p lib
           echo "${{ secrets.FIREBASE_DART_OPTIONS }}" | base64 --decode > lib/firebase_options.dart
 
+      - name: Install CocoaPods
+        run: |
+          cd ios
+          pod install
+        shell: bash
+
       #      - name: Analyze project
       #        run: flutter analyze
       #
       #      - name: Run tests
       #        run: flutter test
 
-      - name: Set up signing certificate
+      - name: Import signing certificate (.p12)
         uses: apple-actions/import-codesign-certs@v2
         with:
           p12-file-base64: ${{ secrets.APPLE_P12_BASE64 }}
           p12-password: ${{ secrets.APPLE_P12_PASSWORD }}
 
-      - name: Set up provisioning profile
-        uses: apple-actions/download-provisioning-profiles@v2
-        with:
-          bundle-id: com.fantasticfour.cooki
-          profile-type: IOS_APP_STORE
-          api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
-          api-issuer-id: ${{ secrets.APPSTORE_API_ISSUER_ID }}
-          private-key-base64: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
-
-      - name: Build IPA
+      - name: Create provisioning profile from base64
         run: |
-          flutter build ipa --release \
-            --export-options-plist=ios/ExportOptions.plist
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles/        
+          echo "${{ secrets.PROVISIONING_PROFILE_BASE64 }}" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/Appstore_cooki_with_signin.mobileprovision
 
-      - name: Upload to TestFlight
-        uses: apple-actions/upload-testflight@v1
-        with:
-          app-path: build/ios/ipa
-          issuer-id: ${{ secrets.APPSTORE_API_ISSUER_ID }}
-          api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
-          api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+      - name: Debug provisioning profile
+        run: |
+          echo "=== Installed profiles ==="
+          ls -la ~/Library/MobileDevice/Provisioning\ Profiles/
+          
+          echo "=== Profile contents ==="
+          security cms -D -i ~/Library/MobileDevice/Provisioning\ Profiles/Appstore_cooki_with_signin.mobileprovision | head -50
+          
+          echo "=== Xcode can see these profiles ==="
+          security find-identity -v -p codesigning
+          
+          echo "=== Profile UUID ==="
+          security cms -D -i ~/Library/MobileDevice/Provisioning\ Profiles/Appstore_cooki_with_signin.mobileprovision | grep -A1 "UUID"
+
+      - name: Install Fastlane
+        run: gem install fastlane -NV
+
+      - name: Build & Submit via Fastlane
+        working-directory: ios
+        env:
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
+          APP_STORE_CONNECT_API_PRIVATE_KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+        run: |
+          fastlane beta
 
 #  test:
 #    if: github.ref == 'refs/heads/master' || github.event_name == 'pull_request'

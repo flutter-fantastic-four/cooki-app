@@ -80,7 +80,9 @@ class CommunityState {
   }
 
   bool get hasActiveFilters =>
-      selectedCuisines.isNotEmpty || selectedSort.isNotEmpty;
+      selectedCuisines.isNotEmpty ||
+      selectedSort.isNotEmpty ||
+      searchQuery.isNotEmpty;
 }
 
 class CommunityViewModel extends AutoDisposeNotifier<CommunityState> {

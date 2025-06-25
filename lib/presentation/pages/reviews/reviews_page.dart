@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cooki/app/constants/app_constants.dart';
 import 'package:cooki/core/utils/date_time_util.dart';
@@ -11,11 +13,13 @@ import 'package:cooki/presentation/widgets/star_rating.dart';
 import 'package:easy_image_viewer/easy_image_viewer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/constants/app_colors.dart';
 import '../../../core/utils/general_util.dart';
 import '../../../core/utils/snackbar_util.dart';
 import '../../../domain/entity/review.dart';
+import '../../settings_global_view_model.dart';
 import '../../user_global_view_model.dart';
 import '../add_review/write_review_page.dart';
 import 'reviews_view_model.dart';
@@ -37,13 +41,30 @@ class ReviewsPage extends ConsumerWidget {
   ) {
     final currentUser = ref.read(userGlobalViewModelProvider);
     final isMyReview = currentUser?.id == review.userId;
+    final currentAppLanguage =
+        ref.read(settingsGlobalViewModelProvider).selectedLanguage.code;
+    final vm = ref.read(reviewsViewModelProvider(recipeId).notifier);
+    final shouldShowTranslate = vm.shouldShowTranslate(
+      review,
+      currentAppLanguage,
+    );
+    final hasTranslation = vm.hasTranslation(review.id);
+    log(review.language ?? 'lang null');
 
     final options = <ModalOption>[
-      // ModalOption(
-      //   text: strings(context).translateReview,
-      //   icon: Icons.g_translate,
-      //   onTap: () => _translateReview(context, review),
-      // ),
+      if (shouldShowTranslate && !hasTranslation)
+        ModalOption(
+          text: strings(context).translateReview,
+          icon: Icons.g_translate,
+          onTap:
+              () => _translateReview(context, ref, review, currentAppLanguage),
+        ),
+      if (hasTranslation)
+        ModalOption(
+          text: strings(context).undoTranslation,
+          icon: Icons.translate_outlined,
+          onTap: () => vm.clearTranslation(review.id),
+        ),
       if (isMyReview)
         ModalOption(
           text: strings(context).editReview,
@@ -70,8 +91,21 @@ class ReviewsPage extends ConsumerWidget {
     DialogueUtil.showGenericModal(context, options: options);
   }
 
-  void _translateReview(BuildContext context, Review review) {
-    // TODO: Implement translate functionality
+  Future<void> _translateReview(
+    BuildContext context,
+    WidgetRef ref,
+    Review review,
+    String currentAppLanguage,
+  ) async {
+    HapticFeedback.lightImpact();
+    await ref
+        .read(reviewsViewModelProvider(recipeId).notifier)
+        .translateReview(review.id, currentAppLanguage);
+    final state = ref.read(reviewsViewModelProvider(recipeId));
+    if (context.mounted && state.errorKey != null) {
+      _showErrorDialog(context, state.errorKey!, ref);
+      return;
+    }
   }
 
   void _reportReview(BuildContext context, Review review) {
@@ -169,6 +203,7 @@ class ReviewsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(reviewsViewModelProvider(recipeId));
 
+    final userViewModel = ref.watch(userGlobalViewModelProvider);
     ref.listen<ReviewsState>(reviewsViewModelProvider(recipeId), (
       previous,
       next,
@@ -183,31 +218,33 @@ class ReviewsPage extends ConsumerWidget {
       appBar: AppBar(
         title: Text(strings(context).recipeReviews),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 4),
-            child: IconButton(
-              tooltip: strings(context).writeReviewTitle,
-              onPressed: () async {
-                final existingReview = await ref
-                    .read(reviewsViewModelProvider(recipeId).notifier)
-                    .getUserReviewForRecipe(
-                      ref.read(userGlobalViewModelProvider)!.id,
-                    );
-                if (context.mounted) {
-                  _navigateToWriteOrEditReview(
-                    context,
-                    ref,
-                    review: existingReview,
-                  );
-                }
-              },
-              icon: const Icon(
-                Icons.edit_outlined,
-                size: 22,
-                color: Colors.black87,
-              ),
-            ),
-          ),
+          userViewModel != null
+              ? Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: IconButton(
+                  tooltip: strings(context).writeReviewTitle,
+                  onPressed: () async {
+                    final existingReview = await ref
+                        .read(reviewsViewModelProvider(recipeId).notifier)
+                        .getUserReviewForRecipe(
+                          ref.read(userGlobalViewModelProvider)!.id,
+                        );
+                    if (context.mounted) {
+                      _navigateToWriteOrEditReview(
+                        context,
+                        ref,
+                        review: existingReview,
+                      );
+                    }
+                  },
+                  icon: const Icon(
+                    Icons.edit_outlined,
+                    size: 22,
+                    color: Colors.black87,
+                  ),
+                ),
+              )
+              : SizedBox(),
         ],
       ),
       body:
@@ -339,6 +376,11 @@ class ReviewsPage extends ConsumerWidget {
 
   Widget _buildReviewItem(BuildContext context, WidgetRef ref, Review review) {
     final vm = ref.read(reviewsViewModelProvider(recipeId).notifier);
+    final translatedText = ref.watch(
+      reviewsViewModelProvider(
+        recipeId,
+      ).select((state) => state.translatedTexts[review.id]),
+    );
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 30),
@@ -359,7 +401,7 @@ class ReviewsPage extends ConsumerWidget {
           if (review.reviewText?.isNotEmpty == true) ...[
             const SizedBox(height: 12),
             ExpandableText(
-              text: review.reviewText!,
+              text: translatedText ?? review.reviewText!,
               isExpanded: vm.isReviewExpanded(review.id),
               onToggle:
                   () => ref
@@ -429,17 +471,26 @@ class ReviewsPage extends ConsumerWidget {
     WidgetRef ref,
     Review review,
   ) {
+    final isTranslating = ref.watch(
+      reviewsViewModelProvider(
+        recipeId,
+      ).select((state) => state.translatingReviews.contains(review.id)),
+    );
+
     return SizedBox.square(
       dimension: 30,
-      child: IconButton(
-        padding: EdgeInsets.zero,
-        onPressed: () => _showReviewOptionsModal(context, ref, review),
-        icon: const Icon(
-          CupertinoIcons.ellipsis,
-          color: AppColors.greyScale600,
-          size: 22,
-        ),
-      ),
+      child:
+          isTranslating
+              ? CupertinoActivityIndicator(radius: 10)
+              : IconButton(
+                padding: EdgeInsets.zero,
+                onPressed: () => _showReviewOptionsModal(context, ref, review),
+                icon: const Icon(
+                  CupertinoIcons.ellipsis,
+                  color: AppColors.greyScale600,
+                  size: 22,
+                ),
+              ),
     );
   }
 

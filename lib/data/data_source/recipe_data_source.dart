@@ -22,7 +22,7 @@ abstract class RecipeDataSource {
   });
 
   Future<List<RecipeFirestoreDto>> getCommunityRecipes(
-    String userId, {
+    String? userId, {
     RecipeSortType sortType = RecipeSortType.ratingDescending,
   });
 
@@ -38,6 +38,12 @@ abstract class RecipeDataSource {
   Future<void> toggleRecipeShare(String recipeId, bool isPublic);
 
   Future<void> deleteRecipe(String recipeId);
+
+  Future<void> updateRecipeRating(
+    String recipeId,
+    int ratingCount,
+    double ratingSum,
+  );
 }
 
 class RecipeFirestoreDataSource implements RecipeDataSource {
@@ -141,13 +147,17 @@ class RecipeFirestoreDataSource implements RecipeDataSource {
 
   @override
   Future<List<RecipeFirestoreDto>> getCommunityRecipes(
-    String userId, {
+    String? userId, {
     RecipeSortType sortType = RecipeSortType.createdAtDescending,
   }) async {
     var query = _firestore
         .collection('recipes')
-        .where('isPublic', isEqualTo: true)
-        .where('userId', isNotEqualTo: userId);
+        .where('isPublic', isEqualTo: true);
+
+    // 로그인 되어있을 때
+    if (userId != null) {
+      query = query.where('userId', isNotEqualTo: userId);
+    }
     query = _applySort(query, sortType);
 
     final snapshot = await query.get();
@@ -186,5 +196,18 @@ class RecipeFirestoreDataSource implements RecipeDataSource {
   @override
   Future<void> deleteRecipe(String recipeId) async {
     await _firestore.collection('recipes').doc(recipeId).delete();
+  }
+
+  @override
+  Future<void> updateRecipeRating(
+    String recipeId,
+    int ratingCount,
+    double ratingSum,
+  ) async {
+    await _firestore.collection('recipes').doc(recipeId).update({
+      'ratingCount': ratingCount,
+      'ratingSum': ratingSum,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
   }
 }

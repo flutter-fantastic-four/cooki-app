@@ -3,6 +3,7 @@ import 'package:cooki/data/data_source/image_download_data_source.dart';
 import 'package:cooki/data/data_source/recipe_generation_data_source.dart';
 import 'package:cooki/data/data_source/review_data_source.dart';
 import 'package:cooki/data/data_source/review_report_data_source.dart';
+import 'package:cooki/data/data_source/translation_data_source.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:cloud_functions/cloud_functions.dart';
@@ -20,7 +21,9 @@ import 'image_storage_data_source.dart';
 
 // firebase_providers
 final firebaseAuthProvider = Provider((ref) => FirebaseAuth.instance);
-final firebaseFunctionsProvider = Provider((ref) => FirebaseFunctions.instanceFor(region: 'asia-northeast3'));
+final firebaseFunctionsProvider = Provider(
+  (ref) => FirebaseFunctions.instanceFor(region: 'asia-northeast3'),
+);
 final firestoreProvider = Provider((ref) => FirebaseFirestore.instance);
 final firebaseAIProvider = Provider((ref) => FirebaseAI.googleAI());
 final firebaseStorageProvider = Provider((ref) => FirebaseStorage.instance);
@@ -30,30 +33,56 @@ final googleSignInProvider = Provider((ref) => GoogleSignIn());
 final kakaoSignInProvider = Provider((ref) => UserApi.instance);
 
 final dioProvider = Provider<Dio>((ref) {
-  return Dio(BaseOptions(connectTimeout: const Duration(seconds: 6), receiveTimeout: const Duration(seconds: 6)));
+  return Dio(
+    BaseOptions(
+      connectTimeout: const Duration(seconds: 6),
+      receiveTimeout: const Duration(seconds: 6),
+    ),
+  );
 });
 
 // data_source_providers
-final googleSignInDataSourceProvider = Provider<OAuthSignInDataSource>((ref) => GoogleOAuthDataSourceImpl(ref.read(googleSignInProvider)));
-final kakaoSignInDataSourceProvider = Provider<OAuthSignInDataSource>((ref) => KakaoOAuthDataSourceImpl(ref.read(kakaoSignInProvider)));
-final appleSignInDataSourceProvider = Provider<OAuthSignInDataSource>((ref) => AppleOAuthDataSourceImpl());
-
-final firebaseAuthDataSourceProvider = Provider<FirebaseAuthDataSource>(
-  (ref) => FirebaseAuthDataSourceImpl(ref.read(firebaseAuthProvider), ref.read(firebaseFunctionsProvider)),
+final googleSignInDataSourceProvider = Provider<OAuthSignInDataSource>(
+  (ref) => GoogleOAuthDataSourceImpl(ref.read(googleSignInProvider)),
+);
+final kakaoSignInDataSourceProvider = Provider<OAuthSignInDataSource>(
+  (ref) => KakaoOAuthDataSourceImpl(ref.read(kakaoSignInProvider)),
+);
+final appleSignInDataSourceProvider = Provider<OAuthSignInDataSource>(
+  (ref) => AppleOAuthDataSourceImpl(),
 );
 
-final userFirestoreDataSourceProvider = Provider<UserDataSource>((ref) => UserFirestoreDataSource(ref.read(firestoreProvider)));
+final firebaseAuthDataSourceProvider = Provider<FirebaseAuthDataSource>(
+  (ref) => FirebaseAuthDataSourceImpl(
+    ref.read(firebaseAuthProvider),
+    ref.read(firebaseFunctionsProvider),
+  ),
+);
 
-final imageStorageDataSourceProvider = Provider<ImageStorageDataSource>((ref) => FirebaseImageStorageDataSource(ref.read(firebaseStorageProvider)));
+final userFirestoreDataSourceProvider = Provider<UserDataSource>(
+  (ref) => UserFirestoreDataSource(ref.read(firestoreProvider)),
+);
+
+final imageStorageDataSourceProvider = Provider<ImageStorageDataSource>(
+  (ref) => FirebaseImageStorageDataSource(ref.read(firebaseStorageProvider)),
+);
 
 final recipeGenerationDataSourceProvider = Provider<RecipeGenerationDataSource>(
   (ref) => GeminiRecipeGenerationDataSource(ref.read(firebaseAIProvider)),
 );
 
-final imageDownloadDataSourceProvider = Provider<ImageDownloadDataSource>((ref) => DioImageDownloadDataSource(ref.read(dioProvider)));
+final imageDownloadDataSourceProvider = Provider<ImageDownloadDataSource>(
+  (ref) => DioImageDownloadDataSource(ref.read(dioProvider)),
+);
 
-final reviewDataSourceProvider = Provider<ReviewDataSource>((ref) => ReviewFirestoreDataSource(ref.read(firestoreProvider)));
+final reviewDataSourceProvider = Provider<ReviewDataSource>(
+  (ref) => ReviewFirestoreDataSource(ref.read(firestoreProvider)),
+);
 
 final reportDataSourceProvider = Provider<ReviewReportDataSource>((ref) {
   return ReviewReportFirestoreDataSource(ref.read(firestoreProvider));
+});
+
+final translationDataSourceProvider = Provider<TranslationDataSource>((ref) {
+  return TranslationFirebaseDataSource(ref.read(firebaseFunctionsProvider));
 });

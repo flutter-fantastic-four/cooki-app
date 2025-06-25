@@ -9,6 +9,29 @@ import '../../../domain/entity/local_or_remote_image.dart';
 import '../../../domain/entity/review.dart';
 import '../detailed_recipe/detailed_recipe_page.dart';
 
+// Provider for calculating actual average rating from reviews
+final actualAverageRatingProvider = FutureProvider.family
+    .autoDispose<Map<String, dynamic>, String>((ref, recipeId) async {
+      try {
+        final reviewRepository = ref.read(reviewRepositoryProvider);
+        final reviews = await reviewRepository.getReviewsByRecipeId(recipeId);
+
+        if (reviews.isEmpty) {
+          return {'average': 0.0, 'count': 0};
+        }
+
+        final totalRating = reviews.fold<int>(
+          0,
+          (sum, review) => sum + review.rating,
+        );
+        final average = totalRating / reviews.length;
+
+        return {'average': average, 'count': reviews.length};
+      } catch (e) {
+        return {'average': 0.0, 'count': 0};
+      }
+    });
+
 class WriteReviewState {
   final int rating;
   final List<LocalOrRemoteImage> selectedImages;
@@ -72,6 +95,9 @@ class WriteReviewViewModel
       final imageUrls = await _compressAndUploadImages(user.id);
       if (imageUrls == null) return;
 
+      // Detect language if review has text
+      String? detectedLanguage = await _getDetectedLanguage(reviewText);
+
       final review = Review(
         id: arg?.id ?? '',
         reviewText: reviewText.trim(),
@@ -82,6 +108,7 @@ class WriteReviewViewModel
         userImageUrl: user.profileImage,
         createdAt: arg?.createdAt,
         updatedAt: arg != null ? DateTime.now() : null,
+        language: detectedLanguage,
       );
 
       if (arg != null) {
@@ -153,6 +180,21 @@ class WriteReviewViewModel
       state = state.copyWith(errorKey: WriteReviewErrorKey.imageUploadFailed);
       return null;
     }
+  }
+
+  Future<String?> _getDetectedLanguage(String reviewText) async {
+    if (reviewText.trim().isNotEmpty) {
+      try {
+        final detectionResult = await ref
+            .read(reviewRepositoryProvider)
+            .detectReviewLanguage(text: reviewText.trim());
+        return detectionResult.mostLikelyLanguage;
+      } catch (e, stack) {
+        logError(e, stack);
+        return null;
+      }
+    }
+    return null;
   }
 
   Future<void> deleteReview({

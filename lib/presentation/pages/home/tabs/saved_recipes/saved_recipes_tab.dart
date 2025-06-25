@@ -14,6 +14,17 @@ import '../../../../../presentation/widgets/app_dialog.dart';
 import '../../../../../core/utils/snackbar_util.dart';
 import 'saved_recipes_tab_view_model.dart';
 
+// Constants for modal styling
+class _ModalConstants {
+  static const handleWidth = 36.0;
+  static const handleHeight = 4.0;
+  static const sectionTitleStyle = TextStyle(
+    fontSize: 18,
+    fontWeight: FontWeight.w600,
+  );
+  static const filterChipSpacing = 8.0;
+}
+
 class MyRecipesPage extends ConsumerStatefulWidget {
   const MyRecipesPage({super.key});
 
@@ -181,58 +192,43 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                     ),
                   ),
                 ),
-                if (!state.hasActiveFilters)
-                  Container(
-                    width: double.infinity,
-                    height: 1,
-                    color: AppColors.greyScale50,
-                  ),
+                Container(
+                  width: double.infinity,
+                  height: 1,
+                  color: AppColors.greyScale50,
+                ),
               ],
             ),
           ),
           // Active filters
           if (state.hasActiveFilters)
-            Column(
-              children: [
-                Container(
-                  height: 38,
-                  margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        ...state.selectedCuisines.map(
-                          (cuisine) => Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: _FilterChip(
-                              label: cuisine,
-                              onDeleted: () async {
-                                viewModel.removeCuisine(cuisine);
-                                await viewModel.loadRecipes();
-                              },
-                              isModalChip: false,
-                            ),
-                          ),
-                        ),
-                        if (state.selectedSort.isNotEmpty)
-                          _FilterChip(
-                            label: state.selectedSort,
-                            onDeleted: () async {
-                              viewModel.clearSort();
-                              await viewModel.loadRecipes();
-                            },
-                            isModalChip: false,
-                          ),
-                      ],
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  ...state.selectedCuisines.map(
+                    (cuisine) => _FilterChip(
+                      label: cuisine,
+                      onDeleted: () async {
+                        viewModel.removeCuisine(cuisine);
+                        await viewModel.loadRecipes();
+                      },
+                      isModalChip: false,
                     ),
                   ),
-                ),
-                const Divider(
-                  height: 1,
-                  thickness: 1,
-                  color: AppColors.greyScale50,
-                ),
-              ],
+                  if (state.selectedSort.isNotEmpty)
+                    _FilterChip(
+                      label: state.selectedSort,
+                      onDeleted: () async {
+                        viewModel.clearSort();
+                        await viewModel.loadRecipes();
+                      },
+                      isModalChip: false,
+                    ),
+                ],
+              ),
             ),
           // Recipe grid
           Expanded(
@@ -458,84 +454,18 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Handle
-                      Center(
-                        child: Container(
-                          margin: const EdgeInsets.only(top: 8, bottom: 8),
-                          width: 36,
-                          height: 4,
-                          decoration: BoxDecoration(
-                            color: AppColors.greyScale200,
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        ),
-                      ),
+                      _buildModalHandle(),
                       // Filter content
                       Padding(
                         padding: const EdgeInsets.all(20),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Sort options
-                            Text(
-                              strings(context).sort,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                              ),
-                              child: Wrap(
-                                alignment: WrapAlignment.start,
-                                spacing: 8,
-                                runSpacing: 8,
-                                children: [
-                                  _FilterChip(
-                                    label: strings(context).sortByRating,
-                                    isSelected:
-                                        tempSort ==
-                                        strings(context).sortByRating,
-                                    onTap: () {
-                                      setModalState(() {
-                                        tempSort =
-                                            tempSort ==
-                                                    strings(
-                                                      context,
-                                                    ).sortByRating
-                                                ? ''
-                                                : strings(context).sortByRating;
-                                      });
-                                    },
-                                    isModalChip: true,
-                                  ),
-                                  _FilterChip(
-                                    label: strings(context).sortByCookTime,
-                                    isSelected:
-                                        tempSort ==
-                                        strings(context).sortByCookTime,
-                                    onTap: () {
-                                      setModalState(() {
-                                        tempSort =
-                                            tempSort ==
-                                                    strings(
-                                                      context,
-                                                    ).sortByCookTime
-                                                ? ''
-                                                : strings(
-                                                  context,
-                                                ).sortByCookTime;
-                                      });
-                                    },
-                                    isModalChip: true,
-                                  ),
-                                ],
-                              ),
-                            ),
+                            _buildSortSection(context, tempSort, (newSort) {
+                              setModalState(() {
+                                tempSort = newSort;
+                              });
+                            }),
                             const SizedBox(height: 20),
                             const Divider(
                               height: 1,
@@ -543,81 +473,18 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                               color: AppColors.greyScale200,
                             ),
                             const SizedBox(height: 20),
-                            // Cuisine filters
-                            Text(
-                              strings(context).countryCategory,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                              ),
-                              child: Wrap(
-                                alignment: WrapAlignment.start,
-                                spacing: 8,
-                                runSpacing: 8,
-                                children:
-                                    cuisineCategories.map((cuisine) {
-                                      final isSelected = tempCuisines.contains(
-                                        cuisine,
-                                      );
-                                      return _FilterChip(
-                                        label: cuisine,
-                                        isSelected: isSelected,
-                                        onTap: () {
-                                          setModalState(() {
-                                            if (isSelected) {
-                                              tempCuisines.remove(cuisine);
-                                            } else {
-                                              tempCuisines.add(cuisine);
-                                            }
-                                          });
-                                        },
-                                        isModalChip: true,
-                                      );
-                                    }).toList(),
-                              ),
+                            _buildCuisineSection(
+                              context,
+                              cuisineCategories,
+                              tempCuisines,
+                              setModalState,
                             ),
                             const SizedBox(height: 24),
-                            // Action buttons
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: OutlinedButton(
-                                    onPressed: () {
-                                      viewModel.resetFilters();
-                                      Navigator.pop(context);
-                                    },
-                                    child: Text(strings(context).reset),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: ElevatedButton(
-                                    onPressed: () async {
-                                      viewModel.updateSelectedSort(tempSort);
-                                      viewModel.updateSelectedCuisines(
-                                        List.from(tempCuisines),
-                                      );
-                                      await viewModel.loadRecipes();
-                                      Navigator.pop(context);
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppColors.primary,
-                                      foregroundColor: Colors.white,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                    ),
-                                    child: Text(strings(context).apply),
-                                  ),
-                                ),
-                              ],
+                            _buildFilterActionButtons(
+                              context,
+                              viewModel,
+                              tempSort,
+                              tempCuisines,
                             ),
                           ],
                         ),
@@ -659,16 +526,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Top handle
-              Container(
-                width: 40,
-                height: 5,
-                decoration: BoxDecoration(
-                  color: AppColors.greyScale400,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                margin: const EdgeInsets.only(bottom: 12),
-              ),
+              _buildModalHandle(),
 
               _PhotoModalStyleCard(
                 text:
@@ -753,6 +611,157 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
       onPrimaryButtonPressed: () {
         viewModel.deleteRecipe(recipe.id);
       },
+    );
+  }
+
+  // Helper methods for modularized components
+
+  Widget _buildModalHandle() {
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.only(top: 8, bottom: 8),
+        width: _ModalConstants.handleWidth,
+        height: _ModalConstants.handleHeight,
+        decoration: BoxDecoration(
+          color: AppColors.greyScale200,
+          borderRadius: BorderRadius.circular(2),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSortSection(
+    BuildContext context,
+    String tempSort,
+    Function(String) onSortChanged,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(strings(context).sort, style: _ModalConstants.sectionTitleStyle),
+        const SizedBox(height: 12),
+        _buildChipContainer([
+          _buildSortChip(
+            context,
+            strings(context).sortByRating,
+            tempSort,
+            onSortChanged,
+          ),
+          _buildSortChip(
+            context,
+            strings(context).sortByCookTime,
+            tempSort,
+            onSortChanged,
+          ),
+        ]),
+      ],
+    );
+  }
+
+  Widget _buildSortChip(
+    BuildContext context,
+    String sortOption,
+    String tempSort,
+    Function(String) onSortChanged,
+  ) {
+    return _FilterChip(
+      label: sortOption,
+      isSelected: tempSort == sortOption,
+      onTap: () {
+        final newSort = tempSort == sortOption ? '' : sortOption;
+        onSortChanged(newSort);
+      },
+      isModalChip: true,
+    );
+  }
+
+  Widget _buildCuisineSection(
+    BuildContext context,
+    List<String> cuisineCategories,
+    List<String> tempCuisines,
+    Function setModalState,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          strings(context).countryCategory,
+          style: _ModalConstants.sectionTitleStyle,
+        ),
+        const SizedBox(height: 12),
+        _buildChipContainer(
+          cuisineCategories.map((cuisine) {
+            final isSelected = tempCuisines.contains(cuisine);
+            return _FilterChip(
+              label: cuisine,
+              isSelected: isSelected,
+              onTap: () {
+                setModalState(() {
+                  if (isSelected) {
+                    tempCuisines.remove(cuisine);
+                  } else {
+                    tempCuisines.add(cuisine);
+                  }
+                });
+              },
+              isModalChip: true,
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildChipContainer(List<Widget> children) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Wrap(
+        alignment: WrapAlignment.start,
+        spacing: _ModalConstants.filterChipSpacing,
+        runSpacing: _ModalConstants.filterChipSpacing,
+        children: children,
+      ),
+    );
+  }
+
+  Widget _buildFilterActionButtons(
+    BuildContext context,
+    SavedRecipesViewModel viewModel,
+    String tempSort,
+    List<String> tempCuisines,
+  ) {
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton(
+            onPressed: () {
+              viewModel.resetFilters();
+              Navigator.pop(context);
+            },
+            child: Text(strings(context).reset),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: ElevatedButton(
+            onPressed: () async {
+              viewModel.updateSelectedSort(tempSort);
+              viewModel.updateSelectedCuisines(List.from(tempCuisines));
+              await viewModel.loadRecipes();
+              Navigator.pop(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Text(strings(context).apply),
+          ),
+        ),
+      ],
     );
   }
 }

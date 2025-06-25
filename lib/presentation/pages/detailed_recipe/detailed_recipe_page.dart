@@ -2,20 +2,41 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cooki/app/constants/app_colors.dart';
 import 'package:cooki/core/utils/general_util.dart';
 import 'package:cooki/core/utils/navigation_util.dart';
+import 'package:cooki/domain/entity/app_user.dart';
 import 'package:cooki/domain/entity/recipe.dart';
 import 'package:cooki/domain/entity/review.dart';
 import 'package:cooki/presentation/pages/add_review/write_review_page.dart';
 import 'package:cooki/presentation/pages/edit/recipe_edit_page.dart';
 import 'package:cooki/presentation/pages/reviews/reviews_page.dart';
 import 'package:cooki/presentation/pages/reviews/reviews_view_model.dart';
+import 'package:cooki/presentation/user_global_view_model.dart';
 import 'package:cooki/presentation/widgets/app_cached_image.dart';
 import 'package:cooki/presentation/widgets/recipe_page_widgets.dart';
 import 'package:cooki/presentation/widgets/star_rating.dart';
 import 'package:cooki/data/repository/providers.dart';
-import 'package:cooki/presentation/user_global_view_model.dart';
 import 'package:easy_image_viewer/easy_image_viewer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+// Constants for modal text styles
+class _ModalTextStyles {
+  static const modalTitle = TextStyle(
+    color: Colors.black,
+    fontSize: 20,
+    fontFamily: 'Pretendard',
+    fontWeight: FontWeight.w700,
+    height: 1.50,
+  );
+
+  static const modalSubtitle = TextStyle(
+    color: Colors.black,
+    fontSize: 14,
+    fontFamily: 'Pretendard',
+    fontWeight: FontWeight.w400,
+    height: 1.50,
+    letterSpacing: -0.14,
+  );
+}
 
 // Provider for user rating that can be refreshed
 final userRatingProvider = FutureProvider.family.autoDispose<int?, String>((
@@ -37,7 +58,7 @@ final userRatingProvider = FutureProvider.family.autoDispose<int?, String>((
   }
 });
 
-// Provider for actual average rating calculation (excluding deleted reviews)
+// Provider for calculating actual average rating from reviews
 final actualAverageRatingProvider = FutureProvider.family
     .autoDispose<Map<String, dynamic>, String>((ref, recipeId) async {
       try {
@@ -69,6 +90,7 @@ class DetailRecipePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.read(userGlobalViewModelProvider);
     return Scaffold(
       body: SafeArea(
         child: Stack(
@@ -91,13 +113,13 @@ class DetailRecipePage extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _infoChip(context, ref),
+                      _infoChip(context, ref, user),
                       const SizedBox(height: 12),
                       _title(),
                       const SizedBox(height: 20),
                       TagChips(recipe.tags),
                       const SizedBox(height: 24),
-                      _review(context, ref),
+                      _review(context),
                       const SizedBox(height: 24),
                       _ingredientsLabel(context),
                       const SizedBox(height: 16),
@@ -146,24 +168,28 @@ class DetailRecipePage extends ConsumerWidget {
                   SizedBox(
                     width: 40,
                     height: 40,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        elevation: 4,
-                        padding: EdgeInsets.zero,
-                        backgroundColor: Colors.white,
-                      ),
-                      onPressed: () {
-                        NavigationUtil.pushFromBottom(
-                          context,
-                          RecipeEditPage(recipe: recipe),
-                        );
-                      },
-                      child: Icon(
-                        Icons.edit_outlined,
-                        color: Colors.black,
-                        size: 24,
-                      ),
-                    ),
+                    child:
+                        category == strings(context).recipeTabCreated ||
+                                category == strings(context).recipeTabShared
+                            ? ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                elevation: 4,
+                                padding: EdgeInsets.zero,
+                                backgroundColor: Colors.white,
+                              ),
+                              onPressed: () {
+                                NavigationUtil.pushFromBottom(
+                                  context,
+                                  RecipeEditPage(recipe: recipe),
+                                );
+                              },
+                              child: Icon(
+                                Icons.edit_outlined,
+                                color: Colors.black,
+                                size: 24,
+                              ),
+                            )
+                            : SizedBox(),
                   ),
                 ],
               ),
@@ -190,83 +216,40 @@ class DetailRecipePage extends ConsumerWidget {
     );
   }
 
-  Widget _review(BuildContext context, WidgetRef ref) {
+  Widget _review(BuildContext context) {
     return recipe.isPublic
         ? Column(
           children: [
             Consumer(
               builder: (context, ref, child) {
-                final averageRatingAsync = ref.watch(
+                final actualRatingAsync = ref.watch(
                   actualAverageRatingProvider(recipe.id),
                 );
-
-                return averageRatingAsync.when(
+                return actualRatingAsync.when(
                   data: (ratingData) {
                     final average = ratingData['average'] as double;
                     final count = ratingData['count'] as int;
-
-                    return Row(
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            NavigationUtil.pushFromBottom(
-                              context,
-                              ReviewsPage(
-                                recipeId: recipe.id,
-                                recipeName: recipe.recipeName,
-                              ),
-                            );
-                          },
-                          child: Row(
-                            children: [
-                              Text(
-                                '${strings(context).review} ${count > 999 ? '999+' : count}${strings(context).amount}',
-                                style: RecipePageWidgets.sectionTitleStyle,
-                              ),
-                              Icon(Icons.arrow_forward_ios),
-                            ],
-                          ),
-                        ),
-                        Spacer(),
-                        Icon(Icons.star, color: AppColors.secondary600),
-                        Text(
-                          '${strings(context).average} ${count == 0 ? '0' : average.toStringAsFixed(1)}${strings(context).score}',
-                          style: RecipePageWidgets.sectionTitleStyle,
-                        ),
-                      ],
+                    return _buildReviewRow(
+                      context,
+                      count: count,
+                      averageText:
+                          count == 0 ? '0' : average.toStringAsFixed(1),
                     );
                   },
                   loading:
-                      () => Row(
-                        children: [
-                          Text(
-                            '${strings(context).review} ${recipe.ratingCount}${strings(context).amount}',
-                            style: RecipePageWidgets.sectionTitleStyle,
-                          ),
-                          Icon(Icons.arrow_forward_ios),
-                          Spacer(),
-                          Icon(Icons.star, color: AppColors.secondary600),
-                          Text(
-                            '${strings(context).average} ...${strings(context).score}',
-                            style: RecipePageWidgets.sectionTitleStyle,
-                          ),
-                        ],
+                      () => _buildReviewRow(
+                        context,
+                        count: recipe.ratingCount,
+                        averageText:
+                            recipe.ratingSum == 0.0
+                                ? '0'
+                                : recipe.ratingSum.toStringAsFixed(1),
                       ),
                   error:
-                      (error, stack) => Row(
-                        children: [
-                          Text(
-                            '${strings(context).review} ${recipe.ratingCount}${strings(context).amount}',
-                            style: RecipePageWidgets.sectionTitleStyle,
-                          ),
-                          Icon(Icons.arrow_forward_ios),
-                          Spacer(),
-                          Icon(Icons.star, color: AppColors.secondary600),
-                          Text(
-                            '${strings(context).average} 0${strings(context).score}',
-                            style: RecipePageWidgets.sectionTitleStyle,
-                          ),
-                        ],
+                      (error, stack) => _buildReviewRow(
+                        context,
+                        count: recipe.ratingCount,
+                        averageText: '0',
                       ),
                 );
               },
@@ -276,6 +259,44 @@ class DetailRecipePage extends ConsumerWidget {
           ],
         )
         : SizedBox();
+  }
+
+  Widget _buildReviewRow(
+    BuildContext context, {
+    required int count,
+    required String averageText,
+  }) {
+    return Row(
+      children: [
+        _buildReviewNavigationButton(context, count),
+        Spacer(),
+        Icon(Icons.star, color: AppColors.secondary600),
+        Text(
+          '${strings(context).average} $averageText${strings(context).score}',
+          style: RecipePageWidgets.sectionTitleStyle,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildReviewNavigationButton(BuildContext context, int count) {
+    return GestureDetector(
+      onTap: () {
+        NavigationUtil.pushFromBottom(
+          context,
+          ReviewsPage(recipeId: recipe.id, recipeName: recipe.recipeName),
+        );
+      },
+      child: Row(
+        children: [
+          Text(
+            '${strings(context).review} ${count > 999 ? '999+' : count}${strings(context).amount}',
+            style: RecipePageWidgets.sectionTitleStyle,
+          ),
+          Icon(Icons.arrow_forward_ios),
+        ],
+      ),
+    );
   }
 
   Column _ingredientsColumn() {
@@ -342,7 +363,7 @@ class DetailRecipePage extends ConsumerWidget {
     );
   }
 
-  Row _infoChip(BuildContext context, WidgetRef ref) {
+  Row _infoChip(BuildContext context, WidgetRef ref, AppUser? user) {
     return Row(
       children: [
         category != null
@@ -412,8 +433,9 @@ class DetailRecipePage extends ConsumerWidget {
             // Store the result in a static variable or pass it through navigation
             if (ratingPosted == true) {
               DetailRecipePage._hasRatingBeenPosted = true;
-              // Invalidate the rating provider to force refresh
+              // Invalidate the rating providers to force refresh
               ref.invalidate(userRatingProvider(recipe.id));
+              ref.invalidate(actualAverageRatingProvider(recipe.id));
             }
           },
           child: Container(
@@ -644,24 +666,11 @@ class _RatingModalState extends State<_RatingModal> {
                       Text(
                         strings(context).recipeReview,
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 20,
-                          fontFamily: 'Pretendard',
-                          fontWeight: FontWeight.w700,
-                          height: 1.50,
-                        ),
+                        style: _ModalTextStyles.modalTitle,
                       ),
                       Text(
                         strings(context).recipeRating,
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 14,
-                          fontFamily: 'Pretendard',
-                          fontWeight: FontWeight.w400,
-                          height: 1.50,
-                          letterSpacing: -0.14,
-                        ),
+                        style: _ModalTextStyles.modalSubtitle,
                       ),
                     ],
                   ),
@@ -691,139 +700,45 @@ class _RatingModalState extends State<_RatingModal> {
             ),
           ),
 
-          Container(
+          _buildModalActionButtons(context, currentRating),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModalActionButtons(BuildContext context, int currentRating) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F5F5) /* Grayscale-50 */,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 8,
+        children: [
+          SizedBox(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF5F5F5) /* Grayscale-50 */,
-            ),
-            child: Column(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               spacing: 8,
               children: [
-                SizedBox(
-                  width: double.infinity,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    spacing: 8,
-                    children: [
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
-                          child: Container(
-                            height: 54,
-                            padding: const EdgeInsets.all(8),
-                            decoration: ShapeDecoration(
-                              color: Colors.white /* Grayscale-White */,
-                              shape: RoundedRectangleBorder(
-                                side: BorderSide(
-                                  width: 1,
-                                  color: const Color(
-                                    0xFF1D8163,
-                                  ) /* Primary-700 */,
-                                ),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              spacing: 8,
-                              children: [
-                                Text(
-                                  strings(context).close,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: const Color(
-                                      0xFF1D8163,
-                                    ) /* Primary-700 */,
-                                    fontSize: 16,
-                                    fontFamily: 'Pretendard',
-                                    fontWeight: FontWeight.w600,
-                                    height: 1.50,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () async {
-                            if (currentRating > 0) {
-                              try {
-                                final currentUser = widget.currentRef.read(
-                                  userGlobalViewModelProvider,
-                                );
-                                if (currentUser != null) {
-                                  final review = Review(
-                                    id: '',
-                                    reviewText: null,
-                                    rating: currentRating,
-                                    imageUrls: [],
-                                    userId: currentUser.id,
-                                    userName: currentUser.name,
-                                    userImageUrl: currentUser.profileImage,
-                                  );
-                                  await widget.currentRef
-                                      .read(reviewRepositoryProvider)
-                                      .saveReview(
-                                        recipeId: widget.recipe.id,
-                                        review: review,
-                                      );
-                                  if (!context.mounted) return;
-                                  Navigator.pop(context, true);
-                                }
-                              } catch (e) {
-                                if (!context.mounted) return;
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('평점 저장에 실패했습니다: $e')),
-                                );
-                              }
-                            } else {
-                              Navigator.pop(context);
-                            }
-                          },
-                          child: Container(
-                            height: 54,
-                            padding: const EdgeInsets.all(8),
-                            decoration: ShapeDecoration(
-                              color: const Color(0xFF1D8163) /* Primary-700 */,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              spacing: 8,
-                              children: [
-                                Text(
-                                  strings(context).confirm,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: Colors.white /* Grayscale-White */,
-                                    fontSize: 16,
-                                    fontFamily: 'Pretendard',
-                                    fontWeight: FontWeight.w600,
-                                    height: 1.50,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                Expanded(
+                  child: _buildModalButton(
+                    text: strings(context).close,
+                    isPrimary: false,
+                    onTap: () => Navigator.pop(context),
+                  ),
+                ),
+                Expanded(
+                  child: _buildModalButton(
+                    text: strings(context).confirm,
+                    isPrimary: true,
+                    onTap: () => _handleConfirmRating(context, currentRating),
                   ),
                 ),
               ],
@@ -832,5 +747,81 @@ class _RatingModalState extends State<_RatingModal> {
         ],
       ),
     );
+  }
+
+  Widget _buildModalButton({
+    required String text,
+    required bool isPrimary,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 54,
+        padding: const EdgeInsets.all(8),
+        decoration: ShapeDecoration(
+          color: isPrimary ? const Color(0xFF1D8163) : Colors.white,
+          shape: RoundedRectangleBorder(
+            side: BorderSide(width: 1, color: const Color(0xFF1D8163)),
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          spacing: 8,
+          children: [
+            Text(
+              text,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: isPrimary ? Colors.white : const Color(0xFF1D8163),
+                fontSize: 16,
+                fontFamily: 'Pretendard',
+                fontWeight: FontWeight.w600,
+                height: 1.50,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _handleConfirmRating(BuildContext context, int currentRating) async {
+    if (currentRating > 0) {
+      try {
+        final currentUser = widget.currentRef.read(userGlobalViewModelProvider);
+        if (currentUser != null) {
+          final review = Review(
+            id: '',
+            reviewText: null,
+            rating: currentRating,
+            imageUrls: [],
+            userId: currentUser.id,
+            userName: currentUser.name,
+            userImageUrl: currentUser.profileImage,
+          );
+          await widget.currentRef
+              .read(reviewRepositoryProvider)
+              .saveReview(recipeId: widget.recipe.id, review: review);
+          // Invalidate providers to refresh data
+          widget.currentRef.invalidate(userRatingProvider(widget.recipe.id));
+          widget.currentRef.invalidate(
+            actualAverageRatingProvider(widget.recipe.id),
+          );
+          if (!context.mounted) return;
+          Navigator.pop(context, true);
+        }
+      } catch (e) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${strings(context).saveFailedError}: $e')),
+        );
+      }
+    } else {
+      Navigator.pop(context);
+    }
   }
 }

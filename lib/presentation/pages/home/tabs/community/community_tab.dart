@@ -15,6 +15,29 @@ import '../../../../../core/utils/general_util.dart';
 import '../../../../../core/utils/snackbar_util.dart';
 import 'community_tab_view_model.dart';
 
+// Provider for calculating actual average rating from reviews
+final actualAverageRatingProvider = FutureProvider.family
+    .autoDispose<Map<String, dynamic>, String>((ref, recipeId) async {
+      try {
+        final reviewRepository = ref.read(reviewRepositoryProvider);
+        final reviews = await reviewRepository.getReviewsByRecipeId(recipeId);
+
+        if (reviews.isEmpty) {
+          return {'average': 0.0, 'count': 0};
+        }
+
+        final totalRating = reviews.fold<int>(
+          0,
+          (sum, review) => sum + review.rating,
+        );
+        final average = totalRating / reviews.length;
+
+        return {'average': average, 'count': reviews.length};
+      } catch (e) {
+        return {'average': 0.0, 'count': 0};
+      }
+    });
+
 class CommunityPage extends ConsumerStatefulWidget {
   const CommunityPage({super.key});
 
@@ -724,7 +747,7 @@ class _RecipeCard extends StatelessWidget {
                                 final average = ratingData['average'] as double;
                                 final count = ratingData['count'] as int;
                                 return Text(
-                                  '평균 ${count == 0 ? '0' : average.toStringAsFixed(1)}점',
+                                  '${strings(context).average} ${count == 0 ? '0' : average.toStringAsFixed(1)}${strings(context).score}',
                                   style: const TextStyle(
                                     fontSize: 12,
                                     color: AppColors.greyScale600,
@@ -733,7 +756,7 @@ class _RecipeCard extends StatelessWidget {
                               },
                               loading:
                                   () => Text(
-                                    '평균 ${recipe.ratingSum.toStringAsFixed(1)}점',
+                                    '${strings(context).average} ${recipe.ratingSum.toStringAsFixed(1)}${strings(context).score}',
                                     style: const TextStyle(
                                       fontSize: 12,
                                       color: AppColors.greyScale600,
@@ -741,7 +764,7 @@ class _RecipeCard extends StatelessWidget {
                                   ),
                               error:
                                   (error, stack) => Text(
-                                    '평균 0점',
+                                    '${strings(context).average} 0${strings(context).score}',
                                     style: const TextStyle(
                                       fontSize: 12,
                                       color: AppColors.greyScale600,
