@@ -1,7 +1,6 @@
 import 'package:cooki/app/constants/app_colors.dart';
 import 'package:cooki/app/enum/sign_in_method.dart';
 import 'package:cooki/core/utils/general_util.dart';
-import 'package:cooki/core/utils/navigation_util.dart';
 import 'package:cooki/presentation/pages/home/home_page.dart';
 import 'package:cooki/presentation/pages/home/home_view_model.dart';
 import 'package:cooki/presentation/pages/login/login_view_model.dart';
@@ -24,7 +23,13 @@ class LoginButton extends ConsumerWidget {
           child: Stack(
             alignment: Alignment.center,
             children: [
-              Align(alignment: Alignment.centerLeft, child: Padding(padding: const EdgeInsets.only(left: 16), child: _signInMethodIcon())),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 16),
+                  child: _signInMethodIcon(),
+                ),
+              ),
               _signInMethodText(context),
             ],
           ),
@@ -41,7 +46,10 @@ class LoginButton extends ConsumerWidget {
     if (appUser != null && appUser.id.isNotEmpty && context.mounted) {
       ref.read(userGlobalViewModelProvider.notifier).setUser(appUser);
       if (!context.mounted) return;
-      Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const HomePage()), (route) => false);
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const HomePage()),
+        (route) => false,
+      );
       homeViewModel.onIndexChanged(0);
     }
   }

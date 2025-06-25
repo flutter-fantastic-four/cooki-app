@@ -22,13 +22,24 @@ class HomePage extends ConsumerWidget {
 
     return Scaffold(
       bottomNavigationBar: HomeBottomNavigationBar(),
-      body: IndexedStack(index: currentIndex, children: [MyRecipesPage(), CommunityPage(), MyPage()]),
+      body: IndexedStack(
+        index: currentIndex,
+        children: [MyRecipesPage(), CommunityPage(), MyPage()],
+      ),
       floatingActionButton:
           (currentIndex == 0 || currentIndex == 1) && user != null
               ? FloatingActionButton(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                elevation: 4,
+                highlightElevation: 6,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 backgroundColor: AppColors.primary,
-                child: Image.asset('assets/icons/cooki_logo_white_no_text.png', width: 28, height: 28),
+                child: Image.asset(
+                  'assets/icons/cooki_logo_white_no_text.png',
+                  width: 28,
+                  height: 28,
+                ),
                 onPressed: () {
                   NavigationUtil.pushFromBottom(context, GenerateRecipePage());
                 },

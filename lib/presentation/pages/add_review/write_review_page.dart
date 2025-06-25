@@ -267,6 +267,8 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
                     ).select((state) => state.rating),
                   ),
                   iconSize: 32,
+                  filledStarColor: AppColors.secondary600,
+                  emptyStarColor: AppColors.greyScale300,
                   setRating:
                       (selectedRating) => ref
                           .read(
