@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../app/constants/app_colors.dart';
 import '../../../../core/utils/general_util.dart';
 import '../../../../core/utils/snackbar_util.dart';
 import '../../../../domain/entity/recipe.dart';
@@ -47,6 +48,7 @@ class BottomButtonsRow extends ConsumerWidget {
                   ).deleteConfirmMessage(recipe!.recipeName),
                   primaryButtonText: strings(context).delete,
                   secondaryButtonText: strings(context).cancel,
+                  isDestructive: true,
                   onPrimaryButtonPressed: () async {
                     await ref
                         .read(recipeEditViewModelProvider(recipe).notifier)
@@ -63,11 +65,11 @@ class BottomButtonsRow extends ConsumerWidget {
                 );
               },
               style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: Colors.red),
+                side: const BorderSide(color: AppColors.error),
               ),
               child: Text(
                 strings(context).deleteRecipeButton,
-                style: const TextStyle(color: Colors.red),
+                style: const TextStyle(color: AppColors.error),
               ),
             ),
           ),

@@ -117,6 +117,7 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
       title: strings(context).deleteReviewConfirmTitle,
       content: strings(context).deleteReviewConfirmMessage,
       showCancel: true,
+      isDestructive: true,
     );
     if (result != AppDialogResult.confirm) return;
 
@@ -440,7 +441,7 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
                         child: const Icon(
                           Icons.cancel,
                           size: 18,
-                          color: Colors.red,
+                          color: AppColors.error,
                         ),
                       ),
                     ),

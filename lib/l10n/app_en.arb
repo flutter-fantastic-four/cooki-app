@@ -78,6 +78,7 @@
   "afterMinutesLabel": " min",
   "caloriesUnitAfter": " kcal",
   "recipeSavedSuccessfully": "Recipe saved successfully.",
+  "recipeRemovedSuccessfully": "Recipe removed from saved.",
 
   "recipeTitleRequiredError": "Please enter recipe title.",
   "textTooShortError": "Please enter at least 2 characters.",

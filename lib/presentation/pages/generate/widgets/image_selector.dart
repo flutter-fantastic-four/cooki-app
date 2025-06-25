@@ -111,7 +111,7 @@ class ImageSelector extends ConsumerWidget {
                               child: const Icon(
                                 Icons.cancel,
                                 size: 24,
-                                color: Colors.red,
+                                color: AppColors.error,
                               ),
                             ),
                           ),

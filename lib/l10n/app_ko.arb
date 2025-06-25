@@ -79,6 +79,7 @@
   "afterMinutesLabel": " 분 소요",
   "caloriesUnitAfter": " kcal",
   "recipeSavedSuccessfully": "레시피가 저장되었습니다.",
+  "recipeRemovedSuccessfully": "저장한 레시피에서 제거되었습니다.",
 
   "recipeTitleRequiredError": "레시피 제목을 입력해 주세요.",
   "textTooShortError": "2글자 이상 입력해 주세요.",

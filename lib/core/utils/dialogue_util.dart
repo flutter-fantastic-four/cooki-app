@@ -1,4 +1,3 @@
-import 'package:cooki/app/constants/app_styles.dart';
 import 'package:cooki/core/utils/general_util.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -19,31 +18,23 @@ class DialogueUtil {
     required String title,
     required String content,
     bool showCancel = false,
+    bool isDestructive = false,
   }) {
-    final confirmButtonText = showCancel ? strings(context).yes : strings(context).confirm;
-    final Widget dialog = CupertinoAlertDialog(
-      title: Text(title, style: const TextStyle(fontSize: 20)),
-      content: Text(content, style: const TextStyle(fontSize: 15)),
-      actions: [
-        if (showCancel)
-          CupertinoDialogAction(
-            onPressed: () => Navigator.pop(context, AppDialogResult.cancel),
-            child: Text(strings(context).no, style: TextStyle(color: Colors.red, fontSize: 17)),
-          ),
-        CupertinoDialogAction(
-          onPressed: () => Navigator.pop(context, AppDialogResult.confirm),
-          child: Text(confirmButtonText, style: TextStyle(color: Colors.blue, fontSize: 17)),
-        ),
-      ],
-    );
+    final confirmButtonText =
+        showCancel ? strings(context).yes : strings(context).confirm;
 
-    if (showCancel) {
-      // 취소 버튼이 있을 때: 시스템 스타일의 CupertinoAlertDialog 사용 (외부 터치로 닫을 수 없음)
-      return showCupertinoDialog<AppDialogResult?>(context: context, builder: (_) => dialog);
-    } else {
-      // 취소 버튼이 없을 때: 외부 터치로 닫을 수 있는 Cupertino 스타일 팝업 사용
-      return showCupertinoModalPopup<AppDialogResult?>(context: context, builder: (_) => dialog);
-    }
+    return showDialog<AppDialogResult?>(
+      context: context,
+      barrierDismissible: !showCancel, // Only dismissible when no cancel button
+      builder:
+          (BuildContext context) => _AppCustomDialog(
+            title: title,
+            content: content,
+            confirmButtonText: confirmButtonText,
+            showCancel: showCancel,
+            isDestructive: isDestructive,
+          ),
+    );
   }
 
   static void showCustomCupertinoActionSheet(
@@ -54,44 +45,43 @@ class DialogueUtil {
     required VoidCallback onOption1,
     required VoidCallback onOption2,
   }) {
-    showCupertinoModalPopup(
-      context: context,
-      builder:
-          (context) => CupertinoActionSheet(
-            title: Text(title, style: AppStyles.cupertinoSheetTitle),
-            actions: [
-              CupertinoActionSheetAction(
-                onPressed: () {
-                  onOption1();
-                  Navigator.pop(context);
-                },
-                child: Text(option1Text, style: AppStyles.cupertinoSheetActionText),
-              ),
-              CupertinoActionSheetAction(
-                onPressed: () {
-                  onOption2();
-                  Navigator.pop(context);
-                },
-                child: Text(option2Text, style: AppStyles.cupertinoSheetActionText),
-              ),
-            ],
-            cancelButton: CupertinoActionSheetAction(
-              onPressed: () => Navigator.pop(context),
-              child: Text(strings(context).cancel, style: AppStyles.cupertinoSheetActionText),
-            ),
-          ),
+    showGenericModal(
+      context,
+      options: [
+        ModalOption(
+          text: option1Text,
+          icon: Icons.check_circle_outline,
+          onTap: onOption1,
+        ),
+        ModalOption(
+          text: option2Text,
+          icon: Icons.radio_button_unchecked,
+          onTap: onOption2,
+        ),
+      ],
     );
   }
 
-  static void showGenericModal(BuildContext context, {List<ModalOption>? options, VoidCallback? onClose}) {
+  static void showGenericModal(
+    BuildContext context, {
+    List<ModalOption>? options,
+    VoidCallback? onClose,
+  }) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.greyScale50,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(26))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+      ),
       builder: (context) {
         return Padding(
-          padding: const EdgeInsets.only(top: 8, bottom: 30, left: 15, right: 15),
+          padding: const EdgeInsets.only(
+            top: 8,
+            bottom: 30,
+            left: 15,
+            right: 15,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -99,7 +89,10 @@ class DialogueUtil {
               Container(
                 width: 40,
                 height: 5,
-                decoration: BoxDecoration(color: Colors.grey[400], borderRadius: BorderRadius.circular(10)),
+                decoration: BoxDecoration(
+                  color: Colors.grey[400],
+                  borderRadius: BorderRadius.circular(10),
+                ),
                 margin: const EdgeInsets.only(bottom: 12),
               ),
 
@@ -134,14 +127,201 @@ class DialogueUtil {
     );
   }
 
-  static void showImagePickerModal(BuildContext context, {required VoidCallback onCamera, required VoidCallback onGallery, VoidCallback? onClose}) {
+  static void showImagePickerModal(
+    BuildContext context, {
+    required VoidCallback onCamera,
+    required VoidCallback onGallery,
+    VoidCallback? onClose,
+  }) {
     showGenericModal(
       context,
       options: [
-        ModalOption(text: strings(context).takeWithCamera, icon: Icons.photo_camera, onTap: onCamera),
-        ModalOption(text: strings(context).chooseInGallery, icon: CupertinoIcons.photo, onTap: onGallery),
+        ModalOption(
+          text: strings(context).takeWithCamera,
+          icon: Icons.photo_camera,
+          onTap: onCamera,
+        ),
+        ModalOption(
+          text: strings(context).chooseInGallery,
+          icon: CupertinoIcons.photo,
+          onTap: onGallery,
+        ),
       ],
       onClose: onClose,
+    );
+  }
+}
+
+class _AppCustomDialog extends StatelessWidget {
+  final String title;
+  final String content;
+  final String confirmButtonText;
+  final bool showCancel;
+  final bool isDestructive;
+
+  const _AppCustomDialog({
+    required this.title,
+    required this.content,
+    required this.confirmButtonText,
+    required this.showCancel,
+    this.isDestructive = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: AppColors.greyScale800,
+                fontFamily: 'Pretendard',
+              ),
+              textAlign: TextAlign.left,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              content,
+              style: const TextStyle(
+                fontSize: 15,
+                color: AppColors.greyScale700,
+                fontFamily: 'Pretendard',
+              ),
+              textAlign: TextAlign.left,
+            ),
+            const SizedBox(height: 24),
+            if (showCancel)
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed:
+                          () => Navigator.pop(context, AppDialogResult.cancel),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(double.infinity, 50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        side: const BorderSide(color: AppColors.primary),
+                      ),
+                      child: Text(
+                        strings(context).no,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primary,
+                          fontFamily: 'Pretendard',
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child:
+                        isDestructive
+                            ? OutlinedButton(
+                              onPressed:
+                                  () => Navigator.pop(
+                                    context,
+                                    AppDialogResult.confirm,
+                                  ),
+                              style: OutlinedButton.styleFrom(
+                                minimumSize: const Size(double.infinity, 50),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                side: BorderSide(color: AppColors.error),
+                              ),
+                              child: Text(
+                                confirmButtonText,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.error,
+                                  fontFamily: 'Pretendard',
+                                ),
+                              ),
+                            )
+                            : ElevatedButton(
+                              onPressed:
+                                  () => Navigator.pop(
+                                    context,
+                                    AppDialogResult.confirm,
+                                  ),
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: const Size(double.infinity, 50),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                backgroundColor: AppColors.primary,
+                              ),
+                              child: Text(
+                                confirmButtonText,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                  fontFamily: 'Pretendard',
+                                ),
+                              ),
+                            ),
+                  ),
+                ],
+              )
+            else
+              isDestructive
+                  ? OutlinedButton(
+                    onPressed:
+                        () => Navigator.pop(context, AppDialogResult.confirm),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      side: BorderSide(color: AppColors.error),
+                    ),
+                    child: Text(
+                      confirmButtonText,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.error,
+                        fontFamily: 'Pretendard',
+                      ),
+                    ),
+                  )
+                  : ElevatedButton(
+                    onPressed:
+                        () => Navigator.pop(context, AppDialogResult.confirm),
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      backgroundColor: AppColors.primary,
+                    ),
+                    child: Text(
+                      confirmButtonText,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                        fontFamily: 'Pretendard',
+                      ),
+                    ),
+                  ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -152,7 +332,12 @@ class ModalOption {
   final VoidCallback onTap;
   final bool isRed;
 
-  const ModalOption({required this.text, required this.icon, required this.onTap, this.isRed = false});
+  const ModalOption({
+    required this.text,
+    required this.icon,
+    required this.onTap,
+    this.isRed = false,
+  });
 }
 
 class _ModalOptionCard extends StatelessWidget {
@@ -162,7 +347,13 @@ class _ModalOptionCard extends StatelessWidget {
   final bool isCenter;
   final bool isRed;
 
-  const _ModalOptionCard({required this.text, this.icon, required this.onTap, this.isCenter = false, this.isRed = false});
+  const _ModalOptionCard({
+    required this.text,
+    this.icon,
+    required this.onTap,
+    this.isCenter = false,
+    this.isRed = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -175,11 +366,21 @@ class _ModalOptionCard extends StatelessWidget {
         contentPadding: const EdgeInsets.symmetric(vertical: 1),
         leading:
             !isCenter
-                ? Padding(padding: const EdgeInsets.only(left: 24, right: 4), child: Icon(icon, color: isRed ? Colors.red : Colors.black87))
+                ? Padding(
+                  padding: const EdgeInsets.only(left: 24, right: 4),
+                  child: Icon(
+                    icon,
+                    color: isRed ? AppColors.error : Colors.black87,
+                  ),
+                )
                 : null,
         title: Text(
           text,
-          style: TextStyle(fontSize: 16, color: isRed ? Colors.red : Colors.black, fontWeight: FontWeight.w500),
+          style: TextStyle(
+            fontSize: 16,
+            color: isRed ? AppColors.error : Colors.black,
+            fontWeight: FontWeight.w500,
+          ),
           textAlign: isCenter ? TextAlign.center : null,
         ),
         onTap: onTap,

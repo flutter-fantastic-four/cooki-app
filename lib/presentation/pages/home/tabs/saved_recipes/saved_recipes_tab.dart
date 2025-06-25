@@ -1,16 +1,13 @@
 import 'package:cooki/core/utils/navigation_util.dart';
 import 'package:cooki/presentation/pages/detailed_recipe/detailed_recipe_page.dart';
-import 'package:cooki/core/utils/sharing_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../app/constants/app_constants.dart';
-import '../../../../../data/repository/providers.dart';
 import '../../../../../domain/entity/recipe.dart';
 import '../../../../../core/utils/general_util.dart';
 import '../../../../../app/constants/app_colors.dart';
-import '../../../../pages/edit/recipe_edit_page.dart';
-import '../../../../../presentation/widgets/app_dialog.dart';
+import '../../../../../presentation/widgets/recipe_options_modal.dart';
 import '../../../../../core/utils/snackbar_util.dart';
 import 'saved_recipes_tab_view_model.dart';
 
@@ -281,9 +278,16 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                                         return _RecipeCard(
                                           recipe: recipe,
                                           onOptionsTap:
-                                              () => _showOptionsModal(
-                                                context,
-                                                recipe,
+                                              () => RecipeOptionsModal.show(
+                                                context: context,
+                                                ref: ref,
+                                                recipe: recipe,
+                                                onRecipeDeleted: () {
+                                                  viewModel.refreshRecipes();
+                                                },
+                                                onRecipeUpdated: () {
+                                                  viewModel.refreshRecipes();
+                                                },
                                               ),
                                           category: state.selectedCategory,
                                           viewModel: viewModel,
@@ -499,117 +503,6 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
             );
           },
         );
-      },
-    );
-  }
-
-  void _showOptionsModal(BuildContext context, Recipe recipe) {
-    final viewModel = ref.read(
-      savedRecipesViewModelProvider(strings(context)).notifier,
-    );
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: AppColors.greyScale50,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
-      ),
-      builder: (BuildContext context) {
-        return Padding(
-          padding: const EdgeInsets.only(
-            top: 8,
-            bottom: 30,
-            left: 15,
-            right: 15,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildModalHandle(),
-
-              _PhotoModalStyleCard(
-                text:
-                    recipe.isPublic
-                        ? strings(context).communityUnpost
-                        : strings(context).communityPost,
-                icon: recipe.isPublic ? Icons.public_off : Icons.public,
-                onTap: () {
-                  Navigator.pop(context);
-                  viewModel.toggleCommunityPost(recipe);
-                },
-              ),
-
-              _PhotoModalStyleCard(
-                text: strings(context).share,
-                icon: Icons.share_outlined,
-                onTap: () async {
-                  await SharingUtil.shareRecipe(
-                    context,
-                    recipe,
-                    ref.read(imageDownloadRepositoryProvider),
-                  );
-                  if (!context.mounted) return;
-                  Navigator.pop(context);
-                },
-              ),
-
-              _PhotoModalStyleCard(
-                text: strings(context).edit,
-                icon: Icons.edit_outlined,
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => RecipeEditPage(recipe: recipe),
-                    ),
-                  );
-                },
-              ),
-
-              _PhotoModalStyleCard(
-                text: strings(context).delete,
-                icon: Icons.delete_outline,
-                iconColor: Colors.red,
-                textColor: Colors.red,
-                onTap: () {
-                  Navigator.pop(context);
-                  _showDeleteConfirmation(context, recipe);
-                },
-              ),
-
-              const SizedBox(height: 15),
-              _PhotoModalStyleCard(
-                text: strings(context).close,
-                onTap: () => Navigator.pop(context),
-                isCenter: true,
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  void _showDeleteConfirmation(BuildContext context, Recipe recipe) {
-    final viewModel = ref.read(
-      savedRecipesViewModelProvider(strings(context)).notifier,
-    );
-
-    if (recipe.id.isEmpty) {
-      SnackbarUtil.showSnackBar(context, strings(context).deleteError);
-      return;
-    }
-
-    AppDialog.show(
-      context: context,
-      title: strings(context).delete,
-      subText: strings(context).deleteConfirmMessage(recipe.recipeName),
-      primaryButtonText: strings(context).delete,
-      secondaryButtonText: strings(context).cancel,
-      onPrimaryButtonPressed: () {
-        viewModel.deleteRecipe(recipe.id);
       },
     );
   }
@@ -1009,54 +902,6 @@ class FilterIconWithDot extends StatelessWidget {
             ),
           ),
       ],
-    );
-  }
-}
-
-class _PhotoModalStyleCard extends StatelessWidget {
-  final String text;
-  final IconData? icon;
-  final VoidCallback onTap;
-  final bool isCenter;
-  final Color? textColor;
-  final Color? iconColor;
-
-  const _PhotoModalStyleCard({
-    required this.text,
-    this.icon,
-    required this.onTap,
-    this.isCenter = false,
-    this.textColor,
-    this.iconColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      elevation: 0,
-      color: AppColors.white,
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(vertical: 1),
-        leading:
-            !isCenter
-                ? Padding(
-                  padding: const EdgeInsets.only(left: 24, right: 4),
-                  child: Icon(icon, color: iconColor ?? Colors.black87),
-                )
-                : null,
-        title: Text(
-          text,
-          style: TextStyle(
-            fontSize: 16,
-            color: textColor ?? Colors.black,
-            fontWeight: FontWeight.w500,
-          ),
-          textAlign: isCenter ? TextAlign.center : null,
-        ),
-        onTap: onTap,
-      ),
     );
   }
 }

@@ -28,20 +28,35 @@ class AccountActionButton extends ConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           TextButton(
-            onPressed: state.isLoading ? null : () => _handleLogout(context, viewModel),
-            child: Text(strings(context).logout, style: TextStyle(color: Colors.grey[500])),
+            onPressed:
+                state.isLoading
+                    ? null
+                    : () => _handleLogout(context, viewModel),
+            child: Text(
+              strings(context).logout,
+              style: TextStyle(color: Colors.grey[500]),
+            ),
           ),
           Container(color: Colors.grey[300], height: 20, width: 2),
           TextButton(
-            onPressed: state.isLoading ? null : () => _handleDeleteAccount(context, viewModel),
-            child: Text(strings(context).deleteAccount, style: TextStyle(color: Colors.grey[500])),
+            onPressed:
+                state.isLoading
+                    ? null
+                    : () => _handleDeleteAccount(context, viewModel),
+            child: Text(
+              strings(context).deleteAccount,
+              style: TextStyle(color: Colors.grey[500]),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Future<void> _handleLogout(BuildContext context, AccountActionViewModel viewModel) async {
+  Future<void> _handleLogout(
+    BuildContext context,
+    AccountActionViewModel viewModel,
+  ) async {
     final result = await DialogueUtil.showAppCupertinoDialog(
       context: context,
       title: strings(context).logoutDialogTitle,
@@ -53,7 +68,10 @@ class AccountActionButton extends ConsumerWidget {
       final success = await viewModel.logout();
       if (success) {
         // ignore: use_build_context_synchronously
-        Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const LoginPage()), (route) => false);
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+          (route) => false,
+        );
       } else {
         // ignore: use_build_context_synchronously
         SnackbarUtil.showSnackBar(context, strings(context).logouterror);
@@ -61,19 +79,26 @@ class AccountActionButton extends ConsumerWidget {
     }
   }
 
-  Future<void> _handleDeleteAccount(BuildContext context, AccountActionViewModel viewModel) async {
+  Future<void> _handleDeleteAccount(
+    BuildContext context,
+    AccountActionViewModel viewModel,
+  ) async {
     final result = await DialogueUtil.showAppCupertinoDialog(
       context: context,
       title: strings(context).deleteAccountDialogTitle,
       content: strings(context).deleteAccountDialogSubTitle,
       showCancel: true,
+      isDestructive: true,
     );
 
     if (result == AppDialogResult.confirm) {
       final success = await viewModel.deleteAccount();
       if (success) {
         // ignore: use_build_context_synchronously
-        Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const LoginPage()), (route) => false);
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+          (route) => false,
+        );
       } else {
         // ignore: use_build_context_synchronously
         SnackbarUtil.showSnackBar(context, strings(context).deleteAccountError);

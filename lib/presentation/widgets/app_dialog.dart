@@ -9,6 +9,7 @@ class AppDialog extends StatelessWidget {
   final String? secondaryButtonText;
   final VoidCallback onPrimaryButtonPressed;
   final VoidCallback? onSecondaryButtonPressed;
+  final bool isDestructive;
 
   const AppDialog({
     super.key,
@@ -18,6 +19,7 @@ class AppDialog extends StatelessWidget {
     required this.onPrimaryButtonPressed,
     this.secondaryButtonText,
     this.onSecondaryButtonPressed,
+    this.isDestructive = false,
   });
 
   static Future<bool?> show({
@@ -28,6 +30,7 @@ class AppDialog extends StatelessWidget {
     String? secondaryButtonText,
     VoidCallback? onPrimaryButtonPressed,
     VoidCallback? onSecondaryButtonPressed,
+    bool isDestructive = false,
   }) {
     return showDialog<bool>(
       context: context,
@@ -37,6 +40,7 @@ class AppDialog extends StatelessWidget {
             subText: subText,
             primaryButtonText: primaryButtonText ?? strings(context).confirm,
             secondaryButtonText: secondaryButtonText,
+            isDestructive: isDestructive,
             onPrimaryButtonPressed: () {
               if (onPrimaryButtonPressed != null) {
                 onPrimaryButtonPressed();
@@ -105,46 +109,85 @@ class AppDialog extends StatelessWidget {
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: ElevatedButton(
-                      onPressed: onPrimaryButtonPressed,
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: const Size(double.infinity, 50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        backgroundColor: AppColors.primary,
-                      ),
-                      child: Text(
-                        primaryButtonText,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
+                    child:
+                        isDestructive
+                            ? OutlinedButton(
+                              onPressed: onPrimaryButtonPressed,
+                              style: OutlinedButton.styleFrom(
+                                minimumSize: const Size(double.infinity, 50),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                side: BorderSide(color: AppColors.error),
+                              ),
+                              child: Text(
+                                primaryButtonText,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.error,
+                                ),
+                              ),
+                            )
+                            : ElevatedButton(
+                              onPressed: onPrimaryButtonPressed,
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: const Size(double.infinity, 50),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                backgroundColor: AppColors.primary,
+                              ),
+                              child: Text(
+                                primaryButtonText,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
                   ),
                 ],
               )
             else
-              ElevatedButton(
-                onPressed: onPrimaryButtonPressed,
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+              isDestructive
+                  ? OutlinedButton(
+                    onPressed: onPrimaryButtonPressed,
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      side: BorderSide(color: AppColors.error),
+                    ),
+                    child: Text(
+                      primaryButtonText,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.error,
+                      ),
+                    ),
+                  )
+                  : ElevatedButton(
+                    onPressed: onPrimaryButtonPressed,
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      backgroundColor: AppColors.primary,
+                    ),
+                    child: Text(
+                      primaryButtonText,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
-                  backgroundColor: AppColors.primary,
-                ),
-                child: Text(
-                  primaryButtonText,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
           ],
         ),
       ),

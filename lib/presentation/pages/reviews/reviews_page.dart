@@ -83,7 +83,7 @@ class ReviewsPage extends ConsumerWidget {
         ModalOption(
           text: strings(context).deleteReview,
           isRed: true,
-          icon: Icons.delete,
+          icon: Icons.delete_outline,
           onTap: () => _deleteReview(context, ref, review),
         ),
     ];
@@ -126,6 +126,7 @@ class ReviewsPage extends ConsumerWidget {
       title: strings(context).deleteReviewTitle,
       content: strings(context).deleteReviewConfirmation,
       showCancel: true,
+      isDestructive: true,
     );
     if (result == AppDialogResult.confirm) {
       ref

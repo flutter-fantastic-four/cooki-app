@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cooki/app/constants/app_colors.dart';
 import 'package:cooki/core/utils/general_util.dart';
 import 'package:cooki/core/utils/navigation_util.dart';
+import 'package:cooki/core/utils/snackbar_util.dart';
 import 'package:cooki/domain/entity/app_user.dart';
 import 'package:cooki/domain/entity/recipe.dart';
 import 'package:cooki/domain/entity/review.dart';
@@ -12,6 +13,7 @@ import 'package:cooki/presentation/pages/reviews/reviews_page.dart';
 import 'package:cooki/presentation/pages/reviews/reviews_view_model.dart';
 import 'package:cooki/presentation/user_global_view_model.dart';
 import 'package:cooki/presentation/widgets/app_cached_image.dart';
+import 'package:cooki/presentation/widgets/recipe_options_modal.dart';
 import 'package:cooki/presentation/widgets/recipe_page_widgets.dart';
 import 'package:cooki/presentation/widgets/star_rating.dart';
 import 'package:cooki/data/repository/providers.dart';
@@ -82,6 +84,25 @@ final actualAverageRatingProvider = FutureProvider.family
       }
     });
 
+// Provider for checking if a recipe is saved by the current user
+final isRecipeSavedProvider = FutureProvider.family.autoDispose<bool, String>((
+  ref,
+  recipeId,
+) async {
+  try {
+    final currentUser = ref.read(userGlobalViewModelProvider);
+    if (currentUser == null) return false;
+
+    final recipeRepository = ref.read(recipeRepositoryProvider);
+    final savedRecipeIds = await recipeRepository.getUserSavedRecipeIds(
+      currentUser.id,
+    );
+    return savedRecipeIds.contains(recipeId);
+  } catch (e) {
+    return false;
+  }
+});
+
 class DetailRecipePage extends ConsumerWidget {
   final Recipe recipe;
   final String? category;
@@ -116,7 +137,7 @@ class DetailRecipePage extends ConsumerWidget {
                     children: [
                       _infoChip(context, ref, user),
                       const SizedBox(height: 12),
-                      _title(),
+                      _title(context, ref),
                       const SizedBox(height: 20),
                       TagChips(recipe.tags),
                       const SizedBox(height: 24),
@@ -346,7 +367,7 @@ class DetailRecipePage extends ConsumerWidget {
     );
   }
 
-  Row _title() {
+  Row _title(BuildContext context, WidgetRef ref) {
     return Row(
       children: [
         Expanded(
@@ -358,8 +379,105 @@ class DetailRecipePage extends ConsumerWidget {
           ),
         ),
         SizedBox(width: 3),
-        IconButton(onPressed: () {}, icon: Icon(Icons.bookmark_border)),
-        IconButton(onPressed: () {}, icon: Icon(Icons.more_vert)),
+        Consumer(
+          builder: (context, ref, child) {
+            final user = ref.read(userGlobalViewModelProvider);
+            if (user == null) {
+              return IconButton(
+                onPressed: () {
+                  // Navigate to login
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const GuestLoginPage(),
+                    ),
+                  );
+                },
+                icon: Icon(Icons.bookmark_border),
+              );
+            }
+
+            final isRecipeSavedAsync = ref.watch(
+              isRecipeSavedProvider(recipe.id),
+            );
+            return isRecipeSavedAsync.when(
+              data: (isSaved) {
+                return IconButton(
+                  onPressed: () async {
+                    try {
+                      final recipeRepository = ref.read(
+                        recipeRepositoryProvider,
+                      );
+                      if (isSaved) {
+                        await recipeRepository.removeFromSavedRecipes(
+                          user.id,
+                          recipe.id,
+                        );
+                        ref.invalidate(isRecipeSavedProvider(recipe.id));
+                        if (context.mounted) {
+                          SnackbarUtil.showSnackBar(
+                            context,
+                            strings(context).recipeRemovedSuccessfully,
+                            showIcon: true,
+                          );
+                        }
+                      } else {
+                        await recipeRepository.addToSavedRecipes(
+                          user.id,
+                          recipe.id,
+                        );
+                        ref.invalidate(isRecipeSavedProvider(recipe.id));
+                        if (context.mounted) {
+                          SnackbarUtil.showSnackBar(
+                            context,
+                            strings(context).recipeSavedSuccessfully,
+                            showIcon: true,
+                          );
+                        }
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        SnackbarUtil.showSnackBar(
+                          context,
+                          strings(context).errorOccurred,
+                        );
+                      }
+                    }
+                  },
+                  icon: Icon(isSaved ? Icons.bookmark : Icons.bookmark_border),
+                );
+              },
+              loading:
+                  () => IconButton(
+                    onPressed: null,
+                    icon: Icon(Icons.bookmark_border),
+                  ),
+              error:
+                  (error, stack) => IconButton(
+                    onPressed: () {},
+                    icon: Icon(Icons.bookmark_border),
+                  ),
+            );
+          },
+        ),
+        IconButton(
+          onPressed:
+              () => RecipeOptionsModal.show(
+                context: context,
+                ref: ref,
+                recipe: recipe,
+                onRecipeDeleted: () {
+                  // Navigate back to home when recipe is deleted
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                },
+                onRecipeUpdated: () {
+                  // Refresh page state when recipe is updated
+                  ref.invalidate(isRecipeSavedProvider(recipe.id));
+                  ref.invalidate(actualAverageRatingProvider(recipe.id));
+                },
+              ),
+          icon: Icon(Icons.more_vert),
+        ),
       ],
     );
   }
@@ -441,7 +559,7 @@ class DetailRecipePage extends ConsumerWidget {
           },
           child: Container(
             height: 28,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: ShapeDecoration(
               shape: RoundedRectangleBorder(
                 side: BorderSide(width: 1, color: AppColors.greyScale300),
@@ -711,9 +829,7 @@ class _RatingModalState extends State<_RatingModal> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5) /* Grayscale-50 */,
-      ),
+      decoration: BoxDecoration(color: AppColors.greyScale50),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.start,

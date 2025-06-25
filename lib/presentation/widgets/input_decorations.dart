@@ -8,8 +8,8 @@ InputDecoration getInputDecoration(String? hint) {
     hintStyle: const TextStyle(color: Colors.grey),
     enabledBorder: _buildBorder(radius: 14, color: AppColors.borderGrey),
     focusedBorder: _buildBorder(radius: 12, color: AppColors.primary),
-    errorBorder: _buildBorder(radius: 12, color: Colors.red),
-    focusedErrorBorder: _buildBorder(radius: 12, color: Colors.red),
+    errorBorder: _buildBorder(radius: 12, color: AppColors.error),
+    focusedErrorBorder: _buildBorder(radius: 12, color: AppColors.error),
   );
 }
 
