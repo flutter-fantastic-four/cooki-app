@@ -13,13 +13,7 @@ class CommunityState {
   final List<String> selectedCuisines;
   final String selectedSort;
 
-  const CommunityState({
-    this.isLoading = false,
-    this.recipes = const [],
-    this.error,
-    this.selectedCuisines = const [],
-    this.selectedSort = '',
-  });
+  const CommunityState({this.isLoading = false, this.recipes = const [], this.error, this.selectedCuisines = const [], this.selectedSort = ''});
 
   CommunityState copyWith({
     bool? isLoading,
@@ -43,8 +37,7 @@ class CommunityState {
 
     // Filter by cuisine categories if any selected
     if (selectedCuisines.isNotEmpty) {
-      filtered =
-          filtered.where((r) => selectedCuisines.contains(r.category)).toList();
+      filtered = filtered.where((r) => selectedCuisines.contains(r.category)).toList();
     }
 
     // Apply sort option if selected
@@ -57,8 +50,7 @@ class CommunityState {
     return filtered;
   }
 
-  bool get hasActiveFilters =>
-      selectedCuisines.isNotEmpty || selectedSort.isNotEmpty;
+  bool get hasActiveFilters => selectedCuisines.isNotEmpty || selectedSort.isNotEmpty;
 }
 
 class CommunityViewModel extends AutoDisposeNotifier<CommunityState> {
@@ -73,7 +65,7 @@ class CommunityViewModel extends AutoDisposeNotifier<CommunityState> {
 
     try {
       final repository = ref.read(recipeRepositoryProvider);
-      final recipes = await repository.getCommunityRecipes(ref.read(userGlobalViewModelProvider)!.id);
+      final recipes = await repository.getCommunityRecipes(ref.read(userGlobalViewModelProvider)?.id);
       state = state.copyWith(isLoading: false, recipes: recipes);
     } catch (e, stack) {
       logError(e, stack);
@@ -112,7 +104,4 @@ class CommunityViewModel extends AutoDisposeNotifier<CommunityState> {
   }
 }
 
-final communityViewModelProvider =
-    NotifierProvider.autoDispose<CommunityViewModel, CommunityState>(
-      CommunityViewModel.new,
-    );
+final communityViewModelProvider = NotifierProvider.autoDispose<CommunityViewModel, CommunityState>(CommunityViewModel.new);

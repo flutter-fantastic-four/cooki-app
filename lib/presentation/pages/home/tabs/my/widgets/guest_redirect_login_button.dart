@@ -1,16 +1,19 @@
 import 'package:cooki/app/constants/app_colors.dart';
 import 'package:cooki/core/utils/general_util.dart';
-import 'package:cooki/presentation/pages/login/login_page.dart';
+import 'package:cooki/core/utils/navigation_util.dart';
+import 'package:cooki/presentation/pages/login/guest_login_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class GuestRedirectLoginButton extends StatelessWidget {
+class GuestRedirectLoginButton extends ConsumerWidget {
   const GuestRedirectLoginButton({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return GestureDetector(
-      onTap: () => Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const LoginPage()), (route) => false),
-
+      onTap: () {
+        NavigationUtil.pushFromBottom(context, GuestLoginPage());
+      },
       child: Container(
         color: AppColors.greyScale50,
         child: Padding(
