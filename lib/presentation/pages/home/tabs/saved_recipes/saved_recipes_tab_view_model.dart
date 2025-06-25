@@ -93,6 +93,7 @@ class SavedRecipesViewModel
       final currentUser = ref.read(userGlobalViewModelProvider);
       if (currentUser == null) {
         state = state.copyWith(isLoading: false);
+        state = state.copyWith(isLoading: false);
         return;
       }
 
