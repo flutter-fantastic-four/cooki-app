@@ -37,6 +37,9 @@ class MyPage extends ConsumerWidget {
 
           const SizedBox(height: 24),
           InfoColumn(),
+          InfoColumn(),
+          InfoColumn(),
+          InfoColumn(),
           Spacer(),
           vm == null ? SizedBox() : AccountActionButton(),
         ],
