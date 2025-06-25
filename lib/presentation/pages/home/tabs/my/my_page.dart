@@ -32,16 +32,21 @@ class MyPage extends ConsumerWidget {
       ),
       body: Column(
         children: [
-          const SizedBox(height: 24),
-          vm == null ? GuestRedirectLoginButton() : Column(children: [ProfileImage(), const SizedBox(height: 16), NickNameRow()]),
-
-          const SizedBox(height: 24),
-          InfoColumn(),
-          InfoColumn(),
-          InfoColumn(),
-          InfoColumn(),
-          Spacer(),
-          vm == null ? SizedBox() : AccountActionButton(),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SizedBox(height: 24),
+                  vm == null ? GuestRedirectLoginButton() : Column(children: [ProfileImage(), const SizedBox(height: 16), NickNameRow()]),
+                  const SizedBox(height: 24),
+                  InfoColumn(),
+                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
+          ),
+          if (vm != null) AccountActionButton(),
         ],
       ),
     );
