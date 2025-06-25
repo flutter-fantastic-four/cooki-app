@@ -71,6 +71,9 @@ class WriteReviewViewModel
       final imageUrls = await _compressAndUploadImages(user.id);
       if (imageUrls == null) return;
 
+      // Detect language if review has text
+      String? detectedLanguage = await _getDetectedLanguage(reviewText);
+
       final review = Review(
         id: arg?.id ?? '',
         reviewText: reviewText.trim(),
@@ -81,6 +84,7 @@ class WriteReviewViewModel
         userImageUrl: user.profileImage,
         createdAt: arg?.createdAt,
         updatedAt: arg != null ? DateTime.now() : null,
+        language: detectedLanguage,
       );
 
       if (arg != null) {
@@ -149,6 +153,21 @@ class WriteReviewViewModel
       state = state.copyWith(errorKey: WriteReviewErrorKey.imageUploadFailed);
       return null;
     }
+  }
+
+  Future<String?> _getDetectedLanguage(String reviewText) async {
+    if (reviewText.trim().isNotEmpty) {
+      try {
+        final detectionResult = await ref
+            .read(reviewRepositoryProvider)
+            .detectReviewLanguage(text: reviewText.trim());
+        return detectionResult.mostLikelyLanguage;
+      } catch (e, stack) {
+        logError(e, stack);
+        return null;
+      }
+    }
+    return null;
   }
 
   Future<void> deleteReview({

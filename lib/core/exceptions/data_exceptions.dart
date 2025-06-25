@@ -13,6 +13,18 @@ class ApiException implements Exception {
   }
 }
 
+/// Exception thrown when a translation error occurs.
+///
+/// Used for calling neural translation APIs
+class TranslationException implements Exception {
+  final String message;
+
+  const TranslationException(this.message);
+
+  @override
+  String toString() => 'TranslationException: $message';
+}
+
 /// Exception thrown when a network error occurs.
 ///
 /// Used for connectivity issues, timeouts, etc.
