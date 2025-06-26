@@ -278,5 +278,14 @@
   "guestSignUpPrompt":"간단한 회원가입을 통해\n 쿠키의 모든 서비스를 이용할 수 있어요.",
 
   "undoTranslation": "원본 보기",
-  "translationFailed": "번역에 실패했습니다. 다시 시도해 주세요."
+  "translationFailed": "번역에 실패했습니다. 다시 시도해 주세요.",
+
+  "cookTime": "약 {minute}분 소요",
+  "@cookTime": {
+  "placeholders": {
+    "minute": {
+      "type": "int"
+         }
+    }
+  }
 }

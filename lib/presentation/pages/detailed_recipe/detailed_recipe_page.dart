@@ -98,7 +98,9 @@ class DetailRecipePage extends ConsumerWidget {
                       _infoChip(context, ref, user),
                       const SizedBox(height: 12),
                       _title(context, ref),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 8),
+                      _details(context),
+                      const SizedBox(height: 13),
                       TagChips(recipe.tags),
                       const SizedBox(height: 24),
                       _review(context),
@@ -120,6 +122,17 @@ class DetailRecipePage extends ConsumerWidget {
       ),
     );
   }
+
+  Widget _details(BuildContext context) => Row(
+    children: [
+      Text(strings(context).cookTime(recipe.cookTime), style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+      SizedBox(width: 12),
+      Text("${recipe.calories}${strings(context).caloriesLabel}", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+      Spacer(),
+      Text(recipe.category, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+      SizedBox(width: 12),
+    ],
+  );
 
   Row _ingredientsLabel(BuildContext context) {
     return Row(
