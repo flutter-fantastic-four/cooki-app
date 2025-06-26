@@ -1,3 +1,4 @@
+import 'package:cooki/presentation/pages/home/tabs/community/widget/photo_modal_style_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -16,13 +17,9 @@ class RecipeOptionsModal extends ConsumerWidget {
   final Recipe recipe;
   final VoidCallback? onRecipeDeleted;
   final VoidCallback? onRecipeUpdated;
+  final bool isDetail;
 
-  const RecipeOptionsModal({
-    super.key,
-    required this.recipe,
-    this.onRecipeDeleted,
-    this.onRecipeUpdated,
-  });
+  const RecipeOptionsModal({super.key, required this.recipe, this.onRecipeDeleted, this.onRecipeUpdated, this.isDetail = false});
 
   static void show({
     required BuildContext context,
@@ -30,19 +27,19 @@ class RecipeOptionsModal extends ConsumerWidget {
     required Recipe recipe,
     VoidCallback? onRecipeDeleted,
     VoidCallback? onRecipeUpdated,
+    bool? isDetail,
   }) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.greyScale50,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
-      ),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(26))),
       builder: (BuildContext context) {
         return RecipeOptionsModal(
           recipe: recipe,
           onRecipeDeleted: onRecipeDeleted,
           onRecipeUpdated: onRecipeUpdated,
+          isDetail: isDetail == null ? false : true,
         );
       },
     );
@@ -52,7 +49,6 @@ class RecipeOptionsModal extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.read(userGlobalViewModelProvider);
     final isOwner = user?.id == recipe.userId;
-
     return Padding(
       padding: const EdgeInsets.only(top: 8, bottom: 30, left: 15, right: 15),
       child: Column(
@@ -62,30 +58,19 @@ class RecipeOptionsModal extends ConsumerWidget {
 
           // Post to community option (owner-only)
           if (isOwner)
-            _PhotoModalStyleCard(
-              text:
-                  recipe.isPublic
-                      ? strings(context).communityUnpost
-                      : strings(context).communityPost,
+            PhotoModalStyleCard(
+              text: recipe.isPublic ? strings(context).communityUnpost : strings(context).communityPost,
               icon: recipe.isPublic ? Icons.public_off : Icons.public,
               onTap: () => _toggleCommunityPost(context, ref),
             ),
 
           // Share option (always available)
-          _PhotoModalStyleCard(
-            text: strings(context).share,
-            icon: Icons.share_outlined,
-            onTap: () => _shareRecipe(context, ref),
-          ),
+          PhotoModalStyleCard(text: strings(context).share, icon: Icons.share_outlined, onTap: () => _shareRecipe(context, ref)),
 
           // Edit and delete options (owner-only)
           if (isOwner) ...[
-            _PhotoModalStyleCard(
-              text: strings(context).edit,
-              icon: Icons.edit_outlined,
-              onTap: () => _editRecipe(context),
-            ),
-            _PhotoModalStyleCard(
+            isDetail ? SizedBox() : PhotoModalStyleCard(text: strings(context).edit, icon: Icons.edit_outlined, onTap: () => _editRecipe(context)),
+            PhotoModalStyleCard(
               text: strings(context).delete,
               icon: Icons.delete_outline,
               iconColor: AppColors.error,
@@ -95,11 +80,7 @@ class RecipeOptionsModal extends ConsumerWidget {
           ],
 
           const SizedBox(height: 15),
-          _PhotoModalStyleCard(
-            text: strings(context).close,
-            onTap: () => Navigator.pop(context),
-            isCenter: true,
-          ),
+          PhotoModalStyleCard(text: strings(context).close, onTap: () => Navigator.pop(context), isCenter: true),
         ],
       ),
     );
@@ -111,10 +92,7 @@ class RecipeOptionsModal extends ConsumerWidget {
         margin: const EdgeInsets.only(top: 8, bottom: 8),
         width: 36.0,
         height: 4.0,
-        decoration: BoxDecoration(
-          color: AppColors.greyScale200,
-          borderRadius: BorderRadius.circular(2),
-        ),
+        decoration: BoxDecoration(color: AppColors.greyScale200, borderRadius: BorderRadius.circular(2)),
       ),
     );
   }
@@ -125,13 +103,7 @@ class RecipeOptionsModal extends ConsumerWidget {
       final recipeRepository = ref.read(recipeRepositoryProvider);
       await recipeRepository.toggleRecipeShare(recipe.id, !recipe.isPublic);
       if (context.mounted) {
-        SnackbarUtil.showSnackBar(
-          context,
-          recipe.isPublic
-              ? strings(context).unpostSuccess
-              : strings(context).postSuccess,
-          showIcon: true,
-        );
+        SnackbarUtil.showSnackBar(context, recipe.isPublic ? strings(context).unpostSuccess : strings(context).postSuccess, showIcon: true);
         onRecipeUpdated?.call();
       }
     } catch (e) {
@@ -147,11 +119,7 @@ class RecipeOptionsModal extends ConsumerWidget {
   }
 
   void _shareRecipe(BuildContext context, WidgetRef ref) async {
-    await SharingUtil.shareRecipe(
-      context,
-      recipe,
-      ref.read(imageDownloadRepositoryProvider),
-    );
+    await SharingUtil.shareRecipe(context, recipe, ref.read(imageDownloadRepositoryProvider));
     if (!context.mounted) return;
     Navigator.pop(context);
   }
@@ -178,11 +146,7 @@ class RecipeOptionsModal extends ConsumerWidget {
         try {
           await ref.read(recipeRepositoryProvider).deleteRecipe(recipe.id);
           if (context.mounted) {
-            SnackbarUtil.showSnackBar(
-              context,
-              strings(context).deleteSuccess,
-              showIcon: true,
-            );
+            SnackbarUtil.showSnackBar(context, strings(context).deleteSuccess, showIcon: true);
             onRecipeDeleted?.call();
           }
         } catch (e) {
@@ -191,54 +155,6 @@ class RecipeOptionsModal extends ConsumerWidget {
           }
         }
       },
-    );
-  }
-}
-
-class _PhotoModalStyleCard extends StatelessWidget {
-  final String text;
-  final IconData? icon;
-  final VoidCallback onTap;
-  final bool isCenter;
-  final Color? textColor;
-  final Color? iconColor;
-
-  const _PhotoModalStyleCard({
-    required this.text,
-    this.icon,
-    required this.onTap,
-    this.isCenter = false,
-    this.textColor,
-    this.iconColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      elevation: 0,
-      color: AppColors.white,
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(vertical: 1),
-        leading:
-            !isCenter
-                ? Padding(
-                  padding: const EdgeInsets.only(left: 24, right: 4),
-                  child: Icon(icon, color: iconColor ?? Colors.black87),
-                )
-                : null,
-        title: Text(
-          text,
-          style: TextStyle(
-            fontSize: 16,
-            color: textColor ?? Colors.black,
-            fontWeight: FontWeight.w500,
-          ),
-          textAlign: isCenter ? TextAlign.center : null,
-        ),
-        onTap: onTap,
-      ),
     );
   }
 }
