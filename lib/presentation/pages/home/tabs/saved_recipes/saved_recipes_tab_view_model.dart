@@ -163,11 +163,18 @@ class SavedRecipesViewModel
 
       for (final recipe in recipes) {
         try {
-          final userReview = await reviewRepository.getUserReviewForRecipe(
-            recipeId: recipe.id,
-            userId: currentUser.id,
-          );
-          userRatings[recipe.id] = userReview?.rating;
+          if (recipe.isPublic) {
+            // For public recipes, get rating from reviews
+            final userReview = await reviewRepository.getUserReviewForRecipe(
+              recipeId: recipe.id,
+              userId: currentUser.id,
+            );
+            userRatings[recipe.id] = userReview?.rating;
+          } else {
+            // For private recipes, use recipe's userRating field directly
+            userRatings[recipe.id] =
+                recipe.userRating > 0 ? recipe.userRating : null;
+          }
         } catch (e) {
           // If there's an error getting the rating for this recipe, just set it to null
           userRatings[recipe.id] = null;

@@ -22,6 +22,15 @@ class RatingModalState extends ConsumerState<RatingModal> {
   int currentRating = 0;
 
   @override
+  void initState() {
+    super.initState();
+    // Initialize with current rating if available
+    if (!widget.recipe.isPublic && widget.recipe.userRating > 0) {
+      currentRating = widget.recipe.userRating;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 8, bottom: 30, left: 15, right: 15),
@@ -32,7 +41,10 @@ class RatingModalState extends ConsumerState<RatingModal> {
           Container(
             width: 40,
             height: 5,
-            decoration: BoxDecoration(color: AppColors.greyScale400, borderRadius: BorderRadius.circular(10)),
+            decoration: BoxDecoration(
+              color: AppColors.greyScale400,
+              borderRadius: BorderRadius.circular(10),
+            ),
             margin: const EdgeInsets.only(bottom: 12),
           ),
           Padding(
@@ -49,8 +61,15 @@ class RatingModalState extends ConsumerState<RatingModal> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     spacing: 4,
                     children: [
-                      Text(strings(context).recipeReview, textAlign: TextAlign.center, style: _ModalTextStyles.modalTitle),
-                      Text(strings(context).recipeRating, style: _ModalTextStyles.modalSubtitle),
+                      Text(
+                        strings(context).recipeReview,
+                        textAlign: TextAlign.center,
+                        style: _ModalTextStyles.modalTitle,
+                      ),
+                      Text(
+                        strings(context).recipeRating,
+                        style: _ModalTextStyles.modalSubtitle,
+                      ),
                     ],
                   ),
                 ),
@@ -102,7 +121,13 @@ class RatingModalState extends ConsumerState<RatingModal> {
               crossAxisAlignment: CrossAxisAlignment.center,
               spacing: 8,
               children: [
-                Expanded(child: _buildModalButton(text: strings(context).close, isPrimary: false, onTap: () => Navigator.pop(context))),
+                Expanded(
+                  child: _buildModalButton(
+                    text: strings(context).close,
+                    isPrimary: false,
+                    onTap: () => Navigator.pop(context),
+                  ),
+                ),
                 Expanded(
                   child: _buildModalButton(
                     text: strings(context).confirm,
@@ -118,7 +143,11 @@ class RatingModalState extends ConsumerState<RatingModal> {
     );
   }
 
-  Widget _buildModalButton({required String text, required bool isPrimary, required VoidCallback onTap}) {
+  Widget _buildModalButton({
+    required String text,
+    required bool isPrimary,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -126,7 +155,10 @@ class RatingModalState extends ConsumerState<RatingModal> {
         padding: const EdgeInsets.all(8),
         decoration: ShapeDecoration(
           color: isPrimary ? const Color(0xFF1D8163) : Colors.white,
-          shape: RoundedRectangleBorder(side: BorderSide(width: 1, color: const Color(0xFF1D8163)), borderRadius: BorderRadius.circular(8)),
+          shape: RoundedRectangleBorder(
+            side: BorderSide(width: 1, color: const Color(0xFF1D8163)),
+            borderRadius: BorderRadius.circular(8),
+          ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -156,16 +188,28 @@ class RatingModalState extends ConsumerState<RatingModal> {
       try {
         final currentUser = ref.read(userGlobalViewModelProvider);
         if (currentUser != null) {
-          final review = Review(
-            id: '',
-            reviewText: null,
-            rating: currentRating,
-            imageUrls: [],
-            userId: currentUser.id,
-            userName: currentUser.name,
-            userImageUrl: currentUser.profileImage,
-          );
-          await ref.read(reviewRepositoryProvider).saveReview(recipeId: widget.recipe.id, review: review);
+          if (widget.recipe.isPublic) {
+            // For public recipes, create a review
+            final review = Review(
+              id: '',
+              reviewText: null,
+              rating: currentRating,
+              imageUrls: [],
+              userId: currentUser.id,
+              userName: currentUser.name,
+              userImageUrl: currentUser.profileImage,
+            );
+            await ref
+                .read(reviewRepositoryProvider)
+                .saveReview(recipeId: widget.recipe.id, review: review);
+          } else {
+            // For private recipes, update the recipe's userRating field
+            final updatedRecipe = widget.recipe.copyWith(
+              userRating: currentRating,
+            );
+            await ref.read(recipeRepositoryProvider).editRecipe(updatedRecipe);
+          }
+
           // Invalidate providers to refresh data
           ref.invalidate(userRatingProvider(widget.recipe.id));
           ref.invalidate(actualAverageRatingProvider(widget.recipe.id));
@@ -174,7 +218,9 @@ class RatingModalState extends ConsumerState<RatingModal> {
         }
       } catch (e) {
         if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${strings(context).saveFailedError}: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${strings(context).saveFailedError}: $e')),
+        );
       }
     } else {
       Navigator.pop(context);
@@ -184,7 +230,13 @@ class RatingModalState extends ConsumerState<RatingModal> {
 
 // Constants for modal text styles
 class _ModalTextStyles {
-  static const modalTitle = TextStyle(color: Colors.black, fontSize: 20, fontFamily: 'Pretendard', fontWeight: FontWeight.w700, height: 1.50);
+  static const modalTitle = TextStyle(
+    color: Colors.black,
+    fontSize: 20,
+    fontFamily: 'Pretendard',
+    fontWeight: FontWeight.w700,
+    height: 1.50,
+  );
 
   static const modalSubtitle = TextStyle(
     color: Colors.black,
