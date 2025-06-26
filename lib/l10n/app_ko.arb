@@ -120,7 +120,7 @@
 
   "addPicture": "사진 추가하기",
   "reviewTextHint": "요리하면서 느낀 점, 맛에 대한 평가, 팁이나 후기 등 음식에 대한 솔직한 리뷰를 자유롭게 작성해보세요. (선택)",
-  "saveReviewButtonText": "저장",
+  "saveReviewButtonText": "등록하기",
   "reviewSavedSuccessfully": "리뷰가 저장되었습니다.",
 
   "reviewsLoadFailedError": "리뷰를 불러오는 데 실패했습니다.",
@@ -145,13 +145,14 @@
   "deleteReview": "삭제하기",
 
   "editReviewTitle": "리뷰 수정",
-  "editReviewConfirmMessage": "이 리뷰를 수정하시겠습니까?",
+  "editReviewDialogTitle": "작성한 리뷰를 수정할까요?",
+  "editReviewConfirmMessage": "변경한 수정사항을 반영할게요",
   "reviewEditFailedTitle": "리뷰 수정 실패",
   "reviewEditedSuccessfully": "리뷰가 성공적으로 수정되었습니다.",
-  "deleteReviewConfirmTitle": "리뷰 삭제",
-  "deleteReviewConfirmMessage": "이 리뷰를 삭제하시겠습니까? 삭제된 리뷰는 복구할 수 없습니다.",
+  "deleteReviewConfirmTitle": "작성한 리뷰를 삭제할까요?",
+  "deleteReviewConfirmMessage": "삭제된 리뷰는 복구할 수 없습니다.",
   "delete": "삭제",
-  "editReviewButtonText": "수정",
+  "editReviewButtonText": "수정하기",
   "stopWritingConfirmTitle": "작성을 중단할까요?",
   "stopWritingConfirmMessage": "작성중인 내용은 저장되지 않습니다.",
 

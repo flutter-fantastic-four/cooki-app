@@ -30,7 +30,7 @@ abstract class AppTheme {
         centerTitle: true,
         // titleSpacing: 25,
         titleTextStyle: TextStyle(
-          fontSize: 20,
+          fontSize: 19,
           color: Colors.black87,
           fontWeight: FontWeight.bold,
           fontFamily: 'Pretendard',
@@ -43,7 +43,7 @@ abstract class AppTheme {
           foregroundColor: Colors.white,
           backgroundColor: AppColors.primary,
           disabledBackgroundColor: AppColors.inactiveButton,
-          disabledForegroundColor: Colors.white,
+          // disabledForegroundColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           minimumSize: const Size(double.infinity, 52),
           textStyle: const TextStyle(

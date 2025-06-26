@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cooki/core/utils/modal_util.dart';
 import 'package:cooki/core/utils/snackbar_util.dart';
 import 'package:cooki/presentation/widgets/app_cached_image.dart';
 import 'package:cooki/presentation/widgets/bottom_button_wrapper.dart';
@@ -62,7 +63,7 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
       final result = await DialogueUtil.showAppDialog(
         context: context,
         showCancel: true,
-        title: strings(context).editReviewTitle,
+        title: strings(context).editReviewDialogTitle,
         content: strings(context).editReviewConfirmMessage,
       );
       if (result != true) return;
@@ -164,7 +165,7 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
       return;
     }
 
-    DialogueUtil.showImagePickerModal(
+    ModalUtil.showImagePickerModal(
       context,
       onCamera: () => _pickImages(context, ImageSource.camera),
       onGallery: () => _pickImages(context, ImageSource.gallery),
@@ -457,12 +458,11 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
       maxLines: 7,
       maxLength: 500,
       controller: _controller,
-      decoration: getInputDecoration(strings(context).reviewTextHint).copyWith(
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 16,
-          horizontal: 16,
-        ),
-      ),
+      style: TextStyle(fontSize: 16),
+      decoration: getInputDecoration(
+        strings(context).reviewTextHint,
+        contentPadding: EdgeInsets.all(16),
+      )
     );
   }
 

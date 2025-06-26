@@ -7,7 +7,6 @@ import 'package:cooki/core/utils/snackbar_util.dart';
 import 'package:cooki/domain/entity/app_user.dart';
 import 'package:cooki/domain/entity/recipe.dart';
 import 'package:cooki/domain/entity/review.dart';
-import 'package:cooki/gen/l10n/app_localizations.dart';
 import 'package:cooki/presentation/pages/add_review/write_review_page.dart';
 import 'package:cooki/presentation/pages/detailed_recipe/widget/rating_modal.dart';
 import 'package:cooki/presentation/pages/detailed_recipe/widget/review_card_list.dart';
@@ -150,10 +149,10 @@ class DetailRecipePage extends ConsumerWidget {
                               RecipeEditPage(recipe: recipe),
                             );
                           },
-                          icon: Icon(
-                            Icons.edit_outlined,
-                            color: Colors.black,
-                            size: 24,
+                          icon: Image.asset(
+                            'assets/icons/pencil_icon.png',
+                            height: 22,
+                            width: 22,
                           ),
                         )
                         : SizedBox(),

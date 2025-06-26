@@ -3,7 +3,7 @@ import '../utils/error_mappers.dart';
 class RecipeValidator {
   static RecipeValidationErrorKey? validateTitle(String? title) {
     if (title == null || title.trim().isEmpty) {
-      return RecipeValidationErrorKey.titleRequired;
+      return RecipeValidationErrorKey.required;
     }
     return null;
   }

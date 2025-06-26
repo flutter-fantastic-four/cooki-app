@@ -142,6 +142,7 @@
   "deleteReview": "Delete",
 
   "editReviewTitle": "Edit Review",
+  "editReviewDialogTitle": "Edit Review",
   "editReviewConfirmMessage": "Do you want to edit this review?",
   "reviewEditFailedTitle": "Review Edit Failed",
   "reviewEditedSuccessfully": "Review updated successfully.",

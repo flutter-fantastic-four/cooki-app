@@ -17,12 +17,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/constants/app_colors.dart';
 import '../../../core/utils/general_util.dart';
+import '../../../core/utils/modal_util.dart';
 import '../../../core/utils/snackbar_util.dart';
 import '../../../domain/entity/review.dart';
 import '../../settings_global_view_model.dart';
 import '../../user_global_view_model.dart';
 import '../add_review/write_review_page.dart';
 import 'reviews_view_model.dart';
+
+const double horizontalPadding = 20;
 
 class ReviewsPage extends ConsumerWidget {
   final String recipeId;
@@ -88,7 +91,7 @@ class ReviewsPage extends ConsumerWidget {
         ),
     ];
 
-    DialogueUtil.showGenericModal(context, options: options);
+    ModalUtil.showGenericModal(context, options: options);
   }
 
   Future<void> _translateReview(
@@ -237,10 +240,10 @@ class ReviewsPage extends ConsumerWidget {
                       );
                     }
                   },
-                  icon: const Icon(
-                    Icons.edit_outlined,
-                    size: 22,
-                    color: Colors.black87,
+                  icon: Image.asset(
+                    'assets/icons/pencil_icon.png',
+                    height: 22,
+                    width: 22,
                   ),
                 ),
               )
@@ -270,9 +273,9 @@ class ReviewsPage extends ConsumerWidget {
                           Expanded(
                             child: ListView.builder(
                               padding: const EdgeInsets.fromLTRB(
-                                16,
+                                horizontalPadding,
                                 10,
-                                16,
+                                0,
                                 40,
                               ),
                               itemCount: state.reviews.length,
@@ -329,7 +332,10 @@ class ReviewsPage extends ConsumerWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(
+        horizontal: horizontalPadding,
+        vertical: 12,
+      ),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
@@ -359,8 +365,9 @@ class ReviewsPage extends ConsumerWidget {
                       child: Text(
                         sortOption.getLabel(context),
                         style: TextStyle(
+                          fontSize: 12,
                           color:
-                              isActive ? Colors.white : const Color(0xFF444444),
+                              isActive ? Colors.white : AppColors.greyScale800,
                           fontWeight:
                               isActive ? FontWeight.w600 : FontWeight.normal,
                         ),
@@ -396,20 +403,23 @@ class ReviewsPage extends ConsumerWidget {
             setRating: null,
             alignment: MainAxisAlignment.start,
           ),
-          if (review.reviewText?.isNotEmpty == true) ...[
-            const SizedBox(height: 12),
-            ExpandableText(
-              text: translatedText ?? review.reviewText!,
-              isExpanded: vm.isReviewExpanded(review.id),
-              onToggle:
-                  () => ref
-                      .read(reviewsViewModelProvider(recipeId).notifier)
-                      .toggleReviewExpansion(review.id),
-            ),
-          ],
           if (review.imageUrls.isNotEmpty) ...[
-            const SizedBox(height: 15),
+            const SizedBox(height: 12),
             _buildReviewImages(context, review),
+          ],
+          if (review.reviewText?.isNotEmpty == true) ...[
+            const SizedBox(height: 15),
+            Padding(
+              padding: const EdgeInsets.only(right: horizontalPadding),
+              child: ExpandableText(
+                text: translatedText ?? review.reviewText!,
+                isExpanded: vm.isReviewExpanded(review.id),
+                onToggle:
+                    () => ref
+                        .read(reviewsViewModelProvider(recipeId).notifier)
+                        .toggleReviewExpansion(review.id),
+              ),
+            ),
           ],
         ],
       ),
@@ -421,37 +431,40 @@ class ReviewsPage extends ConsumerWidget {
     WidgetRef ref,
     Review review,
   ) {
-    return Row(
-      children: [
-        _buildUserAvatar(review),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                review.userName,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
+    return Padding(
+      padding: const EdgeInsets.only(right: horizontalPadding),
+      child: Row(
+        children: [
+          _buildUserAvatar(review),
+          const SizedBox(width: 9),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  review.userName,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
                 ),
-              ),
-              Text(
-                DateTimeUtil.formatCompactDateTime(review.createdAt, context),
-                style: TextStyle(fontSize: 13, color: AppColors.greyScale500),
-              ),
-            ],
+                Text(
+                  DateTimeUtil.formatCompactDateTime(review.createdAt, context),
+                  style: TextStyle(fontSize: 12, color: AppColors.greyScale500),
+                ),
+              ],
+            ),
           ),
-        ),
-        _buildOverflowMenu(context, ref, review),
-      ],
+          _buildOverflowMenu(context, ref, review),
+        ],
+      ),
     );
   }
 
   Widget _buildUserAvatar(Review review) {
     return CircleAvatar(
-      radius: 18,
+      radius: 16,
       backgroundColor: Colors.grey[300],
       backgroundImage:
           review.userImageUrl != null
@@ -493,7 +506,7 @@ class ReviewsPage extends ConsumerWidget {
   }
 
   Widget _buildReviewImages(BuildContext context, Review review) {
-    final double imageDimension = 120;
+    final double imageDimension = 123;
     return SizedBox(
       height: imageDimension,
       child: ListView.builder(
@@ -501,7 +514,9 @@ class ReviewsPage extends ConsumerWidget {
         itemCount: review.imageUrls.length,
         itemBuilder: (context, index) {
           return Padding(
-            padding: const EdgeInsets.only(right: 8),
+            padding: EdgeInsets.only(
+              right: index == review.imageUrls.length - 1 ? 0 : 8,
+            ),
             child: GestureDetector(
               onTap: () => _showImageViewer(context, review.imageUrls, index),
               child: ClipRRect(
