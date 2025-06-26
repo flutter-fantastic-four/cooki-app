@@ -281,6 +281,9 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                                 state.searchQuery.isNotEmpty
                             ? _buildNoResultsView()
                             : CustomScrollView(
+                              key: PageStorageKey(
+                                'saved_recipes_${state.selectedCategory}',
+                              ),
                               slivers: [
                                 SliverPadding(
                                   padding: const EdgeInsets.fromLTRB(
@@ -312,6 +315,13 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                                                 ref: ref,
                                                 recipe: recipe,
                                                 onRecipeDeleted: () {
+                                                  SnackbarUtil.showSnackBar(
+                                                    context,
+                                                    strings(
+                                                      context,
+                                                    ).deleteSuccess,
+                                                    showIcon: true,
+                                                  );
                                                   viewModel.refreshRecipes();
                                                 },
                                                 onRecipeUpdated: () {

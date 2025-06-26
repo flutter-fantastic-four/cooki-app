@@ -211,7 +211,7 @@ class RatingModalState extends ConsumerState<RatingModal> {
           }
 
           // Invalidate providers to refresh data
-          ref.invalidate(userRatingProvider(widget.recipe.id));
+          ref.invalidate(userRatingProvider(widget.recipe));
           ref.invalidate(actualAverageRatingProvider(widget.recipe.id));
           if (!context.mounted) return;
           Navigator.pop(context, true);

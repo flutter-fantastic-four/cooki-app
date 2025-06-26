@@ -25,24 +25,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Provider for user rating that can be refreshed
-final userRatingProvider = FutureProvider.family.autoDispose<int?, String>((
+final userRatingProvider = FutureProvider.family.autoDispose<int?, Recipe>((
   ref,
-  recipeId,
+  recipe,
 ) async {
   try {
     final currentUser = ref.read(userGlobalViewModelProvider);
     if (currentUser == null) return null;
 
-    // Get the recipe to check if it's public or private
-    final recipeRepository = ref.read(recipeRepositoryProvider);
-    final allRecipes = await recipeRepository.getAllRecipes();
-    final recipe = allRecipes.firstWhere((r) => r.id == recipeId);
-
     if (recipe.isPublic) {
       // For public recipes, get rating from reviews
       final reviewRepository = ref.read(reviewRepositoryProvider);
       final userReview = await reviewRepository.getUserReviewForRecipe(
-        recipeId: recipeId,
+        recipeId: recipe.id,
         userId: currentUser.id,
       );
       return userReview?.rating;
@@ -468,6 +463,7 @@ class DetailRecipePage extends ConsumerWidget {
                     isDetail: true,
                     onRecipeDeleted: () {
                       viewModel.refreshRecipes();
+                      Navigator.of(context).pop();
                     },
                     onRecipeUpdated: () {
                       viewModel.refreshRecipes();
@@ -565,13 +561,13 @@ class DetailRecipePage extends ConsumerWidget {
             if (ratingPosted == true) {
               DetailRecipePage._hasRatingBeenPosted = true;
               // Invalidate the rating providers to force refresh
-              ref.invalidate(userRatingProvider(recipe.id));
+              ref.invalidate(userRatingProvider(recipe));
               ref.invalidate(actualAverageRatingProvider(recipe.id));
             }
           },
           child: Consumer(
             builder: (context, ref, child) {
-              final userRatingAsync = ref.watch(userRatingProvider(recipe.id));
+              final userRatingAsync = ref.watch(userRatingProvider(recipe));
               return userRatingAsync.when(
                 data: (userRating) {
                   final rating = userRating ?? 0;
