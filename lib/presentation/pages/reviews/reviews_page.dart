@@ -17,6 +17,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/constants/app_colors.dart';
 import '../../../core/utils/general_util.dart';
+import '../../../core/utils/modal_util.dart';
 import '../../../core/utils/snackbar_util.dart';
 import '../../../domain/entity/review.dart';
 import '../../settings_global_view_model.dart';
@@ -90,7 +91,7 @@ class ReviewsPage extends ConsumerWidget {
         ),
     ];
 
-    DialogueUtil.showGenericModal(context, options: options);
+    ModalUtil.showGenericModal(context, options: options);
   }
 
   Future<void> _translateReview(

@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cooki/core/utils/modal_util.dart';
 import 'package:cooki/core/utils/snackbar_util.dart';
 import 'package:cooki/presentation/widgets/app_cached_image.dart';
 import 'package:cooki/presentation/widgets/bottom_button_wrapper.dart';
@@ -164,7 +165,7 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
       return;
     }
 
-    DialogueUtil.showImagePickerModal(
+    ModalUtil.showImagePickerModal(
       context,
       onCamera: () => _pickImages(context, ImageSource.camera),
       onGallery: () => _pickImages(context, ImageSource.gallery),

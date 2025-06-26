@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:cooki/core/utils/dialogue_util.dart';
 import 'package:cooki/core/utils/logger.dart';
+import 'package:cooki/core/utils/modal_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cooki/presentation/user_global_view_model.dart';
@@ -57,7 +57,7 @@ class ProfileImage extends ConsumerWidget {
         ),
         GestureDetector(
           onTap: () {
-            DialogueUtil.showImagePickerModal(
+            ModalUtil.showImagePickerModal(
               context,
               onCamera: () => _pickImage(vm, ImageSource.camera),
               onGallery: () => _pickImage(vm, ImageSource.gallery),
