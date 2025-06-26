@@ -2,6 +2,7 @@
 
 import 'package:cooki/core/utils/navigation_util.dart';
 import 'package:cooki/presentation/pages/detailed_recipe/detailed_recipe_page.dart';
+import 'package:cooki/presentation/pages/home/tabs/community/widget/photo_modal_style_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,27 +17,23 @@ import '../../../../../core/utils/snackbar_util.dart';
 import 'community_tab_view_model.dart';
 
 // Provider for calculating actual average rating from reviews
-final actualAverageRatingProvider = FutureProvider.family
-    .autoDispose<Map<String, dynamic>, String>((ref, recipeId) async {
-      try {
-        final reviewRepository = ref.read(reviewRepositoryProvider);
-        final reviews = await reviewRepository.getReviewsByRecipeId(recipeId);
+final actualAverageRatingProvider = FutureProvider.family.autoDispose<Map<String, dynamic>, String>((ref, recipeId) async {
+  try {
+    final reviewRepository = ref.read(reviewRepositoryProvider);
+    final reviews = await reviewRepository.getReviewsByRecipeId(recipeId);
 
-        if (reviews.isEmpty) {
-          return {'average': 0.0, 'count': 0};
-        }
+    if (reviews.isEmpty) {
+      return {'average': 0.0, 'count': 0};
+    }
 
-        final totalRating = reviews.fold<int>(
-          0,
-          (sum, review) => sum + review.rating,
-        );
-        final average = totalRating / reviews.length;
+    final totalRating = reviews.fold<int>(0, (sum, review) => sum + review.rating);
+    final average = totalRating / reviews.length;
 
-        return {'average': average, 'count': reviews.length};
-      } catch (e) {
-        return {'average': 0.0, 'count': 0};
-      }
-    });
+    return {'average': average, 'count': reviews.length};
+  } catch (e) {
+    return {'average': 0.0, 'count': 0};
+  }
+});
 
 class CommunityPage extends ConsumerStatefulWidget {
   const CommunityPage({super.key});
@@ -69,10 +66,7 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar:
-          state.isSearchActive
-              ? _buildSearchAppBar(context, state, viewModel)
-              : _buildNormalAppBar(context, state, viewModel),
+      appBar: state.isSearchActive ? _buildSearchAppBar(context, state, viewModel) : _buildNormalAppBar(context, state, viewModel),
       body: Column(
         children: [
           // Active filters
@@ -81,7 +75,7 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  margin: const EdgeInsets.fromLTRB(16, 4 , 16, 12),
+                  margin: const EdgeInsets.fromLTRB(16, 4, 16, 12),
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
@@ -113,11 +107,7 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                     ),
                   ),
                 ),
-                const Divider(
-                  height: 1,
-                  thickness: 1,
-                  color: AppColors.greyScale200,
-                ),
+                const Divider(height: 1, thickness: 1, color: AppColors.greyScale200),
               ],
             ),
           // Recipe grid
@@ -147,35 +137,15 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 64,
-              color: AppColors.greyScale400,
-            ),
+            const Icon(Icons.error_outline, size: 64, color: AppColors.greyScale400),
             const SizedBox(height: 16),
-            Text(
-              strings(context).errorOccurred,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: AppColors.greyScale600,
-              ),
-            ),
+            Text(strings(context).errorOccurred, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.greyScale600)),
             const SizedBox(height: 8),
-            Text(
-              strings(context).checkNetworkConnection,
-              style: const TextStyle(
-                fontSize: 14,
-                color: AppColors.greyScale500,
-              ),
-            ),
+            Text(strings(context).checkNetworkConnection, style: const TextStyle(fontSize: 14, color: AppColors.greyScale500)),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () => viewModel.loadRecipes(),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-              ),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
               child: Text(strings(context).retryButton),
             ),
           ],
@@ -191,20 +161,9 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.cancel_outlined,
-                size: 64,
-                color: AppColors.greyScale400,
-              ),
+              Icon(Icons.cancel_outlined, size: 64, color: AppColors.greyScale400),
               const SizedBox(height: 16),
-              Text(
-                strings(context).noRecipes,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.greyScale600,
-                ),
-              ),
+              Text(strings(context).noRecipes, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.greyScale600)),
             ],
           ),
         );
@@ -214,28 +173,14 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.restaurant_menu,
-                size: 64,
-                color: AppColors.greyScale400,
-              ),
+              const Icon(Icons.restaurant_menu, size: 64, color: AppColors.greyScale400),
               const SizedBox(height: 16),
               Text(
                 strings(context).noSharedRecipes,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.greyScale600,
-                ),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.greyScale600),
               ),
               const SizedBox(height: 8),
-              Text(
-                strings(context).shareFirstRecipe,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: AppColors.greyScale500,
-                ),
-              ),
+              Text(strings(context).shareFirstRecipe, style: const TextStyle(fontSize: 14, color: AppColors.greyScale500)),
             ],
           ),
         );
@@ -253,10 +198,7 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
       itemCount: filteredRecipes.length,
       itemBuilder: (context, index) {
         final recipe = filteredRecipes[index];
-        return _RecipeCard(
-          recipe: recipe,
-          onOptionsTap: () => _showOptionsModal(context, recipe),
-        );
+        return _RecipeCard(recipe: recipe, onOptionsTap: () => _showOptionsModal(context, recipe));
       },
     );
   }
@@ -273,17 +215,13 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.greyScale50,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
-      ),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(26))),
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setModalState) {
             return Container(
               width: double.infinity,
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.9,
-              ),
+              constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.9),
               child: SafeArea(
                 child: SingleChildScrollView(
                   child: Column(
@@ -296,10 +234,7 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                           margin: const EdgeInsets.only(top: 8, bottom: 12),
                           width: 40,
                           height: 5,
-                          decoration: BoxDecoration(
-                            color: AppColors.greyScale400,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
+                          decoration: BoxDecoration(color: AppColors.greyScale400, borderRadius: BorderRadius.circular(10)),
                         ),
                       ),
                       // Filter content
@@ -309,19 +244,11 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // Sort options
-                            Text(
-                              strings(context).sort,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
+                            Text(strings(context).sort, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
                             const SizedBox(height: 12),
                             Container(
                               width: double.infinity,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
                               child: Wrap(
                                 alignment: WrapAlignment.start,
                                 spacing: 8,
@@ -329,38 +256,20 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                                 children: [
                                   _FilterChip(
                                     label: strings(context).sortByRating,
-                                    isSelected:
-                                        tempSort ==
-                                        strings(context).sortByRating,
+                                    isSelected: tempSort == strings(context).sortByRating,
                                     onTap: () {
                                       setModalState(() {
-                                        tempSort =
-                                            tempSort ==
-                                                    strings(
-                                                      context,
-                                                    ).sortByRating
-                                                ? ''
-                                                : strings(context).sortByRating;
+                                        tempSort = tempSort == strings(context).sortByRating ? '' : strings(context).sortByRating;
                                       });
                                     },
                                     isModalChip: true,
                                   ),
                                   _FilterChip(
                                     label: strings(context).sortByCookTime,
-                                    isSelected:
-                                        tempSort ==
-                                        strings(context).sortByCookTime,
+                                    isSelected: tempSort == strings(context).sortByCookTime,
                                     onTap: () {
                                       setModalState(() {
-                                        tempSort =
-                                            tempSort ==
-                                                    strings(
-                                                      context,
-                                                    ).sortByCookTime
-                                                ? ''
-                                                : strings(
-                                                  context,
-                                                ).sortByCookTime;
+                                        tempSort = tempSort == strings(context).sortByCookTime ? '' : strings(context).sortByCookTime;
                                       });
                                     },
                                     isModalChip: true,
@@ -369,35 +278,21 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                               ),
                             ),
                             const SizedBox(height: 20),
-                            const Divider(
-                              height: 1,
-                              thickness: 1,
-                              color: AppColors.greyScale200,
-                            ),
+                            const Divider(height: 1, thickness: 1, color: AppColors.greyScale200),
                             const SizedBox(height: 20),
                             // Cuisine filters
-                            Text(
-                              strings(context).countryCategory,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
+                            Text(strings(context).countryCategory, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
                             const SizedBox(height: 12),
                             Container(
                               width: double.infinity,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
                               child: Wrap(
                                 alignment: WrapAlignment.start,
                                 spacing: 8,
                                 runSpacing: 8,
                                 children:
                                     cuisineCategories.map((cuisine) {
-                                      final isSelected = tempCuisines.contains(
-                                        cuisine,
-                                      );
+                                      final isSelected = tempCuisines.contains(cuisine);
                                       return _FilterChip(
                                         label: cuisine,
                                         isSelected: isSelected,
@@ -435,17 +330,13 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                                     onPressed: () async {
                                       Navigator.pop(context);
                                       viewModel.updateSelectedSort(tempSort);
-                                      viewModel.updateSelectedCuisines(
-                                        List.from(tempCuisines),
-                                      );
+                                      viewModel.updateSelectedCuisines(List.from(tempCuisines));
                                       await viewModel.loadRecipes();
                                     },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: AppColors.primary,
                                       foregroundColor: Colors.white,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                     ),
                                     child: Text(strings(context).apply),
                                   ),
@@ -455,9 +346,7 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                           ],
                         ),
                       ),
-                      SizedBox(
-                        height: MediaQuery.of(context).viewInsets.bottom + 16,
-                      ),
+                      SizedBox(height: MediaQuery.of(context).viewInsets.bottom + 16),
                     ],
                   ),
                 ),
@@ -469,34 +358,13 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
     );
   }
 
-  PreferredSizeWidget _buildNormalAppBar(
-    BuildContext context,
-    CommunityState state,
-    CommunityViewModel viewModel,
-  ) {
+  PreferredSizeWidget _buildNormalAppBar(BuildContext context, CommunityState state, CommunityViewModel viewModel) {
     return AppBar(
       titleSpacing: 20,
-      title: Text(
-        strings(context).communityTitle,
-        style: const TextStyle(
-          color: Colors.black,
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
+      title: Text(strings(context).communityTitle, style: const TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.w600)),
       actions: [
-        IconButton(
-          icon: FilterIconWithDot(showDot: state.hasActiveFilters),
-          onPressed: () => _showFilterModal(context),
-        ),
-        IconButton(
-          icon: const Icon(
-            CupertinoIcons.search,
-            color: Colors.black,
-            size: 24,
-          ),
-          onPressed: () => viewModel.toggleSearch(),
-        ),
+        IconButton(icon: FilterIconWithDot(showDot: state.hasActiveFilters), onPressed: () => _showFilterModal(context)),
+        IconButton(icon: const Icon(CupertinoIcons.search, color: Colors.black, size: 24), onPressed: () => viewModel.toggleSearch()),
         const SizedBox(width: 8),
       ],
       backgroundColor: Colors.white,
@@ -505,11 +373,7 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
     );
   }
 
-  PreferredSizeWidget _buildSearchAppBar(
-    BuildContext context,
-    CommunityState state,
-    CommunityViewModel viewModel,
-  ) {
+  PreferredSizeWidget _buildSearchAppBar(BuildContext context, CommunityState state, CommunityViewModel viewModel) {
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0,
@@ -541,11 +405,7 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
         if (state.searchQuery.isNotEmpty) ...[
           const SizedBox(width: 8),
           IconButton(
-            icon: const Icon(
-              Icons.cancel,
-              color: AppColors.greyScale500,
-              size: 18,
-            ),
+            icon: const Icon(Icons.cancel, color: AppColors.greyScale500, size: 18),
             onPressed: () {
               _searchController.clear();
               viewModel.updateSearchQuery('');
@@ -563,17 +423,10 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.greyScale50,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
-      ),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(26))),
       builder: (BuildContext context) {
         return Padding(
-          padding: const EdgeInsets.only(
-            top: 8,
-            bottom: 30,
-            left: 15,
-            right: 15,
-          ),
+          padding: const EdgeInsets.only(top: 8, bottom: 30, left: 15, right: 15),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -581,31 +434,20 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
               Container(
                 width: 40,
                 height: 5,
-                decoration: BoxDecoration(
-                  color: AppColors.greyScale400,
-                  borderRadius: BorderRadius.circular(10),
-                ),
+                decoration: BoxDecoration(color: AppColors.greyScale400, borderRadius: BorderRadius.circular(10)),
                 margin: const EdgeInsets.only(bottom: 12),
               ),
-              _PhotoModalStyleCard(
+              PhotoModalStyleCard(
                 text: strings(context).share,
                 icon: Icons.share_outlined,
                 onTap: () async {
-                  await SharingUtil.shareRecipe(
-                    context,
-                    recipe,
-                    ref.read(imageDownloadRepositoryProvider),
-                  );
+                  await SharingUtil.shareRecipe(context, recipe, ref.read(imageDownloadRepositoryProvider));
                   if (!context.mounted) return;
                   Navigator.pop(context);
                 },
               ),
               const SizedBox(height: 15),
-              _PhotoModalStyleCard(
-                text: strings(context).close,
-                onTap: () => Navigator.pop(context),
-                isCenter: true,
-              ),
+              PhotoModalStyleCard(text: strings(context).close, onTap: () => Navigator.pop(context), isCenter: true),
             ],
           ),
         );
@@ -624,10 +466,7 @@ class _RecipeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
-        final result = await NavigationUtil.pushFromBottom<bool>(
-          context,
-          DetailRecipePage(recipe: recipe),
-        );
+        final result = await NavigationUtil.pushFromBottom<bool>(context, DetailRecipePage(recipe: recipe));
         // If a rating/review was posted, we don't need to refresh community tab
         // as it shows different recipes, but this maintains consistency
         if (result == true) {
@@ -639,13 +478,7 @@ class _RecipeCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: AppColors.greyScale200),
           color: AppColors.white,
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.black.withValues(alpha: 0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          boxShadow: [BoxShadow(color: AppColors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -653,33 +486,17 @@ class _RecipeCard extends StatelessWidget {
             SizedBox(
               height: 120,
               child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(6),
-                ),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
                 child:
                     recipe.imageUrl != null
-                        ? AppCachedImage(
-                          imageUrl: recipe.imageUrl!,
-                          width: double.infinity,
-                          height: double.infinity,
-                          fit: BoxFit.cover,
-                        )
-                        : Image.asset(
-                          'assets/no_image.png',
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          height: double.infinity,
-                        ),
+                        ? AppCachedImage(imageUrl: recipe.imageUrl!, width: double.infinity, height: double.infinity, fit: BoxFit.cover)
+                        : Image.asset('assets/no_image.png', fit: BoxFit.cover, width: double.infinity, height: double.infinity),
               ),
             ),
             SizedBox(
               height: 64,
               child: Padding(
-                padding: const EdgeInsets.only(
-                  left: 12.0,
-                  right: 12.0,
-                  top: 12.0,
-                ),
+                padding: const EdgeInsets.only(left: 12.0, right: 12.0, top: 12.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -692,22 +509,10 @@ class _RecipeCard extends StatelessWidget {
                             recipe.recipeName,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.greyScale800,
-                              height: 1.2,
-                            ),
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.greyScale800, height: 1.2),
                           ),
                         ),
-                        GestureDetector(
-                          onTap: onOptionsTap,
-                          child: const Icon(
-                            Icons.more_vert,
-                            size: 20,
-                            color: AppColors.black,
-                          ),
-                        ),
+                        GestureDetector(onTap: onOptionsTap, child: const Icon(Icons.more_vert, size: 20, color: AppColors.black)),
                       ],
                     ),
                     // User name and rating
@@ -716,52 +521,34 @@ class _RecipeCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             recipe.userName,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: AppColors.greyScale600,
-                            ),
+                            style: const TextStyle(fontSize: 12, color: AppColors.greyScale600),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Icon(
-                          Icons.star,
-                          color: AppColors.secondary600,
-                          size: 14,
-                        ),
+                        Icon(Icons.star, color: AppColors.secondary600, size: 14),
                         const SizedBox(width: 2),
                         Consumer(
                           builder: (context, ref, child) {
-                            final averageRatingAsync = ref.watch(
-                              actualAverageRatingProvider(recipe.id),
-                            );
+                            final averageRatingAsync = ref.watch(actualAverageRatingProvider(recipe.id));
                             return averageRatingAsync.when(
                               data: (ratingData) {
                                 final average = ratingData['average'] as double;
                                 final count = ratingData['count'] as int;
                                 return Text(
                                   '${strings(context).average} ${count == 0 ? '0' : average.toStringAsFixed(1)}${strings(context).score}',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: AppColors.greyScale600,
-                                  ),
+                                  style: const TextStyle(fontSize: 12, color: AppColors.greyScale600),
                                 );
                               },
                               loading:
                                   () => Text(
                                     '${strings(context).average} ${recipe.ratingSum.toStringAsFixed(1)}${strings(context).score}',
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: AppColors.greyScale600,
-                                    ),
+                                    style: const TextStyle(fontSize: 12, color: AppColors.greyScale600),
                                   ),
                               error:
                                   (error, stack) => Text(
                                     '${strings(context).average} 0${strings(context).score}',
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: AppColors.greyScale600,
-                                    ),
+                                    style: const TextStyle(fontSize: 12, color: AppColors.greyScale600),
                                   ),
                             );
                           },
@@ -817,13 +604,7 @@ class _FilterChip extends StatelessWidget {
   final bool isSelected;
   final bool isModalChip;
 
-  const _FilterChip({
-    required this.label,
-    this.onTap,
-    this.onDeleted,
-    this.isSelected = false,
-    this.isModalChip = false,
-  });
+  const _FilterChip({required this.label, this.onTap, this.onDeleted, this.isSelected = false, this.isModalChip = false});
 
   @override
   Widget build(BuildContext context) {
@@ -833,17 +614,11 @@ class _FilterChip extends StatelessWidget {
         height: 26,
         padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
-          color:
-              isModalChip
-                  ? (isSelected ? AppColors.primary700 : AppColors.white)
-                  : (isSelected ? AppColors.primary50 : AppColors.primary50),
+          color: isModalChip ? (isSelected ? AppColors.primary700 : AppColors.white) : (isSelected ? AppColors.primary50 : AppColors.primary50),
           borderRadius: BorderRadius.circular(13),
           border:
               isModalChip
-                  ? Border.all(
-                    color: isSelected ? AppColors.primary800 : AppColors.white,
-                    width: 1,
-                  )
+                  ? Border.all(color: isSelected ? AppColors.primary800 : AppColors.white, width: 1)
                   : Border.all(color: AppColors.primary700, width: 1),
         ),
         child: Row(
@@ -852,14 +627,7 @@ class _FilterChip extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                color:
-                    isModalChip
-                        ? (isSelected
-                            ? AppColors.white
-                            : AppColors.greyScale800)
-                        : (isSelected
-                            ? AppColors.primary
-                            : AppColors.primary),
+                color: isModalChip ? (isSelected ? AppColors.white : AppColors.greyScale800) : (isSelected ? AppColors.primary : AppColors.primary),
                 fontSize: 12,
                 height: 1.2,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
@@ -867,14 +635,7 @@ class _FilterChip extends StatelessWidget {
             ),
             if (onDeleted != null) ...[
               const SizedBox(width: 2),
-              GestureDetector(
-                onTap: onDeleted,
-                child: Icon(
-                  Icons.close,
-                  size: 14,
-                  color: isModalChip ? AppColors.white : AppColors.primary700,
-                ),
-              ),
+              GestureDetector(onTap: onDeleted, child: Icon(Icons.close, size: 14, color: isModalChip ? AppColors.white : AppColors.primary700)),
               const SizedBox(width: 2),
             ],
           ],
@@ -899,64 +660,9 @@ class FilterIconWithDot extends StatelessWidget {
           Positioned(
             right: -2,
             top: 2,
-            child: Container(
-              width: 8,
-              height: 8,
-              decoration: const BoxDecoration(
-                color: AppColors.primary,
-                shape: BoxShape.circle,
-              ),
-            ),
+            child: Container(width: 8, height: 8, decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle)),
           ),
       ],
-    );
-  }
-}
-
-class _PhotoModalStyleCard extends StatelessWidget {
-  final String text;
-  final IconData? icon;
-  final VoidCallback onTap;
-  final bool isCenter;
-  final Color? textColor;
-  final Color? iconColor;
-
-  const _PhotoModalStyleCard({
-    required this.text,
-    this.icon,
-    required this.onTap,
-    this.isCenter = false,
-    this.textColor,
-    this.iconColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      elevation: 0,
-      color: AppColors.white,
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(vertical: 1),
-        leading:
-            !isCenter
-                ? Padding(
-                  padding: const EdgeInsets.only(left: 24, right: 4),
-                  child: Icon(icon, color: iconColor ?? Colors.black87),
-                )
-                : null,
-        title: Text(
-          text,
-          style: TextStyle(
-            fontSize: 16,
-            color: textColor ?? Colors.black,
-            fontWeight: FontWeight.w500,
-          ),
-          textAlign: isCenter ? TextAlign.center : null,
-        ),
-        onTap: onTap,
-      ),
     );
   }
 }

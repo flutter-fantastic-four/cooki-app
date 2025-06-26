@@ -7,10 +7,12 @@ import 'package:cooki/core/utils/snackbar_util.dart';
 import 'package:cooki/domain/entity/app_user.dart';
 import 'package:cooki/domain/entity/recipe.dart';
 import 'package:cooki/domain/entity/review.dart';
+import 'package:cooki/gen/l10n/app_localizations.dart';
 import 'package:cooki/presentation/pages/add_review/write_review_page.dart';
 import 'package:cooki/presentation/pages/detailed_recipe/widget/rating_modal.dart';
 import 'package:cooki/presentation/pages/detailed_recipe/widget/review_card_list.dart';
 import 'package:cooki/presentation/pages/edit/recipe_edit_page.dart';
+import 'package:cooki/presentation/pages/home/tabs/saved_recipes/saved_recipes_tab_view_model.dart';
 import 'package:cooki/presentation/pages/login/guest_login_page.dart';
 import 'package:cooki/presentation/pages/reviews/reviews_page.dart';
 import 'package:cooki/presentation/user_global_view_model.dart';
@@ -120,7 +122,7 @@ class DetailRecipePage extends ConsumerWidget {
                     children: [
                       _infoChip(context, ref, user),
                       const SizedBox(height: 12),
-                      _title(context, ref),
+                      _title(context, ref, recipe.isPublic),
                       const SizedBox(height: 8),
                       _details(context),
                       const SizedBox(height: 13),
@@ -260,7 +262,8 @@ class DetailRecipePage extends ConsumerWidget {
     );
   }
 
-  Row _title(BuildContext context, WidgetRef ref) {
+  Row _title(BuildContext context, WidgetRef ref, bool isPublic) {
+    final viewModel = ref.read(savedRecipesViewModelProvider(strings(context)).notifier);
     return Row(
       children: [
         Expanded(child: Text(recipe.recipeName, style: RecipePageWidgets.sectionTitleStyle, softWrap: true, overflow: TextOverflow.visible)),
@@ -312,7 +315,24 @@ class DetailRecipePage extends ConsumerWidget {
             );
           },
         ),
-        IconButton(onPressed: () => _shareRecipe(context, ref), icon: Icon(Icons.ios_share)),
+        isPublic
+            ? IconButton(onPressed: () => _shareRecipe(context, ref), icon: Icon(Icons.ios_share))
+            : GestureDetector(
+              onTap:
+                  () => RecipeOptionsModal.show(
+                    context: context,
+                    ref: ref,
+                    recipe: recipe,
+                    isDetail: true,
+                    onRecipeDeleted: () {
+                      viewModel.refreshRecipes();
+                    },
+                    onRecipeUpdated: () {
+                      viewModel.refreshRecipes();
+                    },
+                  ),
+              child: const Icon(Icons.more_vert, size: 20, color: AppColors.black),
+            ),
       ],
     );
   }
