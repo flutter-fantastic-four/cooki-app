@@ -78,10 +78,10 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
           // Active filters
           if (state.hasActiveFilters)
             Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  height: 38,
-                  margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                  margin: const EdgeInsets.fromLTRB(16, 4 , 16, 12),
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
@@ -96,6 +96,7 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                                 await viewModel.loadRecipes();
                               },
                               isModalChip: false,
+                              isSelected: true,
                             ),
                           ),
                         ),
@@ -432,12 +433,12 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                                 Expanded(
                                   child: ElevatedButton(
                                     onPressed: () async {
+                                      Navigator.pop(context);
                                       viewModel.updateSelectedSort(tempSort);
                                       viewModel.updateSelectedCuisines(
                                         List.from(tempCuisines),
                                       );
                                       await viewModel.loadRecipes();
-                                      Navigator.pop(context);
                                     },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: AppColors.primary,
@@ -857,8 +858,8 @@ class _FilterChip extends StatelessWidget {
                             ? AppColors.white
                             : AppColors.greyScale800)
                         : (isSelected
-                            ? AppColors.primary700
-                            : AppColors.primary700),
+                            ? AppColors.primary
+                            : AppColors.primary),
                 fontSize: 12,
                 height: 1.2,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
