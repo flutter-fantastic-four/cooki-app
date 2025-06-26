@@ -421,7 +421,7 @@ class DetailRecipePage extends ConsumerWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: ShapeDecoration(
                       shape: RoundedRectangleBorder(
-                        side: BorderSide(width: 1, color: rating == 0 ? AppColors.greyScale300 : AppColors.greyScale800),
+                        side: BorderSide(width: 1, color: rating == 0 ? AppColors.greyScale800 : AppColors.greyScale800),
                         borderRadius: BorderRadius.circular(99999),
                       ),
                     ),
@@ -429,8 +429,8 @@ class DetailRecipePage extends ConsumerWidget {
                       children: List.generate(5, (index) {
                         return Icon(
                           index < rating ? Icons.star : Icons.star_border,
-                          color: index < rating ? AppColors.secondary600 : AppColors.greyScale300,
-                          size: 12,
+                          color: index < rating ? AppColors.secondary600 : AppColors.greyScale500,
+                          size: 14,
                         );
                       }),
                     ),

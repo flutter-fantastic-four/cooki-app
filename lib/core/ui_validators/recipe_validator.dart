@@ -3,10 +3,8 @@ import '../utils/error_mappers.dart';
 class RecipeValidator {
   static RecipeValidationErrorKey? validateTitle(String? title) {
     if (title == null || title.trim().isEmpty) {
-      return RecipeValidationErrorKey.required;
-    } /*else if (title.length > RecipePageWidgets.titleMaxLength) {
-      return RecipeValidationErrorKey.required;
-    }*/
+      return RecipeValidationErrorKey.titleRequired;
+    }
     return null;
   }
 
