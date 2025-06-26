@@ -4,6 +4,7 @@ import 'package:cooki/data/repository/providers.dart';
 import 'package:cooki/domain/entity/recipe.dart';
 import 'package:cooki/domain/entity/review.dart';
 import 'package:cooki/presentation/pages/detailed_recipe/detailed_recipe_page.dart';
+import 'package:cooki/presentation/pages/reviews/reviews_view_model.dart';
 import 'package:cooki/presentation/user_global_view_model.dart';
 import 'package:cooki/presentation/widgets/star_rating.dart';
 import 'package:flutter/material.dart';
@@ -211,8 +212,17 @@ class RatingModalState extends ConsumerState<RatingModal> {
           }
 
           // Invalidate providers to refresh data
-          ref.invalidate(userRatingProvider(widget.recipe.id));
+          ref.invalidate(userRatingProvider(widget.recipe));
           ref.invalidate(actualAverageRatingProvider(widget.recipe.id));
+          // Invalidate the reviews provider to refresh the review list
+          ref.invalidate(reviewsViewModelProvider(widget.recipe.id));
+
+          // For private recipes, invalidate the recipe data provider
+          // so fresh rating data is fetched from Firestore
+          if (!widget.recipe.isPublic) {
+            ref.invalidate(recipeByIdProvider(widget.recipe.id));
+          }
+
           if (!context.mounted) return;
           Navigator.pop(context, true);
         }

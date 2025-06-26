@@ -19,7 +19,13 @@ class RecipeOptionsModal extends ConsumerWidget {
   final VoidCallback? onRecipeUpdated;
   final bool isDetail;
 
-  const RecipeOptionsModal({super.key, required this.recipe, this.onRecipeDeleted, this.onRecipeUpdated, this.isDetail = false});
+  const RecipeOptionsModal({
+    super.key,
+    required this.recipe,
+    this.onRecipeDeleted,
+    this.onRecipeUpdated,
+    this.isDetail = false,
+  });
 
   static void show({
     required BuildContext context,
@@ -33,7 +39,9 @@ class RecipeOptionsModal extends ConsumerWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.greyScale50,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(26))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+      ),
       builder: (BuildContext context) {
         return RecipeOptionsModal(
           recipe: recipe,
@@ -59,17 +67,30 @@ class RecipeOptionsModal extends ConsumerWidget {
           // Post to community option (owner-only)
           if (isOwner)
             PhotoModalStyleCard(
-              text: recipe.isPublic ? strings(context).communityUnpost : strings(context).communityPost,
+              text:
+                  recipe.isPublic
+                      ? strings(context).communityUnpost
+                      : strings(context).communityPost,
               icon: recipe.isPublic ? Icons.public_off : Icons.public,
               onTap: () => _toggleCommunityPost(context, ref),
             ),
 
           // Share option (always available)
-          PhotoModalStyleCard(text: strings(context).share, icon: Icons.share_outlined, onTap: () => _shareRecipe(context, ref)),
+          PhotoModalStyleCard(
+            text: strings(context).share,
+            icon: Icons.share_outlined,
+            onTap: () => _shareRecipe(context, ref),
+          ),
 
           // Edit and delete options (owner-only)
           if (isOwner) ...[
-            isDetail ? SizedBox() : PhotoModalStyleCard(text: strings(context).edit, icon: Icons.edit_outlined, onTap: () => _editRecipe(context)),
+            isDetail
+                ? SizedBox()
+                : PhotoModalStyleCard(
+                  text: strings(context).edit,
+                  icon: Icons.edit_outlined,
+                  onTap: () => _editRecipe(context),
+                ),
             PhotoModalStyleCard(
               text: strings(context).delete,
               icon: Icons.delete_outline,
@@ -80,7 +101,11 @@ class RecipeOptionsModal extends ConsumerWidget {
           ],
 
           const SizedBox(height: 15),
-          PhotoModalStyleCard(text: strings(context).close, onTap: () => Navigator.pop(context), isCenter: true),
+          PhotoModalStyleCard(
+            text: strings(context).close,
+            onTap: () => Navigator.pop(context),
+            isCenter: true,
+          ),
         ],
       ),
     );
@@ -92,7 +117,10 @@ class RecipeOptionsModal extends ConsumerWidget {
         margin: const EdgeInsets.only(top: 8, bottom: 8),
         width: 36.0,
         height: 4.0,
-        decoration: BoxDecoration(color: AppColors.greyScale200, borderRadius: BorderRadius.circular(2)),
+        decoration: BoxDecoration(
+          color: AppColors.greyScale200,
+          borderRadius: BorderRadius.circular(2),
+        ),
       ),
     );
   }
@@ -103,7 +131,13 @@ class RecipeOptionsModal extends ConsumerWidget {
       final recipeRepository = ref.read(recipeRepositoryProvider);
       await recipeRepository.toggleRecipeShare(recipe.id, !recipe.isPublic);
       if (context.mounted) {
-        SnackbarUtil.showSnackBar(context, recipe.isPublic ? strings(context).unpostSuccess : strings(context).postSuccess, showIcon: true);
+        SnackbarUtil.showSnackBar(
+          context,
+          recipe.isPublic
+              ? strings(context).unpostSuccess
+              : strings(context).postSuccess,
+          showIcon: true,
+        );
         onRecipeUpdated?.call();
       }
     } catch (e) {
@@ -119,7 +153,11 @@ class RecipeOptionsModal extends ConsumerWidget {
   }
 
   void _shareRecipe(BuildContext context, WidgetRef ref) async {
-    await SharingUtil.shareRecipe(context, recipe, ref.read(imageDownloadRepositoryProvider));
+    await SharingUtil.shareRecipe(
+      context,
+      recipe,
+      ref.read(imageDownloadRepositoryProvider),
+    );
     if (!context.mounted) return;
     Navigator.pop(context);
   }
@@ -135,6 +173,9 @@ class RecipeOptionsModal extends ConsumerWidget {
       return;
     }
 
+    // Capture the repository reference before showing the dialog
+    final recipeRepository = ref.read(recipeRepositoryProvider);
+
     AppDialog.show(
       context: context,
       title: strings(context).delete,
@@ -142,19 +183,18 @@ class RecipeOptionsModal extends ConsumerWidget {
       primaryButtonText: strings(context).delete,
       secondaryButtonText: strings(context).cancel,
       isDestructive: true,
-      onPrimaryButtonPressed: () async {
-        try {
-          await ref.read(recipeRepositoryProvider).deleteRecipe(recipe.id);
-          if (context.mounted) {
-            SnackbarUtil.showSnackBar(context, strings(context).deleteSuccess, showIcon: true);
-            onRecipeDeleted?.call();
-          }
-        } catch (e) {
-          if (context.mounted) {
-            SnackbarUtil.showSnackBar(context, strings(context).deleteError);
-          }
-        }
-      },
+      onPrimaryButtonPressed: () => _performDelete(context, recipeRepository),
     );
+  }
+
+  void _performDelete(BuildContext context, recipeRepository) async {
+    try {
+      await recipeRepository.deleteRecipe(recipe.id);
+      onRecipeDeleted?.call();
+    } catch (e) {
+      if (context.mounted) {
+        SnackbarUtil.showSnackBar(context, strings(context).deleteError);
+      }
+    }
   }
 }
