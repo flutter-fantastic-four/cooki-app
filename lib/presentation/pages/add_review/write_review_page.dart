@@ -62,7 +62,7 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
       final result = await DialogueUtil.showAppDialog(
         context: context,
         showCancel: true,
-        title: strings(context).editReviewTitle,
+        title: strings(context).editReviewDialogTitle,
         content: strings(context).editReviewConfirmMessage,
       );
       if (result != true) return;
@@ -457,12 +457,11 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
       maxLines: 7,
       maxLength: 500,
       controller: _controller,
-      decoration: getInputDecoration(strings(context).reviewTextHint).copyWith(
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 16,
-          horizontal: 16,
-        ),
-      ),
+      style: TextStyle(fontSize: 16),
+      decoration: getInputDecoration(
+        strings(context).reviewTextHint,
+        contentPadding: EdgeInsets.all(16),
+      )
     );
   }
 

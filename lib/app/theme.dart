@@ -30,7 +30,7 @@ abstract class AppTheme {
         centerTitle: true,
         // titleSpacing: 25,
         titleTextStyle: TextStyle(
-          fontSize: 20,
+          fontSize: 19,
           color: Colors.black87,
           fontWeight: FontWeight.bold,
           fontFamily: 'Pretendard',
