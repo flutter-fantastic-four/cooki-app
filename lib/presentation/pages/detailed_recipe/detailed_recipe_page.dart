@@ -15,6 +15,7 @@ import 'package:cooki/presentation/pages/edit/recipe_edit_page.dart';
 import 'package:cooki/presentation/pages/home/tabs/saved_recipes/saved_recipes_tab_view_model.dart';
 import 'package:cooki/presentation/pages/login/guest_login_page.dart';
 import 'package:cooki/presentation/pages/reviews/reviews_page.dart';
+import 'package:cooki/presentation/pages/reviews/reviews_view_model.dart';
 import 'package:cooki/presentation/user_global_view_model.dart';
 import 'package:cooki/presentation/widgets/app_cached_image.dart';
 import 'package:cooki/presentation/widgets/recipe_options_modal.dart';
@@ -23,6 +24,20 @@ import 'package:cooki/data/repository/providers.dart';
 import 'package:easy_image_viewer/easy_image_viewer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+// Provider for fetching fresh recipe data from Firestore by ID
+final recipeByIdProvider = FutureProvider.family.autoDispose<Recipe?, String>((
+  ref,
+  recipeId,
+) async {
+  try {
+    final recipeRepository = ref.read(recipeRepositoryProvider);
+    final allRecipes = await recipeRepository.getAllRecipes();
+    return allRecipes.firstWhere((recipe) => recipe.id == recipeId);
+  } catch (e) {
+    return null;
+  }
+});
 
 // Provider for user rating that can be refreshed
 final userRatingProvider = FutureProvider.family.autoDispose<int?, Recipe>((
@@ -42,8 +57,17 @@ final userRatingProvider = FutureProvider.family.autoDispose<int?, Recipe>((
       );
       return userReview?.rating;
     } else {
-      // For private recipes, get rating from recipe's userRating field
-      return recipe.userRating > 0 ? recipe.userRating : null;
+      // For private recipes, get rating from fresh recipe data
+      final freshRecipeAsync = ref.watch(recipeByIdProvider(recipe.id));
+      return freshRecipeAsync.when(
+        data:
+            (freshRecipe) =>
+                freshRecipe != null && freshRecipe.userRating > 0
+                    ? freshRecipe.userRating
+                    : null,
+        loading: () => recipe.userRating > 0 ? recipe.userRating : null,
+        error: (_, __) => recipe.userRating > 0 ? recipe.userRating : null,
+      );
     }
   } catch (e) {
     return null;
@@ -239,6 +263,7 @@ class DetailRecipePage extends ConsumerWidget {
                     final count = ratingData['count'] as int;
                     return _buildReviewRow(
                       context,
+                      ref,
                       count: count,
                       averageText:
                           count == 0 ? '0' : average.toStringAsFixed(1),
@@ -247,6 +272,7 @@ class DetailRecipePage extends ConsumerWidget {
                   loading:
                       () => _buildReviewRow(
                         context,
+                        ref,
                         count: recipe.ratingCount,
                         averageText:
                             recipe.ratingSum == 0.0
@@ -256,6 +282,7 @@ class DetailRecipePage extends ConsumerWidget {
                   error:
                       (error, stack) => _buildReviewRow(
                         context,
+                        ref,
                         count: recipe.ratingCount,
                         averageText: '0',
                       ),
@@ -270,13 +297,14 @@ class DetailRecipePage extends ConsumerWidget {
   }
 
   Widget _buildReviewRow(
-    BuildContext context, {
+    BuildContext context,
+    WidgetRef ref, {
     required int count,
     required String averageText,
   }) {
     return Row(
       children: [
-        _buildReviewNavigationButton(context, count),
+        _buildReviewNavigationButton(context, ref, count),
         Spacer(),
         Icon(Icons.star, color: AppColors.secondary600),
         Text(
@@ -287,13 +315,22 @@ class DetailRecipePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildReviewNavigationButton(BuildContext context, int count) {
+  Widget _buildReviewNavigationButton(
+    BuildContext context,
+    WidgetRef ref,
+    int count,
+  ) {
     return GestureDetector(
-      onTap: () {
-        NavigationUtil.pushFromBottom(
+      onTap: () async {
+        await NavigationUtil.pushFromBottom(
           context,
           ReviewsPage(recipeId: recipe.id, recipeName: recipe.recipeName),
         );
+        // Refresh review data when returning from reviews page
+        // This handles cases where reviews might have been deleted or edited
+        ref.invalidate(userRatingProvider(recipe));
+        ref.invalidate(actualAverageRatingProvider(recipe.id));
+        ref.read(reviewsViewModelProvider(recipe.id).notifier).refreshReviews();
       },
       child: Row(
         children: [
@@ -563,6 +600,10 @@ class DetailRecipePage extends ConsumerWidget {
               // Invalidate the rating providers to force refresh
               ref.invalidate(userRatingProvider(recipe));
               ref.invalidate(actualAverageRatingProvider(recipe.id));
+              // Refresh the reviews data directly instead of just invalidating
+              ref
+                  .read(reviewsViewModelProvider(recipe.id).notifier)
+                  .refreshReviews();
             }
           },
           child: Consumer(
