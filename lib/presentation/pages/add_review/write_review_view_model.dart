@@ -71,10 +71,7 @@ class WriteReviewViewModel
       final imageUrls = await _compressAndUploadImages(user.id);
       if (imageUrls == null) return;
 
-      // Detect language if review has text
-      String? detectedLanguage = await _getDetectedLanguage(reviewText);
-
-      final review = Review(
+      var review = Review(
         id: arg?.id ?? '',
         reviewText: reviewText.trim(),
         rating: state.rating,
@@ -84,7 +81,6 @@ class WriteReviewViewModel
         userImageUrl: user.profileImage,
         createdAt: arg?.createdAt,
         updatedAt: arg != null ? DateTime.now() : null,
-        language: detectedLanguage,
       );
 
       if (arg != null) {
@@ -92,10 +88,16 @@ class WriteReviewViewModel
             .read(reviewRepositoryProvider)
             .editReview(recipeId: recipeId, review: review);
       } else {
-        await ref
+        final reviewId = await ref
             .read(reviewRepositoryProvider)
             .saveReview(recipeId: recipeId, review: review);
+        review = review.copyWith(id: reviewId);
       }
+      _detectAndUpdateLanguage(
+        reviewText: reviewText,
+        recipeId: recipeId,
+        review: review,
+      );
     } catch (e, stack) {
       logError(e, stack);
       state = state.copyWith(errorKey: WriteReviewErrorKey.saveFailed);
@@ -155,19 +157,27 @@ class WriteReviewViewModel
     }
   }
 
-  Future<String?> _getDetectedLanguage(String reviewText) async {
-    if (reviewText.trim().isNotEmpty) {
-      try {
-        final detectionResult = await ref
+  Future<void> _detectAndUpdateLanguage({
+    required String reviewText,
+    required String recipeId,
+    required Review review,
+  }) async {
+    if (reviewText.trim().isEmpty) return;
+    try {
+      final detectionResult = await ref
+          .read(reviewRepositoryProvider)
+          .detectReviewLanguage(text: reviewText.trim());
+      if (detectionResult.mostLikelyLanguage != null) {
+        final updatedReview = review.copyWith(
+          language: detectionResult.mostLikelyLanguage,
+        );
+        await ref
             .read(reviewRepositoryProvider)
-            .detectReviewLanguage(text: reviewText.trim());
-        return detectionResult.mostLikelyLanguage;
-      } catch (e, stack) {
-        logError(e, stack);
-        return null;
+            .editReview(recipeId: recipeId, review: updatedReview);
       }
+    } catch (e, stack) {
+      logError(e, stack);
     }
-    return null;
   }
 
   Future<void> deleteReview({

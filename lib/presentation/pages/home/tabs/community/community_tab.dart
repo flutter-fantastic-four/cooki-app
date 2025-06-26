@@ -2,6 +2,7 @@
 
 import 'package:cooki/core/utils/navigation_util.dart';
 import 'package:cooki/presentation/pages/detailed_recipe/detailed_recipe_page.dart';
+import 'package:cooki/presentation/pages/home/tabs/community/widget/photo_modal_style_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -587,7 +588,7 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                 ),
                 margin: const EdgeInsets.only(bottom: 12),
               ),
-              _PhotoModalStyleCard(
+              PhotoModalStyleCard(
                 text: strings(context).share,
                 icon: Icons.share_outlined,
                 onTap: () async {
@@ -601,7 +602,7 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                 },
               ),
               const SizedBox(height: 15),
-              _PhotoModalStyleCard(
+              PhotoModalStyleCard(
                 text: strings(context).close,
                 onTap: () => Navigator.pop(context),
                 isCenter: true,
@@ -907,54 +908,6 @@ class FilterIconWithDot extends StatelessWidget {
             ),
           ),
       ],
-    );
-  }
-}
-
-class _PhotoModalStyleCard extends StatelessWidget {
-  final String text;
-  final IconData? icon;
-  final VoidCallback onTap;
-  final bool isCenter;
-  final Color? textColor;
-  final Color? iconColor;
-
-  const _PhotoModalStyleCard({
-    required this.text,
-    this.icon,
-    required this.onTap,
-    this.isCenter = false,
-    this.textColor,
-    this.iconColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      elevation: 0,
-      color: AppColors.white,
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(vertical: 1),
-        leading:
-            !isCenter
-                ? Padding(
-                  padding: const EdgeInsets.only(left: 24, right: 4),
-                  child: Icon(icon, color: iconColor ?? Colors.black87),
-                )
-                : null,
-        title: Text(
-          text,
-          style: TextStyle(
-            fontSize: 16,
-            color: textColor ?? Colors.black,
-            fontWeight: FontWeight.w500,
-          ),
-          textAlign: isCenter ? TextAlign.center : null,
-        ),
-        onTap: onTap,
-      ),
     );
   }
 }
