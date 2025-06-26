@@ -151,120 +151,175 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
     super.dispose();
   }
 
+  bool _hasUnsavedChanges() {
+    // If editing existing recipe, check if anything changed from original
+    if (widget.recipe != null) {
+      final originalRecipe = widget.recipe!;
+
+      final titleChanged =
+          _titleController.text.trim() != originalRecipe.recipeName.trim();
+      final currentIngredients =
+          _ingredientsControllers.map((c) => c.text.trim()).toList();
+      final ingredientsChanged =
+          !_listsEqual(currentIngredients, originalRecipe.ingredients);
+      final currentSteps = _stepsControllers.map((c) => c.text.trim()).toList();
+      final stepsChanged = !_listsEqual(currentSteps, originalRecipe.steps);
+      final cookTimeChanged =
+          _cookTimeController.text.trim() != originalRecipe.cookTime.toString();
+      final caloriesChanged =
+          _caloriesController.text.trim() != originalRecipe.calories.toString();
+
+      final state = ref.read(recipeEditViewModelProvider(widget.recipe));
+      final categoryChanged = state.selectedCategory != originalRecipe.category;
+      final publicChanged = state.isPublic != originalRecipe.isPublic;
+
+      return titleChanged ||
+          ingredientsChanged ||
+          stepsChanged ||
+          cookTimeChanged ||
+          caloriesChanged ||
+          categoryChanged ||
+          publicChanged;
+    }
+
+    // For new recipes, check if any content has been added
+    final hasTitle = _titleController.text.trim().isNotEmpty;
+    final hasIngredients = _ingredientsControllers.any(
+      (c) => c.text.trim().isNotEmpty,
+    );
+    final hasSteps = _stepsControllers.any((c) => c.text.trim().isNotEmpty);
+    final hasCookTime = _cookTimeController.text.trim().isNotEmpty;
+    final hasCalories = _caloriesController.text.trim().isNotEmpty;
+
+    return hasTitle || hasIngredients || hasSteps || hasCookTime || hasCalories;
+  }
+
+  bool _listsEqual(List<String> list1, List<String> list2) {
+    if (list1.length != list2.length) return false;
+    for (int i = 0; i < list1.length; i++) {
+      if (list1[i] != list2[i]) return false;
+    }
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     final vm = ref.read(recipeEditViewModelProvider(widget.recipe).notifier);
 
-    return GestureDetector(
-      onTap: () {
-        FocusScope.of(context).unfocus;
-        FocusManager.instance.primaryFocus?.unfocus();
-      },
-      child: Scaffold(
-        bottomNavigationBar: BottomButtonsRow(
-          recipe: recipe,
-          onSave: _saveRecipe,
-        ),
-        body: CustomScrollView(
-          slivers: [
-            SliverAppBar(
-              floating: true,
-              snap: true,
-              pinned: false,
-              backgroundColor: Colors.white,
-              title: Text(
-                strings(context).editRecipeTitle,
-                style: const TextStyle(color: Colors.black),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    if (recipe?.imageUrl != null) ...[
-                      _buildImageSelector(),
-                      const SizedBox(height: 5),
-                    ],
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 16,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Title field
-                          const SizedBox(height: 2),
-                          TitleFieldWidget(
-                            recipe: recipe,
-                            titleController: _titleController,
-                          ),
-
-                          const SizedBox(height: 12),
-                          CookInfoRowWidget(
-                            caloriesController: _caloriesController,
-                            cookTimeController: _cookTimeController,
-                          ),
-
-                          const SizedBox(height: 20),
-                          if (recipe != null) TagChips(recipe!.tags),
-
-                          const SizedBox(height: 28),
-                          Text(
-                            strings(context).categoryLabel,
-                            style: RecipePageWidgets.sectionTitleStyle,
-                          ),
-                          const SizedBox(height: 8),
-                          _buildCategorySelector(),
-
-                          const SizedBox(height: 28),
-                          Row(
-                            children: [
-                              Text(
-                                strings(context).ingredientsLabel,
-                                style: RecipePageWidgets.sectionTitleStyle,
-                              ),
-                              const SizedBox(width: 3),
-                              Text(
-                                strings(context).servingsLabel,
-                                style: RecipePageWidgets.servingsTitleStyle,
-                              ),
-                            ],
-                          ),
-
-                          const SizedBox(height: 8),
-                          InputListWidget(
-                            controllers: _ingredientsControllers,
-                            hintText: strings(context).ingredientsHint,
-                            onAdd: () => _addIngredient(vm),
-                            onRemove: (index) => _removeIngredient(vm, index),
-                          ),
-
-                          const SizedBox(height: 24),
-                          Text(
-                            strings(context).stepsLabel,
-                            style: RecipePageWidgets.sectionTitleStyle,
-                          ),
-
-                          const SizedBox(height: 8),
-                          InputListWidget(
-                            controllers: _stepsControllers,
-                            isSteps: true,
-                            hintText: strings(context).stepsHint,
-                            onAdd: () => _addStep(vm),
-                            onRemove: (index) => _removeStep(vm, index),
-                          ),
-
-                          _buildPublicToggle(),
-                        ],
-                      ),
-                    ),
-                  ],
+    return GeneralUtil.buildUnsavedChangesPopScope(
+      context: context,
+      hasUnsavedChanges: () => _hasUnsavedChanges(),
+      child: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus;
+          FocusManager.instance.primaryFocus?.unfocus();
+        },
+        child: Scaffold(
+          bottomNavigationBar: BottomButtonsRow(
+            recipe: recipe,
+            onSave: _saveRecipe,
+          ),
+          body: CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                floating: true,
+                snap: true,
+                pinned: false,
+                backgroundColor: Colors.white,
+                title: Text(
+                  strings(context).editRecipeTitle,
+                  style: const TextStyle(color: Colors.black),
                 ),
               ),
-            ),
-          ],
+              SliverToBoxAdapter(
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      if (recipe?.imageUrl != null) ...[
+                        _buildImageSelector(),
+                        const SizedBox(height: 5),
+                      ],
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 16,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Title field
+                            const SizedBox(height: 2),
+                            TitleFieldWidget(
+                              recipe: recipe,
+                              titleController: _titleController,
+                            ),
+
+                            const SizedBox(height: 12),
+                            CookInfoRowWidget(
+                              caloriesController: _caloriesController,
+                              cookTimeController: _cookTimeController,
+                            ),
+
+                            const SizedBox(height: 20),
+                            if (recipe != null) TagChips(recipe!.tags),
+
+                            const SizedBox(height: 28),
+                            Text(
+                              strings(context).categoryLabel,
+                              style: RecipePageWidgets.sectionTitleStyle,
+                            ),
+                            const SizedBox(height: 8),
+                            _buildCategorySelector(),
+
+                            const SizedBox(height: 28),
+                            Row(
+                              children: [
+                                Text(
+                                  strings(context).ingredientsLabel,
+                                  style: RecipePageWidgets.sectionTitleStyle,
+                                ),
+                                const SizedBox(width: 3),
+                                Text(
+                                  strings(context).servingsLabel,
+                                  style: RecipePageWidgets.servingsTitleStyle,
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 8),
+                            InputListWidget(
+                              controllers: _ingredientsControllers,
+                              hintText: strings(context).ingredientsHint,
+                              onAdd: () => _addIngredient(vm),
+                              onRemove: (index) => _removeIngredient(vm, index),
+                            ),
+
+                            const SizedBox(height: 24),
+                            Text(
+                              strings(context).stepsLabel,
+                              style: RecipePageWidgets.sectionTitleStyle,
+                            ),
+
+                            const SizedBox(height: 8),
+                            InputListWidget(
+                              controllers: _stepsControllers,
+                              isSteps: true,
+                              hintText: strings(context).stepsHint,
+                              onAdd: () => _addStep(vm),
+                              onRemove: (index) => _removeStep(vm, index),
+                            ),
+
+                            _buildPublicToggle(),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
