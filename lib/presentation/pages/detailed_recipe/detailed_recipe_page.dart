@@ -527,7 +527,7 @@ class DetailRecipePage extends ConsumerWidget {
                 existingReview = null;
               }
 
-              ratingPosted = await NavigationUtil.pushFromBottomAndWait<bool>(
+              ratingPosted = await NavigationUtil.pushFromBottom<bool>(
                 context,
                 WriteReviewPage(
                   recipeId: recipe.id,
@@ -559,7 +559,7 @@ class DetailRecipePage extends ConsumerWidget {
           },
           child: Container(
             height: 28,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: ShapeDecoration(
               shape: RoundedRectangleBorder(
                 side: BorderSide(width: 1, color: AppColors.greyScale300),
@@ -581,8 +581,8 @@ class DetailRecipePage extends ConsumerWidget {
                           color:
                               index < rating
                                   ? AppColors.secondary600
-                                  : AppColors.greyScale300,
-                          size: 12,
+                                  : AppColors.greyScale500,
+                          size: 14,
                         );
                       }),
                     );
@@ -699,8 +699,6 @@ class ReviewCardList extends ConsumerWidget {
                   currentRating: review.rating,
                   iconSize: 16,
                   horizontalPadding: 0,
-                  filledStarColor: AppColors.secondary600,
-                  emptyStarColor: AppColors.greyScale300,
                   setRating: null,
                   alignment: MainAxisAlignment.start,
                 ),

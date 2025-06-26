@@ -676,7 +676,7 @@ class _RecipeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
-        final result = await NavigationUtil.pushFromBottomAndWait<bool>(
+        final result = await NavigationUtil.pushFromBottom<bool>(
           context,
           DetailRecipePage(
             recipe: recipe,
@@ -783,7 +783,7 @@ class _RecipeCard extends StatelessWidget {
                                   color:
                                       index < (userRating ?? 0)
                                           ? AppColors.secondary600
-                                          : AppColors.greyScale300,
+                                          : AppColors.greyScale400,
                                   size: 14,
                                 );
                               }),

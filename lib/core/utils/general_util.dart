@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 import '../../gen/l10n/app_localizations.dart';
-import '../../presentation/widgets/app_dialog.dart';
+import 'dialogue_util.dart';
 
 AppLocalizations strings(BuildContext context) {
   return AppLocalizations.of(context)!;
@@ -55,12 +55,11 @@ class GeneralUtil {
       onPopInvokedWithResult: (bool didPop, Object? result) async {
         if (!didPop) {
           if (hasUnsavedChanges()) {
-            final confirm = await AppDialog.show(
+            final confirm = await DialogueUtil.showAppDialog(
               context: context,
               title: strings(context).stopWritingConfirmTitle,
-              subText: strings(context).stopWritingConfirmMessage,
-              primaryButtonText: strings(context).confirm,
-              secondaryButtonText: strings(context).cancel,
+              content: strings(context).stopWritingConfirmMessage,
+              showCancel: true,
             );
 
             if (confirm == true) {

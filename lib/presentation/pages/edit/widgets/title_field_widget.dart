@@ -45,43 +45,40 @@ class TitleFieldWidget extends ConsumerWidget {
     RecipeEditViewModel vm,
     WidgetRef ref,
   ) {
-    return SizedBox(
-      width: MediaQuery.of(context).size.width - 48, // Fixed width with padding
-      child: TextFormField(
-        controller: titleController,
-        style: TextStyle(
-          fontSize: 20,
-          color: AppColors.greyScale800,
-          fontWeight: FontWeight.bold,
+    return TextFormField(
+      controller: titleController,
+      style: TextStyle(
+        fontSize: 20,
+        color: AppColors.greyScale800,
+        fontWeight: FontWeight.bold,
+      ),
+      minLines: 1,
+      maxLines: 2,
+      autofocus: true,
+      validator: (value) {
+        final error = RecipeValidator.validateTitle(value);
+        return error != null
+            ? ErrorMapper.mapRecipeValidationError(context, error)
+            : null;
+      },
+      maxLength: RecipePageWidgets.titleMaxLength,
+      onFieldSubmitted: (_) => _confirmTitleEdit(vm),
+      decoration: InputDecoration(
+        hintText: strings(context).recipeTitleHint,
+        hintStyle: const TextStyle(color: Colors.grey),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 12,
+          horizontal: 14,
         ),
-        minLines: 1,
-        maxLines: null, // Allow unlimited lines for auto-expansion
-        autofocus: true,
-        validator: (value) {
-          final error = RecipeValidator.validateTitle(value);
-          return error != null
-              ? ErrorMapper.mapRecipeValidationError(context, error)
-              : null;
-        },
-        maxLength: 30,
-        onFieldSubmitted: (_) => _confirmTitleEdit(vm),
-        decoration: InputDecoration(
-          hintText: strings(context).recipeTitleHint,
-          hintStyle: const TextStyle(color: Colors.grey),
-          contentPadding: const EdgeInsets.symmetric(
-            vertical: 12,
-            horizontal: 14,
-          ),
-          filled: true,
-          fillColor: AppColors.appBarGrey,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
-          counterStyle: const TextStyle(
-            fontSize: 12,
-            color: AppColors.greyScale600,
-          ),
+        filled: true,
+        fillColor: AppColors.appBarGrey,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        counterStyle: const TextStyle(
+          fontSize: 12,
+          color: AppColors.greyScale600,
         ),
       ),
     );

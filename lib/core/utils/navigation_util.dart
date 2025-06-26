@@ -20,32 +20,7 @@ class NavigationUtil {
     // );
   }
 
-  static void pushFromBottom(BuildContext context, Widget page) {
-    Navigator.push(
-      context,
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => page,
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          const begin = Offset(0.0, 1.0); // from bottom
-          const end = Offset.zero;
-          const curve = Curves.easeOut;
-
-          final tween = Tween(
-            begin: begin,
-            end: end,
-          ).chain(CurveTween(curve: curve));
-          final offsetAnimation = animation.drive(tween);
-
-          return SlideTransition(position: offsetAnimation, child: child);
-        },
-      ),
-    );
-  }
-
-  static Future<T?> pushFromBottomAndWait<T>(
-    BuildContext context,
-    Widget page,
-  ) {
+  static Future<T?> pushFromBottom<T>(BuildContext context, Widget page) {
     return Navigator.push<T>(
       context,
       PageRouteBuilder<T>(

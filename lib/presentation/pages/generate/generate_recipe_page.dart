@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:cooki/core/utils/dialogue_util.dart';
 import 'package:cooki/core/utils/error_mappers.dart';
 import 'package:cooki/core/utils/general_util.dart';
 import 'package:cooki/presentation/pages/edit/recipe_edit_page.dart';
@@ -12,7 +13,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/constants/app_constants.dart';
 import '../../user_global_view_model.dart';
 import '../../widgets/input_decorations.dart';
-import '../../widgets/app_dialog.dart';
 import 'generate_recipe_view_model.dart';
 
 class GenerateRecipePage extends ConsumerWidget {
@@ -34,10 +34,10 @@ class GenerateRecipePage extends ConsumerWidget {
     final state = ref.read(generateRecipeViewModelProvider);
 
     if (context.mounted && state.errorKey != null) {
-      AppDialog.show(
+      DialogueUtil.showAppDialog(
         context: context,
         title: strings(context).generationFailedTitle,
-        subText: ErrorMapper.mapGenerateRecipeError(context, state.errorKey!),
+        content: ErrorMapper.mapGenerateRecipeError(context, state.errorKey!),
       );
       ref.read(generateRecipeViewModelProvider.notifier).clearError();
       return;
