@@ -36,16 +36,22 @@ class GenerateRecipeState {
     Set<String>? selectedPreferences,
   }) {
     return GenerateRecipeState(
-      isGeneratingAndSaving: isGeneratingAndSaving ?? this.isGeneratingAndSaving,
+      isGeneratingAndSaving:
+          isGeneratingAndSaving ?? this.isGeneratingAndSaving,
       isLoadingImage: isLoadingImage ?? this.isLoadingImage,
       errorKey: clearErrorKey ? null : errorKey ?? this.errorKey,
-      selectedImageBytes: clearSelectedImageBytes ? null : selectedImageBytes ?? this.selectedImageBytes,
+      selectedImageBytes:
+          clearSelectedImageBytes
+              ? null
+              : selectedImageBytes ?? this.selectedImageBytes,
       textInput: textInput ?? this.textInput,
       selectedPreferences: selectedPreferences ?? this.selectedPreferences,
     );
   }
 
-  bool get canGenerate => (textInput.isNotEmpty || selectedImageBytes != null) && !isGeneratingAndSaving;
+  bool get canGenerate =>
+      (textInput.isNotEmpty || selectedImageBytes != null) &&
+      !isGeneratingAndSaving;
 
   bool get hasImage => selectedImageBytes != null;
 }
@@ -64,7 +70,10 @@ class GenerateRecipeViewModel extends AutoDisposeNotifier<GenerateRecipeState> {
     state = state.copyWith(isGeneratingAndSaving: true);
 
     try {
-      final generated = await _generateRecipe(textOnlyRecipePromptPath: textOnlyRecipePromptPath, imageRecipePromptPath: imageRecipePromptPath);
+      final generated = await _generateRecipe(
+        textOnlyRecipePromptPath: textOnlyRecipePromptPath,
+        imageRecipePromptPath: imageRecipePromptPath,
+      );
       if (generated == null) return null;
 
       final saved = await _saveRecipe(generatedRecipe: generated, user: user);
@@ -76,10 +85,15 @@ class GenerateRecipeViewModel extends AutoDisposeNotifier<GenerateRecipeState> {
     }
   }
 
-  Future<GeneratedRecipe?> _generateRecipe({required String textOnlyRecipePromptPath, required String imageRecipePromptPath}) async {
+  Future<GeneratedRecipe?> _generateRecipe({
+    required String textOnlyRecipePromptPath,
+    required String imageRecipePromptPath,
+  }) async {
     try {
       if (state.textInput.isNotEmpty) {
-        final validationResult = await ref.read(recipeGenerationRepositoryProvider).validateUserInput(state.textInput);
+        final validationResult = await ref
+            .read(recipeGenerationRepositoryProvider)
+            .validateUserInput(state.textInput);
 
         if (!validationResult.isValid) {
           state = state.copyWith(errorKey: SaveRecipeErrorKey.invalidUserInput);
@@ -87,20 +101,30 @@ class GenerateRecipeViewModel extends AutoDisposeNotifier<GenerateRecipeState> {
         }
       }
 
-      final compressedImageBytes = await GeneralUtil.compressImageBytes(state.selectedImageBytes);
+      final compressedImageBytes = await GeneralUtil.compressImageBytes(
+        state.selectedImageBytes,
+      );
 
       var generatedRecipe = await ref
           .read(recipeGenerationRepositoryProvider)
           .generateRecipe(
             textInput: state.textInput.isNotEmpty ? state.textInput : null,
             imageBytes: compressedImageBytes,
-            preferences: state.selectedPreferences.isNotEmpty ? state.selectedPreferences : null,
+            preferences:
+                state.selectedPreferences.isNotEmpty
+                    ? state.selectedPreferences
+                    : null,
             textOnlyRecipePromptPath: textOnlyRecipePromptPath,
             imageRecipePromptPath: imageRecipePromptPath,
           );
 
       if (generatedRecipe.isError) {
-        state = state.copyWith(errorKey: state.selectedImageBytes != null ? SaveRecipeErrorKey.invalidImage : SaveRecipeErrorKey.generationFailed);
+        state = state.copyWith(
+          errorKey:
+              state.selectedImageBytes != null
+                  ? SaveRecipeErrorKey.invalidImage
+                  : SaveRecipeErrorKey.generationFailed,
+        );
         return null;
       }
       return generatedRecipe.copyWith(imageBytes: state.selectedImageBytes);
@@ -111,11 +135,16 @@ class GenerateRecipeViewModel extends AutoDisposeNotifier<GenerateRecipeState> {
     }
   }
 
-  Future<Recipe?> _saveRecipe({required GeneratedRecipe generatedRecipe, required AppUser user}) async {
+  Future<Recipe?> _saveRecipe({
+    required GeneratedRecipe generatedRecipe,
+    required AppUser user,
+  }) async {
     try {
       String? imageUrl;
       if (state.selectedImageBytes != null) {
-        imageUrl = await ref.read(recipeRepositoryProvider).uploadImageBytes(state.selectedImageBytes!, user.id);
+        imageUrl = await ref
+            .read(recipeRepositoryProvider)
+            .uploadImageBytes(state.selectedImageBytes!, user.id);
       }
 
       final buffer =
@@ -145,7 +174,9 @@ class GenerateRecipeViewModel extends AutoDisposeNotifier<GenerateRecipeState> {
         promptInput: promptInputFormatted,
       );
 
-      final recipeId = await ref.read(recipeRepositoryProvider).saveRecipe(recipe);
+      final recipeId = await ref
+          .read(recipeRepositoryProvider)
+          .saveRecipe(recipe);
       return recipe.copyWith(id: recipeId);
     } catch (e, stack) {
       logError(e, stack);
@@ -187,4 +218,7 @@ class GenerateRecipeViewModel extends AutoDisposeNotifier<GenerateRecipeState> {
   }
 }
 
-final generateRecipeViewModelProvider = NotifierProvider.autoDispose<GenerateRecipeViewModel, GenerateRecipeState>(GenerateRecipeViewModel.new);
+final generateRecipeViewModelProvider =
+    NotifierProvider.autoDispose<GenerateRecipeViewModel, GenerateRecipeState>(
+      GenerateRecipeViewModel.new,
+    );
