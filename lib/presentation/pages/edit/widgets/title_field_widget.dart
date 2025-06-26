@@ -68,6 +68,7 @@ class TitleFieldWidget extends ConsumerWidget {
               child: TextFormField(
                 controller: titleController,
                 maxLength: RecipePageWidgets.titleMaxLength,
+                textInputAction: TextInputAction.done,
                 style: TextStyle(
                   fontSize: 20,
                   color: AppColors.greyScale800,
@@ -109,7 +110,7 @@ class TitleFieldWidget extends ConsumerWidget {
         _buildTitleActionButton(
           onPressed: () => _confirmTitleEdit(vm),
           icon: Icons.check,
-          color: AppColors.primary,
+          color: AppColors.greyScale500,
         ),
         _buildTitleActionButton(
           onPressed: () {
@@ -165,7 +166,11 @@ class TitleFieldWidget extends ConsumerWidget {
             child: IconButton(
               padding: EdgeInsets.zero,
               onPressed: () => vm.startTitleEdit(),
-              icon: const Icon(Icons.edit_outlined, size: 18),
+              icon: Image.asset(
+                'assets/icons/pencil_icon.png',
+                height: 19,
+                width: 19,
+              ),
             ),
           ),
         ),
