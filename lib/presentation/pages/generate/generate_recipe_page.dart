@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'package:cooki/core/utils/dialogue_util.dart';
 import 'package:cooki/core/utils/error_mappers.dart';
 import 'package:cooki/core/utils/general_util.dart';
-import 'package:cooki/presentation/pages/edit/recipe_edit_page.dart';
+import 'package:cooki/presentation/pages/detailed_recipe/detailed_recipe_page.dart';
 import 'package:cooki/presentation/pages/generate/widgets/generate_button.dart';
 import 'package:cooki/presentation/pages/generate/widgets/image_selector.dart';
 import 'package:flutter/material.dart';
@@ -49,7 +49,7 @@ class GenerateRecipePage extends ConsumerWidget {
           .read(savedRecipesViewModelProvider(strings(context)).notifier)
           .refreshRecipes();
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => RecipeEditPage(recipe: savedRecipe)),
+        MaterialPageRoute(builder: (_) => DetailRecipePage(recipe: savedRecipe)),
       );
     }
   }
