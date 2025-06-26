@@ -79,7 +79,9 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
   Widget build(BuildContext context) {
     final state = ref.watch(savedRecipesViewModelProvider(strings(context)));
     final user = ref.watch(userGlobalViewModelProvider);
-    final viewModel = ref.read(savedRecipesViewModelProvider(strings(context)).notifier);
+    final viewModel = ref.read(
+      savedRecipesViewModelProvider(strings(context)).notifier,
+    );
     // Show error snackbar if there's an error
     ref.listen(savedRecipesViewModelProvider(strings(context)), (
       previous,
@@ -138,14 +140,18 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                                 right: isLastTab ? 16 : 8,
                               ),
                               child: GestureDetector(
-                                onTap: () {
-                                  _pageController.animateToPage(
-                                    AppConstants.recipeTabCategories(
-                                      context,
-                                    ).indexOf(category),
-                                    duration: const Duration(milliseconds: 300),
-                                    curve: Curves.easeInOut,
-                                  );
+                                onTap: () async {
+                                  final targetIndex =
+                                      AppConstants.recipeTabCategories(
+                                        context,
+                                      ).indexOf(category);
+
+                                  // Directly set category and load recipes
+                                  viewModel.setSelectedCategory(category);
+                                  await viewModel.loadRecipes();
+
+                                  // Use jumpToPage to avoid intermediate page callbacks
+                                  _pageController.jumpToPage(targetIndex);
                                 },
                                 child: Stack(
                                   clipBehavior: Clip.none,
@@ -245,10 +251,23 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
               },
               itemCount: AppConstants.recipeTabCategories(context).length,
               itemBuilder: (context, index) {
-                if (user == null || state.recipes.isEmpty) {
-                  final category = AppConstants.recipeTabCategories(context)[index];
-                  return NoRecipeNotice(category: category);
+                final pageCategory =
+                    AppConstants.recipeTabCategories(context)[index];
+                final isCurrentPage = pageCategory == state.selectedCategory;
+
+                // Show recipes only for the current selected category
+                if (!isCurrentPage) {
+                  // For non-current pages, show empty state or loading
+                  return Container(
+                    color: Colors.white,
+                    child: const Center(child: CircularProgressIndicator()),
+                  );
                 }
+
+                if (user == null || state.recipes.isEmpty) {
+                  return NoRecipeNotice(category: pageCategory);
+                }
+
                 return RefreshIndicator(
                   onRefresh: () => viewModel.refreshRecipes(),
                   color: AppColors.primary,
@@ -669,7 +688,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
   }
 }
 
-class _RecipeCard extends StatelessWidget {
+class _RecipeCard extends ConsumerWidget {
   final Recipe recipe;
   final VoidCallback onOptionsTap;
   final String category;
@@ -683,19 +702,34 @@ class _RecipeCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return GestureDetector(
       onTap: () async {
-        final result = await NavigationUtil.pushFromBottom<bool>(
+        // Determine the appropriate category for "All" tab based on recipe properties
+        String? displayCategory = category;
+        if (category == strings(context).recipeTabAll) {
+          // For "All" tab, determine category based on recipe properties
+          final currentUser = ref.read(userGlobalViewModelProvider);
+          if (currentUser != null) {
+            if (recipe.userId == currentUser.id) {
+              // Recipe belongs to current user
+              displayCategory =
+                  recipe.isPublic
+                      ? strings(context).recipeTabShared
+                      : strings(context).recipeTabCreated;
+            } else {
+              // Recipe doesn't belong to current user, so it's saved
+              displayCategory = strings(context).recipeTabSaved;
+            }
+          }
+        }
+
+        await NavigationUtil.pushFromBottom<bool>(
           context,
-          DetailRecipePage(
-            recipe: recipe,
-            category:
-                category == strings(context).recipeTabAll ? null : category,
-          ),
+          DetailRecipePage(recipe: recipe, category: displayCategory),
         );
-        // If a rating was posted, refresh the recipes
-        if (result == true && context.mounted) {
+        // Always refresh the recipes when returning from detail page
+        if (context.mounted) {
           viewModel.loadRecipes();
         }
       },

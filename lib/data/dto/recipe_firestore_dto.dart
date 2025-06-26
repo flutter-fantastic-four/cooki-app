@@ -20,6 +20,7 @@ class RecipeFirestoreDto {
   final String? promptInput;
   final int ratingCount;
   final double ratingSum;
+  final int userRating;
 
   const RecipeFirestoreDto({
     required this.id,
@@ -40,6 +41,7 @@ class RecipeFirestoreDto {
     this.promptInput,
     required this.ratingCount,
     required this.ratingSum,
+    required this.userRating,
   });
 
   factory RecipeFirestoreDto.fromMap(String id, Map<String, dynamic> map) {
@@ -62,6 +64,7 @@ class RecipeFirestoreDto {
       promptInput: map['promptInput'],
       ratingCount: map['ratingCount'],
       ratingSum: (map['ratingSum'] ?? 0).toDouble(),
+      userRating: map['userRating'] ?? 0,
     );
   }
 
@@ -84,6 +87,7 @@ class RecipeFirestoreDto {
       'promptInput': promptInput,
       'ratingCount': ratingCount,
       'ratingSum': ratingSum,
+      'userRating': userRating,
     };
   }
 
@@ -103,10 +107,14 @@ class RecipeFirestoreDto {
       isPublic: recipe.isPublic,
       imageUrl: recipe.imageUrl,
       createdAt: Timestamp.fromDate(recipe.createdAt),
-      updatedAt: recipe.updatedAt != null ? Timestamp.fromDate(recipe.updatedAt!) : null,
+      updatedAt:
+          recipe.updatedAt != null
+              ? Timestamp.fromDate(recipe.updatedAt!)
+              : null,
       promptInput: recipe.promptInput,
       ratingCount: recipe.ratingCount,
       ratingSum: recipe.ratingSum,
+      userRating: recipe.userRating,
     );
   }
   Recipe toEntity() {
@@ -129,6 +137,7 @@ class RecipeFirestoreDto {
       promptInput: promptInput,
       ratingCount: ratingCount,
       ratingSum: ratingSum,
+      userRating: userRating,
     );
   }
 }

@@ -81,7 +81,7 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  margin: const EdgeInsets.fromLTRB(16, 4 , 16, 12),
+                  margin: const EdgeInsets.fromLTRB(16, 4, 16, 12),
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
@@ -614,24 +614,24 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
   }
 }
 
-class _RecipeCard extends StatelessWidget {
+class _RecipeCard extends ConsumerWidget {
   final Recipe recipe;
   final VoidCallback onOptionsTap;
 
   const _RecipeCard({required this.recipe, required this.onOptionsTap});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return GestureDetector(
       onTap: () async {
-        final result = await NavigationUtil.pushFromBottom<bool>(
+        await NavigationUtil.pushFromBottom<bool>(
           context,
           DetailRecipePage(recipe: recipe),
         );
-        // If a rating/review was posted, we don't need to refresh community tab
-        // as it shows different recipes, but this maintains consistency
-        if (result == true) {
-          // No action needed for community tab as ratings don't affect the list
+        // Always refresh the community tab when returning from detail page
+        // This ensures any changes (like bookmarking) are reflected
+        if (context.mounted) {
+          ref.read(communityViewModelProvider.notifier).loadRecipes();
         }
       },
       child: Container(
@@ -857,9 +857,7 @@ class _FilterChip extends StatelessWidget {
                         ? (isSelected
                             ? AppColors.white
                             : AppColors.greyScale800)
-                        : (isSelected
-                            ? AppColors.primary
-                            : AppColors.primary),
+                        : (isSelected ? AppColors.primary : AppColors.primary),
                 fontSize: 12,
                 height: 1.2,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
