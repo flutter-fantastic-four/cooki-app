@@ -28,7 +28,7 @@ class GenerateButton extends StatelessWidget {
                   height: 21,
                   child: CupertinoActivityIndicator(radius: 10),
                 )
-                : const Icon(Icons.auto_awesome, size: 21),
+                : null,
         iconAlignment: IconAlignment.end,
         label: Text(
           isLoading
