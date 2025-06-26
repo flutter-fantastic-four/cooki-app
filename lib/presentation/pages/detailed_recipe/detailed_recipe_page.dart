@@ -807,8 +807,6 @@ class _RatingModalState extends State<_RatingModal> {
             padding: EdgeInsets.only(bottom: 40),
             child: StarRating(
               currentRating: currentRating,
-              filledStarColor: AppColors.secondary600,
-              emptyStarColor: AppColors.greyScale300,
               setRating: (value) {
                 setState(() {
                   currentRating = value;
