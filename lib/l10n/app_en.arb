@@ -268,5 +268,14 @@
   "guestSignUpPrompt":"With a simple sign-up\nyou can enjoy all of Cookie's services.",
 
   "undoTranslation": "Show original",
-  "translationFailed": "Translation failed. Please try again."
+  "translationFailed": "Translation failed. Please try again.",
+
+  "cookTime": "{minute} min",
+  "@cookTime": {
+  "placeholders": {
+    "minute": {
+      "type": "int"
+    }
+  }
+}
 }
