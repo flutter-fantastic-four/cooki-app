@@ -10,6 +10,7 @@ import 'package:cooki/domain/entity/review.dart';
 import 'package:cooki/presentation/pages/add_review/write_review_page.dart';
 import 'package:cooki/presentation/pages/detailed_recipe/widget/rating_modal.dart';
 import 'package:cooki/presentation/pages/detailed_recipe/widget/review_card_list.dart';
+import 'package:cooki/presentation/pages/edit/recipe_edit_page.dart';
 import 'package:cooki/presentation/pages/login/guest_login_page.dart';
 import 'package:cooki/presentation/pages/reviews/reviews_page.dart';
 import 'package:cooki/presentation/user_global_view_model.dart';
@@ -82,7 +83,29 @@ class DetailRecipePage extends ConsumerWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          SliverAppBar(floating: true, snap: true, pinned: false, backgroundColor: Colors.white, foregroundColor: Colors.black, elevation: 2),
+          SliverAppBar(
+            floating: true,
+            snap: true,
+            pinned: false,
+            backgroundColor: Colors.white,
+            foregroundColor: Colors.black,
+            elevation: 2,
+            actions: [
+              SizedBox(
+                width: 56,
+                height: 56,
+                child:
+                    user != null && user.id == recipe.userId
+                        ? IconButton(
+                          onPressed: () {
+                            NavigationUtil.pushFromBottom(context, RecipeEditPage(recipe: recipe));
+                          },
+                          icon: Icon(Icons.edit_outlined, color: Colors.black, size: 24),
+                        )
+                        : SizedBox(),
+              ),
+            ],
+          ),
           SliverToBoxAdapter(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
