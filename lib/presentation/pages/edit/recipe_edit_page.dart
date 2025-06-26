@@ -158,102 +158,110 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
         FocusManager.instance.primaryFocus?.unfocus();
       },
       child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          title: Text(
-            strings(context).editRecipeTitle,
-            style: const TextStyle(color: Colors.black),
-          ),
-        ),
         bottomNavigationBar: BottomButtonsRow(
           recipe: recipe,
           onSave: _saveRecipe,
         ),
-
-        body: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              if (recipe?.imageUrl != null) ...[
-                _buildImageSelector(),
-                const SizedBox(height: 5),
-              ],
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 16,
-                ),
+        body: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              floating: true,
+              snap: true,
+              pinned: false,
+              backgroundColor: Colors.white,
+              title: Text(
+                strings(context).editRecipeTitle,
+                style: const TextStyle(color: Colors.black),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Form(
+                key: _formKey,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Title field
-                    const SizedBox(height: 2),
-                    TitleFieldWidget(
-                      recipe: recipe,
-                      titleController: _titleController,
+                    if (recipe?.imageUrl != null) ...[
+                      _buildImageSelector(),
+                      const SizedBox(height: 5),
+                    ],
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 16,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Title field
+                          const SizedBox(height: 2),
+                          TitleFieldWidget(
+                            recipe: recipe,
+                            titleController: _titleController,
+                          ),
+
+                          const SizedBox(height: 12),
+                          CookInfoRowWidget(
+                            caloriesController: _caloriesController,
+                            cookTimeController: _cookTimeController,
+                          ),
+
+                          const SizedBox(height: 20),
+                          if (recipe != null) TagChips(recipe!.tags),
+
+                          const SizedBox(height: 28),
+                          Text(
+                            strings(context).categoryLabel,
+                            style: RecipePageWidgets.sectionTitleStyle,
+                          ),
+                          const SizedBox(height: 8),
+                          _buildCategorySelector(),
+
+                          const SizedBox(height: 28),
+                          Row(
+                            children: [
+                              Text(
+                                strings(context).ingredientsLabel,
+                                style: RecipePageWidgets.sectionTitleStyle,
+                              ),
+                              const SizedBox(width: 3),
+                              Text(
+                                strings(context).servingsLabel,
+                                style: RecipePageWidgets.servingsTitleStyle,
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 8),
+                          InputListWidget(
+                            controllers: _ingredientsControllers,
+                            hintText: strings(context).ingredientsHint,
+                            onAdd: () => _addIngredient(vm),
+                            onRemove: (index) => _removeIngredient(vm, index),
+                          ),
+
+                          const SizedBox(height: 24),
+                          Text(
+                            strings(context).stepsLabel,
+                            style: RecipePageWidgets.sectionTitleStyle,
+                          ),
+
+                          const SizedBox(height: 8),
+                          InputListWidget(
+                            controllers: _stepsControllers,
+                            isSteps: true,
+                            hintText: strings(context).stepsHint,
+                            onAdd: () => _addStep(vm),
+                            onRemove: (index) => _removeStep(vm, index),
+                          ),
+
+                          _buildPublicToggle(),
+                        ],
+                      ),
                     ),
-
-                    const SizedBox(height: 12),
-                    CookInfoRowWidget(
-                      caloriesController: _caloriesController,
-                      cookTimeController: _cookTimeController,
-                    ),
-
-                    const SizedBox(height: 20),
-                    if (recipe != null) TagChips(recipe!.tags),
-
-                    const SizedBox(height: 28),
-                    Text(
-                      strings(context).categoryLabel,
-                      style: RecipePageWidgets.sectionTitleStyle,
-                    ),
-                    const SizedBox(height: 8),
-                    _buildCategorySelector(),
-
-                    const SizedBox(height: 28),
-                    Row(
-                      children: [
-                        Text(
-                          strings(context).ingredientsLabel,
-                          style: RecipePageWidgets.sectionTitleStyle,
-                        ),
-                        const SizedBox(width: 3),
-                        Text(
-                          strings(context).servingsLabel,
-                          style: RecipePageWidgets.servingsTitleStyle,
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 8),
-                    InputListWidget(
-                      controllers: _ingredientsControllers,
-                      hintText: strings(context).ingredientsHint,
-                      onAdd: () => _addIngredient(vm),
-                      onRemove: (index) => _removeIngredient(vm, index),
-                    ),
-
-                    const SizedBox(height: 24),
-                    Text(
-                      strings(context).stepsLabel,
-                      style: RecipePageWidgets.sectionTitleStyle,
-                    ),
-
-                    const SizedBox(height: 8),
-                    InputListWidget(
-                      controllers: _stepsControllers,
-                      isSteps: true,
-                      hintText: strings(context).stepsHint,
-                      onAdd: () => _addStep(vm),
-                      onRemove: (index) => _removeStep(vm, index),
-                    ),
-
-                    _buildPublicToggle(),
                   ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
