@@ -1,5 +1,6 @@
 import 'package:cooki/core/utils/navigation_util.dart';
 import 'package:cooki/presentation/pages/detailed_recipe/detailed_recipe_page.dart';
+import 'package:cooki/presentation/pages/home/tabs/saved_recipes/widget/no_recipe_notice.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +10,7 @@ import '../../../../../core/utils/general_util.dart';
 import '../../../../../app/constants/app_colors.dart';
 import '../../../../../presentation/widgets/recipe_options_modal.dart';
 import '../../../../../core/utils/snackbar_util.dart';
+import '../../../../user_global_view_model.dart';
 import 'saved_recipes_tab_view_model.dart';
 
 // Constants for modal styling
@@ -76,10 +78,8 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(savedRecipesViewModelProvider(strings(context)));
-    final viewModel = ref.read(
-      savedRecipesViewModelProvider(strings(context)).notifier,
-    );
-
+    final user = ref.watch(userGlobalViewModelProvider);
+    final viewModel = ref.read(savedRecipesViewModelProvider(strings(context)).notifier);
     // Show error snackbar if there's an error
     ref.listen(savedRecipesViewModelProvider(strings(context)), (
       previous,
@@ -245,6 +245,10 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
               },
               itemCount: AppConstants.recipeTabCategories(context).length,
               itemBuilder: (context, index) {
+                if (user == null || state.recipes.isEmpty) {
+                  final category = AppConstants.recipeTabCategories(context)[index];
+                  return NoRecipeNotice(category: category);
+                }
                 return RefreshIndicator(
                   onRefresh: () => viewModel.refreshRecipes(),
                   color: AppColors.primary,

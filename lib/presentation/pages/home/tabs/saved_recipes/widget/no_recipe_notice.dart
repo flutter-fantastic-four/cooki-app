@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class NoRecipeNotice extends ConsumerWidget {
   const NoRecipeNotice({super.key, required this.category});
+
   final String category;
 
   @override
@@ -23,15 +24,20 @@ class NoRecipeNotice extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Image.asset('assets/icons/cancel.png', width: 48, height: 48),
+        SizedBox(height: 20),
         Text(
-          strings(
-            context,
-          ).noRecipeNoticeemptyCategoryMessage(category == strings(context).recipeTabAll ? "$category ${strings(context).recipe}" : category),
+          strings(context).noRecipeNoticeemptyCategoryMessage,
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
         SizedBox(height: 8),
-        Text(strings(context).noRecipeNoticeRecentFood, style: TextStyle(fontSize: 12)),
-        Text(strings(context).noRecipeNoticeTakePhoto, style: TextStyle(fontSize: 12)),
+        Text(
+          strings(context).noRecipeNoticeRecentFood,
+          style: TextStyle(fontSize: 12),
+        ),
+        Text(
+          strings(context).noRecipeNoticeTakePhoto,
+          style: TextStyle(fontSize: 12),
+        ),
         SizedBox(height: 24),
         SizedBox(
           height: 44,
@@ -47,10 +53,17 @@ class NoRecipeNotice extends ConsumerWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset('assets/icons/cooki_logo_white_no_text.png', width: 24, height: 24),
+                Image.asset(
+                  'assets/icons/cooki_logo_white_no_text.png',
+                  width: 24,
+                  height: 24,
+                ),
                 SizedBox(width: 4),
 
-                Text(strings(context).generateRecipe, style: TextStyle(color: AppColors.white, fontSize: 14)),
+                Text(
+                  strings(context).generateRecipe,
+                  style: TextStyle(color: AppColors.white, fontSize: 14),
+                ),
               ],
             ),
           ),
@@ -59,8 +72,15 @@ class NoRecipeNotice extends ConsumerWidget {
           onTap: () {
             homeViewModel.onIndexChanged(1);
           },
-          child: Padding(padding: EdgeInsets.all(18), child: UnderLineText(text: strings(context).goCommunity, textSize: 14)),
+          child: Padding(
+            padding: EdgeInsets.all(18),
+            child: UnderLineText(
+              text: strings(context).goCommunity,
+              textSize: 14,
+            ),
+          ),
         ),
+        SizedBox(height: 100),
       ],
     );
   }
