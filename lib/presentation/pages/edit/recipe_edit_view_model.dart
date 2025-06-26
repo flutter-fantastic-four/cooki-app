@@ -31,14 +31,12 @@ class RecipeEditState {
     bool? isSaving,
     SaveRecipeErrorKey? errorKey,
     bool clearErrorKey = false,
-    bool? isEditingTitle,
     String? currentTitle,
   }) => RecipeEditState(
     selectedCategory: selectedCategory ?? this.selectedCategory,
     isPublic: isPublic ?? this.isPublic,
     isSaving: isSaving ?? this.isSaving,
     errorKey: clearErrorKey ? null : errorKey ?? this.errorKey,
-    isEditingTitle: isEditingTitle ?? this.isEditingTitle,
     currentTitle: currentTitle ?? this.currentTitle,
   );
 }
@@ -122,18 +120,6 @@ class RecipeEditViewModel
 
   void clearError() {
     state = state.copyWith(clearErrorKey: true);
-  }
-
-  void startTitleEdit() {
-    state = state.copyWith(isEditingTitle: true);
-  }
-
-  void cancelTitleEdit() {
-    state = state.copyWith(isEditingTitle: false);
-  }
-
-  void confirmTitleEdit(String newTitle) {
-    state = state.copyWith(isEditingTitle: false, currentTitle: newTitle);
   }
 }
 

@@ -7,7 +7,6 @@ import '../../../../core/utils/error_mappers.dart';
 import '../../../../core/utils/general_util.dart';
 import '../../../../domain/entity/recipe.dart';
 import '../../../widgets/recipe_page_widgets.dart';
-import '../recipe_edit_view_model.dart';
 
 // final titleLengthProvider = StateProvider.autoDispose<int>((ref) => 0);
 
@@ -21,30 +20,8 @@ class TitleFieldWidget extends ConsumerWidget {
     required this.titleController,
   });
 
-  void _confirmTitleEdit(RecipeEditViewModel vm) {
-    final error = RecipeValidator.validateTitle(titleController.text);
-    if (error == null) {
-      vm.confirmTitleEdit(titleController.text);
-    }
-  }
-
-  void _cancelTitleEdit(RecipeEditViewModel vm, String? confirmedTitle) {
-    titleController.text = confirmedTitle ?? '';
-    vm.cancelTitleEdit();
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final vm = ref.read(recipeEditViewModelProvider(recipe).notifier);
-
-    return _buildTextFieldRow(context, vm, ref);
-  }
-
-  Widget _buildTextFieldRow(
-    BuildContext context,
-    RecipeEditViewModel vm,
-    WidgetRef ref,
-  ) {
     return TextFormField(
       controller: titleController,
       style: TextStyle(
@@ -61,7 +38,6 @@ class TitleFieldWidget extends ConsumerWidget {
             : null;
       },
       maxLength: RecipePageWidgets.titleMaxLength,
-      onFieldSubmitted: (_) => _confirmTitleEdit(vm),
       decoration: InputDecoration(
         hintText: strings(context).recipeTitleHint,
         hintStyle: const TextStyle(color: Colors.grey),
