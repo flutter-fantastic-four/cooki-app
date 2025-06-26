@@ -13,6 +13,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/constants/app_constants.dart';
 import '../../user_global_view_model.dart';
 import '../../widgets/input_decorations.dart';
+import '../home/tabs/saved_recipes/saved_recipes_tab_view_model.dart';
 import 'generate_recipe_view_model.dart';
 
 class GenerateRecipePage extends ConsumerWidget {
@@ -45,6 +46,7 @@ class GenerateRecipePage extends ConsumerWidget {
 
     if (savedRecipe != null) {
       if (!context.mounted) return;
+      ref.read(savedRecipesViewModelProvider(strings(context)).notifier).refreshRecipes();
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => RecipeEditPage(recipe: savedRecipe)),
       );

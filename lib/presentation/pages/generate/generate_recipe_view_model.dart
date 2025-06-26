@@ -70,13 +70,23 @@ class GenerateRecipeViewModel extends AutoDisposeNotifier<GenerateRecipeState> {
     state = state.copyWith(isGeneratingAndSaving: true);
 
     try {
-      final generated = await _generateRecipe(
+      final generationTask = _generateRecipe(
         textOnlyRecipePromptPath: textOnlyRecipePromptPath,
         imageRecipePromptPath: imageRecipePromptPath,
       );
+      final Future<String?> imageUploadTask = _uploadImageIfNeeded(user.id);
+      final results = await Future.wait([generationTask, imageUploadTask]);
+
+      final generated = results[0] as GeneratedRecipe?;
+      final imageUrl = results[1] as String?;
+
       if (generated == null) return null;
 
-      final saved = await _saveRecipe(generatedRecipe: generated, user: user);
+      final saved = await _saveRecipe(
+        generatedRecipe: generated,
+        user: user,
+        imageUrl: imageUrl,
+      );
       if (saved == null) return null;
 
       return saved;
@@ -135,18 +145,25 @@ class GenerateRecipeViewModel extends AutoDisposeNotifier<GenerateRecipeState> {
     }
   }
 
+  Future<String?> _uploadImageIfNeeded(String userId) async {
+    if (state.selectedImageBytes == null) return null;
+    try {
+      return await ref
+          .read(recipeRepositoryProvider)
+          .uploadImageBytes(state.selectedImageBytes!, userId);
+    } catch (e, stack) {
+      logError(e, stack);
+      state = state.copyWith(errorKey: SaveRecipeErrorKey.saveFailed);
+      return null;
+    }
+  }
+
   Future<Recipe?> _saveRecipe({
     required GeneratedRecipe generatedRecipe,
     required AppUser user,
+    required String? imageUrl,
   }) async {
     try {
-      String? imageUrl;
-      if (state.selectedImageBytes != null) {
-        imageUrl = await ref
-            .read(recipeRepositoryProvider)
-            .uploadImageBytes(state.selectedImageBytes!, user.id);
-      }
-
       final buffer =
           StringBuffer()
             ..writeln('[Text Input]')

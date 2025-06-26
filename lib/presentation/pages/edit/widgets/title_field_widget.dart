@@ -54,7 +54,6 @@ class TitleFieldWidget extends ConsumerWidget {
       ),
       minLines: 1,
       maxLines: 2,
-      autofocus: true,
       validator: (value) {
         final error = RecipeValidator.validateTitle(value);
         return error != null
