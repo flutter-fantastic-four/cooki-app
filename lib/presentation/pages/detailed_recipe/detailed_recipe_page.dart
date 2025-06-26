@@ -311,11 +311,11 @@ class DetailRecipePage extends ConsumerWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   decoration: ShapeDecoration(
                     shape: RoundedRectangleBorder(
-                      side: BorderSide(width: 1, color: AppColors.greyScale300),
+                      side: BorderSide(width: 1, color: AppColors.greyScale800),
                       borderRadius: BorderRadius.circular(99999),
                     ),
                   ),
-                  child: Text(category!, style: TextStyle(fontSize: 12)),
+                  child: Text(category!, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                 ),
                 SizedBox(width: 8),
               ],
@@ -367,19 +367,22 @@ class DetailRecipePage extends ConsumerWidget {
               ref.invalidate(actualAverageRatingProvider(recipe.id));
             }
           },
-          child: Container(
-            height: 28,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: ShapeDecoration(
-              shape: RoundedRectangleBorder(side: BorderSide(width: 1, color: AppColors.greyScale300), borderRadius: BorderRadius.circular(99999)),
-            ),
-            child: Consumer(
-              builder: (context, ref, child) {
-                final userRatingAsync = ref.watch(userRatingProvider(recipe.id));
-                return userRatingAsync.when(
-                  data: (userRating) {
-                    final rating = userRating ?? 0;
-                    return Row(
+          child: Consumer(
+            builder: (context, ref, child) {
+              final userRatingAsync = ref.watch(userRatingProvider(recipe.id));
+              return userRatingAsync.when(
+                data: (userRating) {
+                  final rating = userRating ?? 0;
+                  return Container(
+                    height: 28,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: ShapeDecoration(
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(width: 1, color: rating == 0 ? AppColors.greyScale300 : AppColors.greyScale800),
+                        borderRadius: BorderRadius.circular(99999),
+                      ),
+                    ),
+                    child: Row(
                       children: List.generate(5, (index) {
                         return Icon(
                           index < rating ? Icons.star : Icons.star_border,
@@ -387,23 +390,23 @@ class DetailRecipePage extends ConsumerWidget {
                           size: 12,
                         );
                       }),
-                    );
-                  },
-                  loading:
-                      () => Row(
-                        children: List.generate(5, (index) {
-                          return Icon(Icons.star_border, color: AppColors.greyScale300, size: 12);
-                        }),
-                      ),
-                  error:
-                      (error, stack) => Row(
-                        children: List.generate(5, (index) {
-                          return Icon(Icons.star_border, color: AppColors.greyScale300, size: 12);
-                        }),
-                      ),
-                );
-              },
-            ),
+                    ),
+                  );
+                },
+                loading:
+                    () => Row(
+                      children: List.generate(5, (index) {
+                        return Icon(Icons.star_border, color: AppColors.greyScale300, size: 12);
+                      }),
+                    ),
+                error:
+                    (error, stack) => Row(
+                      children: List.generate(5, (index) {
+                        return Icon(Icons.star_border, color: AppColors.greyScale300, size: 12);
+                      }),
+                    ),
+              );
+            },
           ),
         ),
       ],
