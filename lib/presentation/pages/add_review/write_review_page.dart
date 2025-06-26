@@ -59,13 +59,13 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
 
     // Show confirmation dialog for editing
     if (isEditingMode) {
-      final result = await DialogueUtil.showAppCupertinoDialog(
+      final result = await DialogueUtil.showAppDialog(
         context: context,
         showCancel: true,
         title: strings(context).editReviewTitle,
         content: strings(context).editReviewConfirmMessage,
       );
-      if (result != AppDialogResult.confirm) return;
+      if (result != true) return;
     }
 
     final start = DateTime.now();
@@ -83,7 +83,7 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
     final state = ref.read(writeReviewViewModelProvider(widget.review));
 
     if (context.mounted && state.errorKey != null) {
-      DialogueUtil.showAppCupertinoDialog(
+      DialogueUtil.showAppDialog(
         context: context,
         title:
             isEditingMode
@@ -112,14 +112,13 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
   Future<void> _deleteReview(BuildContext context) async {
     if (widget.review == null) return;
 
-    final result = await DialogueUtil.showAppCupertinoDialog(
+    final result = await DialogueUtil.showAppDialog(
       context: context,
       title: strings(context).deleteReviewConfirmTitle,
       content: strings(context).deleteReviewConfirmMessage,
       showCancel: true,
-      isDestructive: true,
     );
-    if (result != AppDialogResult.confirm) return;
+    if (result != true) return;
 
     await ref
         .read(writeReviewViewModelProvider(widget.review).notifier)
@@ -127,7 +126,7 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
 
     final state = ref.read(writeReviewViewModelProvider(widget.review));
     if (context.mounted && state.errorKey != null) {
-      DialogueUtil.showAppCupertinoDialog(
+      DialogueUtil.showAppDialog(
         context: context,
         title: strings(context).genericErrorTitle,
         content: ErrorMapper.mapWriteReviewError(context, state.errorKey!),
@@ -268,8 +267,6 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
                     ).select((state) => state.rating),
                   ),
                   iconSize: 32,
-                  filledStarColor: AppColors.secondary600,
-                  emptyStarColor: AppColors.greyScale300,
                   setRating:
                       (selectedRating) => ref
                           .read(
@@ -441,7 +438,7 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
                         child: const Icon(
                           Icons.cancel,
                           size: 18,
-                          color: AppColors.error,
+                          color: Colors.red,
                         ),
                       ),
                     ),

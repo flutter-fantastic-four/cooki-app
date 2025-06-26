@@ -7,30 +7,6 @@ import '../../../data/repository/providers.dart';
 import '../../../domain/entity/app_user.dart';
 import '../../../domain/entity/local_or_remote_image.dart';
 import '../../../domain/entity/review.dart';
-import '../detailed_recipe/detailed_recipe_page.dart';
-
-// Provider for calculating actual average rating from reviews
-final actualAverageRatingProvider = FutureProvider.family
-    .autoDispose<Map<String, dynamic>, String>((ref, recipeId) async {
-      try {
-        final reviewRepository = ref.read(reviewRepositoryProvider);
-        final reviews = await reviewRepository.getReviewsByRecipeId(recipeId);
-
-        if (reviews.isEmpty) {
-          return {'average': 0.0, 'count': 0};
-        }
-
-        final totalRating = reviews.fold<int>(
-          0,
-          (sum, review) => sum + review.rating,
-        );
-        final average = totalRating / reviews.length;
-
-        return {'average': average, 'count': reviews.length};
-      } catch (e) {
-        return {'average': 0.0, 'count': 0};
-      }
-    });
 
 class WriteReviewState {
   final int rating;
@@ -120,9 +96,6 @@ class WriteReviewViewModel
             .read(reviewRepositoryProvider)
             .saveReview(recipeId: recipeId, review: review);
       }
-
-      // Invalidate the average rating provider to refresh the display
-      ref.invalidate(actualAverageRatingProvider(recipeId));
     } catch (e, stack) {
       logError(e, stack);
       state = state.copyWith(errorKey: WriteReviewErrorKey.saveFailed);
@@ -207,9 +180,6 @@ class WriteReviewViewModel
       await ref
           .read(reviewRepositoryProvider)
           .deleteReview(recipeId: recipeId, reviewId: reviewId);
-
-      // Invalidate the average rating provider to refresh the display
-      ref.invalidate(actualAverageRatingProvider(recipeId));
     } catch (e, stack) {
       logError(e, stack);
       state = state.copyWith(errorKey: WriteReviewErrorKey.deleteFailed);

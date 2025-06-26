@@ -83,7 +83,7 @@ class ReviewsPage extends ConsumerWidget {
         ModalOption(
           text: strings(context).deleteReview,
           isRed: true,
-          icon: Icons.delete_outline,
+          icon: Icons.delete,
           onTap: () => _deleteReview(context, ref, review),
         ),
     ];
@@ -121,14 +121,13 @@ class ReviewsPage extends ConsumerWidget {
     WidgetRef ref,
     Review review,
   ) async {
-    final result = await DialogueUtil.showAppCupertinoDialog(
+    final result = await DialogueUtil.showAppDialog(
       context: context,
       title: strings(context).deleteReviewTitle,
       content: strings(context).deleteReviewConfirmation,
       showCancel: true,
-      isDestructive: true,
     );
-    if (result == AppDialogResult.confirm) {
+    if (result == true) {
       ref
           .read(reviewsViewModelProvider(recipeId).notifier)
           .deleteReview(review.id);
@@ -192,7 +191,7 @@ class ReviewsPage extends ConsumerWidget {
     ReviewsErrorKey errorKey,
     WidgetRef ref,
   ) {
-    DialogueUtil.showAppCupertinoDialog(
+    DialogueUtil.showAppDialog(
       context: context,
       title: strings(context).genericErrorTitle,
       content: ErrorMapper.mapReviewsPageError(context, errorKey),
@@ -394,8 +393,6 @@ class ReviewsPage extends ConsumerWidget {
             currentRating: review.rating,
             iconSize: 16,
             horizontalPadding: 0,
-            filledStarColor: AppColors.secondary600,
-            emptyStarColor: AppColors.greyScale300,
             setRating: null,
             alignment: MainAxisAlignment.start,
           ),

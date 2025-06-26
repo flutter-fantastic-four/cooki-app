@@ -96,10 +96,10 @@
   "contactTheDevelopersTeam" : "개발자들에게 문의",
   "logout" : "로그아웃",
   "deleteAccount":"회원탈퇴",
-  "languageSettings" : "언어",
+  "languageSettings" : "언어설정",
 
   "logoutDialogTitle" : "로그아웃할까요?",
-  "logoutDialogSubTitle" : "로그아웃할까요?",
+  "logoutDialogSubTitle" : "언제든지 다시 로그인할 수 있습니다",
   "logouterror" : "로그아웃 중 오류가 발생했습니다.",
 
 

@@ -3,27 +3,26 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../app/constants/app_colors.dart';
-
-enum AppDialogResult {
-  confirm, // 확인 or 네
-  cancel, // 아니오
-}
+import '../../app/constants/app_styles.dart';
 
 class DialogueUtil {
   /// 앱 팝업 표시
   /// [showCancel]=true면 '네', '이니오' 버튼 2개 표시,
   /// false면 '확인' 버튼만 표시
-  static Future<AppDialogResult?> showAppCupertinoDialog({
+  static Future<bool?> showAppDialog({
     required BuildContext context,
     required String title,
     required String content,
     bool showCancel = false,
     bool isDestructive = false,
+    String? primaryButtonText,
+    String? secondaryButtonText,
   }) {
     final confirmButtonText =
-        showCancel ? strings(context).yes : strings(context).confirm;
+        primaryButtonText ??
+        (showCancel ? strings(context).yes : strings(context).confirm);
 
-    return showDialog<AppDialogResult?>(
+    return showDialog<bool?>(
       context: context,
       barrierDismissible: !showCancel, // Only dismissible when no cancel button
       builder:
@@ -31,6 +30,7 @@ class DialogueUtil {
             title: title,
             content: content,
             confirmButtonText: confirmButtonText,
+            secondaryButtonText: secondaryButtonText,
             showCancel: showCancel,
             isDestructive: isDestructive,
           ),
@@ -45,20 +45,41 @@ class DialogueUtil {
     required VoidCallback onOption1,
     required VoidCallback onOption2,
   }) {
-    showGenericModal(
-      context,
-      options: [
-        ModalOption(
-          text: option1Text,
-          icon: Icons.check_circle_outline,
-          onTap: onOption1,
-        ),
-        ModalOption(
-          text: option2Text,
-          icon: Icons.radio_button_unchecked,
-          onTap: onOption2,
-        ),
-      ],
+    showCupertinoModalPopup(
+      context: context,
+      builder:
+          (context) => CupertinoActionSheet(
+            title: Text(title, style: AppStyles.cupertinoSheetTitle),
+            actions: [
+              CupertinoActionSheetAction(
+                onPressed: () {
+                  onOption1();
+                  Navigator.pop(context);
+                },
+                child: Text(
+                  option1Text,
+                  style: AppStyles.cupertinoSheetActionText,
+                ),
+              ),
+              CupertinoActionSheetAction(
+                onPressed: () {
+                  onOption2();
+                  Navigator.pop(context);
+                },
+                child: Text(
+                  option2Text,
+                  style: AppStyles.cupertinoSheetActionText,
+                ),
+              ),
+            ],
+            cancelButton: CupertinoActionSheetAction(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                strings(context).cancel,
+                style: AppStyles.cupertinoSheetActionText,
+              ),
+            ),
+          ),
     );
   }
 
@@ -156,6 +177,7 @@ class _AppCustomDialog extends StatelessWidget {
   final String title;
   final String content;
   final String confirmButtonText;
+  final String? secondaryButtonText;
   final bool showCancel;
   final bool isDestructive;
 
@@ -163,6 +185,7 @@ class _AppCustomDialog extends StatelessWidget {
     required this.title,
     required this.content,
     required this.confirmButtonText,
+    this.secondaryButtonText,
     required this.showCancel,
     this.isDestructive = false,
   });
@@ -205,7 +228,7 @@ class _AppCustomDialog extends StatelessWidget {
                   Expanded(
                     child: OutlinedButton(
                       onPressed:
-                          () => Navigator.pop(context, AppDialogResult.cancel),
+                          () => Navigator.pop(context, false),
                       style: OutlinedButton.styleFrom(
                         minimumSize: const Size(double.infinity, 50),
                         shape: RoundedRectangleBorder(
@@ -214,7 +237,7 @@ class _AppCustomDialog extends StatelessWidget {
                         side: const BorderSide(color: AppColors.primary),
                       ),
                       child: Text(
-                        strings(context).no,
+                        secondaryButtonText ?? strings(context).no,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -232,7 +255,7 @@ class _AppCustomDialog extends StatelessWidget {
                               onPressed:
                                   () => Navigator.pop(
                                     context,
-                                    AppDialogResult.confirm,
+                                    true,
                                   ),
                               style: OutlinedButton.styleFrom(
                                 minimumSize: const Size(double.infinity, 50),
@@ -255,7 +278,7 @@ class _AppCustomDialog extends StatelessWidget {
                               onPressed:
                                   () => Navigator.pop(
                                     context,
-                                    AppDialogResult.confirm,
+                                    true,
                                   ),
                               style: ElevatedButton.styleFrom(
                                 minimumSize: const Size(double.infinity, 50),
@@ -281,7 +304,7 @@ class _AppCustomDialog extends StatelessWidget {
               isDestructive
                   ? OutlinedButton(
                     onPressed:
-                        () => Navigator.pop(context, AppDialogResult.confirm),
+                        () => Navigator.pop(context, true),
                     style: OutlinedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 50),
                       shape: RoundedRectangleBorder(
@@ -301,7 +324,7 @@ class _AppCustomDialog extends StatelessWidget {
                   )
                   : ElevatedButton(
                     onPressed:
-                        () => Navigator.pop(context, AppDialogResult.confirm),
+                        () => Navigator.pop(context, true),
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 50),
                       shape: RoundedRectangleBorder(

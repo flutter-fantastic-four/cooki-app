@@ -19,6 +19,8 @@ abstract class AppColors {
 
   static const kakaoLoginBackground = Color(0xFFFEE500);
 
+  static const error = Color(0xFFFF3B30);
+
   // From Figma design
 
   // Primary Colors
@@ -57,7 +59,4 @@ abstract class AppColors {
   static const greyScale800 = Color(0xFF262626);
   static const black = Color(0xFF000000);
   static const white = Color(0xFFFFFFFF);
-
-  // Error Color
-  static const error = Color(0xFFFF3B30);
 }
