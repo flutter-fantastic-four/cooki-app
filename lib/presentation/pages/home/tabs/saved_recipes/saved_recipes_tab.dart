@@ -1,5 +1,6 @@
 import 'package:cooki/core/utils/navigation_util.dart';
 import 'package:cooki/presentation/pages/detailed_recipe/detailed_recipe_page.dart';
+import 'package:cooki/presentation/pages/home/tabs/saved_recipes/widget/no_recipe_notice.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +10,7 @@ import '../../../../../core/utils/general_util.dart';
 import '../../../../../app/constants/app_colors.dart';
 import '../../../../../presentation/widgets/recipe_options_modal.dart';
 import '../../../../../core/utils/snackbar_util.dart';
+import '../../../../user_global_view_model.dart';
 import 'saved_recipes_tab_view_model.dart';
 
 // Constants for modal styling
@@ -76,10 +78,8 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(savedRecipesViewModelProvider(strings(context)));
-    final viewModel = ref.read(
-      savedRecipesViewModelProvider(strings(context)).notifier,
-    );
-
+    final user = ref.watch(userGlobalViewModelProvider);
+    final viewModel = ref.read(savedRecipesViewModelProvider(strings(context)).notifier);
     // Show error snackbar if there's an error
     ref.listen(savedRecipesViewModelProvider(strings(context)), (
       previous,
@@ -106,11 +106,13 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
               ? _buildSearchAppBar(context, state, viewModel)
               : _buildNormalAppBar(context, state, viewModel),
       body: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           // Category tabs
-          Container(
-            height: 42,
+          SizedBox(
+            height: 38,
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Expanded(
                   child: SingleChildScrollView(
@@ -157,7 +159,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                                       child: Text(
                                         category,
                                         style: TextStyle(
-                                          fontSize: 12,
+                                          fontSize: 13,
                                           fontWeight:
                                               isSelected
                                                   ? FontWeight.w600
@@ -199,32 +201,36 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
           ),
           // Active filters
           if (state.hasActiveFilters)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  ...state.selectedCuisines.map(
-                    (cuisine) => _FilterChip(
-                      label: cuisine,
-                      onDeleted: () async {
-                        viewModel.removeCuisine(cuisine);
-                        await viewModel.loadRecipes();
-                      },
-                      isModalChip: false,
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    ...state.selectedCuisines.map(
+                      (cuisine) => _FilterChip(
+                        label: cuisine,
+                        onDeleted: () async {
+                          viewModel.removeCuisine(cuisine);
+                          await viewModel.loadRecipes();
+                        },
+                        isModalChip: false,
+                      ),
                     ),
-                  ),
-                  if (state.selectedSort.isNotEmpty)
-                    _FilterChip(
-                      label: state.selectedSort,
-                      onDeleted: () async {
-                        viewModel.clearSort();
-                        await viewModel.loadRecipes();
-                      },
-                      isModalChip: false,
-                    ),
-                ],
+                    if (state.selectedSort.isNotEmpty)
+                      _FilterChip(
+                        label: state.selectedSort,
+                        onDeleted: () async {
+                          viewModel.clearSort();
+                          await viewModel.loadRecipes();
+                        },
+                        isModalChip: false,
+                        isSelected: true,
+                      ),
+                  ],
+                ),
               ),
             ),
           // Recipe grid
@@ -239,6 +245,10 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
               },
               itemCount: AppConstants.recipeTabCategories(context).length,
               itemBuilder: (context, index) {
+                if (user == null || state.recipes.isEmpty) {
+                  final category = AppConstants.recipeTabCategories(context)[index];
+                  return NoRecipeNotice(category: category);
+                }
                 return RefreshIndicator(
                   onRefresh: () => viewModel.refreshRecipes(),
                   color: AppColors.primary,
@@ -639,10 +649,10 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
         Expanded(
           child: ElevatedButton(
             onPressed: () async {
+              Navigator.pop(context);
               viewModel.updateSelectedSort(tempSort);
               viewModel.updateSelectedCuisines(List.from(tempCuisines));
               await viewModel.loadRecipes();
-              Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
@@ -676,7 +686,7 @@ class _RecipeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
-        final result = await NavigationUtil.pushFromBottomAndWait<bool>(
+        final result = await NavigationUtil.pushFromBottom<bool>(
           context,
           DetailRecipePage(
             recipe: recipe,
@@ -783,7 +793,7 @@ class _RecipeCard extends StatelessWidget {
                                   color:
                                       index < (userRating ?? 0)
                                           ? AppColors.secondary600
-                                          : AppColors.greyScale300,
+                                          : AppColors.greyScale400,
                                   size: 14,
                                 );
                               }),

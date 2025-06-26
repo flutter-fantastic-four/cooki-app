@@ -57,14 +57,14 @@ class AccountActionButton extends ConsumerWidget {
     BuildContext context,
     AccountActionViewModel viewModel,
   ) async {
-    final result = await DialogueUtil.showAppCupertinoDialog(
+    final result = await DialogueUtil.showAppDialog(
       context: context,
       title: strings(context).logoutDialogTitle,
       content: strings(context).logoutDialogSubTitle,
       showCancel: true,
     );
 
-    if (result == AppDialogResult.confirm) {
+    if (result == true) {
       final success = await viewModel.logout();
       if (success) {
         // ignore: use_build_context_synchronously
@@ -83,7 +83,7 @@ class AccountActionButton extends ConsumerWidget {
     BuildContext context,
     AccountActionViewModel viewModel,
   ) async {
-    final result = await DialogueUtil.showAppCupertinoDialog(
+    final result = await DialogueUtil.showAppDialog(
       context: context,
       title: strings(context).deleteAccountDialogTitle,
       content: strings(context).deleteAccountDialogSubTitle,
@@ -91,7 +91,7 @@ class AccountActionButton extends ConsumerWidget {
       isDestructive: true,
     );
 
-    if (result == AppDialogResult.confirm) {
+    if (result == true) {
       final success = await viewModel.deleteAccount();
       if (success) {
         // ignore: use_build_context_synchronously

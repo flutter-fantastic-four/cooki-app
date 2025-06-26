@@ -1,5 +1,6 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+import '../../app/constants/app_colors.dart';
 
 class StarRating extends StatelessWidget {
   final int currentRating;
@@ -7,8 +8,8 @@ class StarRating extends StatelessWidget {
   final double horizontalPadding;
   final Function(int)? setRating;
   final MainAxisAlignment alignment;
-  final Color? filledStarColor;
-  final Color? emptyStarColor;
+  final Color filledStarColor;
+  final Color emptyStarColor;
 
   const StarRating({
     super.key,
@@ -17,8 +18,8 @@ class StarRating extends StatelessWidget {
     this.horizontalPadding = 4,
     this.setRating,
     this.alignment = MainAxisAlignment.center,
-    this.filledStarColor,
-    this.emptyStarColor,
+    this.filledStarColor = AppColors.secondary600,
+    this.emptyStarColor = AppColors.greyScale500,
   });
 
   @override
@@ -35,10 +36,7 @@ class StarRating extends StatelessWidget {
               icon: Icon(
                 index < currentRating ? Icons.star : Icons.star_border,
                 size: iconSize,
-                color:
-                    index < currentRating
-                        ? (filledStarColor ?? Colors.black)
-                        : (emptyStarColor ?? Colors.black),
+                color: index < currentRating ? filledStarColor : emptyStarColor,
               ),
               onPressed:
                   setRating == null

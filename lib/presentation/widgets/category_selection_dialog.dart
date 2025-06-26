@@ -9,13 +9,14 @@ Future<String?> showCategorySelectionDialog(BuildContext context) {
   return showModalBottomSheet<String>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: AppColors.greyScale50,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
-    ),
+    backgroundColor: Colors.transparent,
     builder: (context) {
       return Container(
         margin: EdgeInsets.only(top: statusBarHeight + 15),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
         child: const CategorySelectionDialog(),
       );
     },
@@ -63,13 +64,15 @@ class CategorySelectionDialog extends StatelessWidget {
   }
 
   Widget _buildDragHandle() {
-    return Center(
-      child: Container(
+    return const Center(
+      child: SizedBox(
         width: 40,
         height: 5,
-        decoration: BoxDecoration(
-          color: AppColors.greyScale400,
-          borderRadius: BorderRadius.circular(10),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: Colors.black26,
+            borderRadius: BorderRadius.all(Radius.circular(2.5)),
+          ),
         ),
       ),
     );

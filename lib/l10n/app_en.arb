@@ -264,14 +264,7 @@
   "noRecipeNoticeTakePhoto": "One photo and a brief description are enough",
   "goCommunity": "Browse Community",
 
-  "noRecipeNoticeemptyCategoryMessage": "No {category} yet",
-  "@noRecipeNoticeemptyCategoryMessage": {
-    "placeholders": {
-      "category": {
-        "type": "String"
-      }
-    }
-  },
+  "noRecipeNoticeemptyCategoryMessage": "There are no recipes yet",
   "guestSignUpPrompt":"With a simple sign-up\nyou can enjoy all of Cookie's services.",
 
   "undoTranslation": "Show original",

@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cooki/core/utils/dialogue_util.dart';
 import 'package:cooki/core/utils/snackbar_util.dart';
 import 'package:cooki/domain/entity/app_user.dart';
 import 'package:cooki/presentation/pages/edit/recipe_edit_view_model.dart';
@@ -7,7 +8,6 @@ import 'package:cooki/presentation/pages/edit/widgets/cook_info_row.dart';
 import 'package:cooki/presentation/pages/edit/widgets/input_list_widget.dart';
 import 'package:cooki/presentation/pages/edit/widgets/title_field_widget.dart';
 import 'package:cooki/presentation/widgets/app_cached_image.dart';
-import 'package:cooki/presentation/widgets/app_dialog.dart';
 import 'package:cooki/presentation/widgets/category_selection_dialog.dart';
 import 'package:cooki/presentation/widgets/recipe_page_widgets.dart';
 import 'package:easy_image_viewer/easy_image_viewer.dart';
@@ -59,10 +59,10 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
       final errorKey =
           ref.read(recipeEditViewModelProvider(widget.recipe)).errorKey;
       if (mounted && errorKey != null) {
-        AppDialog.show(
+        DialogueUtil.showAppDialog(
           context: context,
           title: strings(context).recipeSavingFailedTitle,
-          subText: ErrorMapper.mapGenerateRecipeError(context, errorKey),
+          content: ErrorMapper.mapGenerateRecipeError(context, errorKey),
         );
         vm.clearError();
         return;

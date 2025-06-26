@@ -98,7 +98,7 @@ class CommunityViewModel extends AutoDisposeNotifier<CommunityState> {
     try {
       final repository = ref.read(recipeRepositoryProvider);
       final recipes = await repository.getCommunityRecipes(
-        ref.read(userGlobalViewModelProvider)!.id,
+        ref.read(userGlobalViewModelProvider)?.id,
       );
       state = state.copyWith(isLoading: false, recipes: recipes);
     } catch (e, stack) {

@@ -38,12 +38,6 @@ abstract class RecipeDataSource {
   Future<void> toggleRecipeShare(String recipeId, bool isPublic);
 
   Future<void> deleteRecipe(String recipeId);
-
-  Future<void> updateRecipeRating(
-    String recipeId,
-    int ratingCount,
-    double ratingSum,
-  );
 }
 
 class RecipeFirestoreDataSource implements RecipeDataSource {
@@ -196,18 +190,5 @@ class RecipeFirestoreDataSource implements RecipeDataSource {
   @override
   Future<void> deleteRecipe(String recipeId) async {
     await _firestore.collection('recipes').doc(recipeId).delete();
-  }
-
-  @override
-  Future<void> updateRecipeRating(
-    String recipeId,
-    int ratingCount,
-    double ratingSum,
-  ) async {
-    await _firestore.collection('recipes').doc(recipeId).update({
-      'ratingCount': ratingCount,
-      'ratingSum': ratingSum,
-      'updatedAt': FieldValue.serverTimestamp(),
-    });
   }
 }

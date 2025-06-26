@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../app/constants/app_colors.dart';
 
 class RecipePageWidgets {
-  // static const titleMaxLength = 17;
+  static const titleMaxLength = 30;
   static const divider = Divider(color: AppColors.greyScale800, thickness: 0.5);
   static const sectionTitleStyle = TextStyle(
     fontSize: 20,
@@ -33,36 +33,32 @@ class TagChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children:
-            tags.map((tag) {
-              return Padding(
-                padding: const EdgeInsets.only(right: 6),
-                child: Container(
-                  padding: EdgeInsets.symmetric(
-                    vertical: verticalPadding,
-                    horizontal: horizontalPadding,
-                  ),
-                  decoration: ShapeDecoration(
-                    shape: RoundedRectangleBorder(
-                      side: BorderSide(color: AppColors.greyScale400),
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    color: Colors.white,
-                  ),
-                  child: DefaultTextStyle(
-                    style: TextStyle(color: Colors.black, fontSize: fontSize),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [Text(tag)],
-                    ),
-                  ),
+    return Wrap(
+      spacing: 6,
+      runSpacing: 8,
+      children:
+          tags.map((tag) {
+            return Container(
+              padding: EdgeInsets.symmetric(
+                vertical: verticalPadding,
+                horizontal: horizontalPadding,
+              ),
+              decoration: ShapeDecoration(
+                shape: RoundedRectangleBorder(
+                  side: BorderSide(color: AppColors.greyScale400),
+                  borderRadius: BorderRadius.circular(18),
                 ),
-              );
-            }).toList(),
-      ),
+                color: Colors.white,
+              ),
+              child: DefaultTextStyle(
+                style: TextStyle(color: Colors.black, fontSize: fontSize),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [Text(tag)],
+                ),
+              ),
+            );
+          }).toList(),
     );
   }
 }

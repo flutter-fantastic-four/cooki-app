@@ -4,7 +4,6 @@ import 'package:cooki/core/utils/navigation_util.dart';
 import 'package:cooki/presentation/pages/detailed_recipe/detailed_recipe_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../app/constants/app_constants.dart';
 import '../../../../../core/utils/sharing_util.dart';
@@ -79,10 +78,10 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
           // Active filters
           if (state.hasActiveFilters)
             Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  height: 38,
-                  margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                  margin: const EdgeInsets.fromLTRB(16, 4 , 16, 12),
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
@@ -97,6 +96,7 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                                 await viewModel.loadRecipes();
                               },
                               isModalChip: false,
+                              isSelected: true,
                             ),
                           ),
                         ),
@@ -433,12 +433,12 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                                 Expanded(
                                   child: ElevatedButton(
                                     onPressed: () async {
+                                      Navigator.pop(context);
                                       viewModel.updateSelectedSort(tempSort);
                                       viewModel.updateSelectedCuisines(
                                         List.from(tempCuisines),
                                       );
                                       await viewModel.loadRecipes();
-                                      Navigator.pop(context);
                                     },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: AppColors.primary,
@@ -624,7 +624,7 @@ class _RecipeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
-        final result = await NavigationUtil.pushFromBottomAndWait<bool>(
+        final result = await NavigationUtil.pushFromBottom<bool>(
           context,
           DetailRecipePage(recipe: recipe),
         );
@@ -858,8 +858,8 @@ class _FilterChip extends StatelessWidget {
                             ? AppColors.white
                             : AppColors.greyScale800)
                         : (isSelected
-                            ? AppColors.primary700
-                            : AppColors.primary700),
+                            ? AppColors.primary
+                            : AppColors.primary),
                 fontSize: 12,
                 height: 1.2,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,

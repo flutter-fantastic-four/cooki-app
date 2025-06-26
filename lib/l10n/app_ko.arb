@@ -96,10 +96,10 @@
   "contactTheDevelopersTeam" : "개발자들에게 문의",
   "logout" : "로그아웃",
   "deleteAccount":"회원탈퇴",
-  "languageSettings" : "언어",
+  "languageSettings" : "언어설정",
 
   "logoutDialogTitle" : "로그아웃할까요?",
-  "logoutDialogSubTitle" : "로그아웃할까요?",
+  "logoutDialogSubTitle" : "언제든지 다시 로그인할 수 있습니다",
   "logouterror" : "로그아웃 중 오류가 발생했습니다.",
 
 
@@ -267,14 +267,7 @@
   "noRecipeNoticeTakePhoto": "사진 한 장, 간단한 설명이면 충분해요",
   "goCommunity": "커뮤니티 둘러보기",
 
-  "noRecipeNoticeemptyCategoryMessage": "아직 {category}가 없어요",
-  "@noRecipeNoticeemptyCategoryMessage": {
-  "placeholders": {
-    "category": {
-      "type": "String"
-         }
-    }
-  },
+  "noRecipeNoticeemptyCategoryMessage": "아직 레시피가 없어요",
   "guestSignUpPrompt":"간단한 회원가입을 통해\n 쿠키의 모든 서비스를 이용할 수 있어요.",
 
   "undoTranslation": "원본 보기",

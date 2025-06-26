@@ -362,7 +362,7 @@ class DetailRecipePage extends ConsumerWidget {
                 existingReview = null;
               }
 
-              ratingPosted = await NavigationUtil.pushFromBottomAndWait<bool>(
+              ratingPosted = await NavigationUtil.pushFromBottom<bool>(
                 context,
                 WriteReviewPage(
                   recipeId: recipe.id,
