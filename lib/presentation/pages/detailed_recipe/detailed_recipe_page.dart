@@ -134,6 +134,7 @@ class DetailRecipePage extends ConsumerWidget {
   Widget _review(BuildContext context) {
     return recipe.isPublic
         ? Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Consumer(
               builder: (context, ref, child) {
