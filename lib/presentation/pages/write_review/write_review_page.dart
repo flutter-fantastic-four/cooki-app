@@ -1,16 +1,12 @@
 import 'dart:developer';
-import 'dart:io';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cooki/core/utils/modal_util.dart';
 import 'package:cooki/core/utils/snackbar_util.dart';
-import 'package:cooki/presentation/widgets/app_cached_image.dart';
+import 'package:cooki/presentation/pages/write_review/widgets/photo_upload_box.dart';
+import 'package:cooki/presentation/pages/write_review/widgets/photos_thumbnails_row.dart';
 import 'package:cooki/presentation/widgets/bottom_button_wrapper.dart';
-import 'package:easy_image_viewer/easy_image_viewer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:image_picker/image_picker.dart';
 import '../../../app/constants/app_colors.dart';
 import '../../../core/utils/dialogue_util.dart';
 import '../../../core/utils/error_mappers.dart';
@@ -148,70 +144,6 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
     }
   }
 
-  void _showImagePickerModal(BuildContext context) {
-    final currentImageCount = ref.read(
-      writeReviewViewModelProvider(
-        widget.review,
-      ).select((state) => state.selectedImages.length),
-    );
-
-    if (currentImageCount >= 5) {
-      SnackbarUtil.showSnackBar(
-        context,
-        strings(context).tooManyImagesError,
-        showIcon: true,
-        customIcon: SnackbarUtil.appLogoIcon(),
-      );
-      return;
-    }
-
-    ModalUtil.showImagePickerModal(
-      context,
-      onCamera: () => _pickImages(context, ImageSource.camera),
-      onGallery: () => _pickImages(context, ImageSource.gallery),
-    );
-  }
-
-  Future<void> _pickImages(BuildContext context, ImageSource source) async {
-    final vm = ref.read(writeReviewViewModelProvider(widget.review).notifier);
-    final ImagePicker picker = ImagePicker();
-
-    if (source == ImageSource.camera) {
-      final XFile? image = await picker.pickImage(
-        source: source,
-        maxHeight: 1080,
-        maxWidth: 1080,
-      );
-      if (image != null) {
-        vm.addImages([File(image.path)]);
-      }
-    } else {
-      final List<XFile> images = await picker.pickMultiImage(
-        maxHeight: 1080,
-        maxWidth: 1080,
-      );
-      if (images.isNotEmpty) {
-        final imageFiles = images.map((xFile) => File(xFile.path)).toList();
-        vm.addImages(imageFiles);
-      }
-
-      final state = ref.read(writeReviewViewModelProvider(widget.review));
-      if (context.mounted &&
-          state.errorKey == WriteReviewErrorKey.tooManyImages) {
-        SnackbarUtil.showSnackBar(
-          context,
-          strings(context).tooManyImagesError,
-          showIcon: true,
-          customIcon: SnackbarUtil.appLogoIcon(),
-        );
-        ref
-            .read(writeReviewViewModelProvider(widget.review).notifier)
-            .clearError();
-        return;
-      }
-    }
-  }
-
   bool _hasUnsavedChanges() {
     final state = ref.read(writeReviewViewModelProvider(widget.review));
     // If editing, check if anything changed from original
@@ -278,9 +210,9 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
                           .setRating(selectedRating),
                 ),
                 const SizedBox(height: 32),
-                _buildPhotoUploadSection(context),
+                PhotoUploadBox(widget.review),
                 const SizedBox(height: 24),
-                _buildPhotoThumbnails(),
+                PhotosThumbnailsRow(widget.review),
                 const SizedBox(height: 18),
                 _buildTextInputSection(context),
                 const SizedBox(height: 32),
@@ -332,127 +264,6 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
     );
   }
 
-  Widget _buildPhotoUploadSection(BuildContext context) {
-    return GestureDetector(
-      onTap: () => _showImagePickerModal(context),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        margin: const EdgeInsets.symmetric(horizontal: 3),
-        decoration: BoxDecoration(
-          color: Colors.transparent,
-          border: Border.all(color: Colors.black),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.camera_alt, color: Colors.black, size: 20),
-            const SizedBox(width: 10),
-            Text(
-              strings(context).addPicture,
-              style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPhotoThumbnails() {
-    final images = ref.watch(
-      writeReviewViewModelProvider(
-        widget.review,
-      ).select((state) => state.selectedImages),
-    );
-
-    if (images.isEmpty) return const SizedBox.shrink();
-
-    final double imageDimension = 80;
-    return SizedBox(
-      height: imageDimension,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: images.length,
-        itemBuilder: (context, index) {
-          final reviewImage = images[index];
-
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: GestureDetector(
-              onTap: () {
-                ImageProvider imageProvider;
-                if (reviewImage.isFile) {
-                  imageProvider = FileImage(reviewImage.file!);
-                } else {
-                  imageProvider = CachedNetworkImageProvider(reviewImage.url!);
-                }
-
-                showImageViewer(
-                  context,
-                  imageProvider,
-                  swipeDismissible: true,
-                  doubleTapZoomable: true,
-                  useSafeArea: true,
-                );
-              },
-              child: Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child:
-                        reviewImage.isFile
-                            ? Image.file(
-                              reviewImage.file!,
-                              height: imageDimension,
-                              width: imageDimension,
-                              fit: BoxFit.cover,
-                            )
-                            : AppCachedImage(
-                              imageUrl: reviewImage.url!,
-                              height: imageDimension,
-                              width: imageDimension,
-                              fit: BoxFit.cover,
-                            ),
-                  ),
-                  Positioned(
-                    top: 4,
-                    right: 4,
-                    child: GestureDetector(
-                      onTap:
-                          () => ref
-                              .read(
-                                writeReviewViewModelProvider(
-                                  widget.review,
-                                ).notifier,
-                              )
-                              .removeImage(index),
-                      child: Container(
-                        padding: const EdgeInsets.all(0.5),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.cancel,
-                          size: 18,
-                          color: Colors.red,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
   Widget _buildTextInputSection(BuildContext context) {
     return TextField(
       maxLines: 7,
@@ -462,7 +273,7 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
       decoration: getInputDecoration(
         strings(context).reviewTextHint,
         contentPadding: EdgeInsets.all(16),
-      )
+      ),
     );
   }
 
