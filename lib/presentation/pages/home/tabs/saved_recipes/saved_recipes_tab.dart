@@ -106,11 +106,13 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
               ? _buildSearchAppBar(context, state, viewModel)
               : _buildNormalAppBar(context, state, viewModel),
       body: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           // Category tabs
-          Container(
-            height: 42,
+          SizedBox(
+            height: 38,
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Expanded(
                   child: SingleChildScrollView(
@@ -157,7 +159,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                                       child: Text(
                                         category,
                                         style: TextStyle(
-                                          fontSize: 12,
+                                          fontSize: 13,
                                           fontWeight:
                                               isSelected
                                                   ? FontWeight.w600
@@ -199,32 +201,36 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
           ),
           // Active filters
           if (state.hasActiveFilters)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  ...state.selectedCuisines.map(
-                    (cuisine) => _FilterChip(
-                      label: cuisine,
-                      onDeleted: () async {
-                        viewModel.removeCuisine(cuisine);
-                        await viewModel.loadRecipes();
-                      },
-                      isModalChip: false,
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    ...state.selectedCuisines.map(
+                      (cuisine) => _FilterChip(
+                        label: cuisine,
+                        onDeleted: () async {
+                          viewModel.removeCuisine(cuisine);
+                          await viewModel.loadRecipes();
+                        },
+                        isModalChip: false,
+                      ),
                     ),
-                  ),
-                  if (state.selectedSort.isNotEmpty)
-                    _FilterChip(
-                      label: state.selectedSort,
-                      onDeleted: () async {
-                        viewModel.clearSort();
-                        await viewModel.loadRecipes();
-                      },
-                      isModalChip: false,
-                    ),
-                ],
+                    if (state.selectedSort.isNotEmpty)
+                      _FilterChip(
+                        label: state.selectedSort,
+                        onDeleted: () async {
+                          viewModel.clearSort();
+                          await viewModel.loadRecipes();
+                        },
+                        isModalChip: false,
+                        isSelected: true,
+                      ),
+                  ],
+                ),
               ),
             ),
           // Recipe grid
@@ -639,10 +645,10 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
         Expanded(
           child: ElevatedButton(
             onPressed: () async {
+              Navigator.pop(context);
               viewModel.updateSelectedSort(tempSort);
               viewModel.updateSelectedCuisines(List.from(tempCuisines));
               await viewModel.loadRecipes();
-              Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
