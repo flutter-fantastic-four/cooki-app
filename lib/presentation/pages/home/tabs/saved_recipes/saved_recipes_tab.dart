@@ -108,8 +108,8 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
       body: Column(
         children: [
           // Category tabs
-          Container(
-            height: 42,
+          SizedBox(
+            height: 38,
             child: Column(
               children: [
                 Expanded(
@@ -157,7 +157,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                                       child: Text(
                                         category,
                                         style: TextStyle(
-                                          fontSize: 12,
+                                          fontSize: 13,
                                           fontWeight:
                                               isSelected
                                                   ? FontWeight.w600
@@ -200,7 +200,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
           // Active filters
           if (state.hasActiveFilters)
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
               child: Wrap(
                 spacing: 8,
                 runSpacing: 8,
