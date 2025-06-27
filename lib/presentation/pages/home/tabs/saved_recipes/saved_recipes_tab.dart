@@ -52,7 +52,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
 
     _pageController = PageController(
       initialPage: AppConstants.recipeTabCategories(
-        context,
+        strings(context),
       ).indexOf(defaultCategory),
     );
   }
@@ -122,7 +122,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                     child: Row(
                       children:
                           AppConstants.recipeTabCategories(
-                            context,
+                            strings(context),
                           ).asMap().entries.map((entry) {
                             final index = entry.key;
                             final category = entry.value;
@@ -131,7 +131,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                             final isLastTab =
                                 index ==
                                 AppConstants.recipeTabCategories(
-                                      context,
+                                      strings(context),
                                     ).length -
                                     1;
                             return Padding(
@@ -143,7 +143,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                                 onTap: () async {
                                   final targetIndex =
                                       AppConstants.recipeTabCategories(
-                                        context,
+                                        strings(context),
                                       ).indexOf(category);
 
                                   // Directly set category and load recipes
@@ -245,14 +245,14 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
               controller: _pageController,
               onPageChanged: (index) async {
                 final category =
-                    AppConstants.recipeTabCategories(context)[index];
+                    AppConstants.recipeTabCategories(strings(context))[index];
                 viewModel.setSelectedCategory(category);
                 await viewModel.loadRecipes();
               },
-              itemCount: AppConstants.recipeTabCategories(context).length,
+              itemCount: AppConstants.recipeTabCategories(strings(context)).length,
               itemBuilder: (context, index) {
                 final pageCategory =
-                    AppConstants.recipeTabCategories(context)[index];
+                    AppConstants.recipeTabCategories(strings(context))[index];
                 final isCurrentPage = pageCategory == state.selectedCategory;
 
                 // Show recipes only for the current selected category
@@ -473,7 +473,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
 
     String tempSort = state.selectedSort;
     List<String> tempCuisines = List.from(state.selectedCuisines);
-    final cuisineCategories = AppConstants.recipeCategories(context);
+    final cuisineCategories = AppConstants.recipeCategories(strings(context));
 
     showModalBottomSheet(
       context: context,

@@ -363,7 +363,7 @@ class ReviewsPage extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        sortOption.getLabel(context),
+                        sortOption.getLabel(strings(context)),
                         style: TextStyle(
                           fontSize: 12,
                           color:

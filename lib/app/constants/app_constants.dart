@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:cooki/gen/l10n/app_localizations.dart';
 
-import '../../core/utils/general_util.dart';
 import '../../data/data_source/review_data_source.dart';
+import '../../domain/entity/recipe_category.dart';
 import '../../domain/entity/sort_option.dart';
 
 class AppConstants {
@@ -10,65 +10,49 @@ class AppConstants {
   static List<SortOption> getSortOptions() {
     return [
       SortOption(
-        labelGetter: (context) => strings(context).newestFirst,
+        labelGetter: (strings) => strings.newestFirst,
         type: ReviewSortType.dateDescending,
       ),
       SortOption(
-        labelGetter: (context) => strings(context).highestRating,
+        labelGetter: (strings) => strings.highestRating,
         type: ReviewSortType.ratingDescending,
       ),
       SortOption(
-        labelGetter: (context) => strings(context).lowestRating,
+        labelGetter: (strings) => strings.lowestRating,
         type: ReviewSortType.ratingAscending,
       ),
     ];
   }
 
-  static List<String> recipePreferences(BuildContext context) {
-    final s = strings(context);
+  static List<String> recipePreferences(AppLocalizations strings) {
     return [
-      s.recipePreferences_diet,
-      s.recipePreferences_vegetarian,
-      s.recipePreferences_vegan,
-      s.recipePreferences_noSpicy,
-      s.recipePreferences_noPeanuts,
-      s.recipePreferences_simple,
-      s.recipePreferences_under15Min,
-      s.recipePreferences_noMeat,
-      s.recipePreferences_noDairy,
-      s.recipePreferences_highProtein,
-      s.recipePreferences_lowCarb,
-      s.recipePreferences_kidFriendly,
+      strings.recipePreferences_diet,
+      strings.recipePreferences_vegetarian,
+      strings.recipePreferences_vegan,
+      strings.recipePreferences_noSpicy,
+      strings.recipePreferences_noPeanuts,
+      strings.recipePreferences_simple,
+      strings.recipePreferences_under15Min,
+      strings.recipePreferences_noMeat,
+      strings.recipePreferences_noDairy,
+      strings.recipePreferences_highProtein,
+      strings.recipePreferences_lowCarb,
+      strings.recipePreferences_kidFriendly,
     ];
   }
 
-  static List<String> recipeCategories(BuildContext context) {
-    final s = strings(context);
-    return [
-      s.recipeCategoryKorean,
-      s.recipeCategoryChinese,
-      s.recipeCategoryJapanese,
-      s.recipeCategoryThai,
-      s.recipeCategoryIndian,
-      s.recipeCategoryAmerican,
-      s.recipeCategoryFrench,
-      s.recipeCategoryItalian,
-      s.recipeCategoryMediterranean,
-      s.recipeCategoryMiddleEastern,
-      s.recipeCategoryMexican,
-      s.recipeCategorySoutheastAsian,
-      s.recipeCategoryAfrican,
-      s.recipeCategoryOther,
-    ];
+  static List<String> recipeCategories(AppLocalizations strings) {
+    return RecipeCategory.values
+        .map((category) => category.getLabel(strings))
+        .toList();
   }
 
-  static List<String> recipeTabCategories(BuildContext context) {
-    final s = strings(context);
+  static List<String> recipeTabCategories(AppLocalizations strings) {
     return [
-      s.recipeTabAll,
-      s.recipeTabCreated,
-      s.recipeTabSaved,
-      s.recipeTabShared
+      strings.recipeTabAll,
+      strings.recipeTabCreated,
+      strings.recipeTabSaved,
+      strings.recipeTabShared,
     ];
   }
 

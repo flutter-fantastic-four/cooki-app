@@ -339,7 +339,7 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
         FocusManager.instance.primaryFocus?.unfocus();
         final category = await ModalUtil.showStringSelectionModal(
           context,
-          options: AppConstants.recipeCategories(context),
+          options: AppConstants.recipeCategories(strings(context)),
         );
         // final category = await showCategorySelectionDialog(context);
         if (category?.isNotEmpty == true) {
