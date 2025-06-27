@@ -7,7 +7,6 @@ import 'package:cooki/core/utils/snackbar_util.dart';
 import 'package:cooki/domain/entity/app_user.dart';
 import 'package:cooki/domain/entity/recipe.dart';
 import 'package:cooki/domain/entity/review.dart';
-import 'package:cooki/presentation/pages/add_review/write_review_page.dart';
 import 'package:cooki/presentation/pages/detailed_recipe/widget/rating_modal.dart';
 import 'package:cooki/presentation/pages/detailed_recipe/widget/review_card_list.dart';
 import 'package:cooki/presentation/pages/edit/recipe_edit_page.dart';
@@ -23,6 +22,8 @@ import 'package:cooki/data/repository/providers.dart';
 import 'package:easy_image_viewer/easy_image_viewer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../write_review/write_review_page.dart';
 
 // Provider for fetching fresh recipe data from Firestore by ID
 final recipeByIdProvider = FutureProvider.family.autoDispose<Recipe?, String>((

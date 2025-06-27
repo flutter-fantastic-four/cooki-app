@@ -22,7 +22,7 @@ import '../../../core/utils/snackbar_util.dart';
 import '../../../domain/entity/review.dart';
 import '../../settings_global_view_model.dart';
 import '../../user_global_view_model.dart';
-import '../add_review/write_review_page.dart';
+import '../write_review/write_review_page.dart';
 import 'reviews_view_model.dart';
 
 const double horizontalPadding = 20;
