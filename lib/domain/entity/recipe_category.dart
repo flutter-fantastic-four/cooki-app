@@ -1,4 +1,8 @@
+import 'dart:ui';
+
 import 'package:cooki/gen/l10n/app_localizations.dart';
+
+import '../../presentation/settings_global_view_model.dart';
 
 enum RecipeCategory {
   korean,
@@ -49,10 +53,7 @@ enum RecipeCategory {
     }
   }
 
-  static RecipeCategory? fromLabel(
-    String label,
-    AppLocalizations strings,
-  ) {
+  static RecipeCategory? fromLabel(String label, AppLocalizations strings) {
     for (final category in RecipeCategory.values) {
       if (category.getLabel(strings) == label) {
         return category;

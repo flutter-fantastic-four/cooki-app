@@ -19,6 +19,8 @@ import '../../../app/constants/app_constants.dart';
 import '../../../core/utils/error_mappers.dart';
 import '../../../core/utils/general_util.dart';
 import '../../../domain/entity/recipe.dart';
+import '../../../domain/entity/recipe_category.dart';
+import '../../../gen/l10n/app_localizations.dart';
 import '../../user_global_view_model.dart';
 import '../home/tabs/saved_recipes/saved_recipes_tab_view_model.dart';
 
@@ -134,6 +136,24 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
     }
     if (_stepsControllers.isEmpty) {
       _stepsControllers.add(TextEditingController());
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _convertInitialCategory();
+    });
+  }
+
+  Future<void> _convertInitialCategory() async {
+    final currentCategory = widget.recipe?.category;
+    if (currentCategory != null) {
+      final recipeLanguage = await GeneralUtil.detectCategoryLanguage(
+        currentCategory,
+      );
+      if (recipeLanguage != null && mounted) {
+        final vm = ref.read(
+          recipeEditViewModelProvider(widget.recipe).notifier,
+        );
+        vm.setRecipeLanguage(recipeLanguage);
+      }
     }
   }
 
@@ -337,13 +357,24 @@ class _RecipeEditPageState extends ConsumerState<RecipeEditPage> {
       onTap: () async {
         FocusScope.of(context).unfocus();
         FocusManager.instance.primaryFocus?.unfocus();
-        final category = await ModalUtil.showStringSelectionModal(
+        final categInCurrLang = await ModalUtil.showStringSelectionModal(
           context,
           options: AppConstants.recipeCategories(strings(context)),
         );
-        // final category = await showCategorySelectionDialog(context);
-        if (category?.isNotEmpty == true) {
-          vm.setCategory(category);
+        if (categInCurrLang?.isNotEmpty == true) {
+          final state = ref.read(recipeEditViewModelProvider(widget.recipe));
+          if (state.recipeLanguage != null && mounted) {
+            // Convert back to recipe language
+            final categoryInRecipeLanguage =
+                await GeneralUtil.convertFromCurrentLanguage(
+                  categInCurrLang: categInCurrLang!,
+                  strings: strings(context),
+                  targetLanguage: state.recipeLanguage!,
+                );
+            vm.setCategory(categoryInRecipeLanguage ?? categInCurrLang);
+          } else {
+            vm.setCategory(categInCurrLang);
+          }
         }
       },
       child: Container(
