@@ -26,10 +26,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../write_review/write_review_page.dart';
 
 // Provider for fetching fresh recipe data from Firestore by ID
-final recipeByIdProvider = FutureProvider.family.autoDispose<Recipe?, String>((
-  ref,
-  recipeId,
-) async {
+final recipeByIdProvider = FutureProvider.family.autoDispose<Recipe?, String>((ref, recipeId) async {
   try {
     final recipeRepository = ref.read(recipeRepositoryProvider);
     final allRecipes = await recipeRepository.getAllRecipes();
@@ -40,10 +37,7 @@ final recipeByIdProvider = FutureProvider.family.autoDispose<Recipe?, String>((
 });
 
 // Provider for user rating that can be refreshed
-final userRatingProvider = FutureProvider.family.autoDispose<int?, Recipe>((
-  ref,
-  recipe,
-) async {
+final userRatingProvider = FutureProvider.family.autoDispose<int?, Recipe>((ref, recipe) async {
   try {
     final currentUser = ref.read(userGlobalViewModelProvider);
     if (currentUser == null) return null;
@@ -51,20 +45,13 @@ final userRatingProvider = FutureProvider.family.autoDispose<int?, Recipe>((
     if (recipe.isPublic) {
       // For public recipes, get rating from reviews
       final reviewRepository = ref.read(reviewRepositoryProvider);
-      final userReview = await reviewRepository.getUserReviewForRecipe(
-        recipeId: recipe.id,
-        userId: currentUser.id,
-      );
+      final userReview = await reviewRepository.getUserReviewForRecipe(recipeId: recipe.id, userId: currentUser.id);
       return userReview?.rating;
     } else {
       // For private recipes, get rating from fresh recipe data
       final freshRecipeAsync = ref.watch(recipeByIdProvider(recipe.id));
       return freshRecipeAsync.when(
-        data:
-            (freshRecipe) =>
-                freshRecipe != null && freshRecipe.userRating > 0
-                    ? freshRecipe.userRating
-                    : null,
+        data: (freshRecipe) => freshRecipe != null && freshRecipe.userRating > 0 ? freshRecipe.userRating : null,
         loading: () => recipe.userRating > 0 ? recipe.userRating : null,
         error: (_, __) => recipe.userRating > 0 ? recipe.userRating : null,
       );
@@ -75,41 +62,32 @@ final userRatingProvider = FutureProvider.family.autoDispose<int?, Recipe>((
 });
 
 // Provider for calculating actual average rating from reviews
-final actualAverageRatingProvider = FutureProvider.family
-    .autoDispose<Map<String, dynamic>, String>((ref, recipeId) async {
-      try {
-        final reviewRepository = ref.read(reviewRepositoryProvider);
-        final reviews = await reviewRepository.getReviewsByRecipeId(recipeId);
+final actualAverageRatingProvider = FutureProvider.family.autoDispose<Map<String, dynamic>, String>((ref, recipeId) async {
+  try {
+    final reviewRepository = ref.read(reviewRepositoryProvider);
+    final reviews = await reviewRepository.getReviewsByRecipeId(recipeId);
 
-        if (reviews.isEmpty) {
-          return {'average': 0.0, 'count': 0};
-        }
+    if (reviews.isEmpty) {
+      return {'average': 0.0, 'count': 0};
+    }
 
-        final totalRating = reviews.fold<int>(
-          0,
-          (sum, review) => sum + review.rating,
-        );
-        final average = totalRating / reviews.length;
+    final totalRating = reviews.fold<int>(0, (sum, review) => sum + review.rating);
+    final average = totalRating / reviews.length;
 
-        return {'average': average, 'count': reviews.length};
-      } catch (e) {
-        return {'average': 0.0, 'count': 0};
-      }
-    });
+    return {'average': average, 'count': reviews.length};
+  } catch (e) {
+    return {'average': 0.0, 'count': 0};
+  }
+});
 
 // Provider for checking if a recipe is saved by the current user
-final isRecipeSavedProvider = FutureProvider.family.autoDispose<bool, String>((
-  ref,
-  recipeId,
-) async {
+final isRecipeSavedProvider = FutureProvider.family.autoDispose<bool, String>((ref, recipeId) async {
   try {
     final currentUser = ref.read(userGlobalViewModelProvider);
     if (currentUser == null) return false;
 
     final recipeRepository = ref.read(recipeRepositoryProvider);
-    final savedRecipeIds = await recipeRepository.getUserSavedRecipeIds(
-      currentUser.id,
-    );
+    final savedRecipeIds = await recipeRepository.getUserSavedRecipeIds(currentUser.id);
     return savedRecipeIds.contains(recipeId);
   } catch (e) {
     return false;
@@ -145,16 +123,9 @@ class DetailRecipePage extends ConsumerWidget {
                     user != null && user.id == recipe.userId
                         ? IconButton(
                           onPressed: () {
-                            NavigationUtil.pushFromBottom(
-                              context,
-                              RecipeEditPage(recipe: recipe),
-                            );
+                            NavigationUtil.pushFromBottom(context, RecipeEditPage(recipe: recipe));
                           },
-                          icon: Image.asset(
-                            'assets/icons/pencil_icon.png',
-                            height: 22,
-                            width: 22,
-                          ),
+                          icon: Image.asset('assets/icons/pencil_icon.png', height: 22, width: 22),
                         )
                         : SizedBox(),
               ),
@@ -166,17 +137,9 @@ class DetailRecipePage extends ConsumerWidget {
               children: [
                 recipe.imageUrl != null
                     ? _buildImageSelector(context)
-                    : Image.asset(
-                      'assets/no_image.png',
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      height: 230,
-                    ),
+                    : Image.asset('assets/no_image.png', fit: BoxFit.cover, width: double.infinity, height: 230),
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 16,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -194,10 +157,7 @@ class DetailRecipePage extends ConsumerWidget {
                       const SizedBox(height: 16),
                       _ingredientsColumn(),
                       const SizedBox(height: 16),
-                      Text(
-                        strings(context).stepsLabel,
-                        style: RecipePageWidgets.sectionTitleStyle,
-                      ),
+                      Text(strings(context).stepsLabel, style: RecipePageWidgets.sectionTitleStyle),
                       const SizedBox(height: 16),
                       _stepsColumn(),
                     ],
@@ -213,20 +173,11 @@ class DetailRecipePage extends ConsumerWidget {
 
   Widget _details(BuildContext context) => Row(
     children: [
-      Text(
-        strings(context).cookTime(recipe.cookTime),
-        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-      ),
+      Text(strings(context).cookTime(recipe.cookTime), style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
       SizedBox(width: 12),
-      Text(
-        "${recipe.calories}${strings(context).caloriesLabel}",
-        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-      ),
+      Text("${recipe.calories}${strings(context).caloriesLabel}", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
       Spacer(),
-      Text(
-        recipe.category,
-        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-      ),
+      Text(recipe.category, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
       SizedBox(width: 12),
     ],
   );
@@ -234,15 +185,9 @@ class DetailRecipePage extends ConsumerWidget {
   Row _ingredientsLabel(BuildContext context) {
     return Row(
       children: [
-        Text(
-          strings(context).ingredientsLabel,
-          style: RecipePageWidgets.sectionTitleStyle,
-        ),
+        Text(strings(context).ingredientsLabel, style: RecipePageWidgets.sectionTitleStyle),
         const SizedBox(width: 3),
-        Text(
-          strings(context).servingsLabel,
-          style: RecipePageWidgets.servingsTitleStyle,
-        ),
+        Text(strings(context).servingsLabel, style: RecipePageWidgets.servingsTitleStyle),
       ],
     );
   }
@@ -254,38 +199,21 @@ class DetailRecipePage extends ConsumerWidget {
           children: [
             Consumer(
               builder: (context, ref, child) {
-                final actualRatingAsync = ref.watch(
-                  actualAverageRatingProvider(recipe.id),
-                );
+                final actualRatingAsync = ref.watch(actualAverageRatingProvider(recipe.id));
                 return actualRatingAsync.when(
                   data: (ratingData) {
                     final average = ratingData['average'] as double;
                     final count = ratingData['count'] as int;
-                    return _buildReviewRow(
-                      context,
-                      ref,
-                      count: count,
-                      averageText:
-                          count == 0 ? '0' : average.toStringAsFixed(1),
-                    );
+                    return _buildReviewRow(context, ref, count: count, averageText: count == 0 ? '0' : average.toStringAsFixed(1));
                   },
                   loading:
                       () => _buildReviewRow(
                         context,
                         ref,
                         count: recipe.ratingCount,
-                        averageText:
-                            recipe.ratingSum == 0.0
-                                ? '0'
-                                : recipe.ratingSum.toStringAsFixed(1),
+                        averageText: recipe.ratingSum == 0.0 ? '0' : recipe.ratingSum.toStringAsFixed(1),
                       ),
-                  error:
-                      (error, stack) => _buildReviewRow(
-                        context,
-                        ref,
-                        count: recipe.ratingCount,
-                        averageText: '0',
-                      ),
+                  error: (error, stack) => _buildReviewRow(context, ref, count: recipe.ratingCount, averageText: '0'),
                 );
               },
             ),
@@ -296,36 +224,21 @@ class DetailRecipePage extends ConsumerWidget {
         : SizedBox();
   }
 
-  Widget _buildReviewRow(
-    BuildContext context,
-    WidgetRef ref, {
-    required int count,
-    required String averageText,
-  }) {
+  Widget _buildReviewRow(BuildContext context, WidgetRef ref, {required int count, required String averageText}) {
     return Row(
       children: [
         _buildReviewNavigationButton(context, ref, count),
         Spacer(),
         Icon(Icons.star, color: AppColors.secondary600),
-        Text(
-          '${strings(context).average} $averageText${strings(context).score}',
-          style: RecipePageWidgets.sectionTitleStyle,
-        ),
+        Text('${strings(context).average} $averageText${strings(context).score}', style: RecipePageWidgets.sectionTitleStyle),
       ],
     );
   }
 
-  Widget _buildReviewNavigationButton(
-    BuildContext context,
-    WidgetRef ref,
-    int count,
-  ) {
+  Widget _buildReviewNavigationButton(BuildContext context, WidgetRef ref, int count) {
     return GestureDetector(
       onTap: () async {
-        await NavigationUtil.pushFromBottom(
-          context,
-          ReviewsPage(recipeId: recipe.id, recipeName: recipe.recipeName),
-        );
+        await NavigationUtil.pushFromBottom(context, ReviewsPage(recipeId: recipe.id, recipeName: recipe.recipeName));
         // Refresh review data when returning from reviews page
         // This handles cases where reviews might have been deleted or edited
         ref.invalidate(userRatingProvider(recipe));
@@ -334,10 +247,7 @@ class DetailRecipePage extends ConsumerWidget {
       },
       child: Row(
         children: [
-          Text(
-            '${strings(context).review} ${count > 999 ? '999+' : count}${strings(context).amount}',
-            style: RecipePageWidgets.sectionTitleStyle,
-          ),
+          Text('${strings(context).review} ${count > 999 ? '999+' : count}${strings(context).amount}', style: RecipePageWidgets.sectionTitleStyle),
           Icon(Icons.arrow_forward_ios),
         ],
       ),
@@ -350,10 +260,7 @@ class DetailRecipePage extends ConsumerWidget {
       children: [
         for (final item in recipe.ingredients) ...[
           RecipePageWidgets.divider,
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Text(item),
-          ),
+          Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12), child: Text(item)),
         ],
       ],
     );
@@ -371,14 +278,8 @@ class DetailRecipePage extends ConsumerWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 8,
-                    horizontal: 14,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.appBarGrey,
-                    borderRadius: RecipePageWidgets.inputBorderRadius,
-                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 14),
+                  decoration: BoxDecoration(color: AppColors.appBarGrey, borderRadius: RecipePageWidgets.inputBorderRadius),
                   child: Text(recipe.steps[i]),
                 ),
               ),
@@ -391,19 +292,10 @@ class DetailRecipePage extends ConsumerWidget {
   }
 
   Row _title(BuildContext context, WidgetRef ref, bool isPublic) {
-    final viewModel = ref.read(
-      savedRecipesViewModelProvider(strings(context)).notifier,
-    );
+    final viewModel = ref.read(savedRecipesViewModelProvider(strings(context)).notifier);
     return Row(
       children: [
-        Expanded(
-          child: Text(
-            recipe.recipeName,
-            style: RecipePageWidgets.sectionTitleStyle,
-            softWrap: true,
-            overflow: TextOverflow.visible,
-          ),
-        ),
+        Expanded(child: Text(recipe.recipeName, style: RecipePageWidgets.sectionTitleStyle, softWrap: true, overflow: TextOverflow.visible)),
         SizedBox(width: 3),
         Consumer(
           builder: (context, ref, child) {
@@ -412,85 +304,48 @@ class DetailRecipePage extends ConsumerWidget {
               return IconButton(
                 onPressed: () {
                   // Navigate to login
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const GuestLoginPage(),
-                    ),
-                  );
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const GuestLoginPage()));
                 },
                 icon: Icon(Icons.bookmark_border),
               );
             }
 
-            final isRecipeSavedAsync = ref.watch(
-              isRecipeSavedProvider(recipe.id),
-            );
+            final isRecipeSavedAsync = ref.watch(isRecipeSavedProvider(recipe.id));
             return isRecipeSavedAsync.when(
               data: (isSaved) {
                 return IconButton(
                   onPressed: () async {
                     try {
-                      final recipeRepository = ref.read(
-                        recipeRepositoryProvider,
-                      );
+                      final recipeRepository = ref.read(recipeRepositoryProvider);
                       if (isSaved) {
-                        await recipeRepository.removeFromSavedRecipes(
-                          user.id,
-                          recipe.id,
-                        );
+                        await recipeRepository.removeFromSavedRecipes(user.id, recipe.id);
                         ref.invalidate(isRecipeSavedProvider(recipe.id));
                         if (context.mounted) {
-                          SnackbarUtil.showSnackBar(
-                            context,
-                            strings(context).recipeRemovedSuccessfully,
-                            showIcon: true,
-                          );
+                          SnackbarUtil.showSnackBar(context, strings(context).recipeRemovedSuccessfully, showIcon: true);
                         }
                       } else {
-                        await recipeRepository.addToSavedRecipes(
-                          user.id,
-                          recipe.id,
-                        );
+                        await recipeRepository.addToSavedRecipes(user.id, recipe.id);
                         ref.invalidate(isRecipeSavedProvider(recipe.id));
                         if (context.mounted) {
-                          SnackbarUtil.showSnackBar(
-                            context,
-                            strings(context).recipeSavedSuccessfully,
-                            showIcon: true,
-                          );
+                          SnackbarUtil.showSnackBar(context, strings(context).recipeSavedSuccessfully, showIcon: true);
                         }
                       }
                     } catch (e) {
                       if (context.mounted) {
-                        SnackbarUtil.showSnackBar(
-                          context,
-                          strings(context).errorOccurred,
-                        );
+                        SnackbarUtil.showSnackBar(context, strings(context).errorOccurred);
                       }
                     }
                   },
                   icon: Icon(isSaved ? Icons.bookmark : Icons.bookmark_border),
                 );
               },
-              loading:
-                  () => IconButton(
-                    onPressed: null,
-                    icon: Icon(Icons.bookmark_border),
-                  ),
-              error:
-                  (error, stack) => IconButton(
-                    onPressed: () {},
-                    icon: Icon(Icons.bookmark_border),
-                  ),
+              loading: () => IconButton(onPressed: null, icon: Icon(Icons.bookmark_border)),
+              error: (error, stack) => IconButton(onPressed: () {}, icon: Icon(Icons.bookmark_border)),
             );
           },
         ),
         isPublic
-            ? IconButton(
-              onPressed: () => _shareRecipe(context, ref),
-              icon: Icon(Icons.ios_share),
-            )
+            ? IconButton(onPressed: () => _shareRecipe(context, ref), icon: Icon(Icons.ios_share))
             : GestureDetector(
               onTap:
                   () => RecipeOptionsModal.show(
@@ -506,22 +361,14 @@ class DetailRecipePage extends ConsumerWidget {
                       viewModel.refreshRecipes();
                     },
                   ),
-              child: const Icon(
-                Icons.more_vert,
-                size: 20,
-                color: AppColors.black,
-              ),
+              child: const Icon(Icons.more_vert, size: 20, color: AppColors.black),
             ),
       ],
     );
   }
 
   void _shareRecipe(BuildContext context, WidgetRef ref) async {
-    await SharingUtil.shareRecipe(
-      context,
-      recipe,
-      ref.read(imageDownloadRepositoryProvider),
-    );
+    await SharingUtil.shareRecipe(context, recipe, ref.read(imageDownloadRepositoryProvider));
     if (!context.mounted) return;
   }
 
@@ -541,10 +388,7 @@ class DetailRecipePage extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(99999),
                     ),
                   ),
-                  child: Text(
-                    category!,
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                  ),
+                  child: Text(category!, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                 ),
                 SizedBox(width: 8),
               ],
@@ -561,11 +405,7 @@ class DetailRecipePage extends ConsumerWidget {
                 final currentUser = ref.read(userGlobalViewModelProvider);
                 if (currentUser != null) {
                   final reviewRepository = ref.read(reviewRepositoryProvider);
-                  existingReview = await reviewRepository
-                      .getUserReviewForRecipe(
-                        recipeId: recipe.id,
-                        userId: currentUser.id,
-                      );
+                  existingReview = await reviewRepository.getUserReviewForRecipe(recipeId: recipe.id, userId: currentUser.id);
                 }
               } catch (e) {
                 // If fetching fails, proceed without existing review
@@ -585,9 +425,7 @@ class DetailRecipePage extends ConsumerWidget {
                 context: context,
                 isScrollControlled: true,
                 backgroundColor: AppColors.greyScale50,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
-                ),
+                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(26))),
                 builder: (context) {
                   return RatingModal(recipe: recipe);
                 },
@@ -601,9 +439,7 @@ class DetailRecipePage extends ConsumerWidget {
               ref.invalidate(userRatingProvider(recipe));
               ref.invalidate(actualAverageRatingProvider(recipe.id));
               // Refresh the reviews data directly instead of just invalidating
-              ref
-                  .read(reviewsViewModelProvider(recipe.id).notifier)
-                  .refreshReviews();
+              ref.read(reviewsViewModelProvider(recipe.id).notifier).refreshReviews();
             }
           },
           child: Consumer(
@@ -614,19 +450,10 @@ class DetailRecipePage extends ConsumerWidget {
                   final rating = userRating ?? 0;
                   return Container(
                     height: 28,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: ShapeDecoration(
                       shape: RoundedRectangleBorder(
-                        side: BorderSide(
-                          width: 1,
-                          color:
-                              rating == 0
-                                  ? AppColors.greyScale300
-                                  : AppColors.greyScale800,
-                        ),
+                        side: BorderSide(width: 1, color: rating == 0 ? AppColors.greyScale300 : AppColors.greyScale800),
                         borderRadius: BorderRadius.circular(99999),
                       ),
                     ),
@@ -634,10 +461,7 @@ class DetailRecipePage extends ConsumerWidget {
                       children: List.generate(5, (index) {
                         return Icon(
                           index < rating ? Icons.star : Icons.star_border,
-                          color:
-                              index < rating
-                                  ? AppColors.secondary600
-                                  : AppColors.greyScale500,
+                          color: index < rating ? AppColors.secondary600 : AppColors.greyScale500,
                           size: 14,
                         );
                       }),
@@ -645,24 +469,36 @@ class DetailRecipePage extends ConsumerWidget {
                   );
                 },
                 loading:
-                    () => Row(
-                      children: List.generate(5, (index) {
-                        return Icon(
-                          Icons.star_border,
-                          color: AppColors.greyScale300,
-                          size: 12,
-                        );
-                      }),
+                    () => Container(
+                      height: 28,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: ShapeDecoration(
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(width: 1, color: AppColors.greyScale300),
+                          borderRadius: BorderRadius.circular(99999),
+                        ),
+                      ),
+                      child: Row(
+                        children: List.generate(5, (index) {
+                          return Icon(Icons.star_border, color: AppColors.greyScale500, size: 14);
+                        }),
+                      ),
                     ),
                 error:
-                    (error, stack) => Row(
-                      children: List.generate(5, (index) {
-                        return Icon(
-                          Icons.star_border,
-                          color: AppColors.greyScale300,
-                          size: 12,
-                        );
-                      }),
+                    (error, stack) => Container(
+                      height: 28,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: ShapeDecoration(
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(width: 1, color: AppColors.greyScale300),
+                          borderRadius: BorderRadius.circular(99999),
+                        ),
+                      ),
+                      child: Row(
+                        children: List.generate(5, (index) {
+                          return Icon(Icons.star_border, color: AppColors.greyScale500, size: 14);
+                        }),
+                      ),
                     ),
               );
             },
@@ -676,20 +512,9 @@ class DetailRecipePage extends ConsumerWidget {
     return GestureDetector(
       onTap: () {
         final imageProvider = CachedNetworkImageProvider(recipe.imageUrl!);
-        showImageViewer(
-          context,
-          imageProvider,
-          swipeDismissible: true,
-          doubleTapZoomable: true,
-          useSafeArea: true,
-        );
+        showImageViewer(context, imageProvider, swipeDismissible: true, doubleTapZoomable: true, useSafeArea: true);
       },
-      child: AppCachedImage(
-        imageUrl: recipe.imageUrl!,
-        fit: BoxFit.cover,
-        height: 230,
-        width: double.infinity,
-      ),
+      child: AppCachedImage(imageUrl: recipe.imageUrl!, fit: BoxFit.cover, height: 230, width: double.infinity),
     );
   }
 }
