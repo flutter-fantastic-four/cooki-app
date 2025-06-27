@@ -19,8 +19,6 @@ import '../../../app/constants/app_constants.dart';
 import '../../../core/utils/error_mappers.dart';
 import '../../../core/utils/general_util.dart';
 import '../../../domain/entity/recipe.dart';
-import '../../../domain/entity/recipe_category.dart';
-import '../../../gen/l10n/app_localizations.dart';
 import '../../user_global_view_model.dart';
 import '../home/tabs/saved_recipes/saved_recipes_tab_view_model.dart';
 
