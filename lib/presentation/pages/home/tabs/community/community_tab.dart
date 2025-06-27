@@ -266,22 +266,28 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
       }
     }
 
-    return GridView.builder(
-      padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 160 / 184, // 160x184 card size
-        crossAxisSpacing: 15,
-        mainAxisSpacing: 16,
-      ),
-      itemCount: filteredRecipes.length,
-      itemBuilder: (context, index) {
-        final recipe = filteredRecipes[index];
-        return _RecipeCard(
-          recipe: recipe,
-          onOptionsTap: () => _showOptionsModal(context, recipe),
-        );
-      },
+    return CustomScrollView(
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.all(16),
+          sliver: SliverGrid(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 160 / 184, // 160x184 card size
+              crossAxisSpacing: 15,
+              mainAxisSpacing: 16,
+            ),
+            delegate: SliverChildBuilderDelegate((context, index) {
+              final recipe = filteredRecipes[index];
+              return _RecipeCard(
+                recipe: recipe,
+                onOptionsTap: () => _showOptionsModal(context, recipe),
+              );
+            }, childCount: filteredRecipes.length),
+          ),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 100)),
+      ],
     );
   }
 

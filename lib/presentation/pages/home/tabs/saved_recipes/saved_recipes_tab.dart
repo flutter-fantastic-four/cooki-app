@@ -11,8 +11,11 @@ import '../../../../../core/utils/general_util.dart';
 import '../../../../../app/constants/app_colors.dart';
 import '../../../../../presentation/widgets/recipe_options_modal.dart';
 import '../../../../../core/utils/snackbar_util.dart';
+import '../../../../../data/repository/providers.dart';
+import '../../../../../core/utils/sharing_util.dart';
 import '../../../../user_global_view_model.dart';
 import 'saved_recipes_tab_view_model.dart';
+import '../community/widget/photo_modal_style_card.dart';
 
 // Constants for modal styling
 class _ModalConstants {
@@ -251,7 +254,8 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                 viewModel.setSelectedCategory(category);
                 await viewModel.loadRecipes();
               },
-              itemCount: AppConstants.recipeTabCategories(strings(context)).length,
+              itemCount:
+                  AppConstants.recipeTabCategories(strings(context)).length,
               itemBuilder: (context, index) {
                 final pageCategory =
                     AppConstants.recipeTabCategories(strings(context))[index];
@@ -311,8 +315,18 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                                             filteredRecipes[recipeIndex];
                                         return _RecipeCard(
                                           recipe: recipe,
-                                          onOptionsTap:
-                                              () => RecipeOptionsModal.show(
+                                          onOptionsTap: () {
+                                            if (state.selectedCategory ==
+                                                strings(
+                                                  context,
+                                                ).recipeTabSaved) {
+                                              _showSavedRecipeOptionsModal(
+                                                context,
+                                                recipe,
+                                                viewModel,
+                                              );
+                                            } else {
+                                              RecipeOptionsModal.show(
                                                 context: context,
                                                 ref: ref,
                                                 recipe: recipe,
@@ -329,7 +343,9 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                                                 onRecipeUpdated: () {
                                                   viewModel.refreshRecipes();
                                                 },
-                                              ),
+                                              );
+                                            }
+                                          },
                                           category: state.selectedCategory,
                                           viewModel: viewModel,
                                         );
@@ -707,6 +723,115 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
           ),
         ),
       ],
+    );
+  }
+
+  void _showSavedRecipeOptionsModal(
+    BuildContext context,
+    Recipe recipe,
+    SavedRecipesViewModel viewModel,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.greyScale50,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+      ),
+      builder: (BuildContext context) {
+        return Consumer(
+          builder: (context, ref, child) {
+            final user = ref.read(userGlobalViewModelProvider);
+
+            return Padding(
+              padding: const EdgeInsets.only(
+                top: 8,
+                bottom: 30,
+                left: 15,
+                right: 15,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Top handle
+                  Container(
+                    width: 40,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: AppColors.greyScale400,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    margin: const EdgeInsets.only(bottom: 12),
+                  ),
+
+                  // Remove from saved option - always show for saved recipes
+                  if (user != null)
+                    PhotoModalStyleCard(
+                      text: strings(context).removeFromMyRecipes,
+                      customIcon: Icon(
+                        Icons.bookmark_remove,
+                        size: 20,
+                        color: Colors.black87,
+                      ),
+                      onTap: () async {
+                        try {
+                          final recipeRepository = ref.read(
+                            recipeRepositoryProvider,
+                          );
+                          await recipeRepository.removeFromSavedRecipes(
+                            user.id,
+                            recipe.id,
+                          );
+
+                          if (context.mounted) {
+                            SnackbarUtil.showSnackBar(
+                              context,
+                              strings(context).recipeRemovedSuccessfully,
+                              showIcon: true,
+                            );
+                            Navigator.pop(context);
+                            viewModel.refreshRecipes();
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            SnackbarUtil.showSnackBar(
+                              context,
+                              strings(context).errorOccurred,
+                            );
+                          }
+                        }
+                      },
+                    ),
+
+                  PhotoModalStyleCard(
+                    text: strings(context).share,
+                    customIcon: Icon(
+                      Icons.ios_share,
+                      size: 20,
+                      color: Colors.black87,
+                    ),
+                    onTap: () async {
+                      await SharingUtil.shareRecipe(
+                        context,
+                        recipe,
+                        ref.read(imageDownloadRepositoryProvider),
+                      );
+                      if (!context.mounted) return;
+                      Navigator.pop(context);
+                    },
+                  ),
+                  const SizedBox(height: 15),
+                  PhotoModalStyleCard(
+                    text: strings(context).close,
+                    onTap: () => Navigator.pop(context),
+                    isCenter: true,
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
