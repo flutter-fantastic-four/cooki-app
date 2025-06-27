@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../app/constants/app_colors.dart';
 import '../../../../core/utils/general_util.dart';
 import '../home_view_model.dart';
 
@@ -29,6 +31,7 @@ class HomeBottomNavigationBar extends StatelessWidget {
             elevation: 0,
             currentIndex: currentIndex,
             onTap: viewModel.onIndexChanged,
+            type: BottomNavigationBarType.fixed,
             iconSize: 28,
             selectedLabelStyle: const TextStyle(
               fontSize: 12,
@@ -36,24 +39,70 @@ class HomeBottomNavigationBar extends StatelessWidget {
             ),
             unselectedLabelStyle: const TextStyle(fontSize: 12),
             selectedItemColor: Colors.black,
+            unselectedItemColor: AppColors.greyScale500,
             items: [
               BottomNavigationBarItem(
-                icon: Icon(Icons.bookmark_border),
-                activeIcon: Icon(Icons.bookmark),
                 label: strings(context).myRecipesTitle,
-                tooltip: strings(context).myRecipesTitle,
+                icon: SvgPicture.asset(
+                  'assets/icons/name=bookmark, size=24, state=Default.svg',
+                  width: 24,
+                  height: 24,
+                  colorFilter: const ColorFilter.mode(
+                    AppColors.greyScale500,
+                    BlendMode.srcIn,
+                  ),
+                ),
+                activeIcon: SvgPicture.asset(
+                  'assets/icons/name=bookmark, size=24, state=pressed.svg',
+                  width: 24,
+                  height: 24,
+                  colorFilter: const ColorFilter.mode(
+                    Colors.black,
+                    BlendMode.srcIn,
+                  ),
+                ),
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.public),
-                activeIcon: Icon(Icons.public),
                 label: strings(context).communityTitle,
-                tooltip: strings(context).communityTitle,
+                icon: SvgPicture.asset(
+                  'assets/icons/name=community, size=24, state=Default.svg',
+                  width: 24,
+                  height: 24,
+                  colorFilter: const ColorFilter.mode(
+                    AppColors.greyScale500,
+                    BlendMode.srcIn,
+                  ),
+                ),
+                activeIcon: SvgPicture.asset(
+                  'assets/icons/name=community, size=24, state=pressed.svg',
+                  width: 24,
+                  height: 24,
+                  colorFilter: const ColorFilter.mode(
+                    Colors.black,
+                    BlendMode.srcIn,
+                  ),
+                ),
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.person_outline),
-                activeIcon: Icon(Icons.person),
                 label: strings(context).myPage,
-                tooltip: strings(context).myPage,
+                icon: SvgPicture.asset(
+                  'assets/icons/name=mypage, size=24, state=Default.svg',
+                  width: 24,
+                  height: 24,
+                  colorFilter: const ColorFilter.mode(
+                    AppColors.greyScale500,
+                    BlendMode.srcIn,
+                  ),
+                ),
+                activeIcon: SvgPicture.asset(
+                  'assets/icons/name=mypage, size=24, state=pressed.svg',
+                  width: 24,
+                  height: 24,
+                  colorFilter: const ColorFilter.mode(
+                    Colors.black,
+                    BlendMode.srcIn,
+                  ),
+                ),
               ),
             ],
           ),

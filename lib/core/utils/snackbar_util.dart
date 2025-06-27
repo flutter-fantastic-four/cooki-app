@@ -15,6 +15,19 @@ class SnackbarUtil {
     );
   }
 
+  /// Returns the red error icon widget
+  static Widget defaultErrorIcon() {
+    return Container(
+      width: 24,
+      height: 24,
+      decoration: const BoxDecoration(
+        color: Colors.red,
+        shape: BoxShape.circle,
+      ),
+      child: const Icon(Icons.close, color: Colors.white, size: 16),
+    );
+  }
+
   /// Returns the app logo icon from assets
   static Widget appLogoIcon() {
     return Image.asset(

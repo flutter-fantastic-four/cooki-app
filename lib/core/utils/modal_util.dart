@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../app/constants/app_colors.dart';
 import 'general_util.dart';
@@ -53,6 +54,104 @@ class ModalUtil {
     );
   }
 
+  static void showTwoOptionsModal(
+    BuildContext context, {
+    required String title,
+    required String description,
+    required String primaryButtonText,
+    required String secondaryButtonText,
+    required VoidCallback onPrimaryButtonPressed,
+    required VoidCallback onSecondaryButtonPressed,
+    bool isDestructive = false,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.greyScale50,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.only(
+            top: 8,
+            bottom: 30,
+            left: 15,
+            right: 15,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildModalTopHandle(),
+              Padding(
+                padding: const EdgeInsets.only(top: 40),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      title,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      description,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: AppColors.greyScale600,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 40),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        onSecondaryButtonPressed();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.greyScale100,
+                        foregroundColor: AppColors.greyScale800,
+                        elevation: 0,
+                        shadowColor: Colors.transparent,
+                      ),
+                      child: Text(secondaryButtonText),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        onPrimaryButtonPressed();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            isDestructive ? AppColors.error : AppColors.primary,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shadowColor: Colors.transparent,
+                      ),
+                      child: Text(primaryButtonText),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   static void showGenericModal(
     BuildContext context, {
@@ -82,6 +181,7 @@ class ModalUtil {
                     (option) => _ModalOptionCard(
                       text: option.text,
                       icon: option.icon,
+                      customIcon: option.customIcon,
                       isRed: option.isRed,
                       onTap: () {
                         Navigator.pop(context);
@@ -131,12 +231,28 @@ class ModalUtil {
       options: [
         ModalOption(
           text: strings(context).takeWithCamera,
-          icon: Icons.photo_camera,
+          customIcon: SvgPicture.asset(
+            'assets/icons/name=camera, size=24, state=Default.svg',
+            width: 20,
+            height: 20,
+            colorFilter: const ColorFilter.mode(
+              Colors.black87,
+              BlendMode.srcIn,
+            ),
+          ),
           onTap: onCamera,
         ),
         ModalOption(
           text: strings(context).chooseInGallery,
-          icon: CupertinoIcons.photo,
+          customIcon: SvgPicture.asset(
+            'assets/icons/name=album, size=24, state=Default.svg',
+            width: 20,
+            height: 20,
+            colorFilter: const ColorFilter.mode(
+              Colors.black87,
+              BlendMode.srcIn,
+            ),
+          ),
           onTap: onGallery,
         ),
       ],
@@ -147,37 +263,37 @@ class ModalUtil {
 
 class ModalOption {
   final String text;
-  final IconData icon;
+  final IconData? icon;
+  final Widget? customIcon;
   final VoidCallback onTap;
   final bool isRed;
 
   const ModalOption({
     required this.text,
-    required this.icon,
+    this.icon,
+    this.customIcon,
     required this.onTap,
     this.isRed = false,
-  });
+  }) : assert(
+         icon != null || customIcon != null,
+         'Either icon or customIcon must be provided',
+       );
 }
 
 class SimpleOptionCard extends StatelessWidget {
   final String text;
   final VoidCallback onTap;
 
-  const SimpleOptionCard({
-    required this.text,
-    required this.onTap,
-    super.key,
-  });
+  const SimpleOptionCard({required this.text, required this.onTap, super.key});
 
   @override
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 3),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8),
-        side: BorderSide(
-          color: AppColors.greyScale100,
-          width: 1,
-        ),),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(color: AppColors.greyScale100, width: 1),
+      ),
       elevation: 0,
       color: Colors.white,
       child: InkWell(
@@ -199,10 +315,10 @@ class SimpleOptionCard extends StatelessWidget {
   }
 }
 
-
 class _ModalOptionCard extends StatelessWidget {
   final String text;
   final IconData? icon;
+  final Widget? customIcon;
   final VoidCallback onTap;
   final bool isCenter;
   final bool isRed;
@@ -210,6 +326,7 @@ class _ModalOptionCard extends StatelessWidget {
   const _ModalOptionCard({
     required this.text,
     this.icon,
+    this.customIcon,
     required this.onTap,
     this.isCenter = false,
     this.isRed = false,
@@ -217,33 +334,56 @@ class _ModalOptionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      elevation: 0,
-      color: Colors.white,
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(vertical: 1),
-        leading:
-            !isCenter
-                ? Padding(
-                  padding: const EdgeInsets.only(left: 24, right: 4),
-                  child: Icon(
-                    icon,
-                    color: isRed ? AppColors.error : Colors.black87,
+    Widget? leadingWidget;
+
+    if (!isCenter) {
+      if (customIcon != null) {
+        leadingWidget = customIcon;
+      } else if (icon != null) {
+        leadingWidget = Icon(
+          icon,
+          color: isRed ? AppColors.error : Colors.black87,
+          size: 20,
+        );
+      }
+    }
+
+    return Container(
+      height: 44,
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        color: Colors.white,
+        border: Border.all(color: AppColors.greyScale100, width: 1),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                if (leadingWidget != null) ...[
+                  leadingWidget!,
+                  const SizedBox(width: 12),
+                ],
+                Expanded(
+                  child: Text(
+                    text,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: isRed ? AppColors.error : Colors.black,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    textAlign: isCenter ? TextAlign.center : TextAlign.left,
                   ),
-                )
-                : null,
-        title: Text(
-          text,
-          style: TextStyle(
-            fontSize: 16,
-            color: isRed ? AppColors.error : Colors.black,
-            fontWeight: FontWeight.w500,
+                ),
+              ],
+            ),
           ),
-          textAlign: isCenter ? TextAlign.center : null,
         ),
-        onTap: onTap,
       ),
     );
   }

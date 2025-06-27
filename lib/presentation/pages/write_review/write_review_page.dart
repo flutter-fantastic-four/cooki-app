@@ -178,12 +178,16 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
         onTap: FocusScope.of(context).unfocus,
         child: Scaffold(
           appBar: AppBar(
-            elevation: 1,
+            elevation: 0,
+            backgroundColor: Colors.white,
+            surfaceTintColor: Colors.white,
             title: Text(
               isEditingMode
                   ? strings(context).editReviewTitle
                   : strings(context).writeReviewTitle,
+              style: const TextStyle(color: Colors.black),
             ),
+            iconTheme: const IconThemeData(color: Colors.black),
             actions: isEditingMode ? [_buildDeleteActionButton(context)] : null,
           ),
           body: Padding(
@@ -236,16 +240,22 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
       child:
           isDeleting
               ? CupertinoActivityIndicator(radius: 10)
-              : InkWell(
-                onTap: () => _deleteReview(context),
-                highlightColor: Colors.grey,
-                child: SvgPicture.asset(
-                  'assets/icons/delete_icon_outline.svg',
-                  width: 25,
-                  height: 25,
-                  colorFilter: const ColorFilter.mode(
-                    AppColors.greyScale800,
-                    BlendMode.srcIn,
+              : Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () => _deleteReview(context),
+                  borderRadius: BorderRadius.circular(20),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: SvgPicture.asset(
+                      'assets/icons/name=delete, size=24, state=Default.svg',
+                      width: 25,
+                      height: 25,
+                      colorFilter: const ColorFilter.mode(
+                        AppColors.greyScale800,
+                        BlendMode.srcIn,
+                      ),
+                    ),
                   ),
                 ),
               ),

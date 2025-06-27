@@ -3,9 +3,12 @@
 import 'package:cooki/core/utils/navigation_util.dart';
 import 'package:cooki/presentation/pages/detailed_recipe/detailed_recipe_page.dart';
 import 'package:cooki/presentation/pages/home/tabs/community/widget/photo_modal_style_card.dart';
+import 'package:cooki/presentation/pages/login/guest_login_page.dart';
+import 'package:cooki/presentation/user_global_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../../app/constants/app_constants.dart';
 import '../../../../../core/utils/sharing_util.dart';
 import '../../../../../data/repository/providers.dart';
@@ -38,6 +41,25 @@ final actualAverageRatingProvider = FutureProvider.family
         return {'average': 0.0, 'count': 0};
       }
     });
+
+// Provider for checking if a recipe is saved by the current user
+final isRecipeSavedProvider = FutureProvider.family.autoDispose<bool, String>((
+  ref,
+  recipeId,
+) async {
+  try {
+    final currentUser = ref.read(userGlobalViewModelProvider);
+    if (currentUser == null) return false;
+
+    final recipeRepository = ref.read(recipeRepositoryProvider);
+    final savedRecipeIds = await recipeRepository.getUserSavedRecipeIds(
+      currentUser.id,
+    );
+    return savedRecipeIds.contains(recipeId);
+  } catch (e) {
+    return false;
+  }
+});
 
 class CommunityPage extends ConsumerStatefulWidget {
   const CommunityPage({super.key});
@@ -109,6 +131,7 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                               await viewModel.loadRecipes();
                             },
                             isModalChip: false,
+                            isSelected: true,
                           ),
                       ],
                     ),
@@ -384,6 +407,14 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
+                            const SizedBox(height: 4),
+                            Text(
+                              strings(context).maxCategorySelectionHint,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.greyScale500,
+                              ),
+                            ),
                             const SizedBox(height: 12),
                             Container(
                               width: double.infinity,
@@ -399,14 +430,19 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                                       final isSelected = tempCuisines.contains(
                                         cuisine,
                                       );
+                                      final isDisabled =
+                                          !isSelected &&
+                                          tempCuisines.length >= 3;
                                       return _FilterChip(
                                         label: cuisine,
                                         isSelected: isSelected,
+                                        isDisabled: isDisabled,
                                         onTap: () {
                                           setModalState(() {
                                             if (isSelected) {
                                               tempCuisines.remove(cuisine);
-                                            } else {
+                                            } else if (tempCuisines.length <
+                                                3) {
                                               tempCuisines.add(cuisine);
                                             }
                                           });
@@ -425,7 +461,9 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                                     onPressed: () async {
                                       viewModel.resetFilters();
                                       await viewModel.loadRecipes();
-                                      Navigator.pop(context);
+                                      if (context.mounted) {
+                                        Navigator.pop(context);
+                                      }
                                     },
                                     child: Text(strings(context).reset),
                                   ),
@@ -491,10 +529,11 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
           onPressed: () => _showFilterModal(context),
         ),
         IconButton(
-          icon: const Icon(
-            CupertinoIcons.search,
-            color: Colors.black,
-            size: 24,
+          icon: SvgPicture.asset(
+            'assets/icons/name=search, size=24, state=Default.svg',
+            width: 24,
+            height: 24,
+            colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
           ),
           onPressed: () => viewModel.toggleSearch(),
         ),
@@ -568,47 +607,185 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
       ),
       builder: (BuildContext context) {
-        return Padding(
-          padding: const EdgeInsets.only(
-            top: 8,
-            bottom: 30,
-            left: 15,
-            right: 15,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Top handle
-              Container(
-                width: 40,
-                height: 5,
-                decoration: BoxDecoration(
-                  color: AppColors.greyScale400,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                margin: const EdgeInsets.only(bottom: 12),
+        return Consumer(
+          builder: (context, ref, child) {
+            final user = ref.read(userGlobalViewModelProvider);
+
+            return Padding(
+              padding: const EdgeInsets.only(
+                top: 8,
+                bottom: 30,
+                left: 15,
+                right: 15,
               ),
-              PhotoModalStyleCard(
-                text: strings(context).share,
-                icon: Icons.share_outlined,
-                onTap: () async {
-                  await SharingUtil.shareRecipe(
-                    context,
-                    recipe,
-                    ref.read(imageDownloadRepositoryProvider),
-                  );
-                  if (!context.mounted) return;
-                  Navigator.pop(context);
-                },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Top handle
+                  Container(
+                    width: 40,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: AppColors.greyScale400,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    margin: const EdgeInsets.only(bottom: 12),
+                  ),
+
+                  // Save option - only show for other users' recipes
+                  if (user != null && user.id != recipe.userId)
+                    Consumer(
+                      builder: (context, ref, child) {
+                        final isRecipeSavedAsync = ref.watch(
+                          isRecipeSavedProvider(recipe.id),
+                        );
+                        return isRecipeSavedAsync.when(
+                          data: (isSaved) {
+                            return PhotoModalStyleCard(
+                              text:
+                                  isSaved
+                                      ? strings(context).removeFromMyRecipes
+                                      : strings(context).saveToMyRecipes,
+                              customIcon: Icon(
+                                isSaved
+                                    ? Icons.bookmark_remove
+                                    : Icons.bookmark_border,
+                                size: 20,
+                                color: Colors.black87,
+                              ),
+                              onTap: () async {
+                                try {
+                                  final recipeRepository = ref.read(
+                                    recipeRepositoryProvider,
+                                  );
+                                  if (isSaved) {
+                                    await recipeRepository
+                                        .removeFromSavedRecipes(
+                                          user.id,
+                                          recipe.id,
+                                        );
+                                    ref.invalidate(
+                                      isRecipeSavedProvider(recipe.id),
+                                    );
+                                    if (context.mounted) {
+                                      SnackbarUtil.showSnackBar(
+                                        context,
+                                        strings(
+                                          context,
+                                        ).recipeRemovedSuccessfully,
+                                        showIcon: true,
+                                      );
+                                    }
+                                  } else {
+                                    await recipeRepository.addToSavedRecipes(
+                                      user.id,
+                                      recipe.id,
+                                    );
+                                    ref.invalidate(
+                                      isRecipeSavedProvider(recipe.id),
+                                    );
+                                    if (context.mounted) {
+                                      SnackbarUtil.showSnackBar(
+                                        context,
+                                        strings(
+                                          context,
+                                        ).recipeSavedSuccessfully,
+                                        showIcon: true,
+                                      );
+                                    }
+                                  }
+                                  if (context.mounted) {
+                                    Navigator.pop(context);
+                                  }
+                                } catch (e) {
+                                  if (context.mounted) {
+                                    SnackbarUtil.showSnackBar(
+                                      context,
+                                      strings(context).errorOccurred,
+                                    );
+                                  }
+                                }
+                              },
+                            );
+                          },
+                          loading:
+                              () => PhotoModalStyleCard(
+                                text: strings(context).saveToMyRecipes,
+                                customIcon: Icon(
+                                  Icons.bookmark_border,
+                                  size: 20,
+                                  color: Colors.black87,
+                                ),
+                                onTap: () {}, // Disable during loading
+                              ),
+                          error:
+                              (error, stack) => PhotoModalStyleCard(
+                                text: strings(context).saveToMyRecipes,
+                                customIcon: Icon(
+                                  Icons.bookmark_border,
+                                  size: 20,
+                                  color: Colors.black87,
+                                ),
+                                onTap: () {
+                                  // Show error and close modal
+                                  SnackbarUtil.showSnackBar(
+                                    context,
+                                    strings(context).errorOccurred,
+                                  );
+                                  Navigator.pop(context);
+                                },
+                              ),
+                        );
+                      },
+                    ),
+
+                  // Save option for non-logged in users - show login prompt
+                  if (user == null)
+                    PhotoModalStyleCard(
+                      text: strings(context).saveToMyRecipes,
+                      customIcon: Icon(
+                        Icons.bookmark_border,
+                        size: 20,
+                        color: Colors.black87,
+                      ),
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const GuestLoginPage(),
+                          ),
+                        );
+                      },
+                    ),
+
+                  PhotoModalStyleCard(
+                    text: strings(context).share,
+                    customIcon: Icon(
+                      Icons.ios_share,
+                      size: 20,
+                      color: Colors.black87,
+                    ),
+                    onTap: () async {
+                      await SharingUtil.shareRecipe(
+                        context,
+                        recipe,
+                        ref.read(imageDownloadRepositoryProvider),
+                      );
+                      if (!context.mounted) return;
+                      Navigator.pop(context);
+                    },
+                  ),
+                  const SizedBox(height: 15),
+                  PhotoModalStyleCard(
+                    text: strings(context).close,
+                    onTap: () => Navigator.pop(context),
+                    isCenter: true,
+                  ),
+                ],
               ),
-              const SizedBox(height: 15),
-              PhotoModalStyleCard(
-                text: strings(context).close,
-                onTap: () => Navigator.pop(context),
-                isCenter: true,
-              ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
@@ -817,6 +994,7 @@ class _FilterChip extends StatelessWidget {
   final VoidCallback? onDeleted;
   final bool isSelected;
   final bool isModalChip;
+  final bool isDisabled;
 
   const _FilterChip({
     required this.label,
@@ -824,23 +1002,28 @@ class _FilterChip extends StatelessWidget {
     this.onDeleted,
     this.isSelected = false,
     this.isModalChip = false,
+    this.isDisabled = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: isDisabled ? null : onTap,
       child: Container(
         height: 26,
         padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
           color:
-              isModalChip
+              isDisabled
+                  ? AppColors.greyScale100
+                  : isModalChip
                   ? (isSelected ? AppColors.primary700 : AppColors.white)
                   : (isSelected ? AppColors.primary50 : AppColors.primary50),
           borderRadius: BorderRadius.circular(13),
           border:
-              isModalChip
+              isDisabled
+                  ? null
+                  : isModalChip
                   ? Border.all(
                     color: isSelected ? AppColors.primary800 : AppColors.white,
                     width: 1,
@@ -854,7 +1037,9 @@ class _FilterChip extends StatelessWidget {
               label,
               style: TextStyle(
                 color:
-                    isModalChip
+                    isDisabled
+                        ? AppColors.greyScale400
+                        : isModalChip
                         ? (isSelected
                             ? AppColors.white
                             : AppColors.greyScale800)
@@ -870,7 +1055,7 @@ class _FilterChip extends StatelessWidget {
                 onTap: onDeleted,
                 child: Icon(
                   Icons.close,
-                  size: 14,
+                  size: 12,
                   color: isModalChip ? AppColors.white : AppColors.primary700,
                 ),
               ),
@@ -893,7 +1078,12 @@ class FilterIconWithDot extends StatelessWidget {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        const Icon(Icons.filter_list, color: Colors.black, size: 24),
+        SvgPicture.asset(
+          'assets/icons/name=filter, size=24, state=Default.svg',
+          width: 24,
+          height: 24,
+          colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
+        ),
         if (showDot)
           Positioned(
             right: -2,

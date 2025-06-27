@@ -4,6 +4,7 @@ import 'package:cooki/presentation/pages/home/tabs/saved_recipes/widget/no_recip
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../../app/constants/app_constants.dart';
 import '../../../../../domain/entity/recipe.dart';
 import '../../../../../core/utils/general_util.dart';
@@ -223,6 +224,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                           await viewModel.loadRecipes();
                         },
                         isModalChip: false,
+                        isSelected: true,
                       ),
                     ),
                     if (state.selectedSort.isNotEmpty)
@@ -277,7 +279,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                     child:
                         state.isLoading
                             ? const Center(child: CircularProgressIndicator())
-                            : state.filteredRecipes.isEmpty &&
+                            : viewModel.getFilteredRecipes(context).isEmpty &&
                                 state.searchQuery.isNotEmpty
                             ? _buildNoResultsView()
                             : CustomScrollView(
@@ -303,8 +305,8 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                                         ),
                                     delegate: SliverChildBuilderDelegate(
                                       (context, recipeIndex) {
-                                        final filteredRecipes =
-                                            state.filteredRecipes;
+                                        final filteredRecipes = viewModel
+                                            .getFilteredRecipes(context);
                                         final recipe =
                                             filteredRecipes[recipeIndex];
                                         return _RecipeCard(
@@ -332,7 +334,10 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                                           viewModel: viewModel,
                                         );
                                       },
-                                      childCount: state.filteredRecipes.length,
+                                      childCount:
+                                          viewModel
+                                              .getFilteredRecipes(context)
+                                              .length,
                                     ),
                                   ),
                                 ),
@@ -372,10 +377,11 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
           onPressed: () => _showFilterModal(context),
         ),
         IconButton(
-          icon: const Icon(
-            CupertinoIcons.search,
-            color: Colors.black,
-            size: 24,
+          icon: SvgPicture.asset(
+            'assets/icons/name=search, size=24, state=Default.svg',
+            width: 24,
+            height: 24,
+            colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
           ),
           onPressed: () => viewModel.toggleSearch(),
         ),
@@ -620,18 +626,25 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
           strings(context).countryCategory,
           style: _ModalConstants.sectionTitleStyle,
         ),
+        const SizedBox(height: 4),
+        Text(
+          strings(context).maxCategorySelectionHint,
+          style: const TextStyle(fontSize: 12, color: AppColors.greyScale500),
+        ),
         const SizedBox(height: 12),
         _buildChipContainer(
           cuisineCategories.map((cuisine) {
             final isSelected = tempCuisines.contains(cuisine);
+            final isDisabled = !isSelected && tempCuisines.length >= 3;
             return _FilterChip(
               label: cuisine,
               isSelected: isSelected,
+              isDisabled: isDisabled,
               onTap: () {
                 setModalState(() {
                   if (isSelected) {
                     tempCuisines.remove(cuisine);
-                  } else {
+                  } else if (tempCuisines.length < 3) {
                     tempCuisines.add(cuisine);
                   }
                 });
@@ -863,6 +876,7 @@ class _FilterChip extends StatelessWidget {
   final VoidCallback? onDeleted;
   final bool isSelected;
   final bool isModalChip;
+  final bool isDisabled;
 
   const _FilterChip({
     required this.label,
@@ -870,23 +884,28 @@ class _FilterChip extends StatelessWidget {
     this.onDeleted,
     this.isSelected = false,
     this.isModalChip = false,
+    this.isDisabled = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: isDisabled ? null : onTap,
       child: Container(
         height: 26,
         padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
           color:
-              isModalChip
+              isDisabled
+                  ? AppColors.greyScale100
+                  : isModalChip
                   ? (isSelected ? AppColors.primary700 : AppColors.white)
                   : (isSelected ? AppColors.primary50 : AppColors.primary50),
           borderRadius: BorderRadius.circular(13),
           border:
-              isModalChip
+              isDisabled
+                  ? null
+                  : isModalChip
                   ? Border.all(
                     color: isSelected ? AppColors.primary800 : AppColors.white,
                     width: 1,
@@ -900,7 +919,9 @@ class _FilterChip extends StatelessWidget {
               label,
               style: TextStyle(
                 color:
-                    isModalChip
+                    isDisabled
+                        ? AppColors.greyScale400
+                        : isModalChip
                         ? (isSelected
                             ? AppColors.white
                             : AppColors.greyScale800)
@@ -918,7 +939,7 @@ class _FilterChip extends StatelessWidget {
                 onTap: onDeleted,
                 child: Icon(
                   Icons.close,
-                  size: 14,
+                  size: 12,
                   color: isModalChip ? AppColors.white : AppColors.primary700,
                 ),
               ),
@@ -941,7 +962,12 @@ class FilterIconWithDot extends StatelessWidget {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        const Icon(Icons.filter_list, color: Colors.black, size: 24),
+        SvgPicture.asset(
+          'assets/icons/name=filter, size=24, state=Default.svg',
+          width: 24,
+          height: 24,
+          colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
+        ),
         if (showDot)
           Positioned(
             right: -2,
