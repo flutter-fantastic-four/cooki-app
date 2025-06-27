@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/constants/app_colors.dart';
 import '../../user_global_view_model.dart';
+import '../../widgets/custom_shimmer.dart';
 import '../../widgets/input_decorations.dart';
 import '../home/tabs/saved_recipes/saved_recipes_tab_view_model.dart';
 import 'generate_recipe_view_model.dart';
@@ -49,7 +50,9 @@ class GenerateRecipePage extends ConsumerWidget {
           .read(savedRecipesViewModelProvider(strings(context)).notifier)
           .refreshRecipes();
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => DetailRecipePage(recipe: savedRecipe)),
+        MaterialPageRoute(
+          builder: (_) => DetailRecipePage(recipe: savedRecipe),
+        ),
       );
     }
   }
@@ -66,10 +69,10 @@ class GenerateRecipePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(generateRecipeViewModelProvider);
     return GeneralUtil.buildUnsavedChangesPopScope(
       context: context,
       hasUnsavedChanges: () {
-        final state = ref.read(generateRecipeViewModelProvider);
         return _hasUnsavedChanges(state);
       },
       child: GestureDetector(
@@ -84,7 +87,6 @@ class GenerateRecipePage extends ConsumerWidget {
           ),
           bottomNavigationBar: Consumer(
             builder: (BuildContext context, WidgetRef ref, Widget? child) {
-              final state = ref.watch(generateRecipeViewModelProvider);
               return GenerateButton(
                 onTap:
                     state.canGenerate
@@ -94,13 +96,48 @@ class GenerateRecipePage extends ConsumerWidget {
               );
             },
           ),
-          body: SelectionArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-              child: _buildLayout(context, ref),
-            ),
-          ),
+          body:
+              state.isGeneratingAndSaving
+                  ? _buildLoadingShimmers()
+                  : SelectionArea(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 16,
+                        horizontal: 20,
+                      ),
+                      child: _buildLayout(context, ref),
+                    ),
+                  ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingShimmers() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      child: ListView(
+        children: List.generate(11, (index) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const CustomShimmer(
+                  width: 180,
+                  height: 13,
+                  radius: 6,
+                ),
+                const SizedBox(height: 8),
+                const CustomShimmer(
+                  width: 330,
+                  height: 13,
+                  radius: 10,
+                ),
+              ],
+            ),
+          );
+        }),
       ),
     );
   }
