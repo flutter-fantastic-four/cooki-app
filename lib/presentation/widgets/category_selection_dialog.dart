@@ -28,7 +28,7 @@ class CategorySelectionDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final categories = AppConstants.recipeCategories(context);
+    final categories = AppConstants.recipeCategories(strings(context));
 
     return DraggableScrollableSheet(
       expand: false,

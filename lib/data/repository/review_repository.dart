@@ -1,7 +1,8 @@
 import 'dart:io';
 import 'package:cooki/data/dto/review_dto.dart';
 
-import '../../domain/entity/review.dart';
+import '../../domain/entity/review/review.dart';
+import '../../domain/entity/review/review_sort_type.dart';
 import '../../domain/entity/translation_entities.dart';
 import '../data_source/image_storage_data_source.dart';
 import '../data_source/review_data_source.dart';

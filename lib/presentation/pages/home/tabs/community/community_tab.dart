@@ -268,7 +268,7 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
 
     String tempSort = state.selectedSort;
     List<String> tempCuisines = List.from(state.selectedCuisines);
-    final cuisineCategories = AppConstants.recipeCategories(context);
+    final cuisineCategories = AppConstants.recipeCategories(strings(context));
 
     showModalBottomSheet(
       context: context,

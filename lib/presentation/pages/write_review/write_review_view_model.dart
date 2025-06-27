@@ -6,7 +6,7 @@ import '../../../core/utils/logger.dart';
 import '../../../data/repository/providers.dart';
 import '../../../domain/entity/app_user.dart';
 import '../../../domain/entity/local_or_remote_image.dart';
-import '../../../domain/entity/review.dart';
+import '../../../domain/entity/review/review.dart';
 
 class WriteReviewState {
   final int rating;

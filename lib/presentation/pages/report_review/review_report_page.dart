@@ -8,7 +8,7 @@ import '../../../core/utils/dialogue_util.dart';
 import '../../../core/utils/general_util.dart';
 import '../../../core/utils/snackbar_util.dart';
 import '../../../data/dto/report_dto.dart';
-import '../../../domain/entity/review.dart';
+import '../../../domain/entity/review/review.dart';
 import '../../user_global_view_model.dart';
 import '../../widgets/selectable_option_row.dart';
 

@@ -3,7 +3,7 @@ import 'package:easy_image_viewer/easy_image_viewer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../domain/entity/review.dart';
+import '../../../../domain/entity/review/review.dart';
 import '../../../widgets/app_cached_image.dart';
 import '../write_review_view_model.dart';
 

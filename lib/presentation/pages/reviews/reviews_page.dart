@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cooki/app/constants/app_constants.dart';
 import 'package:cooki/core/utils/date_time_util.dart';
 import 'package:cooki/core/utils/dialogue_util.dart';
 import 'package:cooki/core/utils/error_mappers.dart';
@@ -19,7 +18,8 @@ import '../../../app/constants/app_colors.dart';
 import '../../../core/utils/general_util.dart';
 import '../../../core/utils/modal_util.dart';
 import '../../../core/utils/snackbar_util.dart';
-import '../../../domain/entity/review.dart';
+import '../../../domain/entity/review/review.dart';
+import '../../../domain/entity/review/review_sort_type.dart';
 import '../../settings_global_view_model.dart';
 import '../../user_global_view_model.dart';
 import '../write_review/write_review_page.dart';
@@ -328,8 +328,6 @@ class ReviewsPage extends ConsumerWidget {
     WidgetRef ref,
     ReviewsState state,
   ) {
-    final sortOptions = AppConstants.getSortOptions();
-
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(
@@ -340,15 +338,15 @@ class ReviewsPage extends ConsumerWidget {
         scrollDirection: Axis.horizontal,
         child: Row(
           children:
-              sortOptions.map((sortOption) {
-                final isActive = state.currentSortType == sortOption.type;
+              ReviewSortType.values.map((sortType) {
+                final isActive = state.currentSortType == sortType;
                 return Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: GestureDetector(
                     onTap:
                         () => ref
                             .read(reviewsViewModelProvider(recipeId).notifier)
-                            .changeSortType(sortOption.type),
+                            .changeSortType(sortType),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
@@ -363,7 +361,7 @@ class ReviewsPage extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        sortOption.getLabel(context),
+                        sortType.getLabel(strings(context)),
                         style: TextStyle(
                           fontSize: 12,
                           color:
