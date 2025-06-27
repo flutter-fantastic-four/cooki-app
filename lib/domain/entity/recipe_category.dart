@@ -1,8 +1,4 @@
-import 'dart:ui';
-
 import 'package:cooki/gen/l10n/app_localizations.dart';
-
-import '../../presentation/settings_global_view_model.dart';
 
 enum RecipeCategory {
   korean,

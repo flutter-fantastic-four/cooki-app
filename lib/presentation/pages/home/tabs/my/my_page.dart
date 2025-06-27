@@ -1,10 +1,10 @@
 import 'package:cooki/core/utils/general_util.dart';
 import 'package:cooki/presentation/pages/home/tabs/my/widgets/account_action_button.dart';
 import 'package:cooki/presentation/pages/home/tabs/my/widgets/guest_redirect_login_button.dart';
+import 'package:cooki/presentation/pages/home/tabs/my/widgets/info_column.dart';
+import 'package:cooki/presentation/pages/home/tabs/my/widgets/language_settings_page.dart';
 import 'package:cooki/presentation/pages/home/tabs/my/widgets/nick_name_row.dart';
 import 'package:cooki/presentation/pages/home/tabs/my/widgets/profile_image.dart';
-import 'package:cooki/presentation/pages/my/widgets/info_column.dart';
-import 'package:cooki/presentation/pages/my/widgets/language_settings_page.dart';
 import 'package:cooki/presentation/user_global_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
