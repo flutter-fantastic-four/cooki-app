@@ -18,7 +18,7 @@ enum RecipeValidationErrorKey {
   required,
 }
 
-enum ReviewsErrorKey { loadFailed, deleteFailed }
+enum ReviewsErrorKey { loadFailed, deleteFailed, translationFailed }
 
 enum WriteReviewErrorKey {
   tooManyImages,
@@ -99,6 +99,8 @@ class ErrorMapper {
         return s.reviewsLoadFailedError;
       case ReviewsErrorKey.deleteFailed:
         return s.reviewDeleteFailedError;
+      case ReviewsErrorKey.translationFailed:
+        return s.translationFailed;
     }
   }
 }

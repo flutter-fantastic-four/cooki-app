@@ -1,13 +1,14 @@
 import 'dart:io';
 
+import 'package:cooki/core/utils/modal_util.dart';
 import 'package:easy_image_viewer/easy_image_viewer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../app/constants/app_colors.dart';
-import '../../../../core/utils/dialogue_util.dart';
 import '../../../../core/utils/logger.dart';
 import '../generate_recipe_view_model.dart';
 
@@ -20,7 +21,7 @@ class ImageSelector extends ConsumerWidget {
     BuildContext context,
     GenerateRecipeViewModel vm,
   ) {
-    DialogueUtil.showImagePickerModal(
+    ModalUtil.showImagePickerModal(
       context,
       onCamera: () => _pickImage(vm, ImageSource.camera),
       onGallery: () => _pickImage(vm, ImageSource.gallery),
@@ -74,7 +75,7 @@ class ImageSelector extends ConsumerWidget {
                   }
                   : () => _showImageSourceActionSheet(context, vm),
           child: Container(
-            height: 160,
+            height: 140,
             decoration: BoxDecoration(
               color: AppColors.greyScale50,
               borderRadius: BorderRadius.circular(12),
@@ -98,21 +99,14 @@ class ImageSelector extends ConsumerWidget {
                           ),
                         ),
                         Positioned(
-                          top: 10,
-                          right: 10,
+                          top: 8,
+                          right: 9,
                           child: GestureDetector(
                             onTap: vm.removeImage,
-                            child: Container(
-                              padding: const EdgeInsets.all(0.5),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.cancel,
-                                size: 24,
-                                color: Colors.red,
-                              ),
+                            child: SvgPicture.asset(
+                              'assets/icons/close_icon.svg',
+                              width: 25,
+                              height: 25,
                             ),
                           ),
                         ),

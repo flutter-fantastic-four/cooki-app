@@ -1,19 +1,17 @@
-import 'package:flutter/cupertino.dart';
+import 'package:cooki/presentation/settings_global_view_model.dart';
+import 'package:cooki/presentation/widgets/big_title_widget.dart';
+import 'package:cooki/presentation/widgets/selectable_option_row.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/utils/general_util.dart';
-import '../../../../core/utils/snackbar_util.dart';
-import '../../../settings_global_view_model.dart';
-import '../../../widgets/big_title_widget.dart';
-import '../../../widgets/selectable_option_row.dart';
+import '../../../../../../core/utils/general_util.dart';
+import '../../../../../../core/utils/snackbar_util.dart';
 
 class LanguageSelectionPage extends ConsumerStatefulWidget {
   const LanguageSelectionPage({super.key});
 
   @override
-  ConsumerState<LanguageSelectionPage> createState() =>
-      _LanguageSelectionPageState();
+  ConsumerState<LanguageSelectionPage> createState() => _LanguageSelectionPageState();
 }
 
 class _LanguageSelectionPageState extends ConsumerState<LanguageSelectionPage> {
@@ -23,8 +21,7 @@ class _LanguageSelectionPageState extends ConsumerState<LanguageSelectionPage> {
   void initState() {
     super.initState();
     // Initialize with current global language setting
-    _selectedLanguage =
-        ref.read(settingsGlobalViewModelProvider.notifier).getCurrentLanguage();
+    _selectedLanguage = ref.read(settingsGlobalViewModelProvider.notifier).getCurrentLanguage();
   }
 
   @override
@@ -48,15 +45,14 @@ class _LanguageSelectionPageState extends ConsumerState<LanguageSelectionPage> {
                     text: language.displayName,
                     isSelected: _selectedLanguage == language,
                     horizontalPadding: 0,
-                    showCheckOnUnselected: true,
+                    isTwoOptions: true,
                     onTap: () {
                       setState(() {
                         _selectedLanguage = language;
                       });
                     },
                   ),
-                  if (language != SupportedLanguage.values.last)
-                    const SizedBox(height: 16),
+                  if (language != SupportedLanguage.values.last) const SizedBox(height: 16),
                 ],
               );
             }),
@@ -74,9 +70,7 @@ class _LanguageSelectionPageState extends ConsumerState<LanguageSelectionPage> {
         height: 48,
         child: ElevatedButton(
           onPressed: _applyLanguageChange,
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-          ),
+          style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 16)),
           child: Text(strings(context).configure),
         ),
       ),
@@ -85,26 +79,16 @@ class _LanguageSelectionPageState extends ConsumerState<LanguageSelectionPage> {
 
   Future<void> _applyLanguageChange() async {
     try {
-      await ref
-          .read(settingsGlobalViewModelProvider.notifier)
-          .changeLanguage(_selectedLanguage);
+      await ref.read(settingsGlobalViewModelProvider.notifier).changeLanguage(_selectedLanguage);
 
-      if (mounted) {
-        SnackbarUtil.showSnackBar(
-          context,
-          strings(context).languageChangedSuccessfully,
-          showIcon: true,
-        );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        SnackbarUtil.showSnackBar(context, strings(context).languageChangedSuccessfully, showIcon: true);
         Navigator.of(context).pop();
-      }
+      });
     } catch (e) {
-      if (mounted) {
-        SnackbarUtil.showSnackBar(
-          context,
-          strings(context).languageChangeFailedError,
-          showIcon: true,
-        );
-      }
+      if (!mounted) return;
+      SnackbarUtil.showSnackBar(context, strings(context).languageChangeFailedError, showIcon: true);
     }
   }
 }

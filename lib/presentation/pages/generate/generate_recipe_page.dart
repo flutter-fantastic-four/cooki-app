@@ -1,19 +1,19 @@
 import 'dart:developer';
 
+import 'package:cooki/core/utils/dialogue_util.dart';
 import 'package:cooki/core/utils/error_mappers.dart';
 import 'package:cooki/core/utils/general_util.dart';
-import 'package:cooki/presentation/pages/detail_recipe/detail_recipe_page.dart';
-import 'package:cooki/presentation/pages/edit/recipe_edit_page.dart';
+import 'package:cooki/presentation/pages/detailed_recipe/detailed_recipe_page.dart';
 import 'package:cooki/presentation/pages/generate/widgets/generate_button.dart';
 import 'package:cooki/presentation/pages/generate/widgets/image_selector.dart';
-import 'package:cooki/presentation/pages/generate/widgets/preference_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../app/constants/app_constants.dart';
+import '../../../app/constants/app_colors.dart';
 import '../../user_global_view_model.dart';
+import '../../widgets/custom_shimmer.dart';
 import '../../widgets/input_decorations.dart';
-import '../../widgets/app_dialog.dart';
+import '../home/tabs/saved_recipes/saved_recipes_tab_view_model.dart';
 import 'generate_recipe_view_model.dart';
 
 class GenerateRecipePage extends ConsumerWidget {
@@ -35,10 +35,10 @@ class GenerateRecipePage extends ConsumerWidget {
     final state = ref.read(generateRecipeViewModelProvider);
 
     if (context.mounted && state.errorKey != null) {
-      AppDialog.show(
+      DialogueUtil.showAppDialog(
         context: context,
         title: strings(context).generationFailedTitle,
-        subText: ErrorMapper.mapGenerateRecipeError(context, state.errorKey!),
+        content: ErrorMapper.mapGenerateRecipeError(context, state.errorKey!),
       );
       ref.read(generateRecipeViewModelProvider.notifier).clearError();
       return;
@@ -46,8 +46,13 @@ class GenerateRecipePage extends ConsumerWidget {
 
     if (savedRecipe != null) {
       if (!context.mounted) return;
+      ref
+          .read(savedRecipesViewModelProvider(strings(context)).notifier)
+          .refreshRecipes();
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => DetailRecipePage(recipe: savedRecipe)),
+        MaterialPageRoute(
+          builder: (_) => DetailRecipePage(recipe: savedRecipe),
+        ),
       );
     }
   }
@@ -64,10 +69,10 @@ class GenerateRecipePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(generateRecipeViewModelProvider);
     return GeneralUtil.buildUnsavedChangesPopScope(
       context: context,
       hasUnsavedChanges: () {
-        final state = ref.read(generateRecipeViewModelProvider);
         return _hasUnsavedChanges(state);
       },
       child: GestureDetector(
@@ -75,11 +80,6 @@ class GenerateRecipePage extends ConsumerWidget {
         child: Scaffold(
           appBar: AppBar(
             backgroundColor: Colors.white,
-            elevation: 1,
-            leading: IconButton(
-              onPressed: () => Navigator.of(context).maybePop(),
-              icon: const Icon(Icons.close, size: 27),
-            ),
             title: Text(
               strings(context).generateRecipeAppBarTitle,
               style: const TextStyle(color: Colors.black),
@@ -87,7 +87,6 @@ class GenerateRecipePage extends ConsumerWidget {
           ),
           bottomNavigationBar: Consumer(
             builder: (BuildContext context, WidgetRef ref, Widget? child) {
-              final state = ref.watch(generateRecipeViewModelProvider);
               return GenerateButton(
                 onTap:
                     state.canGenerate
@@ -97,25 +96,60 @@ class GenerateRecipePage extends ConsumerWidget {
               );
             },
           ),
-          body: SelectionArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 18),
-              child: _buildLayout(context, ref),
-            ),
-          ),
+          body:
+              state.isGeneratingAndSaving
+                  ? _buildLoadingShimmers()
+                  : SelectionArea(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 16,
+                        horizontal: 20,
+                      ),
+                      child: _buildLayout(context, ref),
+                    ),
+                  ),
         ),
       ),
     );
   }
 
-  ListView _buildLayout(BuildContext context, WidgetRef ref) {
+  Widget _buildLoadingShimmers() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      child: ListView(
+        children: List.generate(11, (index) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const CustomShimmer(
+                  width: 180,
+                  height: 13,
+                  radius: 6,
+                ),
+                const SizedBox(height: 8),
+                const CustomShimmer(
+                  width: 330,
+                  height: 13,
+                  radius: 10,
+                ),
+              ],
+            ),
+          );
+        }),
+      ),
+    );
+  }
+
+  Widget _buildLayout(BuildContext context, WidgetRef ref) {
     return ListView(
       children: [
-        const SizedBox(height: 10),
+        const SizedBox(height: 2),
         Text(
           strings(context).generatePageMainTitle,
           style: const TextStyle(
-            fontSize: 22,
+            fontSize: 20,
             fontWeight: FontWeight.w800,
             color: Color(0xFF1E1E1E),
           ),
@@ -123,7 +157,11 @@ class GenerateRecipePage extends ConsumerWidget {
         const SizedBox(height: 8),
         Text(
           strings(context).generatePageSubtitle,
-          style: TextStyle(fontSize: 15, color: Colors.grey[700], height: 1.5),
+          style: TextStyle(
+            fontSize: 14,
+            color: AppColors.greyScale600,
+            height: 1.5,
+          ),
         ),
 
         const SizedBox(height: 22),
@@ -136,7 +174,7 @@ class GenerateRecipePage extends ConsumerWidget {
         ),
         const SizedBox(height: 10),
         TextField(
-          maxLines: 4,
+          maxLines: 6,
           maxLength: 300,
           onChanged:
               (text) => ref
@@ -144,50 +182,52 @@ class GenerateRecipePage extends ConsumerWidget {
                   .updateTextInput(text.trim()),
           decoration: getInputDecoration(
             strings(context).generateTextFieldHint,
+            radius: 8,
+            contentPadding: EdgeInsets.all(16),
           ),
         ),
         const SizedBox(height: 16),
-        SizedBox(
-          height: 36,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Consumer(
-              builder: (context, ref, child) {
-                final selectedPreferences = ref.watch(
-                  generateRecipeViewModelProvider.select(
-                    (state) => state.selectedPreferences,
-                  ),
-                );
-                return Row(
-                  children:
-                      AppConstants.recipePreferences(context)
-                          .map(
-                            (label) => PreferenceChip(
-                              label: label,
-                              isSelected: selectedPreferences.contains(label),
-                              onTap:
-                                  () => ref
-                                      .read(
-                                        generateRecipeViewModelProvider
-                                            .notifier,
-                                      )
-                                      .togglePreference(label),
-                            ),
-                          )
-                          .toList(),
-                );
-              },
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
+        // SizedBox(
+        //   height: 36,
+        //   child: SingleChildScrollView(
+        //     scrollDirection: Axis.horizontal,
+        //     child: Consumer(
+        //       builder: (context, ref, child) {
+        //         final selectedPreferences = ref.watch(
+        //           generateRecipeViewModelProvider.select(
+        //             (state) => state.selectedPreferences,
+        //           ),
+        //         );
+        //         return Row(
+        //           children:
+        //               AppConstants.recipePreferences(context)
+        //                   .map(
+        //                     (label) => PreferenceChip(
+        //                       label: label,
+        //                       isSelected: selectedPreferences.contains(label),
+        //                       onTap:
+        //                           () => ref
+        //                               .read(
+        //                                 generateRecipeViewModelProvider
+        //                                     .notifier,
+        //                               )
+        //                               .togglePreference(label),
+        //                     ),
+        //                   )
+        //                   .toList(),
+        //         );
+        //       },
+        //     ),
+        //   ),
+        // ),
+        // const SizedBox(height: 16),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 22),
           child: Center(
             child: Text(
               strings(context).recipeGenerationTip,
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey[700], fontSize: 14),
+              style: TextStyle(color: Colors.grey[700], fontSize: 13),
             ),
           ),
         ),

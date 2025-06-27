@@ -39,7 +39,7 @@ class GeneralUtil {
       imageFile.absolute.path,
       targetPath,
       quality: quality,
-      format: format
+      format: format,
     );
 
     return compressedFile != null ? File(compressedFile.path) : imageFile;
@@ -55,14 +55,14 @@ class GeneralUtil {
       onPopInvokedWithResult: (bool didPop, Object? result) async {
         if (!didPop) {
           if (hasUnsavedChanges()) {
-            final confirm = await DialogueUtil.showAppCupertinoDialog(
+            final confirm = await DialogueUtil.showAppDialog(
               context: context,
               title: strings(context).stopWritingConfirmTitle,
               content: strings(context).stopWritingConfirmMessage,
               showCancel: true,
             );
 
-            if (confirm == AppDialogResult.confirm) {
+            if (confirm == true) {
               if (!context.mounted) return;
               Navigator.of(context).pop();
             }

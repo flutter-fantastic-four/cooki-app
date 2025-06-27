@@ -2,7 +2,7 @@ name: cooki
 description: "A new Flutter project."
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.0+1
+version: 1.1.0+2
 
 environment:
   sdk: ^3.7.2
@@ -25,14 +25,12 @@ dependencies:
   intl: ^0.19.0
   image_picker: ^1.1.0
   firebase_storage: ^12.4.5
-  settings_ui: ^2.0.2
   flutter_localizations:
     sdk: flutter
   url_launcher: ^6.3.1
   kakao_flutter_sdk_user: ^1.9.7+3
   cloud_functions: ^5.5.1
   firebase_ai: ^2.0.0
-  flutter_native_splash: ^2.4.6
   flutter_image_compress: ^2.4.0
   easy_image_viewer: ^1.5.1
   path_provider: ^2.1.5
@@ -41,10 +39,13 @@ dependencies:
   sign_in_with_apple: ^7.0.1
   flutter_svg: ^2.2.0
   shared_preferences: ^2.5.3
+  firebase_remote_config: ^5.4.5
+  shimmer: ^3.0.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_native_splash: ^2.4.6
 
   flutter_lints: ^5.0.0
 
@@ -59,6 +60,19 @@ flutter:
     - assets/prompts/ko/
     - assets/prompts/en/
     - assets/no_image.png
+  
+  fonts:
+    - family: Pretendard
+      fonts:
+        - asset: assets/fonts/Pretendard-Regular.otf
+          weight: 400
+        - asset: assets/fonts/Pretendard-Medium.otf
+          weight: 500
+        - asset: assets/fonts/Pretendard-SemiBold.otf
+          weight: 600
+        - asset: assets/fonts/Pretendard-Bold.otf
+          weight: 700 
+
 
 flutter_native_splash:
   color: "#1D8163"

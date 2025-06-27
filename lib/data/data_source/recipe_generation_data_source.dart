@@ -193,9 +193,9 @@ class GeminiRecipeGenerationDataSource implements RecipeGenerationDataSource {
     required GenerativeModel model,
     int estimatedOutputTokens = 500,
   }) async {
-    const int dailyTokenLimit = 1000000;
-    const int dailyRequestLimit = 1500;
-    const int maxRequestsPerMinute = 15;
+    // Gemini 2.0 Flash (PAID) pricing per 1M tokens
+    const double inputPricePerMillion = 0.10;
+    const double outputPricePerMillion = 0.40;
 
     int textTokens = 0;
     int imageTokens = 0;
@@ -218,9 +218,18 @@ class GeminiRecipeGenerationDataSource implements RecipeGenerationDataSource {
 
     final int totalInputTokens = textTokens + imageTokens;
     final int totalTokens = totalInputTokens + estimatedOutputTokens;
-    final double percentOfDailyLimit = (totalTokens / dailyTokenLimit) * 100;
-    final int maxRequestsPerDayByTokens =
-        (dailyTokenLimit / totalTokens).floor();
+
+    // Cost calculation
+    final double inputCostUSD =
+        (totalInputTokens / 1000000) * inputPricePerMillion;
+    final double outputCostUSD =
+        (estimatedOutputTokens / 1000000) * outputPricePerMillion;
+    final double totalCostUSD = inputCostUSD + outputCostUSD;
+
+    final double usdToKrw = 1389.44;
+    final double inputCostKRW = inputCostUSD * usdToKrw;
+    final double outputCostKRW = outputCostUSD * usdToKrw;
+    final double totalCostKRW = totalCostUSD * usdToKrw;
 
     return '''
 프롬프트 내용:
@@ -231,12 +240,10 @@ class GeminiRecipeGenerationDataSource implements RecipeGenerationDataSource {
 - 예상 출력 토큰 수: $estimatedOutputTokens
 - 총 예상 토큰 수: $totalTokens
 
-무료 등급의 하루 토큰 한도: 1,000,000 토큰
-이 프롬프트가 사용하는 하루 토큰 한도 비율: ${percentOfDailyLimit.toStringAsFixed(2)}%
-이 요청을 하루에 보낼 수 있는 최대 횟수 (토큰 기준): $maxRequestsPerDayByTokens 회
-
-무료 등급의 하루 요청 한도: $dailyRequestLimit 회
-분당 요청 한도: 분당 $maxRequestsPerMinute 회
+💰 예상 과금 (Gemini 2.0 Flash 기준):
+- 입력 토큰 요금 (@\$0.10/M): \$${inputCostUSD.toStringAsFixed(6)} / 원으로 ₩${inputCostKRW.toStringAsFixed(2)}
+- 출력 토큰 요금 (@\$0.40/M): \$${outputCostUSD.toStringAsFixed(6)} / 원으로 ₩${outputCostKRW.toStringAsFixed(2)}
+- ✅ 총 예상 비용: \$${totalCostUSD.toStringAsFixed(6)} / 원으로 ₩${totalCostKRW.toStringAsFixed(2)}
 ''';
   }
 }

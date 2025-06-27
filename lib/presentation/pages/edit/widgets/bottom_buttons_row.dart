@@ -1,12 +1,14 @@
 import 'dart:developer';
+import 'package:cooki/core/utils/dialogue_util.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../app/constants/app_colors.dart';
 import '../../../../core/utils/general_util.dart';
 import '../../../../core/utils/snackbar_util.dart';
 import '../../../../domain/entity/recipe.dart';
-import '../../../widgets/app_dialog.dart';
+import '../../home/tabs/saved_recipes/saved_recipes_tab_view_model.dart';
 import '../recipe_edit_view_model.dart';
 
 class BottomButtonsRow extends ConsumerWidget {
@@ -39,35 +41,37 @@ class BottomButtonsRow extends ConsumerWidget {
                 if (recipe == null) return;
 
                 if (!context.mounted) return;
-                AppDialog.show(
+                final result = await DialogueUtil.showAppDialog(
                   context: context,
                   title: strings(context).delete,
-                  subText: strings(
+                  content: strings(
                     context,
                   ).deleteConfirmMessage(recipe!.recipeName),
                   primaryButtonText: strings(context).delete,
                   secondaryButtonText: strings(context).cancel,
-                  onPrimaryButtonPressed: () async {
-                    await ref
-                        .read(recipeEditViewModelProvider(recipe).notifier)
-                        .deleteRecipe();
-
-                    if (!context.mounted) return;
-                    SnackbarUtil.showSnackBar(
-                      context,
-                      strings(context).deleteSuccess,
-                      showIcon: true,
-                    );
-                    Navigator.of(context).popUntil((route) => route.isFirst);
-                  },
+                  showCancel: true
                 );
+                if (result == true) {
+                  await ref
+                      .read(recipeEditViewModelProvider(recipe).notifier)
+                      .deleteRecipe();
+
+                  if (!context.mounted) return;
+                  SnackbarUtil.showSnackBar(
+                    context,
+                    strings(context).deleteSuccess,
+                    showIcon: true,
+                  );
+                  ref.read(savedRecipesViewModelProvider(strings(context)).notifier).refreshRecipes();
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                }
               },
               style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: Colors.red),
+                side: const BorderSide(color: AppColors.error),
               ),
               child: Text(
                 strings(context).deleteRecipeButton,
-                style: const TextStyle(color: Colors.red),
+                style: const TextStyle(color: AppColors.error),
               ),
             ),
           ),

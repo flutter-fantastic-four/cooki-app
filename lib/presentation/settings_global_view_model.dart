@@ -25,6 +25,8 @@ enum SupportedLanguage {
 class SettingsState {
   final SupportedLanguage selectedLanguage;
 
+  Locale get locale => Locale(selectedLanguage.code);
+
   const SettingsState({required this.selectedLanguage});
 
   SettingsState copyWith({SupportedLanguage? selectedLanguage}) {
@@ -32,8 +34,6 @@ class SettingsState {
       selectedLanguage: selectedLanguage ?? this.selectedLanguage,
     );
   }
-
-  Locale get locale => Locale(selectedLanguage.code);
 }
 
 class SettingsGlobalViewModel extends Notifier<SettingsState> {

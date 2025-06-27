@@ -2,14 +2,22 @@ import 'package:flutter/material.dart';
 
 import '../../app/constants/app_colors.dart';
 
-InputDecoration getInputDecoration(String? hint) {
+InputDecoration getInputDecoration(
+  String? hint, {
+  double radius = 12,
+  EdgeInsetsGeometry? contentPadding,
+}) {
   return InputDecoration(
     hintText: hint,
     hintStyle: const TextStyle(color: Colors.grey),
-    enabledBorder: _buildBorder(radius: 14, color: AppColors.borderGrey),
-    focusedBorder: _buildBorder(radius: 12, color: AppColors.primary),
-    errorBorder: _buildBorder(radius: 12, color: Colors.red),
-    focusedErrorBorder: _buildBorder(radius: 12, color: Colors.red),
+    contentPadding: contentPadding,
+    enabledBorder: _buildBorder(
+      radius: radius + 2,
+      color: AppColors.borderGrey,
+    ),
+    focusedBorder: _buildBorder(radius: radius, color: AppColors.primary),
+    errorBorder: _buildBorder(radius: radius, color: AppColors.error),
+    focusedErrorBorder: _buildBorder(radius: radius, color: AppColors.error),
   );
 }
 

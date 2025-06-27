@@ -13,7 +13,7 @@ class ExpandableText extends StatelessWidget {
     super.key,
     required this.text,
     required this.isExpanded,
-    this.fontSize = 16,
+    this.fontSize = 15,
     required this.onToggle,
   });
 

@@ -9,6 +9,8 @@ import '../../../../domain/entity/recipe.dart';
 import '../../../widgets/recipe_page_widgets.dart';
 import '../recipe_edit_view_model.dart';
 
+// final titleLengthProvider = StateProvider.autoDispose<int>((ref) => 0);
+
 class TitleFieldWidget extends ConsumerWidget {
   final Recipe? recipe;
   final TextEditingController titleController;
@@ -40,6 +42,8 @@ class TitleFieldWidget extends ConsumerWidget {
       ).select((state) => state.isEditingTitle),
     );
 
+    // ref.read(titleLengthProvider.notifier).state = titleController.text.length;
+
     if (isEditingTitle) {
       return _buildTextFieldRow(context, vm, ref);
     } else {
@@ -63,12 +67,15 @@ class TitleFieldWidget extends ConsumerWidget {
               ),
               child: TextFormField(
                 controller: titleController,
-                // maxLength: RecipePageWidgets.titleMaxLength,
+                maxLength: RecipePageWidgets.titleMaxLength,
+                textInputAction: TextInputAction.done,
                 style: TextStyle(
                   fontSize: 20,
                   color: AppColors.greyScale800,
                   fontWeight: FontWeight.bold,
                 ),
+                minLines: 1,
+                maxLines: 2,
                 autofocus: true,
                 validator: (value) {
                   final error = RecipeValidator.validateTitle(value);
@@ -77,7 +84,11 @@ class TitleFieldWidget extends ConsumerWidget {
                       : null;
                 },
                 onFieldSubmitted: (_) => _confirmTitleEdit(vm),
+                // onChanged: (text) {
+                //   ref.read(titleLengthProvider.notifier).state = text.length;
+                // },
                 decoration: InputDecoration(
+                  // counterText: ref.watch(titleLengthProvider) > 33 ? null : '',
                   hintText: strings(context).recipeTitleHint,
                   hintStyle: const TextStyle(color: Colors.grey),
                   contentPadding: const EdgeInsets.symmetric(
@@ -99,7 +110,7 @@ class TitleFieldWidget extends ConsumerWidget {
         _buildTitleActionButton(
           onPressed: () => _confirmTitleEdit(vm),
           icon: Icons.check,
-          color: AppColors.primary,
+          color: AppColors.greyScale500,
         ),
         _buildTitleActionButton(
           onPressed: () {
@@ -155,7 +166,11 @@ class TitleFieldWidget extends ConsumerWidget {
             child: IconButton(
               padding: EdgeInsets.zero,
               onPressed: () => vm.startTitleEdit(),
-              icon: const Icon(Icons.edit, size: 15),
+              icon: Image.asset(
+                'assets/icons/pencil_icon.png',
+                height: 19,
+                width: 19,
+              ),
             ),
           ),
         ),

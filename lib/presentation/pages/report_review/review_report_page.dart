@@ -46,7 +46,7 @@ class _ReportPageState extends ConsumerState<ReviewReportPage> {
 
     final state = ref.read(reviewReportViewModelProvider);
     if (mounted && state.isError) {
-      DialogueUtil.showAppCupertinoDialog(
+      DialogueUtil.showAppDialog(
         context: context,
         title: strings(context).genericErrorTitle,
         content: strings(context).reportError,

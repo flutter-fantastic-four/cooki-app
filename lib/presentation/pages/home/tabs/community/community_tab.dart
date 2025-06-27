@@ -1,8 +1,10 @@
 // ignore_for_file: unused_element_parameter
 
 import 'package:cooki/core/utils/navigation_util.dart';
-import 'package:cooki/presentation/pages/detail_recipe/detail_recipe_page.dart';
+import 'package:cooki/presentation/pages/detailed_recipe/detailed_recipe_page.dart';
+import 'package:cooki/presentation/pages/home/tabs/community/widget/photo_modal_style_card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../app/constants/app_constants.dart';
 import '../../../../../core/utils/sharing_util.dart';
@@ -11,12 +13,31 @@ import '../../../../../domain/entity/recipe.dart';
 import '../../../../../presentation/widgets/app_cached_image.dart';
 import '../../../../../app/constants/app_colors.dart';
 import '../../../../../core/utils/general_util.dart';
+import '../../../../../core/utils/snackbar_util.dart';
+import 'community_tab_view_model.dart';
 
-// Provider for shared recipes from all users
-final communityRecipesProvider = FutureProvider<List<Recipe>>((ref) async {
-  final repository = ref.watch(recipeRepositoryProvider);
-  return await repository.getSharedRecipes();
-});
+// Provider for calculating actual average rating from reviews
+final actualAverageRatingProvider = FutureProvider.family
+    .autoDispose<Map<String, dynamic>, String>((ref, recipeId) async {
+      try {
+        final reviewRepository = ref.read(reviewRepositoryProvider);
+        final reviews = await reviewRepository.getReviewsByRecipeId(recipeId);
+
+        if (reviews.isEmpty) {
+          return {'average': 0.0, 'count': 0};
+        }
+
+        final totalRating = reviews.fold<int>(
+          0,
+          (sum, review) => sum + review.rating,
+        );
+        final average = totalRating / reviews.length;
+
+        return {'average': average, 'count': reviews.length};
+      } catch (e) {
+        return {'average': 0.0, 'count': 0};
+      }
+    });
 
 class CommunityPage extends ConsumerStatefulWidget {
   const CommunityPage({super.key});
@@ -26,89 +47,88 @@ class CommunityPage extends ConsumerStatefulWidget {
 }
 
 class _CommunityPageState extends ConsumerState<CommunityPage> {
-  List<String> selectedCuisines = [];
-  String selectedSort = '';
+  final TextEditingController _searchController = TextEditingController();
 
-  List<Recipe> get filteredRecipes {
-    final recipesAsync = ref.watch(communityRecipesProvider);
-    return recipesAsync.when(
-      loading: () => [],
-      error: (_, __) => [],
-      data: (recipes) {
-        List<Recipe> filtered = recipes;
-
-        // Filter by cuisine categories if any selected
-        if (selectedCuisines.isNotEmpty) {
-          filtered = filtered.where((r) => selectedCuisines.contains(r.category)).toList();
-        }
-
-        // Apply sort option if selected
-        if (selectedSort == strings(context).sortByRating) {
-          filtered.sort((a, b) => b.ratingSum.compareTo(a.ratingSum));
-        } else if (selectedSort == strings(context).sortByCookTime) {
-          filtered.sort((a, b) => a.cookTime.compareTo(b.cookTime));
-        }
-
-        return filtered;
-      },
-    );
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(communityViewModelProvider);
+    final viewModel = ref.read(communityViewModelProvider.notifier);
+
+    // Show error snackbar if there's an error
+    ref.listen(communityViewModelProvider, (previous, next) {
+      if (next.error != null) {
+        SnackbarUtil.showSnackBar(context, next.error!);
+        viewModel.clearError();
+      }
+    });
+
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        titleSpacing: 20,
-        title: Text(strings(context).communityTitle, style: const TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.w600)),
-        actions: [
-          IconButton(
-            icon: FilterIconWithDot(showDot: selectedCuisines.isNotEmpty || selectedSort.isNotEmpty),
-            onPressed: () => _showFilterModal(context),
-          ),
-          IconButton(icon: const Icon(Icons.search, color: Colors.black, size: 24), onPressed: () {}),
-        ],
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: false,
-      ),
+      appBar:
+          state.isSearchActive
+              ? _buildSearchAppBar(context, state, viewModel)
+              : _buildNormalAppBar(context, state, viewModel),
       body: Column(
         children: [
           // Active filters
-          if (selectedCuisines.isNotEmpty || selectedSort.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  ...selectedCuisines.map(
-                    (cuisine) => _FilterChip(
-                      label: cuisine,
-                      onDeleted: () {
-                        setState(() {
-                          selectedCuisines.remove(cuisine);
-                        });
-                      },
-                      isModalChip: false,
+          if (state.hasActiveFilters)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  margin: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        ...state.selectedCuisines.map(
+                          (cuisine) => Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: _FilterChip(
+                              label: cuisine,
+                              onDeleted: () async {
+                                viewModel.removeCuisine(cuisine);
+                                await viewModel.loadRecipes();
+                              },
+                              isModalChip: false,
+                              isSelected: true,
+                            ),
+                          ),
+                        ),
+                        if (state.selectedSort.isNotEmpty)
+                          _FilterChip(
+                            label: state.selectedSort,
+                            onDeleted: () async {
+                              viewModel.clearSort();
+                              await viewModel.loadRecipes();
+                            },
+                            isModalChip: false,
+                          ),
+                      ],
                     ),
                   ),
-                  if (selectedSort.isNotEmpty)
-                    _FilterChip(
-                      label: selectedSort,
-                      onDeleted: () {
-                        setState(() {
-                          selectedSort = '';
-                        });
-                      },
-                      isModalChip: false,
-                    ),
-                ],
-              ),
+                ),
+                const Divider(
+                  height: 1,
+                  thickness: 1,
+                  color: AppColors.greyScale200,
+                ),
+              ],
             ),
           // Recipe grid
           Expanded(
-            child: RefreshIndicator(onRefresh: _refreshRecipes, color: AppColors.primary, backgroundColor: AppColors.white, child: _buildContent()),
+            child: RefreshIndicator(
+              onRefresh: () => viewModel.refreshRecipes(),
+              color: AppColors.primary,
+              backgroundColor: AppColors.white,
+              child: _buildContent(),
+            ),
           ),
         ],
       ),
@@ -116,85 +136,155 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
   }
 
   Widget _buildContent() {
-    final recipesAsync = ref.watch(communityRecipesProvider);
+    final state = ref.watch(communityViewModelProvider);
+    final viewModel = ref.read(communityViewModelProvider.notifier);
 
-    return recipesAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error:
-          (error, stack) => Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline, size: 64, color: AppColors.greyScale400),
-                const SizedBox(height: 16),
-                Text(
-                  strings(context).errorOccurred,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.greyScale600),
-                ),
-                const SizedBox(height: 8),
-                Text(strings(context).checkNetworkConnection, style: const TextStyle(fontSize: 14, color: AppColors.greyScale500)),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => ref.invalidate(communityRecipesProvider),
-                  style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
-                  child: Text(strings(context).retryButton),
-                ),
-              ],
-            ),
-          ),
-      data: (recipes) {
-        if (filteredRecipes.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.restaurant_menu, size: 64, color: AppColors.greyScale400),
-                const SizedBox(height: 16),
-                Text(
-                  strings(context).noSharedRecipes,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.greyScale600),
-                ),
-                const SizedBox(height: 8),
-                Text(strings(context).shareFirstRecipe, style: const TextStyle(fontSize: 14, color: AppColors.greyScale500)),
-              ],
-            ),
-          );
-        }
+    if (state.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-        return GridView.builder(
-          padding: const EdgeInsets.all(16),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            childAspectRatio: 0.75,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
+    if (state.error != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.error_outline,
+              size: 64,
+              color: AppColors.greyScale400,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              strings(context).errorOccurred,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: AppColors.greyScale600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              strings(context).checkNetworkConnection,
+              style: const TextStyle(
+                fontSize: 14,
+                color: AppColors.greyScale500,
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => viewModel.loadRecipes(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+              ),
+              child: Text(strings(context).retryButton),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final filteredRecipes = state.getFilteredRecipes(context);
+    if (filteredRecipes.isEmpty) {
+      if (state.hasActiveFilters) {
+        // Show no filtered results
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.cancel_outlined,
+                size: 64,
+                color: AppColors.greyScale400,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                strings(context).noRecipes,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.greyScale600,
+                ),
+              ),
+            ],
           ),
-          itemCount: filteredRecipes.length,
-          itemBuilder: (context, index) {
-            final recipe = filteredRecipes[index];
-            return _RecipeCard(recipe: recipe, onOptionsTap: () => _showOptionsModal(context, recipe));
-          },
+        );
+      } else {
+        // Show general empty state
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.restaurant_menu,
+                size: 64,
+                color: AppColors.greyScale400,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                strings(context).noSharedRecipes,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.greyScale600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                strings(context).shareFirstRecipe,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: AppColors.greyScale500,
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+
+    return GridView.builder(
+      padding: const EdgeInsets.all(16),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 160 / 184, // 160x184 card size
+        crossAxisSpacing: 15,
+        mainAxisSpacing: 16,
+      ),
+      itemCount: filteredRecipes.length,
+      itemBuilder: (context, index) {
+        final recipe = filteredRecipes[index];
+        return _RecipeCard(
+          recipe: recipe,
+          onOptionsTap: () => _showOptionsModal(context, recipe),
         );
       },
     );
   }
 
   void _showFilterModal(BuildContext context) {
-    String tempSort = selectedSort;
-    List<String> tempCuisines = List.from(selectedCuisines);
+    final state = ref.read(communityViewModelProvider);
+    final viewModel = ref.read(communityViewModelProvider.notifier);
+
+    String tempSort = state.selectedSort;
+    List<String> tempCuisines = List.from(state.selectedCuisines);
     final cuisineCategories = AppConstants.recipeCategories(context);
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.greyScale50,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+      ),
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setModalState) {
             return Container(
               width: double.infinity,
-              constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.9),
-              decoration: const BoxDecoration(color: AppColors.greyScale50, borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.9,
+              ),
               child: SafeArea(
                 child: SingleChildScrollView(
                   child: Column(
@@ -204,10 +294,13 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                       // Handle
                       Center(
                         child: Container(
-                          margin: const EdgeInsets.only(top: 8, bottom: 8),
-                          width: 36,
-                          height: 4,
-                          decoration: BoxDecoration(color: AppColors.greyScale200, borderRadius: BorderRadius.circular(2)),
+                          margin: const EdgeInsets.only(top: 8, bottom: 12),
+                          width: 40,
+                          height: 5,
+                          decoration: BoxDecoration(
+                            color: AppColors.greyScale400,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
                       ),
                       // Filter content
@@ -217,139 +310,154 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // Sort options
-                            Text(strings(context).sort, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                            Text(
+                              strings(context).sort,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                             const SizedBox(height: 12),
-                            LayoutBuilder(
-                              builder: (context, constraints) {
-                                const chipWidth = 100.0;
-                                const spacing = 8.0;
-                                final chipsPerRow = ((constraints.maxWidth - 24) / (chipWidth + spacing)).floor();
-                                final totalWidth = chipsPerRow * (chipWidth + spacing) - spacing;
-                                final horizontalPadding = (constraints.maxWidth - totalWidth) / 2;
-
-                                return Container(
-                                  width: double.infinity,
-                                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-                                  child: Wrap(
-                                    alignment: WrapAlignment.start,
-                                    spacing: 8,
-                                    runSpacing: 8,
-                                    children: [
-                                      _FilterChip(
-                                        label: strings(context).sortByRating,
-                                        isSelected: tempSort == strings(context).sortByRating,
-                                        onTap: () {
-                                          setModalState(() {
-                                            tempSort = tempSort == strings(context).sortByRating ? '' : strings(context).sortByRating;
-                                          });
-                                        },
-                                        isModalChip: true,
-                                      ),
-                                      _FilterChip(
-                                        label: strings(context).sortByCookTime,
-                                        isSelected: tempSort == strings(context).sortByCookTime,
-                                        onTap: () {
-                                          setModalState(() {
-                                            tempSort = tempSort == strings(context).sortByCookTime ? '' : strings(context).sortByCookTime;
-                                          });
-                                        },
-                                        isModalChip: true,
-                                      ),
-                                    ],
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                              ),
+                              child: Wrap(
+                                alignment: WrapAlignment.start,
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: [
+                                  _FilterChip(
+                                    label: strings(context).sortByRating,
+                                    isSelected:
+                                        tempSort ==
+                                        strings(context).sortByRating,
+                                    onTap: () {
+                                      setModalState(() {
+                                        tempSort =
+                                            tempSort ==
+                                                    strings(
+                                                      context,
+                                                    ).sortByRating
+                                                ? ''
+                                                : strings(context).sortByRating;
+                                      });
+                                    },
+                                    isModalChip: true,
                                   ),
-                                );
-                              },
+                                  _FilterChip(
+                                    label: strings(context).sortByCookTime,
+                                    isSelected:
+                                        tempSort ==
+                                        strings(context).sortByCookTime,
+                                    onTap: () {
+                                      setModalState(() {
+                                        tempSort =
+                                            tempSort ==
+                                                    strings(
+                                                      context,
+                                                    ).sortByCookTime
+                                                ? ''
+                                                : strings(
+                                                  context,
+                                                ).sortByCookTime;
+                                      });
+                                    },
+                                    isModalChip: true,
+                                  ),
+                                ],
+                              ),
                             ),
                             const SizedBox(height: 20),
-                            const Divider(height: 1, thickness: 1, color: AppColors.greyScale200),
+                            const Divider(
+                              height: 1,
+                              thickness: 1,
+                              color: AppColors.greyScale200,
+                            ),
                             const SizedBox(height: 20),
                             // Cuisine filters
-                            Text(strings(context).countryCategory, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-                            const SizedBox(height: 12),
-                            LayoutBuilder(
-                              builder: (context, constraints) {
-                                const chipWidth = 100.0;
-                                const spacing = 8.0;
-                                final chipsPerRow = ((constraints.maxWidth - 24) / (chipWidth + spacing)).floor();
-                                final totalWidth = chipsPerRow * (chipWidth + spacing) - spacing;
-                                final horizontalPadding = (constraints.maxWidth - totalWidth) / 2;
-
-                                return Container(
-                                  width: double.infinity,
-                                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-                                  child: Wrap(
-                                    alignment: WrapAlignment.start,
-                                    spacing: 8,
-                                    runSpacing: 8,
-                                    children:
-                                        cuisineCategories.map((cuisine) {
-                                          return _FilterChip(
-                                            label: cuisine,
-                                            isSelected: tempCuisines.contains(cuisine),
-                                            onTap: () {
-                                              setModalState(() {
-                                                if (tempCuisines.contains(cuisine)) {
-                                                  tempCuisines.remove(cuisine);
-                                                } else {
-                                                  tempCuisines.add(cuisine);
-                                                }
-                                              });
-                                            },
-                                            isModalChip: true,
-                                          );
-                                        }).toList(),
-                                  ),
-                                );
-                              },
+                            Text(
+                              strings(context).countryCategory,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                            const SizedBox(height: 32),
+                            const SizedBox(height: 12),
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                              ),
+                              child: Wrap(
+                                alignment: WrapAlignment.start,
+                                spacing: 8,
+                                runSpacing: 8,
+                                children:
+                                    cuisineCategories.map((cuisine) {
+                                      final isSelected = tempCuisines.contains(
+                                        cuisine,
+                                      );
+                                      return _FilterChip(
+                                        label: cuisine,
+                                        isSelected: isSelected,
+                                        onTap: () {
+                                          setModalState(() {
+                                            if (isSelected) {
+                                              tempCuisines.remove(cuisine);
+                                            } else {
+                                              tempCuisines.add(cuisine);
+                                            }
+                                          });
+                                        },
+                                        isModalChip: true,
+                                      );
+                                    }).toList(),
+                              ),
+                            ),
+                            const SizedBox(height: 24),
                             // Action buttons
                             Row(
                               children: [
                                 Expanded(
-                                  child: TextButton(
-                                    onPressed: () {
-                                      setModalState(() {
-                                        tempSort = '';
-                                        tempCuisines.clear();
-                                      });
+                                  child: OutlinedButton(
+                                    onPressed: () async {
+                                      viewModel.resetFilters();
+                                      await viewModel.loadRecipes();
+                                      Navigator.pop(context);
                                     },
-                                    style: TextButton.styleFrom(
-                                      padding: const EdgeInsets.symmetric(vertical: 12),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                        side: const BorderSide(color: AppColors.greyScale300),
-                                      ),
-                                    ),
-                                    child: Text(
-                                      strings(context).reset,
-                                      style: const TextStyle(color: AppColors.greyScale600, fontWeight: FontWeight.w600),
-                                    ),
+                                    child: Text(strings(context).reset),
                                   ),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: ElevatedButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        selectedSort = tempSort;
-                                        selectedCuisines = tempCuisines;
-                                      });
+                                    onPressed: () async {
                                       Navigator.pop(context);
+                                      viewModel.updateSelectedSort(tempSort);
+                                      viewModel.updateSelectedCuisines(
+                                        List.from(tempCuisines),
+                                      );
+                                      await viewModel.loadRecipes();
                                     },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: AppColors.primary,
                                       foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(vertical: 12),
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
                                     ),
-                                    child: Text(strings(context).apply, style: const TextStyle(fontWeight: FontWeight.w600)),
+                                    child: Text(strings(context).apply),
                                   ),
                                 ),
                               ],
                             ),
                           ],
                         ),
+                      ),
+                      SizedBox(
+                        height: MediaQuery.of(context).viewInsets.bottom + 16,
                       ),
                     ],
                   ),
@@ -362,15 +470,111 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
     );
   }
 
+  PreferredSizeWidget _buildNormalAppBar(
+    BuildContext context,
+    CommunityState state,
+    CommunityViewModel viewModel,
+  ) {
+    return AppBar(
+      titleSpacing: 20,
+      title: Text(
+        strings(context).communityTitle,
+        style: const TextStyle(
+          color: Colors.black,
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      actions: [
+        IconButton(
+          icon: FilterIconWithDot(showDot: state.hasActiveFilters),
+          onPressed: () => _showFilterModal(context),
+        ),
+        IconButton(
+          icon: const Icon(
+            CupertinoIcons.search,
+            color: Colors.black,
+            size: 24,
+          ),
+          onPressed: () => viewModel.toggleSearch(),
+        ),
+        const SizedBox(width: 8),
+      ],
+      backgroundColor: Colors.white,
+      elevation: 0,
+      centerTitle: false,
+    );
+  }
+
+  PreferredSizeWidget _buildSearchAppBar(
+    BuildContext context,
+    CommunityState state,
+    CommunityViewModel viewModel,
+  ) {
+    return AppBar(
+      backgroundColor: Colors.white,
+      elevation: 0,
+      leadingWidth: 56, // 20 + 24 + 12
+      leading: Padding(
+        padding: const EdgeInsets.only(left: 20),
+        child: IconButton(
+          icon: const Icon(CupertinoIcons.back, color: Colors.black, size: 24),
+          onPressed: () {
+            _searchController.clear();
+            viewModel.clearSearch();
+          },
+        ),
+      ),
+      titleSpacing: 12,
+      title: TextField(
+        controller: _searchController,
+        autofocus: true,
+        onChanged: (query) => viewModel.updateSearchQuery(query),
+        decoration: InputDecoration(
+          hintText: strings(context).searchPlaceholder,
+          hintStyle: TextStyle(color: AppColors.greyScale400, fontSize: 16),
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.zero,
+        ),
+        style: const TextStyle(color: Colors.black, fontSize: 16),
+      ),
+      actions: [
+        if (state.searchQuery.isNotEmpty) ...[
+          const SizedBox(width: 8),
+          IconButton(
+            icon: const Icon(
+              Icons.cancel,
+              color: AppColors.greyScale500,
+              size: 18,
+            ),
+            onPressed: () {
+              _searchController.clear();
+              viewModel.updateSearchQuery('');
+            },
+          ),
+        ] else
+          const SizedBox(width: 28), // 8 + 20 when no clear button
+        const SizedBox(width: 20),
+      ],
+    );
+  }
+
   void _showOptionsModal(BuildContext context, Recipe recipe) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.greyScale50,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(26))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+      ),
       builder: (BuildContext context) {
         return Padding(
-          padding: const EdgeInsets.only(top: 8, bottom: 30, left: 15, right: 15),
+          padding: const EdgeInsets.only(
+            top: 8,
+            bottom: 30,
+            left: 15,
+            right: 15,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -378,104 +582,224 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
               Container(
                 width: 40,
                 height: 5,
-                decoration: BoxDecoration(color: AppColors.greyScale400, borderRadius: BorderRadius.circular(10)),
+                decoration: BoxDecoration(
+                  color: AppColors.greyScale400,
+                  borderRadius: BorderRadius.circular(10),
+                ),
                 margin: const EdgeInsets.only(bottom: 12),
               ),
-
-              _PhotoModalStyleCard(
+              PhotoModalStyleCard(
                 text: strings(context).share,
                 icon: Icons.share_outlined,
                 onTap: () async {
-                  await SharingUtil.shareRecipe(context, recipe, ref.read(imageDownloadRepositoryProvider));
+                  await SharingUtil.shareRecipe(
+                    context,
+                    recipe,
+                    ref.read(imageDownloadRepositoryProvider),
+                  );
                   if (!context.mounted) return;
                   Navigator.pop(context);
                 },
               ),
-
               const SizedBox(height: 15),
-              _PhotoModalStyleCard(text: strings(context).close, onTap: () => Navigator.pop(context), isCenter: true),
+              PhotoModalStyleCard(
+                text: strings(context).close,
+                onTap: () => Navigator.pop(context),
+                isCenter: true,
+              ),
             ],
           ),
         );
       },
     );
   }
-
-  Future<void> _refreshRecipes() async {
-    ref.invalidate(communityRecipesProvider);
-    await Future.delayed(const Duration(milliseconds: 300)); // Small delay for better UX
-  }
 }
 
-class _RecipeCard extends StatelessWidget {
+class _RecipeCard extends ConsumerWidget {
   final Recipe recipe;
   final VoidCallback onOptionsTap;
 
   const _RecipeCard({required this.recipe, required this.onOptionsTap});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return GestureDetector(
-      onTap: () {
-        NavigationUtil.pushFromBottom(context, DetailRecipePage(recipe: recipe));
+      onTap: () async {
+        await NavigationUtil.pushFromBottom<bool>(
+          context,
+          DetailRecipePage(recipe: recipe),
+        );
+        // Always refresh the community tab when returning from detail page
+        // This ensures any changes (like bookmarking) are reflected
+        if (context.mounted) {
+          ref.read(communityViewModelProvider.notifier).loadRecipes();
+        }
       },
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: AppColors.greyScale200),
           color: AppColors.white,
-          boxShadow: [BoxShadow(color: AppColors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.black.withValues(alpha: 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              flex: 4,
-              child: Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
-                    child:
-                        recipe.imageUrl != null
-                            ? AppCachedImage(imageUrl: recipe.imageUrl!, fit: BoxFit.cover, width: double.infinity, height: double.infinity)
-                            : Image.asset('assets/no_image.png', fit: BoxFit.cover, width: double.infinity, height: double.infinity),
-                  ),
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: GestureDetector(onTap: onOptionsTap, child: const Icon(Icons.more_vert, size: 20, color: AppColors.black)),
-                  ),
-                ],
+            SizedBox(
+              height: 120,
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(6),
+                ),
+                child:
+                    recipe.imageUrl != null
+                        ? AppCachedImage(
+                          imageUrl: recipe.imageUrl!,
+                          width: double.infinity,
+                          height: double.infinity,
+                          fit: BoxFit.cover,
+                        )
+                        : Image.asset(
+                          'assets/no_image.png',
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
+                        ),
               ),
             ),
-            Expanded(
-              flex: 3,
+            SizedBox(
+              height: 64,
               child: Padding(
-                padding: const EdgeInsets.all(12.0),
+                padding: const EdgeInsets.only(
+                  left: 12.0,
+                  right: 12.0,
+                  top: 12.0,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    SizedBox(
-                      height: 42, // Approximately 2 lines of text at fontSize 15 with 1.2 height
-                      child: Text(
-                        recipe.recipeName,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.greyScale800, height: 1.2),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
+                    // Recipe title with three dots menu
                     Row(
                       children: [
-                        ...List.generate(5, (index) {
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 2),
-                            child: Icon(index < recipe.ratingSum ? Icons.star : Icons.star_border, color: AppColors.black, size: 14),
-                          );
-                        }),
+                        Expanded(
+                          child: Text(
+                            recipe.recipeName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.greyScale800,
+                              height: 1.2,
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: onOptionsTap,
+                          child: const Icon(
+                            Icons.more_vert,
+                            size: 20,
+                            color: AppColors.black,
+                          ),
+                        ),
                       ],
                     ),
+                    // User name and rating
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            recipe.userName,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.greyScale600,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Icon(
+                          Icons.star,
+                          color: AppColors.secondary600,
+                          size: 14,
+                        ),
+                        const SizedBox(width: 2),
+                        Consumer(
+                          builder: (context, ref, child) {
+                            final averageRatingAsync = ref.watch(
+                              actualAverageRatingProvider(recipe.id),
+                            );
+                            return averageRatingAsync.when(
+                              data: (ratingData) {
+                                final average = ratingData['average'] as double;
+                                final count = ratingData['count'] as int;
+                                return Text(
+                                  '${strings(context).average} ${count == 0 ? '0' : average.toStringAsFixed(1)}${strings(context).score}',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.greyScale600,
+                                  ),
+                                );
+                              },
+                              loading:
+                                  () => Text(
+                                    '${strings(context).average} ${recipe.ratingSum.toStringAsFixed(1)}${strings(context).score}',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: AppColors.greyScale600,
+                                    ),
+                                  ),
+                              error:
+                                  (error, stack) => Text(
+                                    '${strings(context).average} 0${strings(context).score}',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: AppColors.greyScale600,
+                                    ),
+                                  ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                    // Row(
+                    //   children: [
+                    //     CircleAvatar(
+                    //       radius: 10,
+                    //       backgroundImage:
+                    //           recipe.userProfileImage != null
+                    //               ? NetworkImage(recipe.userProfileImage!)
+                    //               : null,
+                    //       backgroundColor: AppColors.greyScale200,
+                    //       child:
+                    //           recipe.userProfileImage == null
+                    //               ? const Icon(
+                    //                 Icons.person,
+                    //                 size: 12,
+                    //                 color: AppColors.greyScale600,
+                    //               )
+                    //               : null,
+                    //     ),
+                    //     const SizedBox(width: 8),
+                    //     Expanded(
+                    //       child: Text(
+                    //         recipe.userName,
+                    //         style: const TextStyle(
+                    //           fontSize: 12,
+                    //           color: AppColors.greyScale600,
+                    //         ),
+                    //         overflow: TextOverflow.ellipsis,
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
                   ],
                 ),
               ),
@@ -494,7 +818,13 @@ class _FilterChip extends StatelessWidget {
   final bool isSelected;
   final bool isModalChip;
 
-  const _FilterChip({required this.label, this.onTap, this.onDeleted, this.isSelected = false, this.isModalChip = false});
+  const _FilterChip({
+    required this.label,
+    this.onTap,
+    this.onDeleted,
+    this.isSelected = false,
+    this.isModalChip = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -504,11 +834,17 @@ class _FilterChip extends StatelessWidget {
         height: 26,
         padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
-          color: isModalChip ? (isSelected ? AppColors.primary700 : AppColors.white) : (isSelected ? AppColors.primary50 : AppColors.primary50),
+          color:
+              isModalChip
+                  ? (isSelected ? AppColors.primary700 : AppColors.white)
+                  : (isSelected ? AppColors.primary50 : AppColors.primary50),
           borderRadius: BorderRadius.circular(13),
           border:
               isModalChip
-                  ? Border.all(color: isSelected ? AppColors.primary800 : AppColors.white, width: 1)
+                  ? Border.all(
+                    color: isSelected ? AppColors.primary800 : AppColors.white,
+                    width: 1,
+                  )
                   : Border.all(color: AppColors.primary700, width: 1),
         ),
         child: Row(
@@ -519,8 +855,10 @@ class _FilterChip extends StatelessWidget {
               style: TextStyle(
                 color:
                     isModalChip
-                        ? (isSelected ? AppColors.white : AppColors.greyScale600)
-                        : (isSelected ? AppColors.primary700 : AppColors.primary700),
+                        ? (isSelected
+                            ? AppColors.white
+                            : AppColors.greyScale800)
+                        : (isSelected ? AppColors.primary : AppColors.primary),
                 fontSize: 12,
                 height: 1.2,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
@@ -528,7 +866,14 @@ class _FilterChip extends StatelessWidget {
             ),
             if (onDeleted != null) ...[
               const SizedBox(width: 2),
-              GestureDetector(onTap: onDeleted, child: Icon(Icons.close, size: 14, color: isModalChip ? AppColors.white : AppColors.primary700)),
+              GestureDetector(
+                onTap: onDeleted,
+                child: Icon(
+                  Icons.close,
+                  size: 14,
+                  color: isModalChip ? AppColors.white : AppColors.primary700,
+                ),
+              ),
               const SizedBox(width: 2),
             ],
           ],
@@ -551,43 +896,18 @@ class FilterIconWithDot extends StatelessWidget {
         const Icon(Icons.filter_list, color: Colors.black, size: 24),
         if (showDot)
           Positioned(
-            top: 4,
-            right: 4,
-            child: Container(width: 8, height: 8, decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle)),
+            right: -2,
+            top: 2,
+            child: Container(
+              width: 8,
+              height: 8,
+              decoration: const BoxDecoration(
+                color: AppColors.primary,
+                shape: BoxShape.circle,
+              ),
+            ),
           ),
       ],
-    );
-  }
-}
-
-class _PhotoModalStyleCard extends StatelessWidget {
-  final String text;
-  final IconData? icon;
-  final VoidCallback onTap;
-  final Color? iconColor;
-  final Color? textColor;
-  final bool isCenter;
-
-  const _PhotoModalStyleCard({required this.text, this.icon, required this.onTap, this.iconColor, this.textColor, this.isCenter = false});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-        decoration: BoxDecoration(color: AppColors.white, borderRadius: BorderRadius.circular(12)),
-        child:
-            isCenter
-                ? Center(child: Text(text, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: textColor ?? AppColors.greyScale800)))
-                : Row(
-                  children: [
-                    if (icon != null) ...[Icon(icon, color: iconColor ?? AppColors.greyScale800, size: 24), const SizedBox(width: 12)],
-                    Text(text, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: textColor ?? AppColors.greyScale800)),
-                  ],
-                ),
-      ),
     );
   }
 }
