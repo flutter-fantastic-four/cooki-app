@@ -1,5 +1,6 @@
 import 'package:cooki/app/constants/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class PreferenceChip extends StatelessWidget {
   final String label;
@@ -39,9 +40,25 @@ class PreferenceChip extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (!isSelected)
-                Icon(Icons.add, size: 16, color: Colors.grey[600])
+                SvgPicture.asset(
+                  'assets/icons/name=plus, size=24, state=Default.svg',
+                  width: 16,
+                  height: 16,
+                  colorFilter: ColorFilter.mode(
+                    Color(0xFF757575),
+                    BlendMode.srcIn,
+                  ),
+                )
               else
-                Icon(Icons.check, size: 14, color: AppColors.greenTextColor),
+                SvgPicture.asset(
+                  'assets/icons/name=check1, size=24, state=Default.svg',
+                  width: 14,
+                  height: 14,
+                  colorFilter: ColorFilter.mode(
+                    AppColors.greenTextColor,
+                    BlendMode.srcIn,
+                  ),
+                ),
               const SizedBox(width: 4),
               Text(
                 label,

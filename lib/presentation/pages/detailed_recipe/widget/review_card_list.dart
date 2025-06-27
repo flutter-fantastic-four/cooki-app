@@ -15,14 +15,20 @@ class ReviewCardList extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(reviewsViewModelProvider(recipe.id));
 
-    final reviews = state.reviews.length > 5 ? state.reviews.sublist(0, 5) : state.reviews;
+    final reviews =
+        state.reviews.length > 5 ? state.reviews.sublist(0, 5) : state.reviews;
     if (reviews.isEmpty) return SizedBox();
 
     return SizedBox(
       height: 120,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        child: Row(children: reviews.map((review) => _buildReviewCard(context, ref, review)).toList()),
+        child: Row(
+          children:
+              reviews
+                  .map((review) => _buildReviewCard(context, ref, review))
+                  .toList(),
+        ),
       ),
     );
   }
@@ -33,7 +39,11 @@ class ReviewCardList extends ConsumerWidget {
       height: 80,
       margin: const EdgeInsets.symmetric(horizontal: 8),
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(12), color: Colors.white),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(12),
+        color: Colors.white,
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -42,7 +52,10 @@ class ReviewCardList extends ConsumerWidget {
               : SizedBox(
                 width: 52,
                 height: 52,
-                child: ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.asset('assets/no_image.png', fit: BoxFit.cover)),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.asset('assets/no_image.png', fit: BoxFit.cover),
+                ),
               ),
           SizedBox(width: 8),
 
@@ -62,7 +75,12 @@ class ReviewCardList extends ConsumerWidget {
                 ),
                 const SizedBox(height: 4),
                 if (review.reviewText?.isNotEmpty == true)
-                  Text(review.reviewText!, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13, height: 1.2)),
+                  Text(
+                    review.reviewText!,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 13, height: 1.2),
+                  ),
               ],
             ),
           ),
@@ -78,7 +96,12 @@ class ReviewCardList extends ConsumerWidget {
       height: imageDimension,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
-        child: AppCachedImage(imageUrl: review.imageUrls.first, width: imageDimension, height: imageDimension, fit: BoxFit.cover),
+        child: AppCachedImage(
+          imageUrl: review.imageUrls.first,
+          width: imageDimension,
+          height: imageDimension,
+          fit: BoxFit.cover,
+        ),
       ),
     );
   }

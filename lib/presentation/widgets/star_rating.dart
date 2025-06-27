@@ -19,7 +19,7 @@ class StarRating extends StatelessWidget {
     this.setRating,
     this.alignment = MainAxisAlignment.center,
     this.filledStarColor = AppColors.secondary600,
-    this.emptyStarColor = AppColors.greyScale500,
+    this.emptyStarColor = AppColors.greyScale300,
   });
 
   @override

@@ -14,6 +14,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import '../../../app/constants/app_colors.dart';
 import '../../../core/utils/general_util.dart';
 import '../../../core/utils/modal_util.dart';
@@ -58,27 +59,59 @@ class ReviewsPage extends ConsumerWidget {
       if (shouldShowTranslate && !hasTranslation)
         ModalOption(
           text: strings(context).translateReview,
-          icon: Icons.g_translate,
+          customIcon: SvgPicture.asset(
+            'assets/icons/name=translate, size=24, state=Default.svg',
+            width: 20,
+            height: 20,
+            colorFilter: const ColorFilter.mode(
+              Colors.black87,
+              BlendMode.srcIn,
+            ),
+          ),
           onTap:
               () => _translateReview(context, ref, review, currentAppLanguage),
         ),
       if (hasTranslation)
         ModalOption(
           text: strings(context).undoTranslation,
-          icon: Icons.translate_outlined,
+          customIcon: SvgPicture.asset(
+            'assets/icons/name=translate, size=24, state=Default.svg',
+            width: 20,
+            height: 20,
+            colorFilter: const ColorFilter.mode(
+              Colors.black87,
+              BlendMode.srcIn,
+            ),
+          ),
           onTap: () => vm.clearTranslation(review.id),
         ),
       if (isMyReview)
         ModalOption(
           text: strings(context).editReview,
-          icon: Icons.edit_outlined,
+          customIcon: SvgPicture.asset(
+            'assets/icons/name=edit, size=24, state=Default.svg',
+            width: 20,
+            height: 20,
+            colorFilter: const ColorFilter.mode(
+              Colors.black87,
+              BlendMode.srcIn,
+            ),
+          ),
           onTap:
               () => _navigateToWriteOrEditReview(context, ref, review: review),
         ),
       if (!isMyReview)
         ModalOption(
           text: strings(context).reportReview,
-          icon: Icons.flag,
+          customIcon: SvgPicture.asset(
+            'assets/icons/name=warning, size=24, state=Default.svg',
+            width: 20,
+            height: 20,
+            colorFilter: const ColorFilter.mode(
+              AppColors.error,
+              BlendMode.srcIn,
+            ),
+          ),
           isRed: true,
           onTap: () => _reportReview(context, review),
         ),
@@ -86,7 +119,15 @@ class ReviewsPage extends ConsumerWidget {
         ModalOption(
           text: strings(context).deleteReview,
           isRed: true,
-          icon: Icons.delete,
+          customIcon: SvgPicture.asset(
+            'assets/icons/name=delete, size=24, state=Default.svg',
+            width: 20,
+            height: 20,
+            colorFilter: const ColorFilter.mode(
+              AppColors.error,
+              BlendMode.srcIn,
+            ),
+          ),
           onTap: () => _deleteReview(context, ref, review),
         ),
     ];
@@ -240,10 +281,14 @@ class ReviewsPage extends ConsumerWidget {
                       );
                     }
                   },
-                  icon: Image.asset(
-                    'assets/icons/pencil_icon.png',
-                    height: 22,
+                  icon: SvgPicture.asset(
+                    'assets/icons/name=edit, size=24, state=Default.svg',
                     width: 22,
+                    height: 22,
+                    colorFilter: const ColorFilter.mode(
+                      Colors.black,
+                      BlendMode.srcIn,
+                    ),
                   ),
                 ),
               )
