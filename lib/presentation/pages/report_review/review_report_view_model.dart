@@ -1,5 +1,5 @@
 import 'package:cooki/domain/entity/app_user.dart';
-import 'package:cooki/domain/entity/review.dart';
+import 'package:cooki/domain/entity/review/review.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/logger.dart';
 import '../../../data/dto/report_dto.dart';

@@ -2,7 +2,7 @@ import 'package:cooki/app/constants/app_colors.dart';
 import 'package:cooki/core/utils/general_util.dart';
 import 'package:cooki/data/repository/providers.dart';
 import 'package:cooki/domain/entity/recipe.dart';
-import 'package:cooki/domain/entity/review.dart';
+import 'package:cooki/domain/entity/review/review.dart';
 import 'package:cooki/presentation/pages/detailed_recipe/detailed_recipe_page.dart';
 import 'package:cooki/presentation/pages/reviews/reviews_view_model.dart';
 import 'package:cooki/presentation/user_global_view_model.dart';

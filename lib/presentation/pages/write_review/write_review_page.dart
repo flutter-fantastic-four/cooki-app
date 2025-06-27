@@ -11,7 +11,7 @@ import '../../../app/constants/app_colors.dart';
 import '../../../core/utils/dialogue_util.dart';
 import '../../../core/utils/error_mappers.dart';
 import '../../../core/utils/general_util.dart';
-import '../../../domain/entity/review.dart';
+import '../../../domain/entity/review/review.dart';
 import '../../user_global_view_model.dart';
 import '../../widgets/input_decorations.dart';
 import '../../widgets/star_rating.dart';

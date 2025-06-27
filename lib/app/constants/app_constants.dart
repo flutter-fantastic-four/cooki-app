@@ -1,28 +1,9 @@
 import 'package:cooki/gen/l10n/app_localizations.dart';
 
-import '../../data/data_source/review_data_source.dart';
 import '../../domain/entity/recipe_category.dart';
-import '../../domain/entity/sort_option.dart';
 
 class AppConstants {
   static const appTitle = 'Cooki';
-
-  static List<SortOption> getSortOptions() {
-    return [
-      SortOption(
-        labelGetter: (strings) => strings.newestFirst,
-        type: ReviewSortType.dateDescending,
-      ),
-      SortOption(
-        labelGetter: (strings) => strings.highestRating,
-        type: ReviewSortType.ratingDescending,
-      ),
-      SortOption(
-        labelGetter: (strings) => strings.lowestRating,
-        type: ReviewSortType.ratingAscending,
-      ),
-    ];
-  }
 
   static List<String> recipePreferences(AppLocalizations strings) {
     return [

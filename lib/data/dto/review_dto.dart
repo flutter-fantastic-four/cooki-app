@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../domain/entity/review.dart';
+import '../../domain/entity/review/review.dart';
 
 class ReviewDto {
   final String id;

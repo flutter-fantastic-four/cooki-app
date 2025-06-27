@@ -1,8 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../domain/entity/review/review_sort_type.dart';
 import '../dto/review_dto.dart';
-
-enum ReviewSortType { dateDescending, ratingAscending, ratingDescending }
 
 abstract class ReviewDataSource {
   Future<String> saveReview({

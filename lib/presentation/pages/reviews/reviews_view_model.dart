@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/error_mappers.dart';
 import '../../../core/utils/logger.dart';
-import '../../../data/data_source/review_data_source.dart';
 import '../../../data/repository/providers.dart';
-import '../../../domain/entity/review.dart';
+import '../../../domain/entity/review/review.dart';
+import '../../../domain/entity/review/review_sort_type.dart';
 
 class ReviewsState {
   final List<Review> reviews;
