@@ -7,7 +7,7 @@ import 'package:cooki/core/utils/sharing_util.dart';
 import 'package:cooki/core/utils/snackbar_util.dart';
 import 'package:cooki/domain/entity/app_user.dart';
 import 'package:cooki/domain/entity/recipe.dart';
-import 'package:cooki/domain/entity/review.dart';
+import 'package:cooki/domain/entity/review/review.dart';
 import 'package:cooki/presentation/pages/detailed_recipe/widget/rating_modal.dart';
 import 'package:cooki/presentation/pages/detailed_recipe/widget/review_card_list.dart';
 import 'package:cooki/presentation/pages/edit/recipe_edit_page.dart';

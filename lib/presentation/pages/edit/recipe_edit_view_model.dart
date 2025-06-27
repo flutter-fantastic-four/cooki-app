@@ -4,6 +4,7 @@ import 'package:cooki/domain/entity/recipe.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/error_mappers.dart';
 import '../../../data/repository/providers.dart';
+import '../../settings_global_view_model.dart';
 
 /// How many items max to allow in either list
 const int recipeListMaxItems = 30;
@@ -15,6 +16,7 @@ class RecipeEditState {
   final SaveRecipeErrorKey? errorKey;
   final bool isEditingTitle;
   final String? currentTitle;
+  final SupportedLanguage? recipeLanguage;
 
   const RecipeEditState({
     this.selectedCategory,
@@ -23,6 +25,7 @@ class RecipeEditState {
     this.errorKey,
     this.isEditingTitle = false,
     this.currentTitle,
+    this.recipeLanguage,
   });
 
   RecipeEditState copyWith({
@@ -33,6 +36,7 @@ class RecipeEditState {
     bool clearErrorKey = false,
     bool? isEditingTitle,
     String? currentTitle,
+    SupportedLanguage? recipeLanguage,
   }) => RecipeEditState(
     selectedCategory: selectedCategory ?? this.selectedCategory,
     isPublic: isPublic ?? this.isPublic,
@@ -40,6 +44,7 @@ class RecipeEditState {
     errorKey: clearErrorKey ? null : errorKey ?? this.errorKey,
     isEditingTitle: isEditingTitle ?? this.isEditingTitle,
     currentTitle: currentTitle ?? this.currentTitle,
+    recipeLanguage: recipeLanguage ?? this.recipeLanguage,
   );
 }
 
@@ -110,6 +115,10 @@ class RecipeEditViewModel
     } catch (e, stack) {
       logError(e, stack);
     }
+  }
+
+  void setRecipeLanguage(SupportedLanguage language) {
+    state = state.copyWith(recipeLanguage: language);
   }
 
   void setCategory(String? category) {

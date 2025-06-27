@@ -4,7 +4,9 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 
+import '../../domain/entity/recipe_category.dart';
 import '../../gen/l10n/app_localizations.dart';
+import '../../presentation/settings_global_view_model.dart';
 import 'dialogue_util.dart';
 
 AppLocalizations strings(BuildContext context) {
@@ -75,5 +77,31 @@ class GeneralUtil {
       },
       child: child,
     );
+  }
+
+  static Future<SupportedLanguage?> detectCategoryLanguage(
+    String storedCategory,
+  ) async {
+    for (final language in SupportedLanguage.values) {
+      final locale = Locale(language.code);
+      final strings = await AppLocalizations.delegate.load(locale);
+      final match = RecipeCategory.fromLabel(storedCategory, strings);
+      if (match != null) return language;
+    }
+    return null;
+  }
+
+  /// Convert category from current app language to a specific language
+  static Future<String?> convertFromCurrentLanguage({
+    required String categInCurrLang,
+    required AppLocalizations strings,
+    required SupportedLanguage targetLanguage,
+  }) async {
+    final categoryEnum = RecipeCategory.fromLabel(categInCurrLang, strings);
+    if (categoryEnum == null) return null;
+
+    final targetLocale = Locale(targetLanguage.code);
+    final targetStrings = await AppLocalizations.delegate.load(targetLocale);
+    return categoryEnum.getLabel(targetStrings);
   }
 }

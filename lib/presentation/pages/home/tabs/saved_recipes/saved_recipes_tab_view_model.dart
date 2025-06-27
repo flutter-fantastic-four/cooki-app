@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:cooki/core/utils/general_util.dart';
 import 'package:cooki/core/utils/logger.dart';
 import 'package:cooki/core/utils/category_mapper.dart';
 import 'package:flutter/material.dart';
@@ -148,15 +149,7 @@ class SavedRecipesViewModel
 
       // Apply cuisine filter
       if (state.selectedCuisines.isNotEmpty) {
-        recipes =
-            recipes.where((recipe) {
-              return state.selectedCuisines.any(
-                (selectedCuisine) => CategoryMapper.doesCategoryMatch(
-                  recipe.category,
-                  selectedCuisine,
-                ),
-              );
-            }).toList();
+        recipes = await _filterRecipesBySelectedCuisines(recipes);
       }
 
       // Load actual average ratings for all recipes
@@ -217,6 +210,43 @@ class SavedRecipesViewModel
       logError(e, stack);
       // Don't fail the whole operation if ratings can't be loaded
     }
+  }
+
+  Future<List<Recipe>> _filterRecipesBySelectedCuisines(
+    List<Recipe> recipes,
+  ) async {
+    final filteredRecipes = <Recipe>[];
+
+    for (final recipe in recipes) {
+      for (final selectedCuisine in state.selectedCuisines) {
+        // Check if recipe category matches any selected cuisine in any language
+        final recipeLanguage = await GeneralUtil.detectCategoryLanguage(
+          recipe.category,
+        );
+        if (recipeLanguage != null) {
+          // Convert selected cuisine to recipe's language for comparison
+          final cuisineInRecipeLanguage =
+              await GeneralUtil.convertFromCurrentLanguage(
+                categInCurrLang: selectedCuisine,
+                strings: arg,
+                targetLanguage: recipeLanguage,
+              );
+
+          if (cuisineInRecipeLanguage == recipe.category) {
+            filteredRecipes.add(recipe);
+            break; // Found a match, no need to check other cuisines for this recipe
+          }
+        } else {
+          // Fallback to direct string comparison if language detection fails
+          if (recipe.category == selectedCuisine) {
+            filteredRecipes.add(recipe);
+            break;
+          }
+        }
+      }
+    }
+
+    return filteredRecipes;
   }
 
   Future<void> _loadUserRatings(List<Recipe> recipes) async {

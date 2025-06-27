@@ -1,6 +1,6 @@
 import 'package:cooki/app/constants/app_colors.dart';
 import 'package:cooki/domain/entity/recipe.dart';
-import 'package:cooki/domain/entity/review.dart';
+import 'package:cooki/domain/entity/review/review.dart';
 import 'package:cooki/presentation/pages/reviews/reviews_view_model.dart';
 import 'package:cooki/presentation/widgets/app_cached_image.dart';
 import 'package:cooki/presentation/widgets/star_rating.dart';
