@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ReviewCardList extends ConsumerWidget {
   const ReviewCardList(this.recipe, {super.key});
+
   final Recipe recipe;
 
   @override

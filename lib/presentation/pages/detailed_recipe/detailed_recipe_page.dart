@@ -121,6 +121,7 @@ final isRecipeSavedProvider = FutureProvider.family.autoDispose<bool, String>((
 class DetailRecipePage extends ConsumerWidget {
   final Recipe recipe;
   final String? category;
+  // ignore: unused_field
   static bool _hasRatingBeenPosted = false;
 
   const DetailRecipePage({super.key, required this.recipe, this.category});
@@ -584,6 +585,7 @@ class DetailRecipePage extends ConsumerWidget {
                 existingReview = null;
               }
 
+              if (!context.mounted) return;
               ratingPosted = await NavigationUtil.pushFromBottom<bool>(
                 context,
                 WriteReviewPage(

@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:cooki/core/utils/logger.dart';
-import 'package:cooki/core/utils/category_mapper.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -56,9 +55,7 @@ class SharingUtil {
     }
     buffer.writeln('${recipe.recipeName} ${s.recipe}');
     buffer.writeln();
-    buffer.writeln(
-      '📂 ${s.categoryLabel}: ${CategoryMapper.translateCategoryToAppLanguage(context, recipe.category)}',
-    );
+    buffer.writeln('📂 ${s.categoryLabel}: ${recipe.category}');
     buffer.writeln('⏱️ ${s.cookTimeLabel}: ${recipe.cookTime}${s.minutes}');
     buffer.writeln('🔥 ${s.caloriesLabel}: ${recipe.calories}kcal');
     if (recipe.tags.isNotEmpty) {

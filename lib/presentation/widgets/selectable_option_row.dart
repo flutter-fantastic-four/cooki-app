@@ -10,7 +10,6 @@ class SelectableOptionRow extends StatelessWidget {
   final VoidCallback onTap;
   final double horizontalPadding;
   final bool isTwoOptions;
-  final bool useCheckbox;
 
   const SelectableOptionRow({
     super.key,
@@ -19,7 +18,6 @@ class SelectableOptionRow extends StatelessWidget {
     required this.onTap,
     this.horizontalPadding = 10,
     this.isTwoOptions = false,
-    this.useCheckbox = false,
   });
 
   @override
@@ -52,12 +50,10 @@ class SelectableOptionRow extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 22),
-                useCheckbox
-                    ? CheckboxWidget(isSelected: isSelected)
-                    : RadioCircle(
-                      isSelected: isSelected,
-                      showCheckOnUnselected: isTwoOptions,
-                    ),
+                RadioCircle(
+                  isSelected: isSelected,
+                  showCheckOnUnselected: isTwoOptions,
+                ),
               ],
             ),
           ),
@@ -94,34 +90,6 @@ class RadioCircle extends StatelessWidget {
               ? const Icon(Icons.check, color: Colors.white, size: 18)
               : showCheckOnUnselected
               ? const Icon(Icons.check, color: Colors.grey, size: 18)
-              : null,
-    );
-  }
-}
-
-class CheckboxWidget extends StatelessWidget {
-  final bool isSelected;
-  final double dimension;
-
-  const CheckboxWidget({
-    super.key,
-    required this.isSelected,
-    this.dimension = 24,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: dimension,
-      height: dimension,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: isSelected ? AppColors.primary400 : Colors.transparent,
-        border: isSelected ? null : Border.all(color: Colors.grey, width: 1.0),
-      ),
-      child:
-          isSelected
-              ? const Icon(Icons.check, color: Colors.white, size: 18)
               : null,
     );
   }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../app/constants/app_colors.dart';
 import '../../../../core/ui_validators/recipe_validator.dart';
@@ -167,14 +166,10 @@ class TitleFieldWidget extends ConsumerWidget {
             child: IconButton(
               padding: EdgeInsets.zero,
               onPressed: () => vm.startTitleEdit(),
-              icon: SvgPicture.asset(
-                'assets/icons/name=edit, size=24, state=Default.svg',
-                width: 19,
+              icon: Image.asset(
+                'assets/icons/pencil_icon.png',
                 height: 19,
-                colorFilter: const ColorFilter.mode(
-                  Colors.black,
-                  BlendMode.srcIn,
-                ),
+                width: 19,
               ),
             ),
           ),

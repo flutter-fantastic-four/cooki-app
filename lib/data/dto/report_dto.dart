@@ -42,7 +42,7 @@ class ReportDto {
   final String? reporterImageUrl;
   final String reviewerId;
   final String reviewerName;
-  final ReportReason reason;
+  final List<String> reasons;
   final String? additionalContext;
   final Timestamp createdAt;
   final bool isDeleted;
@@ -54,13 +54,14 @@ class ReportDto {
     this.reporterImageUrl,
     required this.reviewerId,
     required this.reviewerName,
-    required this.reason,
+    required this.reasons,
     this.additionalContext,
     required this.createdAt,
     this.isDeleted = false,
   });
 
   factory ReportDto.fromMap(String id, Map<String, dynamic> map) {
+    final rawReasons = map['reasons'] as List<dynamic>? ?? [];
     return ReportDto(
       id: id,
       reporterId: map['reporterId'] ?? '',
@@ -68,10 +69,7 @@ class ReportDto {
       reporterImageUrl: map['reporterImageUrl'],
       reviewerId: map['reviewerId'] ?? '',
       reviewerName: map['reviewerName'] ?? '',
-      reason: ReportReason.values.firstWhere(
-            (r) => r.name == map['reason'],
-        orElse: () => ReportReason.other,
-      ),
+      reasons: rawReasons.cast<String>(),
       additionalContext: map['additionalContext'],
       createdAt: map['createdAt'] ?? Timestamp.now(),
       isDeleted: map['isDeleted'] ?? false,
@@ -85,7 +83,7 @@ class ReportDto {
       'reporterImageUrl': reporterImageUrl,
       'reviewerId': reviewerId,
       'reviewerName': reviewerName,
-      'reason': reason.name,
+      'reasons': reasons,
       'additionalContext': additionalContext,
       'createdAt': createdAt,
       'isDeleted': isDeleted,
@@ -100,7 +98,7 @@ class ReportDto {
       reporterImageUrl: report.reporterImageUrl,
       reviewerId: report.reviewerId,
       reviewerName: report.reviewerName,
-      reason: report.reason,
+      reasons: report.reasons.map((r) => r.name).toList(),
       additionalContext: report.additionalContext,
       createdAt: Timestamp.fromDate(report.createdAt),
       isDeleted: report.isDeleted,
@@ -115,7 +113,15 @@ class ReportDto {
       reporterImageUrl: reporterImageUrl,
       reviewerId: reviewerId,
       reviewerName: reviewerName,
-      reason: reason,
+      reasons:
+          reasons
+              .map(
+                (s) => ReportReason.values.firstWhere(
+                  (r) => r.name == s,
+                  orElse: () => ReportReason.other,
+                ),
+              )
+              .toSet(),
       additionalContext: additionalContext,
       createdAt: createdAt.toDate(),
       isDeleted: isDeleted,
