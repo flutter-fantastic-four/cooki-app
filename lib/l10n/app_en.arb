@@ -172,7 +172,7 @@
   "reportError": "An error occurred while submitting the report.",
   "confirmReportSubmission": "Submit Report?",
   "confirmReportMessage": "The report will be submitted with your selected reasons.",
-  "minCharactersError": "Please write at least 10 characters",
+  "reportEmptyOrMinLenError": "Explain the reason for the report (More than 10 characters)",
 
   "selectLanguageTitle": "Select your preferred\nlanguage for Cooki",
   "languageChangedSuccessfully": "Language changed successfully.",

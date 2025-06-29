@@ -14,7 +14,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/svg.dart';
 import '../../../app/constants/app_colors.dart';
 import '../../../core/utils/general_util.dart';
 import '../../../core/utils/modal_util.dart';
@@ -59,59 +58,28 @@ class ReviewsPage extends ConsumerWidget {
       if (shouldShowTranslate && !hasTranslation)
         ModalOption(
           text: strings(context).translateReview,
-          customIcon: SvgPicture.asset(
-            'assets/icons/name=translate, size=24, state=Default.svg',
-            width: 20,
-            height: 20,
-            colorFilter: const ColorFilter.mode(
-              Colors.black87,
-              BlendMode.srcIn,
-            ),
-          ),
+          iconData: Icons.g_translate,
           onTap:
               () => _translateReview(context, ref, review, currentAppLanguage),
         ),
       if (hasTranslation)
         ModalOption(
           text: strings(context).undoTranslation,
-          customIcon: SvgPicture.asset(
-            'assets/icons/name=translate, size=24, state=Default.svg',
-            width: 20,
-            height: 20,
-            colorFilter: const ColorFilter.mode(
-              Colors.black87,
-              BlendMode.srcIn,
-            ),
-          ),
+          svgIconPath:
+              'assets/icons/name=translate, size=24, state=Default.svg',
           onTap: () => vm.clearTranslation(review.id),
         ),
       if (isMyReview)
         ModalOption(
           text: strings(context).editReview,
-          customIcon: SvgPicture.asset(
-            'assets/icons/name=edit, size=24, state=Default.svg',
-            width: 20,
-            height: 20,
-            colorFilter: const ColorFilter.mode(
-              Colors.black87,
-              BlendMode.srcIn,
-            ),
-          ),
+          svgIconPath: 'assets/icons/name=edit, size=24, state=Default.svg',
           onTap:
               () => _navigateToWriteOrEditReview(context, ref, review: review),
         ),
       if (!isMyReview)
         ModalOption(
           text: strings(context).reportReview,
-          customIcon: SvgPicture.asset(
-            'assets/icons/name=warning, size=24, state=Default.svg',
-            width: 20,
-            height: 20,
-            colorFilter: const ColorFilter.mode(
-              AppColors.error,
-              BlendMode.srcIn,
-            ),
-          ),
+          svgIconPath: 'assets/icons/name=warning, size=24, state=Default.svg',
           isRed: true,
           onTap: () => _reportReview(context, review),
         ),
@@ -119,15 +87,7 @@ class ReviewsPage extends ConsumerWidget {
         ModalOption(
           text: strings(context).deleteReview,
           isRed: true,
-          customIcon: SvgPicture.asset(
-            'assets/icons/name=delete, size=24, state=Default.svg',
-            width: 20,
-            height: 20,
-            colorFilter: const ColorFilter.mode(
-              AppColors.error,
-              BlendMode.srcIn,
-            ),
-          ),
+          svgIconPath: 'assets/icons/name=delete, size=24, state=Default.svg',
           onTap: () => _deleteReview(context, ref, review),
         ),
     ];
@@ -281,14 +241,10 @@ class ReviewsPage extends ConsumerWidget {
                       );
                     }
                   },
-                  icon: SvgPicture.asset(
-                    'assets/icons/name=edit, size=24, state=Default.svg',
-                    width: 22,
+                  icon: Image.asset(
+                    'assets/icons/pencil_icon.png',
                     height: 22,
-                    colorFilter: const ColorFilter.mode(
-                      Colors.black,
-                      BlendMode.srcIn,
-                    ),
+                    width: 22,
                   ),
                 ),
               )

@@ -64,42 +64,38 @@ class ReviewReportViewModel extends AutoDisposeNotifier<ReportState> {
     if (!state.canSubmit) return;
 
     state = state.copyWith(isLoading: true);
-    // Create a report for each selected reason
-    final reports =
-        state.selectedReasons
-            .map(
-              (reason) => Report(
-                id: '',
-                // Will be set by Firestore
-                reporterId: currentUser.id,
-                reporterName: currentUser.name,
-                reporterImageUrl: currentUser.profileImage,
-                reviewerId: review.userId,
-                reviewerName: review.userName,
-                reason: reason,
-                additionalContext:
-                    state.additionalContext.trim().isEmpty
-                        ? null
-                        : state.additionalContext.trim(),
-              ),
-            )
-            .toList();
+    final report = Report(
+      id: '',
+      // Will be set by Firestore
+      reporterId: currentUser.id,
+      reporterName: currentUser.name,
+      reporterImageUrl: currentUser.profileImage,
+      reviewerId: review.userId,
+      reviewerName: review.userName,
+      reasons: state.selectedReasons,
+      additionalContext:
+      state.additionalContext.trim().isEmpty
+          ? null
+          : state.additionalContext.trim(),
+    );
     try {
-      for (final report in reports) {
-        await ref
-            .read(reportRepositoryProvider)
-            .createReport(
-              recipeId: recipeId,
-              reviewId: review.id,
-              report: report,
-            );
-      }
+      await ref
+          .read(reportRepositoryProvider)
+          .createReport(
+            recipeId: recipeId,
+            reviewId: review.id,
+            report: report,
+          );
     } catch (e, stack) {
       logError(e, stack);
       state = state.copyWith(isError: true);
     } finally {
       state = state.copyWith(isLoading: false);
     }
+  }
+
+  bool hasSelectedOther() {
+    return state.selectedReasons.contains(ReportReason.other);
   }
 
   void clearError() {

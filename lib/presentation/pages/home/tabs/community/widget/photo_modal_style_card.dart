@@ -60,7 +60,7 @@ class PhotoModalStyleCard extends StatelessWidget {
             child: Row(
               children: [
                 if (leadingWidget != null) ...[
-                  leadingWidget!,
+                  leadingWidget,
                   const SizedBox(width: 12),
                 ],
                 Expanded(

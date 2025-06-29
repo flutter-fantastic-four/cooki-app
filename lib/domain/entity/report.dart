@@ -7,7 +7,7 @@ class Report {
   final String? reporterImageUrl;
   final String reviewerId;
   final String reviewerName;
-  final ReportReason reason;
+  final Set<ReportReason> reasons;
   final String? additionalContext;
   final DateTime createdAt;
   final bool isDeleted;
@@ -19,7 +19,7 @@ class Report {
     this.reporterImageUrl,
     required this.reviewerId,
     required this.reviewerName,
-    required this.reason,
+    required this.reasons,
     this.additionalContext,
     DateTime? createdAt,
     this.isDeleted = false,
@@ -32,7 +32,7 @@ class Report {
     String? reporterImageUrl,
     String? reviewerId,
     String? reviewerName,
-    ReportReason? reason,
+    Set<ReportReason>? reasons,
     String? additionalContext,
     DateTime? createdAt,
     bool? isDeleted,
@@ -44,7 +44,7 @@ class Report {
       reporterImageUrl: reporterImageUrl ?? this.reporterImageUrl,
       reviewerId: reviewerId ?? this.reviewerId,
       reviewerName: reviewerName ?? this.reviewerName,
-      reason: reason ?? this.reason,
+      reasons: reasons ?? this.reasons,
       additionalContext: additionalContext ?? this.additionalContext,
       createdAt: createdAt ?? this.createdAt,
       isDeleted: isDeleted ?? this.isDeleted,
@@ -53,6 +53,6 @@ class Report {
 
   @override
   String toString() {
-    return 'Report(id: $id, reason: ${reason.name})';
+    return 'Report(id: $id, reasons: ${reasons.map((r) => r.name).join(", ")})';
   }
 }

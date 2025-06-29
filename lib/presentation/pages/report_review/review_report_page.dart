@@ -39,35 +39,23 @@ class _ReportPageState extends ConsumerState<ReviewReportPage> {
     final viewModel = ref.read(reviewReportViewModelProvider.notifier);
     final state = ref.read(reviewReportViewModelProvider);
 
-    // Validate submission
-    if (state.selectedReasons.isEmpty) {
+    if (viewModel.hasSelectedOther() &&
+        state.additionalContext.trim().length < 10) {
       SnackbarUtil.showSnackBar(
         context,
-        strings(context).selectReportReason,
+        strings(context).reportEmptyOrMinLenError,
         showIcon: true,
         customIcon: SnackbarUtil.defaultErrorIcon(),
       );
       return;
     }
 
-    if (state.additionalContext.trim().length < 10) {
-      SnackbarUtil.showSnackBar(
-        context,
-        strings(context).minCharactersError,
-        showIcon: true,
-        customIcon: SnackbarUtil.defaultErrorIcon(),
-      );
-      return;
-    }
-
-    // Show confirmation dialog
     final confirmed = await DialogueUtil.showAppDialog(
       context: context,
       title: strings(context).confirmReportSubmission,
       content: strings(context).confirmReportMessage,
       showCancel: true,
     );
-
     if (confirmed != true) return;
 
     await viewModel.submitReport(
@@ -170,7 +158,7 @@ class _ReportPageState extends ConsumerState<ReviewReportPage> {
                   () => ref
                       .read(reviewReportViewModelProvider.notifier)
                       .toggleReason(reason),
-              useCheckbox: true,
+              // useCheckbox: true,
             );
           }).toList(),
     );

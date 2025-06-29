@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -32,7 +31,6 @@ class ModalUtil {
           child: Column(
             children: [
               _buildModalTopHandle(),
-              SizedBox(height: 5),
 
               // Scrollable list of options
               Expanded(
@@ -46,105 +44,6 @@ class ModalUtil {
                     );
                   },
                 ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  static void showTwoOptionsModal(
-    BuildContext context, {
-    required String title,
-    required String description,
-    required String primaryButtonText,
-    required String secondaryButtonText,
-    required VoidCallback onPrimaryButtonPressed,
-    required VoidCallback onSecondaryButtonPressed,
-    bool isDestructive = false,
-  }) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: AppColors.greyScale50,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
-      ),
-      builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.only(
-            top: 8,
-            bottom: 30,
-            left: 15,
-            right: 15,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildModalTopHandle(),
-              Padding(
-                padding: const EdgeInsets.only(top: 40),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      title,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Colors.black,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      description,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: AppColors.greyScale600,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 40),
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        onSecondaryButtonPressed();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.greyScale100,
-                        foregroundColor: AppColors.greyScale800,
-                        elevation: 0,
-                        shadowColor: Colors.transparent,
-                      ),
-                      child: Text(secondaryButtonText),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        onPrimaryButtonPressed();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            isDestructive ? AppColors.error : AppColors.primary,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        shadowColor: Colors.transparent,
-                      ),
-                      child: Text(primaryButtonText),
-                    ),
-                  ),
-                ],
               ),
             ],
           ),
@@ -180,8 +79,8 @@ class ModalUtil {
               ...(options?.map(
                     (option) => _ModalOptionCard(
                       text: option.text,
-                      icon: option.icon,
-                      customIcon: option.customIcon,
+                      icon: option.iconData,
+                      svgIconPath: option.svgIconPath,
                       isRed: option.isRed,
                       onTap: () {
                         Navigator.pop(context);
@@ -216,7 +115,7 @@ class ModalUtil {
         color: Colors.grey[400],
         borderRadius: BorderRadius.circular(10),
       ),
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 17),
     );
   }
 
@@ -231,28 +130,12 @@ class ModalUtil {
       options: [
         ModalOption(
           text: strings(context).takeWithCamera,
-          customIcon: SvgPicture.asset(
-            'assets/icons/name=camera, size=24, state=Default.svg',
-            width: 20,
-            height: 20,
-            colorFilter: const ColorFilter.mode(
-              Colors.black87,
-              BlendMode.srcIn,
-            ),
-          ),
+          svgIconPath: 'assets/icons/name=camera, size=24, state=Default.svg',
           onTap: onCamera,
         ),
         ModalOption(
           text: strings(context).chooseInGallery,
-          customIcon: SvgPicture.asset(
-            'assets/icons/name=album, size=24, state=Default.svg',
-            width: 20,
-            height: 20,
-            colorFilter: const ColorFilter.mode(
-              Colors.black87,
-              BlendMode.srcIn,
-            ),
-          ),
+          svgIconPath: 'assets/icons/name=album, size=24, state=Default.svg',
           onTap: onGallery,
         ),
       ],
@@ -263,20 +146,20 @@ class ModalUtil {
 
 class ModalOption {
   final String text;
-  final IconData? icon;
-  final Widget? customIcon;
+  final IconData? iconData;
+  final String? svgIconPath;
   final VoidCallback onTap;
   final bool isRed;
 
   const ModalOption({
     required this.text,
-    this.icon,
-    this.customIcon,
+    this.iconData,
+    this.svgIconPath,
     required this.onTap,
     this.isRed = false,
   }) : assert(
-         icon != null || customIcon != null,
-         'Either icon or customIcon must be provided',
+         iconData != null || svgIconPath != null,
+         'Either iconData or svgIconPath must be provided',
        );
 }
 
@@ -318,7 +201,7 @@ class SimpleOptionCard extends StatelessWidget {
 class _ModalOptionCard extends StatelessWidget {
   final String text;
   final IconData? icon;
-  final Widget? customIcon;
+  final String? svgIconPath;
   final VoidCallback onTap;
   final bool isCenter;
   final bool isRed;
@@ -326,7 +209,7 @@ class _ModalOptionCard extends StatelessWidget {
   const _ModalOptionCard({
     required this.text,
     this.icon,
-    this.customIcon,
+    this.svgIconPath,
     required this.onTap,
     this.isCenter = false,
     this.isRed = false,
@@ -337,8 +220,14 @@ class _ModalOptionCard extends StatelessWidget {
     Widget? leadingWidget;
 
     if (!isCenter) {
-      if (customIcon != null) {
-        leadingWidget = customIcon;
+      if (svgIconPath != null) {
+        leadingWidget = SvgPicture.asset(
+          svgIconPath!,
+          width: 20,
+          height: 20,
+          colorFilter:
+              isRed ? ColorFilter.mode(AppColors.error, BlendMode.srcIn) : null,
+        );
       } else if (icon != null) {
         leadingWidget = Icon(
           icon,
@@ -349,11 +238,10 @@ class _ModalOptionCard extends StatelessWidget {
     }
 
     return Container(
-      height: 44,
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
         color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(color: AppColors.greyScale100, width: 1),
       ),
       child: Material(
@@ -361,13 +249,13 @@ class _ModalOptionCard extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(8),
           onTap: onTap,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 11),
             child: Row(
               children: [
                 if (leadingWidget != null) ...[
-                  leadingWidget!,
-                  const SizedBox(width: 12),
+                  leadingWidget,
+                  const SizedBox(width: 16),
                 ],
                 Expanded(
                   child: Text(
