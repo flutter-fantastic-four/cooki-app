@@ -1,2 +1,4 @@
 NSCameraUsageDescription = "Please allow camera access to change your profile and take food photos for recipes.";
 NSPhotoLibraryUsageDescription = "Please allow photo library access to change your profile and take food photos for recipes.";
+NSMicrophoneUsageDescription = "Please allow microphone access to use voice search for recipes.";
+NSSpeechRecognitionUsageDescription = "Please allow speech recognition to search recipes using your voice.";
