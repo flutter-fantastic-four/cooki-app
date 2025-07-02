@@ -226,7 +226,7 @@ class DetailRecipePage extends ConsumerWidget {
       ),
       SizedBox(width: 12),
       Text(
-        "${recipe.calories}${strings(context).caloriesLabel}",
+        "${recipe.calories}${strings(context).caloriesUnitAfter}",
         style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
       ),
       Spacer(),
