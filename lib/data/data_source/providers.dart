@@ -29,7 +29,14 @@ final firebaseAIProvider = Provider((ref) => FirebaseAI.googleAI());
 final firebaseStorageProvider = Provider((ref) => FirebaseStorage.instance);
 
 // oauth_providers
-final googleSignInProvider = Provider((ref) => GoogleSignIn());
+final googleSignInProvider = Provider(
+  (ref) => GoogleSignIn(
+    // Using the web client ID from google-services.json for server authentication
+    serverClientId:
+        '507130380473-baqmg33vpgettr0gr8uas188hk80p27b.apps.googleusercontent.com',
+    scopes: ['email', 'profile'],
+  ),
+);
 final kakaoSignInProvider = Provider((ref) => UserApi.instance);
 
 final dioProvider = Provider<Dio>((ref) {

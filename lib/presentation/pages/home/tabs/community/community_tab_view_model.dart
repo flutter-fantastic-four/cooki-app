@@ -5,7 +5,8 @@ import '../../../../../core/utils/logger.dart';
 import '../../../../../core/utils/category_mapper.dart';
 import '../../../../../data/repository/providers.dart';
 import '../../../../../domain/entity/recipe.dart';
-import '../../../../../core/utils/general_util.dart';
+
+import '../../../../../gen/l10n/app_localizations.dart';
 
 class CommunityState {
   final bool isLoading;
@@ -88,15 +89,30 @@ class CommunityState {
     }
 
     // Apply sort option if selected
-    if (selectedSort == strings(context).sortByRating) {
-      // Sort by actual calculated average ratings instead of stored ratingSum
-      filtered.sort((a, b) {
-        final aRating = actualAverageRatings[a.id] ?? 0.0;
-        final bRating = actualAverageRatings[b.id] ?? 0.0;
-        return bRating.compareTo(aRating);
-      });
-    } else if (selectedSort == strings(context).sortByCookTime) {
-      filtered.sort((a, b) => a.cookTime.compareTo(b.cookTime));
+    final localizations = AppLocalizations.of(context);
+    if (localizations != null) {
+      if (selectedSort == localizations.sortByRating) {
+        // Ensure a consistent base order before sorting by rating
+        filtered.sort((a, b) {
+          final dateCmp = b.createdAt.compareTo(a.createdAt);
+          if (dateCmp != 0) return dateCmp;
+          return a.id.compareTo(b.id);
+        });
+        // Now sort by rating (stable, with secondary/tertiary keys)
+        filtered.sort((a, b) {
+          final aRating = actualAverageRatings[a.id] ?? 0.0;
+          final bRating = actualAverageRatings[b.id] ?? 0.0;
+          final cmp = bRating.compareTo(aRating);
+          if (cmp != 0) return cmp;
+          // Secondary: createdAt descending
+          final dateCmp = b.createdAt.compareTo(a.createdAt);
+          if (dateCmp != 0) return dateCmp;
+          // Tertiary: recipeName ascending
+          return a.recipeName.compareTo(b.recipeName);
+        });
+      } else if (selectedSort == localizations.sortByCookTime) {
+        filtered.sort((a, b) => a.cookTime.compareTo(b.cookTime));
+      }
     }
 
     return filtered;

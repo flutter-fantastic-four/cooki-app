@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:cooki/app/constants/app_colors.dart';
 import 'package:cooki/app/enum/sign_in_method.dart';
 import 'package:cooki/core/utils/general_util.dart';
@@ -7,6 +8,7 @@ import 'package:cooki/presentation/pages/login/login_view_model.dart';
 import 'package:cooki/presentation/user_global_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cooki/core/utils/login_debug_helper.dart';
 
 class LoginButton extends ConsumerWidget {
   const LoginButton({super.key, required this.signInMethod});
@@ -18,8 +20,39 @@ class LoginButton extends ConsumerWidget {
       child: SizedBox(
         width: 350,
         child: ElevatedButton(
-          onPressed: () => _login(ref, context),
           style: _getButtonStyle(),
+          onPressed: () async {
+            try {
+              // Add debug check for Android
+              if (Platform.isAndroid) {
+                await LoginDebugHelper.checkAndroidLoginConfiguration();
+              }
+
+              final loginViewModel = ref.read(loginViewModelProvider.notifier);
+              final homeViewModel = ref.read(homeViewModelProvider.notifier);
+              final appUser = await loginViewModel.signIn(signInMethod);
+
+              if (appUser != null && appUser.id.isNotEmpty && context.mounted) {
+                ref.read(userGlobalViewModelProvider.notifier).setUser(appUser);
+                if (!context.mounted) return;
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => const HomePage()),
+                  (route) => false,
+                );
+                homeViewModel.onIndexChanged(0);
+              }
+            } catch (e) {
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Login failed: ${e.toString()}'),
+                    backgroundColor: Colors.red,
+                    duration: const Duration(seconds: 5),
+                  ),
+                );
+              }
+            }
+          },
           child: Stack(
             alignment: Alignment.center,
             children: [
@@ -36,22 +69,6 @@ class LoginButton extends ConsumerWidget {
         ),
       ),
     );
-  }
-
-  void _login(WidgetRef ref, BuildContext context) async {
-    final loginViewModel = ref.read(loginViewModelProvider.notifier);
-    final homeViewModel = ref.read(homeViewModelProvider.notifier);
-    final appUser = await loginViewModel.signIn(signInMethod);
-
-    if (appUser != null && appUser.id.isNotEmpty && context.mounted) {
-      ref.read(userGlobalViewModelProvider.notifier).setUser(appUser);
-      if (!context.mounted) return;
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => const HomePage()),
-        (route) => false,
-      );
-      homeViewModel.onIndexChanged(0);
-    }
   }
 
   Text _signInMethodText(BuildContext context) {

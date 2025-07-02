@@ -16,6 +16,7 @@ import '../../../../../core/utils/sharing_util.dart';
 import '../../../../user_global_view_model.dart';
 import 'saved_recipes_tab_view_model.dart';
 import '../community/widget/photo_modal_style_card.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 // Constants for modal styling
 class _ModalConstants {
@@ -298,63 +299,54 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                                     16.0,
                                     0,
                                   ),
-                                  sliver: SliverGrid(
-                                    gridDelegate:
-                                        const SliverGridDelegateWithFixedCrossAxisCount(
-                                          crossAxisCount: 2,
-                                          crossAxisSpacing: 15,
-                                          mainAxisSpacing: 16,
-                                          childAspectRatio:
-                                              160 / 184, // 160x184 card size
-                                        ),
-                                    delegate: SliverChildBuilderDelegate(
-                                      (context, recipeIndex) {
-                                        final filteredRecipes = viewModel
-                                            .getFilteredRecipes(context);
-                                        final recipe =
-                                            filteredRecipes[recipeIndex];
-                                        return _RecipeCard(
-                                          recipe: recipe,
-                                          onOptionsTap: () {
-                                            if (state.selectedCategory ==
-                                                strings(
+                                  sliver: SliverMasonryGrid.count(
+                                    crossAxisCount: 2,
+                                    crossAxisSpacing: 15,
+                                    mainAxisSpacing: 16,
+                                    childCount:
+                                        viewModel
+                                            .getFilteredRecipes(context)
+                                            .length,
+                                    itemBuilder: (context, recipeIndex) {
+                                      final filteredRecipes = viewModel
+                                          .getFilteredRecipes(context);
+                                      final recipe =
+                                          filteredRecipes[recipeIndex];
+                                      return _RecipeCard(
+                                        recipe: recipe,
+                                        onOptionsTap: () {
+                                          if (state.selectedCategory ==
+                                              strings(context).recipeTabSaved) {
+                                            _showSavedRecipeOptionsModal(
+                                              context,
+                                              recipe,
+                                              viewModel,
+                                            );
+                                          } else {
+                                            RecipeOptionsModal.show(
+                                              context: context,
+                                              ref: ref,
+                                              recipe: recipe,
+                                              onRecipeDeleted: () {
+                                                SnackbarUtil.showSnackBar(
                                                   context,
-                                                ).recipeTabSaved) {
-                                              _showSavedRecipeOptionsModal(
-                                                context,
-                                                recipe,
-                                                viewModel,
-                                              );
-                                            } else {
-                                              RecipeOptionsModal.show(
-                                                context: context,
-                                                ref: ref,
-                                                recipe: recipe,
-                                                onRecipeDeleted: () {
-                                                  SnackbarUtil.showSnackBar(
+                                                  strings(
                                                     context,
-                                                    strings(
-                                                      context,
-                                                    ).deleteSuccess,
-                                                    showIcon: true,
-                                                  );
-                                                  viewModel.refreshRecipes();
-                                                },
-                                                onRecipeUpdated: () {
-                                                  viewModel.refreshRecipes();
-                                                },
-                                              );
-                                            }
-                                          },
-                                          category: state.selectedCategory,
-                                          viewModel: viewModel,
-                                        );
-                                      },
-                                      childCount:
-                                          viewModel
-                                              .getFilteredRecipes(context)
-                                              .length,
-                                    ),
+                                                  ).deleteSuccess,
+                                                  showIcon: true,
+                                                );
+                                                viewModel.refreshRecipes();
+                                              },
+                                              onRecipeUpdated: () {
+                                                viewModel.refreshRecipes();
+                                              },
+                                            );
+                                          }
+                                        },
+                                        category: state.selectedCategory,
+                                        viewModel: viewModel,
+                                      );
+                                    },
                                   ),
                                 ),
                                 const SliverToBoxAdapter(
@@ -896,6 +888,7 @@ class _RecipeCard extends ConsumerWidget {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             SizedBox(
               height: 120,
@@ -919,73 +912,66 @@ class _RecipeCard extends ConsumerWidget {
                         ),
               ),
             ),
-            SizedBox(
-              height: 64,
-              child: Padding(
-                padding: const EdgeInsets.only(
-                  left: 12.0,
-                  right: 12.0,
-                  top: 12.0,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            recipe.recipeName,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.greyScale800,
-                              height: 1.2,
-                            ),
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          recipe.recipeName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.greyScale800,
+                            height: 1.2,
                           ),
                         ),
-                        GestureDetector(
-                          onTap: onOptionsTap,
-                          child: const Icon(
-                            Icons.more_vert,
-                            size: 20,
-                            color: AppColors.black,
-                          ),
+                      ),
+                      GestureDetector(
+                        onTap: onOptionsTap,
+                        child: const Icon(
+                          Icons.more_vert,
+                          size: 20,
+                          color: AppColors.black,
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        // Show user's rating as five-star system
-                        Builder(
-                          builder: (context) {
-                            final userRating = viewModel.getUserRatingForRecipe(
-                              recipe.id,
-                            );
-                            return Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: List.generate(5, (index) {
-                                return Icon(
-                                  index < (userRating ?? 0)
-                                      ? Icons.star
-                                      : Icons.star_border,
-                                  color:
-                                      index < (userRating ?? 0)
-                                          ? AppColors.secondary600
-                                          : AppColors.greyScale400,
-                                  size: 14,
-                                );
-                              }),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      // Show user's rating as five-star system
+                      Builder(
+                        builder: (context) {
+                          final userRating = viewModel.getUserRatingForRecipe(
+                            recipe.id,
+                          );
+                          return Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: List.generate(5, (index) {
+                              return Icon(
+                                index < (userRating ?? 0)
+                                    ? Icons.star
+                                    : Icons.star_border,
+                                color:
+                                    index < (userRating ?? 0)
+                                        ? AppColors.secondary600
+                                        : AppColors.greyScale400,
+                                size: 14,
+                              );
+                            }),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],

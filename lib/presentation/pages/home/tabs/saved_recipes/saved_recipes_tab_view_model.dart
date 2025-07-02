@@ -122,10 +122,40 @@ class SavedRecipesViewModel
       List<Recipe> recipes;
 
       if (selectedCategory == arg.recipeTabAll) {
-        recipes = await repository.getMyRecipes(
+        // For "All" tab, combine user's created recipes AND saved recipes
+        final myRecipesFuture = repository.getMyRecipes(
           currentUser.id,
           sortType: sortType,
         );
+        final savedRecipesFuture = repository.getUserSavedRecipes(
+          currentUser.id,
+          sortType: sortType,
+        );
+
+        final results = await Future.wait([
+          myRecipesFuture,
+          savedRecipesFuture,
+        ]);
+        final myRecipes = results[0];
+        final savedRecipes = results[1];
+
+        // Combine and remove duplicates (in case a recipe is both created and saved)
+        final allRecipesMap = <String, Recipe>{};
+        for (final recipe in myRecipes) {
+          allRecipesMap[recipe.id] = recipe;
+        }
+        for (final recipe in savedRecipes) {
+          allRecipesMap[recipe.id] = recipe;
+        }
+        recipes = allRecipesMap.values.toList();
+
+        // Re-sort the combined list since we lost the original sorting
+        if (state.selectedSort == arg.sortByCookTime) {
+          recipes.sort((a, b) => a.cookTime.compareTo(b.cookTime));
+        } else {
+          // Default to creation date descending (rating sort will be applied later)
+          recipes.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        }
       } else if (selectedCategory == arg.recipeTabCreated) {
         recipes = await repository.getMyRecipes(
           currentUser.id,
@@ -152,19 +182,33 @@ class SavedRecipesViewModel
         recipes = await _filterRecipesBySelectedCuisines(recipes);
       }
 
-      // Load actual average ratings for all recipes
-      await _loadActualAverageRatings(recipes);
+      // Load actual average ratings for all recipes and get the ratings map
+      final actualRatings = await _calculateActualAverageRatings(recipes);
 
       // Apply rating sort in-memory if selected
       if (state.selectedSort == arg.sortByRating) {
         recipes.sort((a, b) {
-          final aRating = state.actualAverageRatings[a.id] ?? 0.0;
-          final bRating = state.actualAverageRatings[b.id] ?? 0.0;
+          double aRating;
+          double bRating;
+          if (a.userId == currentUser.id) {
+            aRating = a.userRating.toDouble();
+          } else {
+            aRating = actualRatings[a.id] ?? 0.0;
+          }
+          if (b.userId == currentUser.id) {
+            bRating = b.userRating.toDouble();
+          } else {
+            bRating = actualRatings[b.id] ?? 0.0;
+          }
           return bRating.compareTo(aRating); // Descending order
         });
       }
 
-      state = state.copyWith(isLoading: false, recipes: recipes);
+      state = state.copyWith(
+        isLoading: false,
+        recipes: recipes,
+        actualAverageRatings: actualRatings,
+      );
 
       // Load user ratings for the recipes
       await _loadUserRatings(recipes);
@@ -174,7 +218,9 @@ class SavedRecipesViewModel
     }
   }
 
-  Future<void> _loadActualAverageRatings(List<Recipe> recipes) async {
+  Future<Map<String, double>> _calculateActualAverageRatings(
+    List<Recipe> recipes,
+  ) async {
     try {
       final reviewRepository = ref.read(reviewRepositoryProvider);
       final Map<String, double> ratings = {};
@@ -205,10 +251,11 @@ class SavedRecipesViewModel
         }
       }
 
-      state = state.copyWith(actualAverageRatings: ratings);
+      return ratings;
     } catch (e, stack) {
       logError(e, stack);
       // Don't fail the whole operation if ratings can't be loaded
+      return {};
     }
   }
 
