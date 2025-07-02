@@ -117,8 +117,8 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
         }
       },
       localeId: localeId,
-      listenFor: Duration(seconds: 5), // Auto-stop after 10 seconds
-      pauseFor: Duration(seconds: 3),   // Stop if pause for 3 seconds
+      // listenFor: Duration(seconds: 5), // Auto-stop after 10 seconds
+      // pauseFor: Duration(seconds: 3),   // Stop if pause for 3 seconds
     );
     setState(() => _isListening = true);
   }
