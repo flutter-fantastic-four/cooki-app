@@ -113,10 +113,9 @@ class SavedRecipesViewModel
       RecipeSortType? sortType;
       if (state.selectedSort == arg.sortByCookTime) {
         sortType = RecipeSortType.cookTimeAscending;
-      } else if (state.selectedSort == arg.sortByRating) {
-        // Add a localized string for this in your l10n files
-        sortType = RecipeSortType.ratingDescending;
       } else {
+        // For rating sort or no sort, use default created date ordering
+        // We'll handle rating sort in-memory after loading actual ratings
         sortType = RecipeSortType.createdAtDescending;
       }
 
@@ -151,15 +150,13 @@ class SavedRecipesViewModel
         }
         recipes = allRecipesMap.values.toList();
 
-        // Re-sort the combined list since we lost the original sorting
         if (state.selectedSort == arg.sortByCookTime) {
           recipes.sort((a, b) => a.cookTime.compareTo(b.cookTime));
         } else if (state.selectedSort == arg.sortByRating) {
-          // Local sort by actual average rating
-          actualRatings = await _calculateActualAverageRatings(recipes);
+          // Sort by userRating only for shared (public) recipes
           recipes.sort((a, b) {
-            final aRating = actualRatings[a.id] ?? 0.0;
-            final bRating = actualRatings[b.id] ?? 0.0;
+            double aRating = (state.userRatings[a.id] ?? a.userRating ?? 0).toDouble();
+            double bRating = (state.userRatings[b.id] ?? b.userRating ?? 0).toDouble();
             return bRating.compareTo(aRating);
           });
         } else {
