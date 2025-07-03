@@ -1,2 +1,4 @@
 NSCameraUsageDescription = "프로필 변경 및 레시피에 사용될 음식 사진을 위해 카메라 권한을 허락해 주세요.";
 NSPhotoLibraryUsageDescription = "프로필 변경 및 레시피에 사용될 음식 사진을 위해 앨범 권한을 허락해 주세요.";
+NSMicrophoneUsageDescription = "레시피 음성 검색을 위해 마이크 접근을 허용해주세요.";
+NSSpeechRecognitionUsageDescription = "음성으로 레시피를 검색하기 위해 음성 인식을 허용해주세요.";

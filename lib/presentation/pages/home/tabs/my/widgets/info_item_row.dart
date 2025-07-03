@@ -4,7 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-enum InfoItem { termsOfService, privacyPolicy, contactTheDevelopersTeam, version }
+enum InfoItem {
+  termsOfService,
+  privacyPolicy,
+  contactTheDevelopersTeam,
+  version,
+}
 
 class InfoItemRow extends StatefulWidget {
   final InfoItem infoItem;
@@ -35,7 +40,8 @@ class _InfoItemRowState extends State<InfoItemRow> {
     final title = switch (widget.infoItem) {
       InfoItem.termsOfService => strings(context).termsOfService,
       InfoItem.privacyPolicy => strings(context).privacyPolicy,
-      InfoItem.contactTheDevelopersTeam => strings(context).contactTheDevelopersTeam,
+      InfoItem.contactTheDevelopersTeam =>
+        strings(context).contactTheDevelopersTeam,
       InfoItem.version => strings(context).version,
     };
     return Column(
@@ -46,13 +52,22 @@ class _InfoItemRowState extends State<InfoItemRow> {
           onTap: () {
             switch (widget.infoItem) {
               case InfoItem.termsOfService:
-                _launchUrl(context, "https://flutter-fantastic-four.github.io/terms_of_service.html");
+                _launchUrl(
+                  context,
+                  "https://flutter-fantastic-four.github.io/terms_of_service.html",
+                );
                 break;
               case InfoItem.privacyPolicy:
-                _launchUrl(context, "https://flutter-fantastic-four.github.io/privacy_policy.html");
+                _launchUrl(
+                  context,
+                  "https://flutter-fantastic-four.github.io/privacy_policy.html",
+                );
                 break;
               case InfoItem.contactTheDevelopersTeam:
-                _launchUrl(context, "https://github.com/flutter-fantastic-four/cooki-app#-개발팀");
+                _launchUrl(
+                  context,
+                  "https://github.com/flutter-fantastic-four/cooki-app#-개발팀",
+                );
                 // _launchEmail();
                 break;
               case InfoItem.version:
@@ -65,7 +80,12 @@ class _InfoItemRowState extends State<InfoItemRow> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
-              children: [Text(title), widget.infoItem == InfoItem.version ? Text(versionInfo) : SizedBox()],
+              children: [
+                Text(title),
+                widget.infoItem == InfoItem.version
+                    ? Text(versionInfo)
+                    : SizedBox(),
+              ],
             ),
           ),
         ),
@@ -102,7 +122,9 @@ class _InfoItemRowState extends State<InfoItemRow> {
   }
 
   Future<void> _launchStore() async {
-    Uri storeUrl = Uri.parse('https://apps.apple.com/us/app/앱스토어ID');
+    Uri storeUrl = Uri.parse(
+      'https://apps.apple.com/us/app/cooki/id6747327839',
+    );
     if (await canLaunchUrl(storeUrl)) {
       await launchUrl(storeUrl);
     }

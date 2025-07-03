@@ -1,5 +1,8 @@
 import 'dart:developer';
+import 'package:cooki/core/utils/general_util.dart';
 import 'package:cooki/core/utils/logger.dart';
+import 'package:cooki/core/utils/category_mapper.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../../data/data_source/recipe_data_source.dart';
@@ -19,6 +22,8 @@ class SavedRecipesState {
   final String searchQuery;
   final bool isSearchActive;
   final Map<String, int?> userRatings; // Map of recipe ID to user's rating
+  final Map<String, double>
+  actualAverageRatings; // Map of recipe ID to actual average rating
 
   const SavedRecipesState({
     this.isLoading = false,
@@ -31,6 +36,7 @@ class SavedRecipesState {
     this.searchQuery = '',
     this.isSearchActive = false,
     this.userRatings = const {},
+    this.actualAverageRatings = const {},
   });
 
   SavedRecipesState copyWith({
@@ -45,6 +51,7 @@ class SavedRecipesState {
     String? searchQuery,
     bool? isSearchActive,
     Map<String, int?>? userRatings,
+    Map<String, double>? actualAverageRatings,
   }) {
     return SavedRecipesState(
       isLoading: isLoading ?? this.isLoading,
@@ -57,6 +64,7 @@ class SavedRecipesState {
       searchQuery: searchQuery ?? this.searchQuery,
       isSearchActive: isSearchActive ?? this.isSearchActive,
       userRatings: userRatings ?? this.userRatings,
+      actualAverageRatings: actualAverageRatings ?? this.actualAverageRatings,
     );
   }
 
@@ -101,49 +109,99 @@ class SavedRecipesViewModel
 
       final selectedCategory = state.selectedCategory;
 
+      // Determine sort type for each tab
       RecipeSortType? sortType;
-      if (state.selectedSort == arg.sortByRating) {
-        sortType = RecipeSortType.ratingDescending;
-      } else if (state.selectedSort == arg.sortByCookTime) {
+      if (state.selectedSort == arg.sortByCookTime) {
         sortType = RecipeSortType.cookTimeAscending;
+      } else {
+        // For rating sort or no sort, use default created date ordering
+        // We'll handle rating sort in-memory after loading actual ratings
+        sortType = RecipeSortType.createdAtDescending;
       }
 
       List<Recipe> recipes;
+      Map<String, double> actualRatings = {};
 
       if (selectedCategory == arg.recipeTabAll) {
-        recipes = await repository.getMyRecipes(
+        // For "All" tab, combine user's created recipes AND saved recipes
+        final myRecipesFuture = repository.getMyRecipes(
           currentUser.id,
-          sortType: sortType ?? RecipeSortType.createdAtDescending,
+          sortType: sortType,
         );
+        final savedRecipesFuture = repository.getUserSavedRecipes(
+          currentUser.id,
+          sortType: sortType,
+        );
+
+        final results = await Future.wait([
+          myRecipesFuture,
+          savedRecipesFuture,
+        ]);
+        final myRecipes = results[0];
+        final savedRecipes = results[1];
+
+        // Combine and remove duplicates (in case a recipe is both created and saved)
+        final allRecipesMap = <String, Recipe>{};
+        for (final recipe in myRecipes) {
+          allRecipesMap[recipe.id] = recipe;
+        }
+        for (final recipe in savedRecipes) {
+          allRecipesMap[recipe.id] = recipe;
+        }
+        recipes = allRecipesMap.values.toList();
+
+        if (state.selectedSort == arg.sortByCookTime) {
+          recipes.sort((a, b) => a.cookTime.compareTo(b.cookTime));
+        } else if (state.selectedSort == arg.sortByRating) {
+          // Sort by userRating only for shared (public) recipes
+          recipes.sort((a, b) {
+            double aRating = (state.userRatings[a.id] ?? a.userRating ?? 0).toDouble();
+            double bRating = (state.userRatings[b.id] ?? b.userRating ?? 0).toDouble();
+            return bRating.compareTo(aRating);
+          });
+        } else {
+          // Default to creation date descending
+          recipes.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        }
+        // Only calculate actualRatings if not already done
+        if (state.selectedSort != arg.sortByRating) {
+          actualRatings = await _calculateActualAverageRatings(recipes);
+        }
       } else if (selectedCategory == arg.recipeTabCreated) {
         recipes = await repository.getMyRecipes(
           currentUser.id,
           isPublic: false,
-          sortType: sortType ?? RecipeSortType.createdAtDescending,
+          sortType: sortType,
         );
+        actualRatings = await _calculateActualAverageRatings(recipes);
       } else if (selectedCategory == arg.recipeTabShared) {
         recipes = await repository.getMyRecipes(
           currentUser.id,
           isPublic: true,
-          sortType: sortType ?? RecipeSortType.createdAtDescending,
+          sortType: sortType,
         );
+        actualRatings = await _calculateActualAverageRatings(recipes);
       } else if (selectedCategory == arg.recipeTabSaved) {
         recipes = await repository.getUserSavedRecipes(
           currentUser.id,
-          sortType: sortType ?? RecipeSortType.createdAtDescending,
+          sortType: sortType,
         );
+        actualRatings = await _calculateActualAverageRatings(recipes);
       } else {
         recipes = [];
+        actualRatings = {};
       }
 
+      // Apply cuisine filter
       if (state.selectedCuisines.isNotEmpty) {
-        recipes =
-            recipes
-                .where((r) => state.selectedCuisines.contains(r.category))
-                .toList();
+        recipes = await _filterRecipesBySelectedCuisines(recipes);
       }
 
-      state = state.copyWith(isLoading: false, recipes: recipes);
+      state = state.copyWith(
+        isLoading: false,
+        recipes: recipes,
+        actualAverageRatings: actualRatings,
+      );
 
       // Load user ratings for the recipes
       await _loadUserRatings(recipes);
@@ -151,6 +209,84 @@ class SavedRecipesViewModel
       logError(e, stack);
       state = state.copyWith(isLoading: false, error: e.toString());
     }
+  }
+
+  Future<Map<String, double>> _calculateActualAverageRatings(
+    List<Recipe> recipes,
+  ) async {
+    try {
+      final reviewRepository = ref.read(reviewRepositoryProvider);
+      final Map<String, double> ratings = {};
+
+      for (final recipe in recipes) {
+        try {
+          if (recipe.isPublic) {
+            // For public recipes, calculate average from reviews
+            final reviews = await reviewRepository.getReviewsByRecipeId(
+              recipe.id,
+            );
+            if (reviews.isEmpty) {
+              ratings[recipe.id] = 0.0;
+            } else {
+              final totalRating = reviews.fold<int>(
+                0,
+                (total, review) => total + review.rating,
+              );
+              ratings[recipe.id] = totalRating / reviews.length;
+            }
+          } else {
+            // For private recipes, use the userRating as the "average"
+            ratings[recipe.id] = recipe.userRating.toDouble();
+          }
+        } catch (e) {
+          // If there's an error getting reviews for this recipe, set rating to 0
+          ratings[recipe.id] = 0.0;
+        }
+      }
+
+      return ratings;
+    } catch (e, stack) {
+      logError(e, stack);
+      // Don't fail the whole operation if ratings can't be loaded
+      return {};
+    }
+  }
+
+  Future<List<Recipe>> _filterRecipesBySelectedCuisines(
+    List<Recipe> recipes,
+  ) async {
+    final filteredRecipes = <Recipe>[];
+
+    for (final recipe in recipes) {
+      for (final selectedCuisine in state.selectedCuisines) {
+        // Check if recipe category matches any selected cuisine in any language
+        final recipeLanguage = await GeneralUtil.detectCategoryLanguage(
+          recipe.category,
+        );
+        if (recipeLanguage != null) {
+          // Convert selected cuisine to recipe's language for comparison
+          final cuisineInRecipeLanguage =
+              await GeneralUtil.convertFromCurrentLanguage(
+                categInCurrLang: selectedCuisine,
+                strings: arg,
+                targetLanguage: recipeLanguage,
+              );
+
+          if (cuisineInRecipeLanguage == recipe.category) {
+            filteredRecipes.add(recipe);
+            break; // Found a match, no need to check other cuisines for this recipe
+          }
+        } else {
+          // Fallback to direct string comparison if language detection fails
+          if (recipe.category == selectedCuisine) {
+            filteredRecipes.add(recipe);
+            break;
+          }
+        }
+      }
+    }
+
+    return filteredRecipes;
   }
 
   Future<void> _loadUserRatings(List<Recipe> recipes) async {
@@ -278,6 +414,26 @@ class SavedRecipesViewModel
 
   int? getUserRatingForRecipe(String recipeId) {
     return state.userRatings[recipeId];
+  }
+
+  /// Get filtered recipes with category translation support
+  List<Recipe> getFilteredRecipes(BuildContext context) {
+    if (state.searchQuery.isEmpty) return state.recipes;
+
+    final query = state.searchQuery.toLowerCase();
+    return state.recipes.where((recipe) {
+      final translatedCategory = CategoryMapper.translateCategoryToAppLanguage(
+        context,
+        recipe.category,
+      );
+      return recipe.recipeName.toLowerCase().contains(query) ||
+          recipe.category.toLowerCase().contains(query) ||
+          translatedCategory.toLowerCase().contains(query) ||
+          recipe.ingredients.any(
+            (ingredient) => ingredient.toLowerCase().contains(query),
+          ) ||
+          recipe.steps.any((step) => step.toLowerCase().contains(query));
+    }).toList();
   }
 }
 

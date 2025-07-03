@@ -8,7 +8,7 @@ import '../../../core/utils/dialogue_util.dart';
 import '../../../core/utils/general_util.dart';
 import '../../../core/utils/snackbar_util.dart';
 import '../../../data/dto/report_dto.dart';
-import '../../../domain/entity/review.dart';
+import '../../../domain/entity/review/review.dart';
 import '../../user_global_view_model.dart';
 import '../../widgets/selectable_option_row.dart';
 
@@ -36,22 +36,42 @@ class _ReportPageState extends ConsumerState<ReviewReportPage> {
   }
 
   Future<void> _submitReport() async {
-    await ref
-        .read(reviewReportViewModelProvider.notifier)
-        .submitReport(
-          recipeId: widget.recipeId,
-          review: widget.review,
-          currentUser: ref.read(userGlobalViewModelProvider)!,
-        );
-
+    final viewModel = ref.read(reviewReportViewModelProvider.notifier);
     final state = ref.read(reviewReportViewModelProvider);
-    if (mounted && state.isError) {
+
+    if (viewModel.hasSelectedOther() &&
+        state.additionalContext.trim().length < 10) {
+      SnackbarUtil.showSnackBar(
+        context,
+        strings(context).reportEmptyOrMinLenError,
+        showIcon: true,
+        customIcon: SnackbarUtil.defaultErrorIcon(),
+      );
+      return;
+    }
+
+    final confirmed = await DialogueUtil.showAppDialog(
+      context: context,
+      title: strings(context).confirmReportSubmission,
+      content: strings(context).confirmReportMessage,
+      showCancel: true,
+    );
+    if (confirmed != true) return;
+
+    await viewModel.submitReport(
+      recipeId: widget.recipeId,
+      review: widget.review,
+      currentUser: ref.read(userGlobalViewModelProvider)!,
+    );
+
+    final finalState = ref.read(reviewReportViewModelProvider);
+    if (mounted && finalState.isError) {
       DialogueUtil.showAppDialog(
         context: context,
         title: strings(context).genericErrorTitle,
         content: strings(context).reportError,
       );
-      ref.read(reviewReportViewModelProvider.notifier).clearError();
+      viewModel.clearError();
     }
 
     if (mounted) {
@@ -133,10 +153,12 @@ class _ReportPageState extends ConsumerState<ReviewReportPage> {
           ReportReason.values.map((reason) {
             return SelectableOptionRow(
               text: reason.getDisplayName(context),
-              isSelected: state.selectedReason == reason,
-              onTap: () => ref
-                  .read(reviewReportViewModelProvider.notifier)
-                  .setSelectedReason(reason),
+              isSelected: state.selectedReasons.contains(reason),
+              onTap:
+                  () => ref
+                      .read(reviewReportViewModelProvider.notifier)
+                      .toggleReason(reason),
+              // useCheckbox: true,
             );
           }).toList(),
     );
@@ -168,9 +190,7 @@ class _ReportPageState extends ConsumerState<ReviewReportPage> {
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 16),
           ),
-          child: Text(
-            strings(context).submitReport,
-          ),
+          child: Text(strings(context).submitReport),
         ),
       ),
     );

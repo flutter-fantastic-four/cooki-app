@@ -47,7 +47,7 @@
   "recipeCategoryChinese": "중식",
   "recipeCategoryJapanese": "일식",
   "recipeCategoryThai": "태국식",
-  "recipeCategoryIndian": "인도식",
+  "recipeCategoryIndian": "인도/남아시아식",
   "recipeCategoryAmerican": "미국식",
   "recipeCategoryFrench": "프랑스식",
   "recipeCategoryItalian": "이탈리아식",
@@ -74,6 +74,8 @@
   "isPublicLabel": "공개 여부",
   "deleteRecipeButton": "삭제",
   "saveRecipeButton": "저장",
+  "saveToMyRecipes": "나의 레시피에 저장",
+  "removeFromMyRecipes": "나의 레시피에서 제거",
   "minutes": "분",
   "beforeMinutesLabel" : "약 ",
   "afterMinutesLabel": " 분 소요",
@@ -171,6 +173,9 @@
   "submitReport": "제출하기",
   "reportSubmitted": "신고가 접수되었습니다. 검토 후 조치하겠습니다.",
   "reportError": "신고 접수 중 오류가 발생했습니다.",
+  "confirmReportSubmission": "신고를 제출할까요?",
+  "confirmReportMessage": "선택하신 내용으로 신고가 접수됩니다",
+  "reportEmptyOrMinLenError": "신고 사유에 대한 설명을 입력해 주세요 (10자 이상)",
 
   "selectLanguageTitle": "쿠키에서\n사용할 언어를 선택하세요.",
   "languageChangedSuccessfully": "언어가 성공적으로 변경되었습니다.",
@@ -204,6 +209,7 @@
   "sortByRating": "평점순",
   "sortByCookTime": "조리시간순",
   "countryCategory": "국가별",
+  "maxCategorySelectionHint": "최대 3개 요리 종류 선택",
   "deleteConfirmMessage": "{recipeName}을(를) 삭제하시겠습니까?",
   "share": "공유",
   "edit": "수정",
@@ -264,12 +270,21 @@
   "skipLogin":"나중에 로그인 할게요",
   "pleaseLogin":"로그인 해주세요",
 
-  "noRecipeNoticeRecentFood": "최근에 맛있게 먹은 음식이 생각나시나요?",
-  "noRecipeNoticeTakePhoto": "사진 한 장, 간단한 설명이면 충분해요",
-  "goCommunity": "커뮤니티 둘러보기",
+  "goCommunity": "커뮤니티 이동하기",
+
+  "guestSignUpPrompt":"간단한 회원가입을 통해\n쿠키의 모든 서비스를 이용할 수 있어요.",
 
   "noRecipeNoticeemptyCategoryMessage": "아직 레시피가 없어요",
-  "guestSignUpPrompt":"간단한 회원가입을 통해\n 쿠키의 모든 서비스를 이용할 수 있어요.",
+  "noRecipeNoticeemptyCategorySubMessage": "최근에 맛있게 먹은 음식이 생각나시나요?\n사진 한 장, 간단한 설명이면 충분해요",
+
+  "noRecipeNoticeCreatedMessage": "생성한 레시피가 없어요",
+  "noRecipeNoticeCreatedSubMessage": "AI 레시피를 생성해보세요\n생성한 레시피는 이곳에 저장됩니다",
+
+  "noRecipeNoticeSavedMessage": "저장한 레시피가 없어요",
+  "noRecipeNoticeSavedSubMessage": "커뮤니티를 둘러보며 다른 유저가 공유한\n레시피가 마음에 든다면 저장해보세요",
+
+  "noRecipeNoticeSharedMessage": "공유한 레시피가 없어요",
+  "noRecipeNoticeSharedSubMessage": "내가 생성한 레시피 중 마음에 드는 레시피를\n커뮤니티에 공유해보세요",
 
   "undoTranslation": "원본 보기",
   "translationFailed": "번역에 실패했습니다. 다시 시도해 주세요.",

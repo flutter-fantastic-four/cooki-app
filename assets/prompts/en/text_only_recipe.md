@@ -48,5 +48,5 @@ All ingredients must include clear, measurable quantities, avoiding vague terms 
 The ingredient amounts should be written for exactly 1 serving as in the example provided.
 
 Only choose one of the following values for `"category"`:
-`["Korean", "Chinese", "Japanese", "Thai", "Indian", "American", "French", "Italian", "Mediterranean", "Middle Eastern", "Mexican", "Southeast Asian", "African", "Other"]`
+`["Korean", "Chinese", "Japanese", "Thai", "Indian/Desi", "American", "French", "Italian", "Mediterranean", "Middle Eastern", "Mexican", "Southeast Asian", "African", "Other"]`
 Use `"Other"` only if the recipe does not clearly fit one of the listed categories.

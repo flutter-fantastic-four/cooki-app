@@ -46,7 +46,7 @@
   "recipeCategoryChinese": "Chinese",
   "recipeCategoryJapanese": "Japanese",
   "recipeCategoryThai": "Thai",
-  "recipeCategoryIndian": "Indian",
+  "recipeCategoryIndian": "Indian/Desi",
   "recipeCategoryAmerican": "American",
   "recipeCategoryFrench": "French",
   "recipeCategoryItalian": "Italian",
@@ -73,6 +73,8 @@
   "isPublicLabel": "Public",
   "deleteRecipeButton": "Delete",
   "saveRecipeButton": "Save",
+  "saveToMyRecipes": "Save to My Recipes",
+  "removeFromMyRecipes": "Remove from My Recipes",
   "minutes": "min",
   "beforeMinutesLabel": "About ",
   "afterMinutesLabel": " min",
@@ -168,6 +170,9 @@
   "submitReport": "Submit",
   "reportSubmitted": "Report submitted. We'll review and take action.",
   "reportError": "An error occurred while submitting the report.",
+  "confirmReportSubmission": "Submit Report?",
+  "confirmReportMessage": "The report will be submitted with your selected reasons.",
+  "reportEmptyOrMinLenError": "Explain the reason for the report (More than 10 characters)",
 
   "selectLanguageTitle": "Select your preferred\nlanguage for Cooki",
   "languageChangedSuccessfully": "Language changed successfully.",
@@ -201,6 +206,7 @@
   "sortByRating": "By Rating",
   "sortByCookTime": "By Cook Time",
   "countryCategory": "By Cuisine",
+  "maxCategorySelectionHint": "Select up to 3 cuisines",
   "deleteConfirmMessage": "Do you want to delete \"{recipeName}\"?",
   "share": "Share",
   "edit": "Edit",
@@ -261,12 +267,21 @@
   "skipLogin": "I'll log in later",
   "pleaseLogin": "Please log in",
 
-  "noRecipeNoticeRecentFood": "Do you recall any delicious food you've recently enjoyed?",
-  "noRecipeNoticeTakePhoto": "One photo and a brief description are enough",
   "goCommunity": "Browse Community",
 
-  "noRecipeNoticeemptyCategoryMessage": "There are no recipes yet",
   "guestSignUpPrompt":"With a simple sign-up\nyou can enjoy all of Cookie's services.",
+
+  "noRecipeNoticeemptyCategoryMessage": "There are no recipes yet",
+  "noRecipeNoticeemptyCategorySubMessage": "Did you recently enjoy a delicious meal?\nA photo and a brief description are all you need!",
+
+  "noRecipeNoticeCreatedMessage": "No recipes created yet",
+  "noRecipeNoticeCreatedSubMessage": "Try generating a recipe with AI.\nYour created recipes will be saved here.",
+
+  "noRecipeNoticeSavedMessage": "No recipes saved yet",
+  "noRecipeNoticeSavedSubMessage": "Browse the community and save\nrecipes you like from other users.",
+
+  "noRecipeNoticeSharedMessage": "No recipes shared yet",
+  "noRecipeNoticeSharedSubMessage": "Pick a recipe you created and\nshare it with the community!",
 
   "undoTranslation": "Show original",
   "translationFailed": "Translation failed. Please try again.",

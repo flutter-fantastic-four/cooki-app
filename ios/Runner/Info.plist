@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Cooki</string>
+	<string>cooki</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -51,6 +51,10 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>NSMicrophoneUsageDescription</key>
+    <string>This app needs microphone access for voice search</string>
+    <key>NSSpeechRecognitionUsageDescription</key>
+    <string>This app uses speech recognition for voice search</string>
 	<key>NSCameraUsageDescription</key>
 	<string>$(NSCameraUsageDescription)</string>
 	<key>NSPhotoLibraryUsageDescription</key>

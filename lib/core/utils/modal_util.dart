@@ -1,5 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../app/constants/app_colors.dart';
 import 'general_util.dart';
@@ -31,7 +31,6 @@ class ModalUtil {
           child: Column(
             children: [
               _buildModalTopHandle(),
-              SizedBox(height: 5),
 
               // Scrollable list of options
               Expanded(
@@ -52,7 +51,6 @@ class ModalUtil {
       },
     );
   }
-
 
   static void showGenericModal(
     BuildContext context, {
@@ -81,7 +79,8 @@ class ModalUtil {
               ...(options?.map(
                     (option) => _ModalOptionCard(
                       text: option.text,
-                      icon: option.icon,
+                      icon: option.iconData,
+                      svgIconPath: option.svgIconPath,
                       isRed: option.isRed,
                       onTap: () {
                         Navigator.pop(context);
@@ -116,7 +115,7 @@ class ModalUtil {
         color: Colors.grey[400],
         borderRadius: BorderRadius.circular(10),
       ),
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 17),
     );
   }
 
@@ -131,12 +130,12 @@ class ModalUtil {
       options: [
         ModalOption(
           text: strings(context).takeWithCamera,
-          icon: Icons.photo_camera,
+          svgIconPath: 'assets/icons/name=camera, size=24, state=Default.svg',
           onTap: onCamera,
         ),
         ModalOption(
           text: strings(context).chooseInGallery,
-          icon: CupertinoIcons.photo,
+          svgIconPath: 'assets/icons/name=album, size=24, state=Default.svg',
           onTap: onGallery,
         ),
       ],
@@ -147,37 +146,37 @@ class ModalUtil {
 
 class ModalOption {
   final String text;
-  final IconData icon;
+  final IconData? iconData;
+  final String? svgIconPath;
   final VoidCallback onTap;
   final bool isRed;
 
   const ModalOption({
     required this.text,
-    required this.icon,
+    this.iconData,
+    this.svgIconPath,
     required this.onTap,
     this.isRed = false,
-  });
+  }) : assert(
+         iconData != null || svgIconPath != null,
+         'Either iconData or svgIconPath must be provided',
+       );
 }
 
 class SimpleOptionCard extends StatelessWidget {
   final String text;
   final VoidCallback onTap;
 
-  const SimpleOptionCard({
-    required this.text,
-    required this.onTap,
-    super.key,
-  });
+  const SimpleOptionCard({required this.text, required this.onTap, super.key});
 
   @override
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 3),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8),
-        side: BorderSide(
-          color: AppColors.greyScale100,
-          width: 1,
-        ),),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(color: AppColors.greyScale100, width: 1),
+      ),
       elevation: 0,
       color: Colors.white,
       child: InkWell(
@@ -199,10 +198,10 @@ class SimpleOptionCard extends StatelessWidget {
   }
 }
 
-
 class _ModalOptionCard extends StatelessWidget {
   final String text;
   final IconData? icon;
+  final String? svgIconPath;
   final VoidCallback onTap;
   final bool isCenter;
   final bool isRed;
@@ -210,6 +209,7 @@ class _ModalOptionCard extends StatelessWidget {
   const _ModalOptionCard({
     required this.text,
     this.icon,
+    this.svgIconPath,
     required this.onTap,
     this.isCenter = false,
     this.isRed = false,
@@ -217,33 +217,61 @@ class _ModalOptionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      elevation: 0,
-      color: Colors.white,
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(vertical: 1),
-        leading:
-            !isCenter
-                ? Padding(
-                  padding: const EdgeInsets.only(left: 24, right: 4),
-                  child: Icon(
-                    icon,
-                    color: isRed ? AppColors.error : Colors.black87,
+    Widget? leadingWidget;
+
+    if (!isCenter) {
+      if (svgIconPath != null) {
+        leadingWidget = SvgPicture.asset(
+          svgIconPath!,
+          width: 20,
+          height: 20,
+          colorFilter:
+              isRed ? ColorFilter.mode(AppColors.error, BlendMode.srcIn) : null,
+        );
+      } else if (icon != null) {
+        leadingWidget = Icon(
+          icon,
+          color: isRed ? AppColors.error : Colors.black87,
+          size: 20,
+        );
+      }
+    }
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.greyScale100, width: 1),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 11),
+            child: Row(
+              children: [
+                if (leadingWidget != null) ...[
+                  leadingWidget,
+                  const SizedBox(width: 16),
+                ],
+                Expanded(
+                  child: Text(
+                    text,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: isRed ? AppColors.error : Colors.black,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    textAlign: isCenter ? TextAlign.center : TextAlign.left,
                   ),
-                )
-                : null,
-        title: Text(
-          text,
-          style: TextStyle(
-            fontSize: 16,
-            color: isRed ? AppColors.error : Colors.black,
-            fontWeight: FontWeight.w500,
+                ),
+              ],
+            ),
           ),
-          textAlign: isCenter ? TextAlign.center : null,
         ),
-        onTap: onTap,
       ),
     );
   }

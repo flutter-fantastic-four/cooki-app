@@ -8,7 +8,7 @@ import '../../../../core/utils/error_mappers.dart';
 import '../../../../core/utils/general_util.dart';
 import '../../../../core/utils/modal_util.dart';
 import '../../../../core/utils/snackbar_util.dart';
-import '../../../../domain/entity/review.dart';
+import '../../../../domain/entity/review/review.dart';
 import '../write_review_view_model.dart';
 
 class PhotoUploadBox extends ConsumerWidget {

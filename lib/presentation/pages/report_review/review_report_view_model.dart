@@ -1,5 +1,5 @@
 import 'package:cooki/domain/entity/app_user.dart';
-import 'package:cooki/domain/entity/review.dart';
+import 'package:cooki/domain/entity/review/review.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/logger.dart';
 import '../../../data/dto/report_dto.dart';
@@ -8,32 +8,32 @@ import '../../../domain/entity/report.dart';
 
 class ReportState {
   final bool isLoading;
-  final ReportReason? selectedReason;
+  final Set<ReportReason> selectedReasons;
   final String additionalContext;
   final bool isError;
 
   const ReportState({
     this.isLoading = false,
-    this.selectedReason,
+    this.selectedReasons = const {},
     this.additionalContext = '',
     this.isError = false,
   });
 
   ReportState copyWith({
     bool? isLoading,
-    ReportReason? selectedReason,
+    Set<ReportReason>? selectedReasons,
     String? additionalContext,
     bool? isError,
   }) {
     return ReportState(
       isLoading: isLoading ?? this.isLoading,
-      selectedReason: selectedReason ?? this.selectedReason,
+      selectedReasons: selectedReasons ?? this.selectedReasons,
       additionalContext: additionalContext ?? this.additionalContext,
       isError: isError ?? this.isError,
     );
   }
 
-  bool get canSubmit => selectedReason != null && !isLoading;
+  bool get canSubmit => selectedReasons.isNotEmpty && !isLoading;
 }
 
 class ReviewReportViewModel extends AutoDisposeNotifier<ReportState> {
@@ -42,8 +42,14 @@ class ReviewReportViewModel extends AutoDisposeNotifier<ReportState> {
     return const ReportState();
   }
 
-  void setSelectedReason(ReportReason reason) {
-    state = state.copyWith(selectedReason: reason);
+  void toggleReason(ReportReason reason) {
+    final currentReasons = Set<ReportReason>.from(state.selectedReasons);
+    if (currentReasons.contains(reason)) {
+      currentReasons.remove(reason);
+    } else {
+      currentReasons.add(reason);
+    }
+    state = state.copyWith(selectedReasons: currentReasons);
   }
 
   void setAdditionalContext(String context) {
@@ -66,7 +72,7 @@ class ReviewReportViewModel extends AutoDisposeNotifier<ReportState> {
       reporterImageUrl: currentUser.profileImage,
       reviewerId: review.userId,
       reviewerName: review.userName,
-      reason: state.selectedReason!,
+      reasons: state.selectedReasons,
       additionalContext:
       state.additionalContext.trim().isEmpty
           ? null
@@ -86,6 +92,10 @@ class ReviewReportViewModel extends AutoDisposeNotifier<ReportState> {
     } finally {
       state = state.copyWith(isLoading: false);
     }
+  }
+
+  bool hasSelectedOther() {
+    return state.selectedReasons.contains(ReportReason.other);
   }
 
   void clearError() {

@@ -1,6 +1,7 @@
 import 'package:cooki/presentation/pages/home/tabs/community/widget/photo_modal_style_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../app/constants/app_colors.dart';
 import '../../core/utils/general_util.dart';
@@ -71,14 +72,18 @@ class RecipeOptionsModal extends ConsumerWidget {
                   recipe.isPublic
                       ? strings(context).communityUnpost
                       : strings(context).communityPost,
-              icon: recipe.isPublic ? Icons.public_off : Icons.public,
+              customIcon: Icon(
+                recipe.isPublic ? Icons.public_off : Icons.public,
+                size: 20,
+                color: Colors.black87,
+              ),
               onTap: () => _toggleCommunityPost(context, ref),
             ),
 
           // Share option (always available)
           PhotoModalStyleCard(
             text: strings(context).share,
-            icon: Icons.share_outlined,
+            customIcon: Icon(Icons.ios_share, size: 20, color: Colors.black87),
             onTap: () => _shareRecipe(context, ref),
           ),
 
@@ -88,13 +93,28 @@ class RecipeOptionsModal extends ConsumerWidget {
                 ? SizedBox()
                 : PhotoModalStyleCard(
                   text: strings(context).edit,
-                  icon: Icons.edit_outlined,
+                  customIcon: SvgPicture.asset(
+                    'assets/icons/name=edit, size=24, state=Default.svg',
+                    width: 20,
+                    height: 20,
+                    colorFilter: const ColorFilter.mode(
+                      Colors.black87,
+                      BlendMode.srcIn,
+                    ),
+                  ),
                   onTap: () => _editRecipe(context),
                 ),
             PhotoModalStyleCard(
               text: strings(context).delete,
-              icon: Icons.delete_outline,
-              iconColor: AppColors.error,
+              customIcon: SvgPicture.asset(
+                'assets/icons/name=delete, size=24, state=Default.svg',
+                width: 20,
+                height: 20,
+                colorFilter: const ColorFilter.mode(
+                  AppColors.error,
+                  BlendMode.srcIn,
+                ),
+              ),
               textColor: AppColors.error,
               onTap: () => _deleteRecipe(context, ref),
             ),
@@ -126,22 +146,32 @@ class RecipeOptionsModal extends ConsumerWidget {
   }
 
   void _toggleCommunityPost(BuildContext context, WidgetRef ref) async {
-    Navigator.pop(context);
     try {
       final recipeRepository = ref.read(recipeRepositoryProvider);
+      final wasPublic = recipe.isPublic;
       await recipeRepository.toggleRecipeShare(recipe.id, !recipe.isPublic);
+
+      // Close modal first
       if (context.mounted) {
-        SnackbarUtil.showSnackBar(
-          context,
-          recipe.isPublic
-              ? strings(context).unpostSuccess
-              : strings(context).postSuccess,
-          showIcon: true,
-        );
-        onRecipeUpdated?.call();
+        Navigator.pop(context);
+
+        // Show toast message after a short delay to ensure modal is closed
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        if (context.mounted) {
+          SnackbarUtil.showSnackBar(
+            context,
+            wasPublic
+                ? strings(context).unpostSuccess
+                : strings(context).postSuccess,
+            showIcon: true,
+          );
+          onRecipeUpdated?.call();
+        }
       }
     } catch (e) {
       if (context.mounted) {
+        Navigator.pop(context);
         SnackbarUtil.showSnackBar(context, strings(context).postError);
       }
     }

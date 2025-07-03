@@ -2,8 +2,8 @@ import 'package:cooki/app/constants/app_colors.dart';
 import 'package:cooki/core/utils/general_util.dart';
 import 'package:cooki/data/repository/providers.dart';
 import 'package:cooki/domain/entity/recipe.dart';
-import 'package:cooki/domain/entity/review.dart';
-import 'package:cooki/presentation/pages/detailed_recipe/detailed_recipe_page.dart';
+import 'package:cooki/domain/entity/review/review.dart';
+import 'package:cooki/presentation/pages/detailed_recipe/recipe_detail_view_model.dart';
 import 'package:cooki/presentation/pages/reviews/reviews_view_model.dart';
 import 'package:cooki/presentation/user_global_view_model.dart';
 import 'package:cooki/presentation/widgets/star_rating.dart';
@@ -211,17 +211,11 @@ class RatingModalState extends ConsumerState<RatingModal> {
             await ref.read(recipeRepositoryProvider).editRecipe(updatedRecipe);
           }
 
-          // Invalidate providers to refresh data
-          ref.invalidate(userRatingProvider(widget.recipe));
-          ref.invalidate(actualAverageRatingProvider(widget.recipe.id));
-          // Invalidate the reviews provider to refresh the review list
-          ref.invalidate(reviewsViewModelProvider(widget.recipe.id));
+          // Refresh the recipe detail view model to get updated data
+          ref.read(recipeDetailViewModelProvider(widget.recipe.id).notifier).refreshRecipeData();
 
-          // For private recipes, invalidate the recipe data provider
-          // so fresh rating data is fetched from Firestore
-          if (!widget.recipe.isPublic) {
-            ref.invalidate(recipeByIdProvider(widget.recipe.id));
-          }
+          // Refresh reviews if needed
+          ref.invalidate(reviewsViewModelProvider(widget.recipe.id));
 
           if (!context.mounted) return;
           Navigator.pop(context, true);

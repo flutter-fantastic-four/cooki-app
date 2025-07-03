@@ -6,7 +6,8 @@ import '../../../core/utils/logger.dart';
 import '../../../data/repository/providers.dart';
 import '../../../domain/entity/app_user.dart';
 import '../../../domain/entity/local_or_remote_image.dart';
-import '../../../domain/entity/review.dart';
+import '../../../domain/entity/review/review.dart';
+import '../detailed_recipe/recipe_detail_view_model.dart';
 
 class WriteReviewState {
   final int rating;
@@ -93,6 +94,7 @@ class WriteReviewViewModel
             .saveReview(recipeId: recipeId, review: review);
         review = review.copyWith(id: reviewId);
       }
+      _refreshRecipeWithDelay(recipeId);
       _detectAndUpdateLanguage(
         reviewText: reviewText,
         recipeId: recipeId,
@@ -190,12 +192,20 @@ class WriteReviewViewModel
       await ref
           .read(reviewRepositoryProvider)
           .deleteReview(recipeId: recipeId, reviewId: reviewId);
+      _refreshRecipeWithDelay(recipeId);
     } catch (e, stack) {
       logError(e, stack);
       state = state.copyWith(errorKey: WriteReviewErrorKey.deleteFailed);
     } finally {
       state = state.copyWith(isDeleting: false);
     }
+  }
+
+  Future<void> _refreshRecipeWithDelay(String recipeId) async {
+    await Future.delayed(Duration(milliseconds: 2000));
+    ref
+        .read(recipeDetailViewModelProvider(recipeId).notifier)
+        .refreshRecipeData();
   }
 
   void setRating(int rating) {

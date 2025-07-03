@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cooki/app/constants/app_constants.dart';
 import 'package:cooki/core/utils/date_time_util.dart';
 import 'package:cooki/core/utils/dialogue_util.dart';
 import 'package:cooki/core/utils/error_mappers.dart';
@@ -19,9 +18,11 @@ import '../../../app/constants/app_colors.dart';
 import '../../../core/utils/general_util.dart';
 import '../../../core/utils/modal_util.dart';
 import '../../../core/utils/snackbar_util.dart';
-import '../../../domain/entity/review.dart';
+import '../../../domain/entity/review/review.dart';
+import '../../../domain/entity/review/review_sort_type.dart';
 import '../../settings_global_view_model.dart';
 import '../../user_global_view_model.dart';
+import '../detailed_recipe/recipe_detail_view_model.dart';
 import '../write_review/write_review_page.dart';
 import 'reviews_view_model.dart';
 
@@ -58,27 +59,28 @@ class ReviewsPage extends ConsumerWidget {
       if (shouldShowTranslate && !hasTranslation)
         ModalOption(
           text: strings(context).translateReview,
-          icon: Icons.g_translate,
+          iconData: Icons.g_translate,
           onTap:
               () => _translateReview(context, ref, review, currentAppLanguage),
         ),
       if (hasTranslation)
         ModalOption(
           text: strings(context).undoTranslation,
-          icon: Icons.translate_outlined,
+          svgIconPath:
+              'assets/icons/name=translate, size=24, state=Default.svg',
           onTap: () => vm.clearTranslation(review.id),
         ),
       if (isMyReview)
         ModalOption(
           text: strings(context).editReview,
-          icon: Icons.edit_outlined,
+          svgIconPath: 'assets/icons/name=edit, size=24, state=Default.svg',
           onTap:
               () => _navigateToWriteOrEditReview(context, ref, review: review),
         ),
       if (!isMyReview)
         ModalOption(
           text: strings(context).reportReview,
-          icon: Icons.flag,
+          svgIconPath: 'assets/icons/name=warning, size=24, state=Default.svg',
           isRed: true,
           onTap: () => _reportReview(context, review),
         ),
@@ -86,7 +88,7 @@ class ReviewsPage extends ConsumerWidget {
         ModalOption(
           text: strings(context).deleteReview,
           isRed: true,
-          icon: Icons.delete,
+          svgIconPath: 'assets/icons/name=delete, size=24, state=Default.svg',
           onTap: () => _deleteReview(context, ref, review),
         ),
     ];
@@ -147,6 +149,7 @@ class ReviewsPage extends ConsumerWidget {
           strings(context).reviewDeletedSuccessfully,
           showIcon: true,
         );
+
       }
     }
   }
@@ -328,8 +331,6 @@ class ReviewsPage extends ConsumerWidget {
     WidgetRef ref,
     ReviewsState state,
   ) {
-    final sortOptions = AppConstants.getSortOptions();
-
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(
@@ -340,15 +341,15 @@ class ReviewsPage extends ConsumerWidget {
         scrollDirection: Axis.horizontal,
         child: Row(
           children:
-              sortOptions.map((sortOption) {
-                final isActive = state.currentSortType == sortOption.type;
+              ReviewSortType.values.map((sortType) {
+                final isActive = state.currentSortType == sortType;
                 return Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: GestureDetector(
                     onTap:
                         () => ref
                             .read(reviewsViewModelProvider(recipeId).notifier)
-                            .changeSortType(sortOption.type),
+                            .changeSortType(sortType),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
@@ -363,7 +364,7 @@ class ReviewsPage extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        sortOption.getLabel(context),
+                        sortType.getLabel(strings(context)),
                         style: TextStyle(
                           fontSize: 12,
                           color:

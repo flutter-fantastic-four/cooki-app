@@ -25,7 +25,9 @@ void main() async {
 
       // Firebase 초기화
       try {
-        await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+        await Firebase.initializeApp(
+          options: DefaultFirebaseOptions.currentPlatform,
+        );
       } catch (_) {} // Firebase가 이미 초기화된 경우 무시
       // 카카오 SDK 초기화
       final remoteConfig = FirebaseRemoteConfig.instance;
@@ -65,7 +67,9 @@ class MyApp extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: SupportedLanguage.values.map((language) => Locale(language.code)),
+      supportedLocales: SupportedLanguage.values.map(
+        (language) => Locale(language.code),
+      ),
       locale: settingsState.locale,
       home: const AppEntryPage(),
     );
