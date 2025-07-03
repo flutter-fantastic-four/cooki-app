@@ -56,9 +56,9 @@ class NoRecipeNotice extends ConsumerWidget {
 
     return Column(
       children: [
-        Text(message, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+        Text(message, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
         SizedBox(height: 8),
-        Text(subMessage, style: TextStyle(fontSize: 12), textAlign: TextAlign.center),
+        Text(subMessage, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16), textAlign: TextAlign.center),
         SizedBox(height: 24),
       ],
     );
