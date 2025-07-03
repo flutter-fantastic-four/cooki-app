@@ -2,6 +2,63 @@ import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+/// Utility function to calculate and add ratingAverage field to all recipes
+/// based on existing ratingSum and ratingCount values.
+Future<void> addRatingAverageToAllRecipes() async {
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+  try {
+    log('Starting to add ratingAverage field to all recipes...');
+
+    // Get all recipes
+    final recipesSnapshot = await firestore.collection('recipes').get();
+
+    log('Found ${recipesSnapshot.docs.length} recipes to update');
+
+    int updatedCount = 0;
+    int errorCount = 0;
+
+    // Process each recipe
+    for (final recipeDoc in recipesSnapshot.docs) {
+      try {
+        final recipeId = recipeDoc.id;
+        final data = recipeDoc.data();
+
+        // Get existing ratingSum and ratingCount
+        final int ratingCount = data['ratingCount'] ?? 0;
+        final double ratingSum = (data['ratingSum'] ?? 0).toDouble();
+
+        // Calculate average
+        final double ratingAverage = ratingCount > 0 ? ratingSum / ratingCount : 0.0;
+
+        // Update the recipe document with ratingAverage field only
+        await firestore.collection('recipes').doc(recipeId).update({
+          'ratingAverage': ratingAverage,
+        });
+
+        updatedCount++;
+        log('✅ Updated recipe $recipeId: count=$ratingCount, sum=$ratingSum, avg=$ratingAverage');
+
+        // Add small delay to avoid overwhelming Firestore
+        await Future.delayed(const Duration(milliseconds: 100));
+
+      } catch (e) {
+        errorCount++;
+        log('❌ Error updating recipe ${recipeDoc.id}: $e');
+      }
+    }
+
+    log('\n📊 Rating Average Update Summary:');
+    log('✅ Successfully updated: $updatedCount recipes');
+    log('❌ Errors: $errorCount recipes');
+    log('🎉 Rating average field addition completed!');
+
+  } catch (e) {
+    log('💥 Fatal error during rating average update: $e');
+    rethrow;
+  }
+}
+
 Future<void> updateAllRecipeRatingStats() async {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 

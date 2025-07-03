@@ -79,7 +79,7 @@ class RecipeFirestoreDataSource implements RecipeDataSource {
   ) {
     switch (sortType) {
       case RecipeSortType.ratingDescending:
-        return query.orderBy('ratingSum', descending: true);
+        return query.orderBy('ratingAverage', descending: true);
       case RecipeSortType.cookTimeAscending:
         return query.orderBy('cookTime', descending: false);
       case RecipeSortType.createdAtDescending:
