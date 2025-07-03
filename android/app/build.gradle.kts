@@ -1,5 +1,6 @@
 import java.util.Properties
 import java.io.FileInputStream
+import java.io.FileNotFoundException
 plugins {
     id("com.android.application")
     // START: FlutterFire Configuration
@@ -12,7 +13,12 @@ plugins {
 }
 
 val properties = Properties().apply {
+    try {
     load(FileInputStream(rootProject.file("key.properties")))
+    } catch (e: FileNotFoundException) {
+        // Fallback for development when key.properties doesn't exist
+        put("KAKAO_API_KEY", "placeholder_key")
+    }
 }
 
 android {
@@ -46,9 +52,10 @@ android {
             manifestPlaceholders["KAKAO_API_KEY"] = properties["KAKAO_API_KEY"] as String
         }
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            isMinifyEnabled = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             manifestPlaceholders["KAKAO_API_KEY"] = properties["KAKAO_API_KEY"] as String
+            // Use debug signing for now - replace with your own signing config for production
             signingConfig = signingConfigs.getByName("debug")
         }
     }

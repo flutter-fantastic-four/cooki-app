@@ -42,11 +42,13 @@ dependencies:
   firebase_remote_config: ^5.4.5
   shimmer: ^3.0.0
   speech_to_text: ^7.1.0
+  flutter_staggered_grid_view: ^0.7.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_native_splash: ^2.4.6
+  flutter_launcher_icons: ^0.14.1
 
   flutter_lints: ^5.0.0
 
@@ -78,3 +80,15 @@ flutter_native_splash:
   color: "#1D8163"
   image: "assets/icons/cooki_logo_white.png"
   color_ios: "#1D8163"
+  color_android: "#1D8163"
+  android_12:
+    image: "assets/icons/cooki_logo_white.png"
+    color: "#1D8163"
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/icons/app_icon.png"
+  min_sdk_android: 21
+  adaptive_icon_background: "#1D8163"
+  adaptive_icon_foreground: "assets/icons/cooki_logo_white_no_text.png"

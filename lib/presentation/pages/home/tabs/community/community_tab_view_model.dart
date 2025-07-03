@@ -5,7 +5,8 @@ import '../../../../../core/utils/logger.dart';
 import '../../../../../core/utils/category_mapper.dart';
 import '../../../../../data/repository/providers.dart';
 import '../../../../../domain/entity/recipe.dart';
-import '../../../../../core/utils/general_util.dart';
+
+import '../../../../../gen/l10n/app_localizations.dart';
 
 class CommunityState {
   final bool isLoading;
@@ -87,16 +88,18 @@ class CommunityState {
           }).toList();
     }
 
-    // Apply sort option if selected
-    if (selectedSort == strings(context).sortByRating) {
-      // Sort by actual calculated average ratings instead of stored ratingSum
-      filtered.sort((a, b) {
-        final aRating = actualAverageRatings[a.id] ?? 0.0;
-        final bRating = actualAverageRatings[b.id] ?? 0.0;
-        return bRating.compareTo(aRating);
-      });
-    } else if (selectedSort == strings(context).sortByCookTime) {
-      filtered.sort((a, b) => a.cookTime.compareTo(b.cookTime));
+    // Local sort by rating or cook time
+    final localizations = AppLocalizations.of(context);
+    if (localizations != null) {
+      if (selectedSort == localizations.sortByRating) {
+        filtered.sort((a, b) {
+          final aRating = actualAverageRatings[a.id] ?? 0.0;
+          final bRating = actualAverageRatings[b.id] ?? 0.0;
+          return bRating.compareTo(aRating);
+        });
+      } else if (selectedSort == localizations.sortByCookTime) {
+        filtered.sort((a, b) => (a.cookTime ?? 0).compareTo(b.cookTime ?? 0));
+      }
     }
 
     return filtered;
