@@ -46,7 +46,7 @@ All ingredients must include clear, measurable quantities, avoiding vague terms 
 The ingredient amounts should be written for exactly 1 serving as in the example provided.
 
 Only choose one of the following values for `"category"`:
-`["Korean", "Chinese", "Japanese", "Thai", "Indian", "American", "French", "Italian", "Mediterranean", "Middle Eastern", "Mexican", "Southeast Asian", "African", "Other"]`
+`["Korean", "Chinese", "Japanese", "Thai", "Desi/Indian", "American", "French", "Italian", "Mediterranean", "Middle Eastern", "Mexican", "Southeast Asian", "African", "Other"]`
 Use `"Other"` only if the recipe does not clearly fit one of the listed categories.
 
 If and only if the image is not of food or a dish, return this fallback JSON instead of valid recipe fields:

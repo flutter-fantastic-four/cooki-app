@@ -5,6 +5,7 @@ enum RecipeSortType {
   createdAtDescending, // default
   ratingDescending, // most stars
   cookTimeAscending, // fastest first
+  myRatingSumDescending, // For my recipes tab (ratingSum)
 }
 
 abstract class RecipeDataSource {
@@ -79,9 +80,17 @@ class RecipeFirestoreDataSource implements RecipeDataSource {
   ) {
     switch (sortType) {
       case RecipeSortType.ratingDescending:
-        return query.orderBy('ratingSum', descending: true);
+        return query
+            .orderBy('actualRating', descending: true)
+            .orderBy('createdAt', descending: true);
+      case RecipeSortType.myRatingSumDescending:
+        return query
+            .orderBy('ratingSum', descending: true)
+            .orderBy('createdAt', descending: true);
       case RecipeSortType.cookTimeAscending:
-        return query.orderBy('cookTime', descending: false);
+        return query
+            .orderBy('cookTime', descending: false)
+            .orderBy('createdAt', descending: true);
       case RecipeSortType.createdAtDescending:
         return query.orderBy('createdAt', descending: true);
     }

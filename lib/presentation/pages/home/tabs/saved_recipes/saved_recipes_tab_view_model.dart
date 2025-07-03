@@ -109,17 +109,19 @@ class SavedRecipesViewModel
 
       final selectedCategory = state.selectedCategory;
 
-      // Determine sort type - only use database sorting for non-rating sorts
+      // Determine sort type for each tab
       RecipeSortType? sortType;
       if (state.selectedSort == arg.sortByCookTime) {
         sortType = RecipeSortType.cookTimeAscending;
+      } else if (state.selectedSort == arg.sortByRating) {
+        // Add a localized string for this in your l10n files
+        sortType = RecipeSortType.myRatingSumDescending;
       } else {
-        // For rating sort or no sort, use default created date ordering
-        // We'll handle rating sort in-memory after loading actual ratings
         sortType = RecipeSortType.createdAtDescending;
       }
 
       List<Recipe> recipes;
+      Map<String, double> actualRatings = {};
 
       if (selectedCategory == arg.recipeTabAll) {
         // For "All" tab, combine user's created recipes AND saved recipes
@@ -152,9 +154,21 @@ class SavedRecipesViewModel
         // Re-sort the combined list since we lost the original sorting
         if (state.selectedSort == arg.sortByCookTime) {
           recipes.sort((a, b) => a.cookTime.compareTo(b.cookTime));
+        } else if (state.selectedSort == arg.sortByRating) {
+          // Local sort by actual average rating
+          actualRatings = await _calculateActualAverageRatings(recipes);
+          recipes.sort((a, b) {
+            final aRating = actualRatings[a.id] ?? 0.0;
+            final bRating = actualRatings[b.id] ?? 0.0;
+            return bRating.compareTo(aRating);
+          });
         } else {
-          // Default to creation date descending (rating sort will be applied later)
+          // Default to creation date descending
           recipes.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        }
+        // Only calculate actualRatings if not already done
+        if (state.selectedSort != arg.sortByRating) {
+          actualRatings = await _calculateActualAverageRatings(recipes);
         }
       } else if (selectedCategory == arg.recipeTabCreated) {
         recipes = await repository.getMyRecipes(
@@ -162,46 +176,28 @@ class SavedRecipesViewModel
           isPublic: false,
           sortType: sortType,
         );
+        actualRatings = await _calculateActualAverageRatings(recipes);
       } else if (selectedCategory == arg.recipeTabShared) {
         recipes = await repository.getMyRecipes(
           currentUser.id,
           isPublic: true,
           sortType: sortType,
         );
+        actualRatings = await _calculateActualAverageRatings(recipes);
       } else if (selectedCategory == arg.recipeTabSaved) {
         recipes = await repository.getUserSavedRecipes(
           currentUser.id,
           sortType: sortType,
         );
+        actualRatings = await _calculateActualAverageRatings(recipes);
       } else {
         recipes = [];
+        actualRatings = {};
       }
 
       // Apply cuisine filter
       if (state.selectedCuisines.isNotEmpty) {
         recipes = await _filterRecipesBySelectedCuisines(recipes);
-      }
-
-      // Load actual average ratings for all recipes and get the ratings map
-      final actualRatings = await _calculateActualAverageRatings(recipes);
-
-      // Apply rating sort in-memory if selected
-      if (state.selectedSort == arg.sortByRating) {
-        recipes.sort((a, b) {
-          double aRating;
-          double bRating;
-          if (a.userId == currentUser.id) {
-            aRating = a.userRating.toDouble();
-          } else {
-            aRating = actualRatings[a.id] ?? 0.0;
-          }
-          if (b.userId == currentUser.id) {
-            bRating = b.userRating.toDouble();
-          } else {
-            bRating = actualRatings[b.id] ?? 0.0;
-          }
-          return bRating.compareTo(aRating); // Descending order
-        });
       }
 
       state = state.copyWith(
