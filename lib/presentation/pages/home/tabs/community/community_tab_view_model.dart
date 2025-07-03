@@ -88,30 +88,17 @@ class CommunityState {
           }).toList();
     }
 
-    // Apply sort option if selected
+    // Local sort by rating or cook time
     final localizations = AppLocalizations.of(context);
     if (localizations != null) {
       if (selectedSort == localizations.sortByRating) {
-        // Ensure a consistent base order before sorting by rating
-        filtered.sort((a, b) {
-          final dateCmp = b.createdAt.compareTo(a.createdAt);
-          if (dateCmp != 0) return dateCmp;
-          return a.id.compareTo(b.id);
-        });
-        // Now sort by rating (stable, with secondary/tertiary keys)
         filtered.sort((a, b) {
           final aRating = actualAverageRatings[a.id] ?? 0.0;
           final bRating = actualAverageRatings[b.id] ?? 0.0;
-          final cmp = bRating.compareTo(aRating);
-          if (cmp != 0) return cmp;
-          // Secondary: createdAt descending
-          final dateCmp = b.createdAt.compareTo(a.createdAt);
-          if (dateCmp != 0) return dateCmp;
-          // Tertiary: recipeName ascending
-          return a.recipeName.compareTo(b.recipeName);
+          return bRating.compareTo(aRating);
         });
       } else if (selectedSort == localizations.sortByCookTime) {
-        filtered.sort((a, b) => a.cookTime.compareTo(b.cookTime));
+        filtered.sort((a, b) => (a.cookTime ?? 0).compareTo(b.cookTime ?? 0));
       }
     }
 
