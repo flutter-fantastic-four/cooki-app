@@ -18,7 +18,7 @@ enum SupportedLanguage {
         return language;
       }
     }
-    return SupportedLanguage.korean; // Default fallback
+    return SupportedLanguage.english; // Default fallback
   }
 }
 
