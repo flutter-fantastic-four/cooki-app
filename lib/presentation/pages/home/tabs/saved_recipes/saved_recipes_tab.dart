@@ -16,6 +16,8 @@ import '../../../../../core/utils/sharing_util.dart';
 import '../../../../user_global_view_model.dart';
 import 'saved_recipes_tab_view_model.dart';
 import '../community/widget/photo_modal_style_card.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+import '../../../../../presentation/settings_global_view_model.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 // Constants for modal styling
@@ -39,6 +41,9 @@ class MyRecipesPage extends ConsumerStatefulWidget {
 class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
   late PageController _pageController;
   final TextEditingController _searchController = TextEditingController();
+  late stt.SpeechToText _speech;
+  bool _speechEnabled = false;
+  bool _isListening = false;
 
   @override
   void didChangeDependencies() {
@@ -60,6 +65,45 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
         strings(context),
       ).indexOf(defaultCategory),
     );
+    _speech = stt.SpeechToText();
+    _initSpeech();
+  }
+
+  void _initSpeech() async {
+    _speechEnabled = await _speech.initialize();
+    setState(() {});
+  }
+
+  void _startVoiceSearch() async {
+    if (_isListening) {
+      await _speech.stop();
+      setState(() => _isListening = false);
+      return;
+    }
+
+    final currentLanguage =
+        ref.read(settingsGlobalViewModelProvider).selectedLanguage;
+    final localeId =
+        currentLanguage == SupportedLanguage.korean ? 'ko_KR' : 'en_US';
+
+    await _speech.listen(
+      onResult: (result) {
+        _searchController.text = result.recognizedWords;
+        final viewModel = ref.read(
+          savedRecipesViewModelProvider(strings(context)).notifier,
+        );
+        viewModel.updateSearchQuery(result.recognizedWords);
+
+        // Stop listening when speech is final
+        if (result.finalResult) {
+          setState(() => _isListening = false);
+        }
+      },
+      localeId: localeId,
+      // listenFor: Duration(seconds: 5), // Auto-stop after 10 seconds
+      // pauseFor: Duration(seconds: 3),   // Stop if pause for 3 seconds
+    );
+    setState(() => _isListening = true);
   }
 
   bool _onScrollNotification(ScrollNotification notification) {
@@ -77,6 +121,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
   void dispose() {
     _pageController.dispose();
     _searchController.dispose();
+    _speech.stop();
     super.dispose();
   }
 
@@ -416,6 +461,10 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
           icon: const Icon(CupertinoIcons.back, color: Colors.black, size: 24),
           onPressed: () {
             _searchController.clear();
+            if (_isListening) {
+              _speech.stop();
+              setState(() => _isListening = false);
+            }
             viewModel.clearSearch();
           },
         ),
@@ -436,19 +485,31 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
       actions: [
         if (state.searchQuery.isNotEmpty) ...[
           const SizedBox(width: 8),
-          IconButton(
-            icon: const Icon(
-              Icons.cancel,
-              color: AppColors.greyScale500,
-              size: 18,
+          SizedBox.square(
+            dimension: 24,
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              icon: const Icon(
+                Icons.cancel,
+                color: AppColors.greyScale500,
+                size: 18,
+              ),
+              onPressed: () {
+                _searchController.clear();
+                viewModel.updateSearchQuery('');
+              },
             ),
-            onPressed: () {
-              _searchController.clear();
-              viewModel.updateSearchQuery('');
-            },
           ),
         ] else
           const SizedBox(width: 28), // 8 + 20 when no clear button
+        IconButton(
+          icon: Icon(
+            _isListening ? Icons.mic : Icons.mic_none,
+            color: _isListening ? Colors.red : Colors.black,
+            size: 22,
+          ),
+          onPressed: _speechEnabled ? _startVoiceSearch : null,
+        ),
         const SizedBox(width: 20),
       ],
     );

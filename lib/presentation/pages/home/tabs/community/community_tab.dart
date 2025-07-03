@@ -20,6 +20,8 @@ import '../../../../../app/constants/app_colors.dart';
 import '../../../../../core/utils/general_util.dart';
 import '../../../../../core/utils/snackbar_util.dart';
 import 'community_tab_view_model.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+import '../../../../../presentation/settings_global_view_model.dart';
 
 // Provider for calculating actual average rating from reviews
 final actualAverageRatingProvider = FutureProvider.family
@@ -72,11 +74,55 @@ class CommunityPage extends ConsumerStatefulWidget {
 
 class _CommunityPageState extends ConsumerState<CommunityPage> {
   final TextEditingController _searchController = TextEditingController();
+  late stt.SpeechToText _speech;
+  bool _speechEnabled = false;
+  bool _isListening = false;
 
   @override
   void dispose() {
     _searchController.dispose();
+    _speech.stop();
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _speech = stt.SpeechToText();
+    _initSpeech();
+  }
+
+  void _initSpeech() async {
+    _speechEnabled = await _speech.initialize();
+    setState(() {});
+  }
+
+  void _startVoiceSearch() async {
+    if (_isListening) {
+      await _speech.stop();
+      setState(() => _isListening = false);
+      return;
+    }
+
+    final currentLanguage = ref.read(settingsGlobalViewModelProvider).selectedLanguage;
+    final localeId = currentLanguage == SupportedLanguage.korean ? 'ko_KR' : 'en_US';
+
+    await _speech.listen(
+      onResult: (result) {
+        _searchController.text = result.recognizedWords;
+        final viewModel = ref.read(communityViewModelProvider.notifier);
+        viewModel.updateSearchQuery(result.recognizedWords);
+
+        // Stop listening when speech is final
+        if (result.finalResult) {
+          setState(() => _isListening = false);
+        }
+      },
+      localeId: localeId,
+      // listenFor: Duration(seconds: 5), // Auto-stop after 10 seconds
+      // pauseFor: Duration(seconds: 3),   // Stop if pause for 3 seconds
+    );
+    setState(() => _isListening = true);
   }
 
   @override
@@ -559,13 +605,18 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0,
-      leadingWidth: 56, // 20 + 24 + 12
+      leadingWidth: 56,
+      // 20 + 24 + 12
       leading: Padding(
         padding: const EdgeInsets.only(left: 20),
         child: IconButton(
           icon: const Icon(CupertinoIcons.back, color: Colors.black, size: 24),
           onPressed: () {
             _searchController.clear();
+            if (_isListening) {
+              _speech.stop();
+              setState(() => _isListening = false);
+            }
             viewModel.clearSearch();
           },
         ),
@@ -586,19 +637,31 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
       actions: [
         if (state.searchQuery.isNotEmpty) ...[
           const SizedBox(width: 8),
-          IconButton(
-            icon: const Icon(
-              Icons.cancel,
-              color: AppColors.greyScale500,
-              size: 18,
+          SizedBox.square(
+            dimension: 24,
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              icon: const Icon(
+                Icons.cancel,
+                color: AppColors.greyScale500,
+                size: 18,
+              ),
+              onPressed: () {
+                _searchController.clear();
+                viewModel.updateSearchQuery('');
+              },
             ),
-            onPressed: () {
-              _searchController.clear();
-              viewModel.updateSearchQuery('');
-            },
           ),
         ] else
           const SizedBox(width: 28), // 8 + 20 when no clear button
+        IconButton(
+          icon: Icon(
+            _isListening ? Icons.mic : Icons.mic_none,
+            color: _isListening ? Colors.red : Colors.black,
+            size: 22,
+          ),
+          onPressed: _speechEnabled ? _startVoiceSearch : null,
+        ),
         const SizedBox(width: 20),
       ],
     );
