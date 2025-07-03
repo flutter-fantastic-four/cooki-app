@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:cooki/core/utils/logger.dart';
+import 'package:cooki/presentation/user_global_view_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -68,8 +69,11 @@ class SettingsGlobalViewModel extends Notifier<SettingsState> {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_languageKey, language.code);
-
       state = state.copyWith(selectedLanguage: language);
+
+      ref
+          .read(userGlobalViewModelProvider.notifier)
+          .updateLanguage(language.code);
     } catch (e, stack) {
       logError(e, stack);
       rethrow;
