@@ -92,13 +92,9 @@ class CommunityState {
     final localizations = AppLocalizations.of(context);
     if (localizations != null) {
       if (selectedSort == localizations.sortByRating) {
-        filtered.sort((a, b) {
-          final aRating = actualAverageRatings[a.id] ?? 0.0;
-          final bRating = actualAverageRatings[b.id] ?? 0.0;
-          return bRating.compareTo(aRating);
-        });
+        filtered.sort((a, b) => b.ratingAverage.compareTo(a.ratingAverage));
       } else if (selectedSort == localizations.sortByCookTime) {
-        filtered.sort((a, b) => (a.cookTime ?? 0).compareTo(b.cookTime ?? 0));
+        filtered.sort((a, b) => a.cookTime.compareTo(b.cookTime));
       }
     }
 
@@ -127,44 +123,9 @@ class CommunityViewModel extends AutoDisposeNotifier<CommunityState> {
         ref.read(userGlobalViewModelProvider)?.id,
       );
       state = state.copyWith(isLoading: false, recipes: recipes);
-
-      // Load actual average ratings for all recipes
-      await _loadActualAverageRatings(recipes);
     } catch (e, stack) {
       logError(e, stack);
       state = state.copyWith(isLoading: false, error: e.toString());
-    }
-  }
-
-  Future<void> _loadActualAverageRatings(List<Recipe> recipes) async {
-    try {
-      final reviewRepository = ref.read(reviewRepositoryProvider);
-      final Map<String, double> ratings = {};
-
-      for (final recipe in recipes) {
-        try {
-          final reviews = await reviewRepository.getReviewsByRecipeId(
-            recipe.id,
-          );
-          if (reviews.isEmpty) {
-            ratings[recipe.id] = 0.0;
-          } else {
-            final totalRating = reviews.fold<int>(
-              0,
-              (total, review) => total + review.rating,
-            );
-            ratings[recipe.id] = totalRating / reviews.length;
-          }
-        } catch (e) {
-          // If there's an error getting reviews for this recipe, set rating to 0
-          ratings[recipe.id] = 0.0;
-        }
-      }
-
-      state = state.copyWith(actualAverageRatings: ratings);
-    } catch (e, stack) {
-      logError(e, stack);
-      // Don't fail the whole operation if ratings can't be loaded
     }
   }
 
