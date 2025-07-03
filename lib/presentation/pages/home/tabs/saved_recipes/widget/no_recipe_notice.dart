@@ -8,7 +8,7 @@ import 'package:cooki/presentation/pages/login/guest_login_page.dart';
 import 'package:cooki/presentation/user_global_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class NoRecipeNotice extends ConsumerWidget {
   const NoRecipeNotice({super.key, required this.category});
@@ -24,7 +24,7 @@ class NoRecipeNotice extends ConsumerWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Image.asset('assets/icons/cancel.png', width: 48, height: 48),
+        SvgPicture.asset('assets/icons/name=cancel, size=24, state=Default.svg', width: 48, height: 48),
         SizedBox(height: 20),
         _emptyNotice(context, category),
         _actionByCategoryButton(context, userState, homeViewModel),

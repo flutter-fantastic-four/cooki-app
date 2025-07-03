@@ -257,7 +257,11 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                 }
 
                 return RefreshIndicator(
-                  onRefresh: () => viewModel.refreshRecipes(),
+                  onRefresh: () async {
+                    // Start loading, but return immediately so the indicator disappears
+                    viewModel.refreshRecipes();
+                    return;
+                  },
                   color: AppColors.primary,
                   backgroundColor: AppColors.white,
                   child: NotificationListener<ScrollNotification>(
@@ -404,7 +408,12 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.cancel_outlined, size: 64, color: AppColors.greyScale400),
+          SvgPicture.asset(
+            'assets/icons/name=cancel, size=24, state=Default.svg',
+            width: 64,
+            height: 64,
+            colorFilter: const ColorFilter.mode(AppColors.greyScale400, BlendMode.srcIn),
+          ),
           const SizedBox(height: 16),
           Text(strings(context).noRecipes, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.greyScale600)),
           const SizedBox(height: 8),
