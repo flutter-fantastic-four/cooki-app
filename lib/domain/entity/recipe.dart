@@ -17,6 +17,7 @@ class Recipe {
   final String? promptInput;
   final int ratingCount;
   final double ratingSum;
+  final double ratingAverage;
   final int userRating;
 
   Recipe({
@@ -38,11 +39,13 @@ class Recipe {
     this.promptInput,
     int? ratingCount,
     double? ratingSum,
+    double? ratingAverage,
     int? userRating,
   }) : createdAt = createdAt ?? DateTime.now(),
-       ratingCount = ratingCount ?? 0,
-       ratingSum = ratingSum ?? 0,
-       userRating = userRating ?? 0;
+        ratingCount = ratingCount ?? 0,
+        ratingSum = ratingSum ?? 0,
+        ratingAverage = ratingAverage ?? 0,
+        userRating = userRating ?? 0;
 
   Recipe copyWith({
     String? id,
@@ -63,6 +66,7 @@ class Recipe {
     String? promptInput,
     int? ratingCount,
     double? ratingSum,
+    double? ratingAverage,
     int? userRating,
   }) {
     return Recipe(
@@ -84,6 +88,7 @@ class Recipe {
       promptInput: promptInput ?? this.promptInput,
       ratingCount: ratingCount ?? this.ratingCount,
       ratingSum: ratingSum ?? this.ratingSum,
+      ratingAverage: ratingAverage ?? this.ratingAverage,
       userRating: userRating ?? this.userRating,
     );
   }

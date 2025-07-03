@@ -23,29 +23,6 @@ import 'community_tab_view_model.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../../../../../presentation/settings_global_view_model.dart';
 
-// Provider for calculating actual average rating from reviews
-final actualAverageRatingProvider = FutureProvider.family
-    .autoDispose<Map<String, dynamic>, String>((ref, recipeId) async {
-      try {
-        final reviewRepository = ref.read(reviewRepositoryProvider);
-        final reviews = await reviewRepository.getReviewsByRecipeId(recipeId);
-
-        if (reviews.isEmpty) {
-          return {'average': 0.0, 'count': 0};
-        }
-
-        final totalRating = reviews.fold<int>(
-          0,
-          (sum, review) => sum + review.rating,
-        );
-        final average = totalRating / reviews.length;
-
-        return {'average': average, 'count': reviews.length};
-      } catch (e) {
-        return {'average': 0.0, 'count': 0};
-      }
-    });
-
 // Provider for checking if a recipe is saved by the current user
 final isRecipeSavedProvider = FutureProvider.family.autoDispose<bool, String>((
   ref,
@@ -104,8 +81,10 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
       return;
     }
 
-    final currentLanguage = ref.read(settingsGlobalViewModelProvider).selectedLanguage;
-    final localeId = currentLanguage == SupportedLanguage.korean ? 'ko_KR' : 'en_US';
+    final currentLanguage =
+        ref.read(settingsGlobalViewModelProvider).selectedLanguage;
+    final localeId =
+        currentLanguage == SupportedLanguage.korean ? 'ko_KR' : 'en_US';
 
     await _speech.listen(
       onResult: (result) {
@@ -985,75 +964,15 @@ class _RecipeCard extends ConsumerWidget {
                       const SizedBox(width: 8),
                       Icon(Icons.star, color: AppColors.secondary600, size: 14),
                       const SizedBox(width: 2),
-                      Consumer(
-                        builder: (context, ref, child) {
-                          final averageRatingAsync = ref.watch(
-                            actualAverageRatingProvider(recipe.id),
-                          );
-                          return averageRatingAsync.when(
-                            data: (ratingData) {
-                              final average = ratingData['average'] as double;
-                              final count = ratingData['count'] as int;
-                              return Text(
-                                '${strings(context).average} ${count == 0 ? '0' : average.toStringAsFixed(1)}${strings(context).score}',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.greyScale600,
-                                ),
-                              );
-                            },
-                            loading:
-                                () => Text(
-                                  '${strings(context).average} ${recipe.ratingSum.toStringAsFixed(1)}${strings(context).score}',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: AppColors.greyScale600,
-                                  ),
-                                ),
-                            error:
-                                (error, stack) => Text(
-                                  '${strings(context).average} 0${strings(context).score}',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: AppColors.greyScale600,
-                                  ),
-                                ),
-                          );
-                        },
+                      Text(
+                        '${strings(context).average} ${recipe.ratingCount == 0 ? '0' : recipe.ratingAverage.toStringAsFixed(1)}${strings(context).score}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.greyScale600,
+                        ),
                       ),
                     ],
                   ),
-                  // Row(
-                  //   children: [
-                  //     CircleAvatar(
-                  //       radius: 10,
-                  //       backgroundImage:
-                  //           recipe.userProfileImage != null
-                  //               ? NetworkImage(recipe.userProfileImage!)
-                  //               : null,
-                  //       backgroundColor: AppColors.greyScale200,
-                  //       child:
-                  //           recipe.userProfileImage == null
-                  //               ? const Icon(
-                  //                 Icons.person,
-                  //                 size: 12,
-                  //                 color: AppColors.greyScale600,
-                  //               )
-                  //               : null,
-                  //     ),
-                  //     const SizedBox(width: 8),
-                  //     Expanded(
-                  //       child: Text(
-                  //         recipe.userName,
-                  //         style: const TextStyle(
-                  //           fontSize: 12,
-                  //           color: AppColors.greyScale600,
-                  //         ),
-                  //         overflow: TextOverflow.ellipsis,
-                  //       ),
-                  //     ),
-                  //   ],
-                  // ),
                 ],
               ),
             ),

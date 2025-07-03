@@ -8,13 +8,13 @@ import 'package:cooki/core/utils/snackbar_util.dart';
 import 'package:cooki/domain/entity/app_user.dart';
 import 'package:cooki/domain/entity/recipe.dart';
 import 'package:cooki/domain/entity/review/review.dart';
+import 'package:cooki/presentation/pages/detailed_recipe/recipe_detail_view_model.dart';
 import 'package:cooki/presentation/pages/detailed_recipe/widget/rating_modal.dart';
 import 'package:cooki/presentation/pages/detailed_recipe/widget/review_card_list.dart';
 import 'package:cooki/presentation/pages/edit/recipe_edit_page.dart';
 import 'package:cooki/presentation/pages/home/tabs/saved_recipes/saved_recipes_tab_view_model.dart';
 import 'package:cooki/presentation/pages/login/guest_login_page.dart';
 import 'package:cooki/presentation/pages/reviews/reviews_page.dart';
-import 'package:cooki/presentation/pages/reviews/reviews_view_model.dart';
 import 'package:cooki/presentation/user_global_view_model.dart';
 import 'package:cooki/presentation/widgets/app_cached_image.dart';
 import 'package:cooki/presentation/widgets/recipe_options_modal.dart';
@@ -25,79 +25,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../reviews/reviews_view_model.dart';
 import '../write_review/write_review_page.dart';
-
-// Provider for fetching fresh recipe data from Firestore by ID
-final recipeByIdProvider = FutureProvider.family.autoDispose<Recipe?, String>((
-  ref,
-  recipeId,
-) async {
-  try {
-    final recipeRepository = ref.read(recipeRepositoryProvider);
-    final allRecipes = await recipeRepository.getAllRecipes();
-    return allRecipes.firstWhere((recipe) => recipe.id == recipeId);
-  } catch (e) {
-    return null;
-  }
-});
-
-// Provider for user rating that can be refreshed
-final userRatingProvider = FutureProvider.family.autoDispose<int?, Recipe>((
-  ref,
-  recipe,
-) async {
-  try {
-    final currentUser = ref.read(userGlobalViewModelProvider);
-    if (currentUser == null) return null;
-
-    if (recipe.isPublic) {
-      // For public recipes, get rating from reviews
-      final reviewRepository = ref.read(reviewRepositoryProvider);
-      final userReview = await reviewRepository.getUserReviewForRecipe(
-        recipeId: recipe.id,
-        userId: currentUser.id,
-      );
-      return userReview?.rating;
-    } else {
-      // For private recipes, get rating from fresh recipe data
-      final freshRecipeAsync = ref.watch(recipeByIdProvider(recipe.id));
-      return freshRecipeAsync.when(
-        data:
-            (freshRecipe) =>
-                freshRecipe != null && freshRecipe.userRating > 0
-                    ? freshRecipe.userRating
-                    : null,
-        loading: () => recipe.userRating > 0 ? recipe.userRating : null,
-        error: (_, __) => recipe.userRating > 0 ? recipe.userRating : null,
-      );
-    }
-  } catch (e) {
-    return null;
-  }
-});
-
-// Provider for calculating actual average rating from reviews
-final actualAverageRatingProvider = FutureProvider.family
-    .autoDispose<Map<String, dynamic>, String>((ref, recipeId) async {
-      try {
-        final reviewRepository = ref.read(reviewRepositoryProvider);
-        final reviews = await reviewRepository.getReviewsByRecipeId(recipeId);
-
-        if (reviews.isEmpty) {
-          return {'average': 0.0, 'count': 0};
-        }
-
-        final totalRating = reviews.fold<int>(
-          0,
-          (sum, review) => sum + review.rating,
-        );
-        final average = totalRating / reviews.length;
-
-        return {'average': average, 'count': reviews.length};
-      } catch (e) {
-        return {'average': 0.0, 'count': 0};
-      }
-    });
 
 // Provider for checking if a recipe is saved by the current user
 final isRecipeSavedProvider = FutureProvider.family.autoDispose<bool, String>((
@@ -121,6 +50,7 @@ final isRecipeSavedProvider = FutureProvider.family.autoDispose<bool, String>((
 class DetailRecipePage extends ConsumerWidget {
   final Recipe recipe;
   final String? category;
+
   // ignore: unused_field
   static bool _hasRatingBeenPosted = false;
 
@@ -128,6 +58,7 @@ class DetailRecipePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(recipeDetailViewModelProvider(recipe.id));
     final user = ref.read(userGlobalViewModelProvider);
 
     return Scaffold(
@@ -187,15 +118,15 @@ class DetailRecipePage extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _infoChip(context, ref, user),
+                      _infoChip(context, ref, user, state),
                       const SizedBox(height: 12),
-                      _title(context, ref, recipe.isPublic),
+                      _title(context, ref),
                       const SizedBox(height: 8),
                       _details(context),
                       const SizedBox(height: 13),
                       TagChips(recipe.tags),
                       const SizedBox(height: 24),
-                      _review(context),
+                      _review(context, ref, state.recipe),
                       const SizedBox(height: 24),
                       _ingredientsLabel(context),
                       const SizedBox(height: 16),
@@ -254,47 +185,20 @@ class DetailRecipePage extends ConsumerWidget {
     );
   }
 
-  Widget _review(BuildContext context) {
+  Widget _review(BuildContext context, WidgetRef ref, Recipe? currentRecipe) {
+    final ratingCount = currentRecipe?.ratingCount ?? 0;
+    final ratingAverage = currentRecipe?.ratingAverage ?? 0.0;
     return recipe.isPublic
         ? Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Consumer(
-              builder: (context, ref, child) {
-                final actualRatingAsync = ref.watch(
-                  actualAverageRatingProvider(recipe.id),
-                );
-                return actualRatingAsync.when(
-                  data: (ratingData) {
-                    final average = ratingData['average'] as double;
-                    final count = ratingData['count'] as int;
-                    return _buildReviewRow(
-                      context,
-                      ref,
-                      count: count,
-                      averageText:
-                          count == 0 ? '0' : average.toStringAsFixed(1),
-                    );
-                  },
-                  loading:
-                      () => _buildReviewRow(
-                        context,
-                        ref,
-                        count: recipe.ratingCount,
-                        averageText:
-                            recipe.ratingSum == 0.0
-                                ? '0'
-                                : recipe.ratingSum.toStringAsFixed(1),
-                      ),
-                  error:
-                      (error, stack) => _buildReviewRow(
-                        context,
-                        ref,
-                        count: recipe.ratingCount,
-                        averageText: '0',
-                      ),
-                );
-              },
+            _buildReviewRow(
+              context,
+              ref,
+              count: ratingCount,
+              averageText:
+                  ratingCount == 0 ? '0' : ratingAverage.toStringAsFixed(1),
+              recipe: recipe,
             ),
             const SizedBox(height: 16),
             ReviewCardList(recipe),
@@ -308,10 +212,11 @@ class DetailRecipePage extends ConsumerWidget {
     WidgetRef ref, {
     required int count,
     required String averageText,
+    required Recipe recipe,
   }) {
     return Row(
       children: [
-        _buildReviewNavigationButton(context, ref, count),
+        _buildReviewNavigationButton(context, ref, count, recipe),
         Spacer(),
         Icon(Icons.star, color: AppColors.secondary600),
         Text(
@@ -326,6 +231,7 @@ class DetailRecipePage extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     int count,
+    Recipe recipe,
   ) {
     return GestureDetector(
       onTap: () async {
@@ -333,11 +239,10 @@ class DetailRecipePage extends ConsumerWidget {
           context,
           ReviewsPage(recipeId: recipe.id, recipeName: recipe.recipeName),
         );
-        // Refresh review data when returning from reviews page
-        // This handles cases where reviews might have been deleted or edited
-        ref.invalidate(userRatingProvider(recipe));
-        ref.invalidate(actualAverageRatingProvider(recipe.id));
-        ref.read(reviewsViewModelProvider(recipe.id).notifier).refreshReviews();
+        // Refresh recipe data when returning from reviews page
+        ref
+            .read(recipeDetailViewModelProvider(recipe.id).notifier)
+            .refreshRecipeData();
       },
       child: Row(
         children: [
@@ -397,7 +302,7 @@ class DetailRecipePage extends ConsumerWidget {
     );
   }
 
-  Row _title(BuildContext context, WidgetRef ref, bool isPublic) {
+  Row _title(BuildContext context, WidgetRef ref) {
     final viewModel = ref.read(
       savedRecipesViewModelProvider(strings(context)).notifier,
     );
@@ -499,9 +404,9 @@ class DetailRecipePage extends ConsumerWidget {
             );
           },
         ),
-        isPublic
+        recipe.isPublic
             ? IconButton(
-              onPressed: () => _shareRecipe(context, ref),
+              onPressed: () => _shareRecipe(context, ref, recipe),
               icon: Icon(Icons.ios_share),
             )
             : GestureDetector(
@@ -529,7 +434,7 @@ class DetailRecipePage extends ConsumerWidget {
     );
   }
 
-  void _shareRecipe(BuildContext context, WidgetRef ref) async {
+  void _shareRecipe(BuildContext context, WidgetRef ref, Recipe recipe) async {
     await SharingUtil.shareRecipe(
       context,
       recipe,
@@ -538,7 +443,12 @@ class DetailRecipePage extends ConsumerWidget {
     if (!context.mounted) return;
   }
 
-  Row _infoChip(BuildContext context, WidgetRef ref, AppUser? user) {
+  Row _infoChip(
+    BuildContext context,
+    WidgetRef ref,
+    AppUser? user,
+    RecipeDetailState state,
+  ) {
     return Row(
       children: [
         category != null
@@ -611,110 +521,48 @@ class DetailRecipePage extends ConsumerWidget {
             // Store the result in a static variable or pass it through navigation
             if (ratingPosted == true) {
               DetailRecipePage._hasRatingBeenPosted = true;
-              // Invalidate the rating providers to force refresh
-              ref.invalidate(userRatingProvider(recipe));
-              ref.invalidate(actualAverageRatingProvider(recipe.id));
-              // Refresh the reviews data directly instead of just invalidating
+              // Refresh recipe data and user rating
+              ref
+                  .read(recipeDetailViewModelProvider(recipe.id).notifier)
+                  .refreshRecipeData();
               ref
                   .read(reviewsViewModelProvider(recipe.id).notifier)
                   .refreshReviews();
             }
           },
-          child: Consumer(
-            builder: (context, ref, child) {
-              final userRatingAsync = ref.watch(userRatingProvider(recipe));
-              return userRatingAsync.when(
-                data: (userRating) {
-                  final rating = userRating ?? 0;
-                  return Container(
-                    height: 28,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: ShapeDecoration(
-                      shape: RoundedRectangleBorder(
-                        side: BorderSide(
-                          width: 1,
-                          color:
-                              rating == 0
-                                  ? AppColors.greyScale300
-                                  : AppColors.greyScale800,
-                        ),
-                        borderRadius: BorderRadius.circular(99999),
-                      ),
-                    ),
-                    child: Row(
-                      children: List.generate(5, (index) {
-                        return Icon(
-                          index < rating ? Icons.star : Icons.star_border,
-                          color:
-                              index < rating
-                                  ? AppColors.secondary600
-                                  : AppColors.greyScale300,
-                          size: 14,
-                        );
-                      }),
-                    ),
-                  );
-                },
-                loading:
-                    () => Container(
-                      height: 28,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: ShapeDecoration(
-                        shape: RoundedRectangleBorder(
-                          side: BorderSide(
-                            width: 1,
-                            color: AppColors.greyScale300,
-                          ),
-                          borderRadius: BorderRadius.circular(99999),
-                        ),
-                      ),
-                      child: Row(
-                        children: List.generate(5, (index) {
-                          return Icon(
-                            Icons.star_border,
-                            color: AppColors.greyScale300,
-                            size: 14,
-                          );
-                        }),
-                      ),
-                    ),
-                error:
-                    (error, stack) => Container(
-                      height: 28,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: ShapeDecoration(
-                        shape: RoundedRectangleBorder(
-                          side: BorderSide(
-                            width: 1,
-                            color: AppColors.greyScale300,
-                          ),
-                          borderRadius: BorderRadius.circular(99999),
-                        ),
-                      ),
-                      child: Row(
-                        children: List.generate(5, (index) {
-                          return Icon(
-                            Icons.star_border,
-                            color: AppColors.greyScale300,
-                            size: 14,
-                          );
-                        }),
-                      ),
-                    ),
-              );
-            },
-          ),
+          child: _buildRatingStars(state.userRating),
         ),
       ],
+    );
+  }
+
+  Widget _buildRatingStars(int? userRating) {
+    final rating = userRating ?? 0;
+    return Container(
+      height: 28,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: ShapeDecoration(
+        shape: RoundedRectangleBorder(
+          side: BorderSide(
+            width: 1,
+            color:
+                rating == 0 ? AppColors.greyScale300 : AppColors.greyScale800,
+          ),
+          borderRadius: BorderRadius.circular(99999),
+        ),
+      ),
+      child: Row(
+        children: List.generate(5, (index) {
+          return Icon(
+            index < rating ? Icons.star : Icons.star_border,
+            color:
+                index < rating
+                    ? AppColors.secondary600
+                    : AppColors.greyScale300,
+            size: 14,
+          );
+        }),
+      ),
     );
   }
 

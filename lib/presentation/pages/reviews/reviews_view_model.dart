@@ -4,6 +4,7 @@ import '../../../core/utils/logger.dart';
 import '../../../data/repository/providers.dart';
 import '../../../domain/entity/review/review.dart';
 import '../../../domain/entity/review/review_sort_type.dart';
+import '../detailed_recipe/recipe_detail_view_model.dart';
 
 class ReviewsState {
   final List<Review> reviews;
@@ -124,6 +125,7 @@ class ReviewsViewModel extends AutoDisposeFamilyNotifier<ReviewsState, String> {
           state.reviews.where((review) => review.id != reviewId).toList();
 
       state = state.copyWith(reviews: updatedReviews);
+      _refreshRecipeWithDelay(arg);
     } catch (e, stack) {
       logError(e, stack);
       state = state.copyWith(errorKey: ReviewsErrorKey.deleteFailed);
@@ -131,6 +133,14 @@ class ReviewsViewModel extends AutoDisposeFamilyNotifier<ReviewsState, String> {
       state = state.copyWith(isLoading: false);
     }
   }
+
+  Future<void> _refreshRecipeWithDelay(String recipeId) async {
+    await Future.delayed(Duration(milliseconds: 2000));
+    ref
+        .read(recipeDetailViewModelProvider(recipeId).notifier)
+        .refreshRecipeData();
+  }
+
 
   Future<Review?> getUserReviewForRecipe(String userId) async {
     try {
