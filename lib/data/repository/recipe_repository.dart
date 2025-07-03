@@ -29,6 +29,8 @@ abstract class RecipeRepository {
   Future<void> toggleRecipeShare(String recipeId, bool isPublic);
 
   Future<void> deleteRecipe(String recipeId);
+
+  Future<Recipe?> getRecipeById(String recipeId);
 }
 
 class RecipeRepositoryImpl implements RecipeRepository {
@@ -99,5 +101,11 @@ class RecipeRepositoryImpl implements RecipeRepository {
   @override
   Future<void> deleteRecipe(String recipeId) {
     return _recipeDataSource.deleteRecipe(recipeId);
+  }
+
+  @override
+  Future<Recipe?> getRecipeById(String recipeId) async {
+    final dto = await _recipeDataSource.getRecipeById(recipeId);
+    return dto?.toEntity();
   }
 }

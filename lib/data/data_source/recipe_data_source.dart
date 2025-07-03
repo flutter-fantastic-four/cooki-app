@@ -38,6 +38,8 @@ abstract class RecipeDataSource {
   Future<void> toggleRecipeShare(String recipeId, bool isPublic);
 
   Future<void> deleteRecipe(String recipeId);
+
+  Future<RecipeFirestoreDto?> getRecipeById(String recipeId);
 }
 
 class RecipeFirestoreDataSource implements RecipeDataSource {
@@ -190,5 +192,16 @@ class RecipeFirestoreDataSource implements RecipeDataSource {
   @override
   Future<void> deleteRecipe(String recipeId) async {
     await _firestore.collection('recipes').doc(recipeId).delete();
+  }
+
+  @override
+  Future<RecipeFirestoreDto?> getRecipeById(String recipeId) async {
+    try {
+      final doc = await _firestore.collection('recipes').doc(recipeId).get();
+      if (!doc.exists) return null;
+      return RecipeFirestoreDto.fromMap(doc.id, doc.data()!);
+    } catch (e) {
+      return null;
+    }
   }
 }
