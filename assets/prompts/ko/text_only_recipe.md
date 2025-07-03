@@ -48,5 +48,5 @@ All ingredients must include clear, measurable quantities, avoiding vague terms 
 The ingredient amounts should be written for exactly 1 serving as in the example provided.
 
 Only choose one of the following values for `"category"`:
-`["한식", "중식", "일식", "태국식", "인도/남아시아식", "미국식", "프랑스식", "이탈리아식", "지중해식", "중동식", "멕시코식", "동남아식", "아프리카식", "기타"]`
+`["한식", "중식", "일식", "태국식", "인도식", "미국식", "프랑스식", "이탈리아식", "지중해식", "중동식", "멕시코식", "동남아식", "아프리카식", "기타"]`
 Use `"기타"` only if the recipe does not clearly fit one of the listed categories.
