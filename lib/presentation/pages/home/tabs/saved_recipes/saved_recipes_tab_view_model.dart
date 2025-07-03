@@ -115,7 +115,7 @@ class SavedRecipesViewModel
         sortType = RecipeSortType.cookTimeAscending;
       } else if (state.selectedSort == arg.sortByRating) {
         // Add a localized string for this in your l10n files
-        sortType = RecipeSortType.myRatingSumDescending;
+        sortType = RecipeSortType.ratingDescending;
       } else {
         sortType = RecipeSortType.createdAtDescending;
       }

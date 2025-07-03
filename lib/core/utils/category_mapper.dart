@@ -10,7 +10,7 @@ class CategoryMapper {
   static const String _chinese = 'chinese';
   static const String _japanese = 'japanese';
   static const String _thai = 'thai';
-  static const String _indian = 'desi/indian';
+  static const String _indian = 'indian';
   static const String _american = 'american';
   static const String _french = 'french';
   static const String _italian = 'italian';
@@ -28,7 +28,7 @@ class CategoryMapper {
     'Chinese': _chinese,
     'Japanese': _japanese,
     'Thai': _thai,
-    'Desi/Indian': _indian,
+    'Indian': _indian,
     'American': _american,
     'French': _french,
     'Italian': _italian,
@@ -44,7 +44,7 @@ class CategoryMapper {
     '중식': _chinese,
     '일식': _japanese,
     '태국식': _thai,
-    '인도/남아시아식': _indian,
+    '인도식': _indian,
     '미국식': _american,
     '프랑스식': _french,
     '이탈리아식': _italian,
