@@ -270,12 +270,21 @@
   "skipLogin":"나중에 로그인 할게요",
   "pleaseLogin":"로그인 해주세요",
 
-  "noRecipeNoticeRecentFood": "최근에 맛있게 먹은 음식이 생각나시나요?",
-  "noRecipeNoticeTakePhoto": "사진 한 장, 간단한 설명이면 충분해요",
-  "goCommunity": "커뮤니티 둘러보기",
+  "goCommunity": "커뮤니티 이동하기",
+
+  "guestSignUpPrompt":"간단한 회원가입을 통해\n쿠키의 모든 서비스를 이용할 수 있어요.",
 
   "noRecipeNoticeemptyCategoryMessage": "아직 레시피가 없어요",
-  "guestSignUpPrompt":"간단한 회원가입을 통해\n 쿠키의 모든 서비스를 이용할 수 있어요.",
+  "noRecipeNoticeemptyCategorySubMessage": "최근에 맛있게 먹은 음식이 생각나시나요?\n사진 한 장, 간단한 설명이면 충분해요",
+
+  "noRecipeNoticeCreatedMessage": "생성한 레시피가 없어요",
+  "noRecipeNoticeCreatedSubMessage": "AI 레시피를 생성해보세요\n생성한 레시피는 이곳에 저장됩니다",
+
+  "noRecipeNoticeSavedMessage": "저장한 레시피가 없어요",
+  "noRecipeNoticeSavedSubMessage": "커뮤니티를 둘러보며 다른 유저가 공유한\n레시피가 마음에 든다면 저장해보세요",
+
+  "noRecipeNoticeSharedMessage": "공유한 레시피가 없어요",
+  "noRecipeNoticeSharedSubMessage": "내가 생성한 레시피 중 마음에 드는 레시피를\n커뮤니티에 공유해보세요",
 
   "undoTranslation": "원본 보기",
   "translationFailed": "번역에 실패했습니다. 다시 시도해 주세요.",
