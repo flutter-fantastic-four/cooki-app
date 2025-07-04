@@ -146,22 +146,32 @@ class RecipeOptionsModal extends ConsumerWidget {
   }
 
   void _toggleCommunityPost(BuildContext context, WidgetRef ref) async {
-    Navigator.pop(context);
     try {
       final recipeRepository = ref.read(recipeRepositoryProvider);
+      final wasPublic = recipe.isPublic;
       await recipeRepository.toggleRecipeShare(recipe.id, !recipe.isPublic);
+
+      // Close modal first
       if (context.mounted) {
-        SnackbarUtil.showSnackBar(
-          context,
-          recipe.isPublic
-              ? strings(context).unpostSuccess
-              : strings(context).postSuccess,
-          showIcon: true,
-        );
-        onRecipeUpdated?.call();
+        Navigator.pop(context);
+
+        // Show toast message after a short delay to ensure modal is closed
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        if (context.mounted) {
+          SnackbarUtil.showSnackBar(
+            context,
+            wasPublic
+                ? strings(context).unpostSuccess
+                : strings(context).postSuccess,
+            showIcon: true,
+          );
+          onRecipeUpdated?.call();
+        }
       }
     } catch (e) {
       if (context.mounted) {
+        Navigator.pop(context);
         SnackbarUtil.showSnackBar(context, strings(context).postError);
       }
     }

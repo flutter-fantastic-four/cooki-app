@@ -20,6 +20,7 @@ class RecipeFirestoreDto {
   final String? promptInput;
   final int ratingCount;
   final double ratingSum;
+  final double ratingAverage;
   final int userRating;
 
   const RecipeFirestoreDto({
@@ -41,6 +42,7 @@ class RecipeFirestoreDto {
     this.promptInput,
     required this.ratingCount,
     required this.ratingSum,
+    required this.ratingAverage,
     required this.userRating,
   });
 
@@ -62,8 +64,9 @@ class RecipeFirestoreDto {
       createdAt: map['createdAt'] ?? Timestamp.now(),
       updatedAt: map['updatedAt'],
       promptInput: map['promptInput'],
-      ratingCount: map['ratingCount'],
+      ratingCount: map['ratingCount'] ?? 0,
       ratingSum: (map['ratingSum'] ?? 0).toDouble(),
+      ratingAverage: (map['ratingAverage'] ?? 0).toDouble(),
       userRating: map['userRating'] ?? 0,
     );
   }
@@ -87,6 +90,7 @@ class RecipeFirestoreDto {
       'promptInput': promptInput,
       'ratingCount': ratingCount,
       'ratingSum': ratingSum,
+      'ratingAverage': ratingAverage,
       'userRating': userRating,
     };
   }
@@ -114,9 +118,11 @@ class RecipeFirestoreDto {
       promptInput: recipe.promptInput,
       ratingCount: recipe.ratingCount,
       ratingSum: recipe.ratingSum,
+      ratingAverage: recipe.ratingAverage,
       userRating: recipe.userRating,
     );
   }
+
   Recipe toEntity() {
     return Recipe(
       id: id,
@@ -137,6 +143,7 @@ class RecipeFirestoreDto {
       promptInput: promptInput,
       ratingCount: ratingCount,
       ratingSum: ratingSum,
+      ratingAverage: ratingAverage,
       userRating: userRating,
     );
   }

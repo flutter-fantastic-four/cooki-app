@@ -22,6 +22,7 @@ import '../../../domain/entity/review/review.dart';
 import '../../../domain/entity/review/review_sort_type.dart';
 import '../../settings_global_view_model.dart';
 import '../../user_global_view_model.dart';
+import '../detailed_recipe/recipe_detail_view_model.dart';
 import '../write_review/write_review_page.dart';
 import 'reviews_view_model.dart';
 
@@ -148,6 +149,7 @@ class ReviewsPage extends ConsumerWidget {
           strings(context).reviewDeletedSuccessfully,
           showIcon: true,
         );
+
       }
     }
   }

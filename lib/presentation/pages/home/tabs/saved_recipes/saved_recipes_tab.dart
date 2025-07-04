@@ -18,15 +18,13 @@ import 'saved_recipes_tab_view_model.dart';
 import '../community/widget/photo_modal_style_card.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../../../../../presentation/settings_global_view_model.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 // Constants for modal styling
 class _ModalConstants {
   static const handleWidth = 36.0;
   static const handleHeight = 4.0;
-  static const sectionTitleStyle = TextStyle(
-    fontSize: 18,
-    fontWeight: FontWeight.w600,
-  );
+  static const sectionTitleStyle = TextStyle(fontSize: 18, fontWeight: FontWeight.w600);
   static const filterChipSpacing = 8.0;
 }
 
@@ -51,19 +49,13 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
 
     // Use post-frame callback to avoid modifying provider during build
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final viewModel = ref.read(
-        savedRecipesViewModelProvider(strings(context)).notifier,
-      );
+      final viewModel = ref.read(savedRecipesViewModelProvider(strings(context)).notifier);
       viewModel.setSelectedCategory(defaultCategory);
       // Ensure recipes are refreshed when tab is first loaded
       viewModel.refreshRecipes();
     });
 
-    _pageController = PageController(
-      initialPage: AppConstants.recipeTabCategories(
-        strings(context),
-      ).indexOf(defaultCategory),
-    );
+    _pageController = PageController(initialPage: AppConstants.recipeTabCategories(strings(context)).indexOf(defaultCategory));
     _speech = stt.SpeechToText();
     _initSpeech();
   }
@@ -86,9 +78,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
     await _speech.listen(
       onResult: (result) {
         _searchController.text = result.recognizedWords;
-        final viewModel = ref.read(
-          savedRecipesViewModelProvider(strings(context)).notifier,
-        );
+        final viewModel = ref.read(savedRecipesViewModelProvider(strings(context)).notifier);
         viewModel.updateSearchQuery(result.recognizedWords);
 
         // Stop listening when speech is final
@@ -106,9 +96,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
   bool _onScrollNotification(ScrollNotification notification) {
     if (notification is ScrollUpdateNotification) {
       final shouldShow = notification.metrics.pixels > 0;
-      final viewModel = ref.read(
-        savedRecipesViewModelProvider(strings(context)).notifier,
-      );
+      final viewModel = ref.read(savedRecipesViewModelProvider(strings(context)).notifier);
       viewModel.setShowTabBorder(shouldShow);
     }
     return false;
@@ -126,21 +114,12 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
   Widget build(BuildContext context) {
     final state = ref.watch(savedRecipesViewModelProvider(strings(context)));
     final user = ref.watch(userGlobalViewModelProvider);
-    final viewModel = ref.read(
-      savedRecipesViewModelProvider(strings(context)).notifier,
-    );
+    final viewModel = ref.read(savedRecipesViewModelProvider(strings(context)).notifier);
     // Show error snackbar if there's an error
-    ref.listen(savedRecipesViewModelProvider(strings(context)), (
-      previous,
-      next,
-    ) {
+    ref.listen(savedRecipesViewModelProvider(strings(context)), (previous, next) {
       if (next.error != null) {
         if (next.error == 'delete_success') {
-          SnackbarUtil.showSnackBar(
-            context,
-            strings(context).deleteSuccess,
-            showIcon: true,
-          );
+          SnackbarUtil.showSnackBar(context, strings(context).deleteSuccess, showIcon: true);
         } else {
           SnackbarUtil.showSnackBar(context, next.error!);
         }
@@ -150,10 +129,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar:
-          state.isSearchActive
-              ? _buildSearchAppBar(context, state, viewModel)
-              : _buildNormalAppBar(context, state, viewModel),
+      appBar: state.isSearchActive ? _buildSearchAppBar(context, state, viewModel) : _buildNormalAppBar(context, state, viewModel),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
@@ -168,30 +144,16 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       children:
-                          AppConstants.recipeTabCategories(
-                            strings(context),
-                          ).asMap().entries.map((entry) {
+                          AppConstants.recipeTabCategories(strings(context)).asMap().entries.map((entry) {
                             final index = entry.key;
                             final category = entry.value;
-                            final isSelected =
-                                state.selectedCategory == category;
-                            final isLastTab =
-                                index ==
-                                AppConstants.recipeTabCategories(
-                                      strings(context),
-                                    ).length -
-                                    1;
+                            final isSelected = state.selectedCategory == category;
+                            final isLastTab = index == AppConstants.recipeTabCategories(strings(context)).length - 1;
                             return Padding(
-                              padding: EdgeInsets.only(
-                                left: index == 0 ? 16 : 0,
-                                right: isLastTab ? 16 : 8,
-                              ),
+                              padding: EdgeInsets.only(left: index == 0 ? 16 : 0, right: isLastTab ? 16 : 8),
                               child: GestureDetector(
                                 onTap: () async {
-                                  final targetIndex =
-                                      AppConstants.recipeTabCategories(
-                                        strings(context),
-                                      ).indexOf(category);
+                                  final targetIndex = AppConstants.recipeTabCategories(strings(context)).indexOf(category);
 
                                   // Directly set category and load recipes
                                   viewModel.setSelectedCategory(category);
@@ -205,22 +167,14 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                                   children: [
                                     Container(
                                       height: 26,
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                      ),
+                                      padding: const EdgeInsets.symmetric(horizontal: 12),
                                       alignment: Alignment.center,
                                       child: Text(
                                         category,
                                         style: TextStyle(
                                           fontSize: 13,
-                                          fontWeight:
-                                              isSelected
-                                                  ? FontWeight.w600
-                                                  : FontWeight.w400,
-                                          color:
-                                              isSelected
-                                                  ? AppColors.primary700
-                                                  : AppColors.greyScale800,
+                                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                                          color: isSelected ? AppColors.primary700 : AppColors.greyScale800,
                                         ),
                                       ),
                                     ),
@@ -229,12 +183,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                                         bottom: 0,
                                         left: 4,
                                         right: 4,
-                                        child: Container(
-                                          height: 2,
-                                          decoration: BoxDecoration(
-                                            color: AppColors.primary,
-                                          ),
-                                        ),
+                                        child: Container(height: 2, decoration: BoxDecoration(color: AppColors.primary)),
                                       ),
                                   ],
                                 ),
@@ -244,11 +193,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                     ),
                   ),
                 ),
-                Container(
-                  width: double.infinity,
-                  height: 1,
-                  color: AppColors.greyScale50,
-                ),
+                Container(width: double.infinity, height: 1, color: AppColors.greyScale50),
               ],
             ),
           ),
@@ -292,25 +237,19 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
             child: PageView.builder(
               controller: _pageController,
               onPageChanged: (index) async {
-                final category =
-                    AppConstants.recipeTabCategories(strings(context))[index];
+                final category = AppConstants.recipeTabCategories(strings(context))[index];
                 viewModel.setSelectedCategory(category);
                 await viewModel.loadRecipes();
               },
-              itemCount:
-                  AppConstants.recipeTabCategories(strings(context)).length,
+              itemCount: AppConstants.recipeTabCategories(strings(context)).length,
               itemBuilder: (context, index) {
-                final pageCategory =
-                    AppConstants.recipeTabCategories(strings(context))[index];
+                final pageCategory = AppConstants.recipeTabCategories(strings(context))[index];
                 final isCurrentPage = pageCategory == state.selectedCategory;
 
                 // Show recipes only for the current selected category
                 if (!isCurrentPage) {
                   // For non-current pages, show empty state or loading
-                  return Container(
-                    color: Colors.white,
-                    child: const Center(child: CircularProgressIndicator()),
-                  );
+                  return Container(color: Colors.white, child: const Center(child: CircularProgressIndicator()));
                 }
 
                 if (user == null || state.recipes.isEmpty) {
@@ -318,7 +257,11 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                 }
 
                 return RefreshIndicator(
-                  onRefresh: () => viewModel.refreshRecipes(),
+                  onRefresh: () async {
+                    // Start loading, but return immediately so the indicator disappears
+                    viewModel.refreshRecipes();
+                    return;
+                  },
                   color: AppColors.primary,
                   backgroundColor: AppColors.white,
                   child: NotificationListener<ScrollNotification>(
@@ -326,83 +269,48 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                     child:
                         state.isLoading
                             ? const Center(child: CircularProgressIndicator())
-                            : viewModel.getFilteredRecipes(context).isEmpty &&
-                                state.searchQuery.isNotEmpty
+                            : viewModel.getFilteredRecipes(context).isEmpty && state.searchQuery.isNotEmpty
                             ? _buildNoResultsView()
                             : CustomScrollView(
-                              key: PageStorageKey(
-                                'saved_recipes_${state.selectedCategory}',
-                              ),
+                              key: PageStorageKey('saved_recipes_${state.selectedCategory}'),
                               slivers: [
                                 SliverPadding(
-                                  padding: const EdgeInsets.fromLTRB(
-                                    16.0,
-                                    16.0,
-                                    16.0,
-                                    0,
-                                  ),
-                                  sliver: SliverGrid(
-                                    gridDelegate:
-                                        const SliverGridDelegateWithFixedCrossAxisCount(
-                                          crossAxisCount: 2,
-                                          crossAxisSpacing: 15,
-                                          mainAxisSpacing: 16,
-                                          childAspectRatio:
-                                              160 / 184, // 160x184 card size
-                                        ),
-                                    delegate: SliverChildBuilderDelegate(
-                                      (context, recipeIndex) {
-                                        final filteredRecipes = viewModel
-                                            .getFilteredRecipes(context);
-                                        final recipe =
-                                            filteredRecipes[recipeIndex];
-                                        return _RecipeCard(
-                                          recipe: recipe,
-                                          onOptionsTap: () {
-                                            if (state.selectedCategory ==
-                                                strings(
-                                                  context,
-                                                ).recipeTabSaved) {
-                                              _showSavedRecipeOptionsModal(
-                                                context,
-                                                recipe,
-                                                viewModel,
-                                              );
-                                            } else {
-                                              RecipeOptionsModal.show(
-                                                context: context,
-                                                ref: ref,
-                                                recipe: recipe,
-                                                onRecipeDeleted: () {
-                                                  SnackbarUtil.showSnackBar(
-                                                    context,
-                                                    strings(
-                                                      context,
-                                                    ).deleteSuccess,
-                                                    showIcon: true,
-                                                  );
-                                                  viewModel.refreshRecipes();
-                                                },
-                                                onRecipeUpdated: () {
-                                                  viewModel.refreshRecipes();
-                                                },
-                                              );
-                                            }
-                                          },
-                                          category: state.selectedCategory,
-                                          viewModel: viewModel,
-                                        );
-                                      },
-                                      childCount:
-                                          viewModel
-                                              .getFilteredRecipes(context)
-                                              .length,
-                                    ),
+                                  padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0),
+                                  sliver: SliverMasonryGrid.count(
+                                    crossAxisCount: 2,
+                                    crossAxisSpacing: 15,
+                                    mainAxisSpacing: 16,
+                                    childCount: viewModel.getFilteredRecipes(context).length,
+                                    itemBuilder: (context, recipeIndex) {
+                                      final filteredRecipes = viewModel.getFilteredRecipes(context);
+                                      final recipe = filteredRecipes[recipeIndex];
+                                      return _RecipeCard(
+                                        recipe: recipe,
+                                        onOptionsTap: () {
+                                          if (state.selectedCategory == strings(context).recipeTabSaved) {
+                                            _showSavedRecipeOptionsModal(context, recipe, viewModel);
+                                          } else {
+                                            RecipeOptionsModal.show(
+                                              context: context,
+                                              ref: ref,
+                                              recipe: recipe,
+                                              onRecipeDeleted: () {
+                                                SnackbarUtil.showSnackBar(context, strings(context).deleteSuccess, showIcon: true);
+                                                viewModel.refreshRecipes();
+                                              },
+                                              onRecipeUpdated: () {
+                                                viewModel.refreshRecipes();
+                                              },
+                                            );
+                                          }
+                                        },
+                                        category: state.selectedCategory,
+                                        viewModel: viewModel,
+                                      );
+                                    },
                                   ),
                                 ),
-                                const SliverToBoxAdapter(
-                                  child: SizedBox(height: 100),
-                                ),
+                                const SliverToBoxAdapter(child: SizedBox(height: 100)),
                               ],
                             ),
                   ),
@@ -415,26 +323,12 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
     );
   }
 
-  PreferredSizeWidget _buildNormalAppBar(
-    BuildContext context,
-    SavedRecipesState state,
-    SavedRecipesViewModel viewModel,
-  ) {
+  PreferredSizeWidget _buildNormalAppBar(BuildContext context, SavedRecipesState state, SavedRecipesViewModel viewModel) {
     return AppBar(
       titleSpacing: 20,
-      title: Text(
-        strings(context).myRecipesTitle,
-        style: const TextStyle(
-          color: Colors.black,
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
+      title: Text(strings(context).myRecipesTitle, style: const TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.w600)),
       actions: [
-        IconButton(
-          icon: FilterIconWithDot(showDot: state.hasActiveFilters),
-          onPressed: () => _showFilterModal(context),
-        ),
+        IconButton(icon: FilterIconWithDot(showDot: state.hasActiveFilters), onPressed: () => _showFilterModal(context)),
         IconButton(
           icon: SvgPicture.asset(
             'assets/icons/name=search, size=24, state=Default.svg',
@@ -452,11 +346,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
     );
   }
 
-  PreferredSizeWidget _buildSearchAppBar(
-    BuildContext context,
-    SavedRecipesState state,
-    SavedRecipesViewModel viewModel,
-  ) {
+  PreferredSizeWidget _buildSearchAppBar(BuildContext context, SavedRecipesState state, SavedRecipesViewModel viewModel) {
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0,
@@ -495,11 +385,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
             dimension: 24,
             child: IconButton(
               padding: EdgeInsets.zero,
-              icon: const Icon(
-                Icons.cancel,
-                color: AppColors.greyScale500,
-                size: 18,
-              ),
+              icon: const Icon(Icons.cancel, color: AppColors.greyScale500, size: 18),
               onPressed: () {
                 _searchController.clear();
                 viewModel.updateSearchQuery('');
@@ -509,11 +395,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
         ] else
           const SizedBox(width: 28), // 8 + 20 when no clear button
         IconButton(
-          icon: Icon(
-            _isListening ? Icons.mic : Icons.mic_none,
-            color: _isListening ? Colors.red : Colors.black,
-            size: 22,
-          ),
+          icon: Icon(_isListening ? Icons.mic : Icons.mic_none, color: _isListening ? Colors.red : Colors.black, size: 22),
           onPressed: _speechEnabled ? _startVoiceSearch : null,
         ),
         const SizedBox(width: 20),
@@ -526,21 +408,16 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.cancel_outlined, size: 64, color: AppColors.greyScale400),
+          SvgPicture.asset(
+            'assets/icons/name=cancel, size=24, state=Default.svg',
+            width: 64,
+            height: 64,
+            colorFilter: const ColorFilter.mode(AppColors.greyScale400, BlendMode.srcIn),
+          ),
           const SizedBox(height: 16),
-          Text(
-            strings(context).noRecipes,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: AppColors.greyScale600,
-            ),
-          ),
+          Text(strings(context).noRecipes, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.greyScale600)),
           const SizedBox(height: 8),
-          Text(
-            strings(context).noSearchResult,
-            style: const TextStyle(fontSize: 14, color: AppColors.greyScale500),
-          ),
+          Text(strings(context).noSearchResult, style: const TextStyle(fontSize: 14, color: AppColors.greyScale500)),
         ],
       ),
     );
@@ -548,9 +425,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
 
   void _showFilterModal(BuildContext context) {
     final state = ref.read(savedRecipesViewModelProvider(strings(context)));
-    final viewModel = ref.read(
-      savedRecipesViewModelProvider(strings(context)).notifier,
-    );
+    final viewModel = ref.read(savedRecipesViewModelProvider(strings(context)).notifier);
 
     String tempSort = state.selectedSort;
     List<String> tempCuisines = List.from(state.selectedCuisines);
@@ -565,13 +440,8 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
           builder: (context, setModalState) {
             return Container(
               width: double.infinity,
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.9,
-              ),
-              decoration: const BoxDecoration(
-                color: AppColors.greyScale50,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-              ),
+              constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.9),
+              decoration: const BoxDecoration(color: AppColors.greyScale50, borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
               child: SafeArea(
                 child: SingleChildScrollView(
                   child: Column(
@@ -591,31 +461,15 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                               });
                             }),
                             const SizedBox(height: 20),
-                            const Divider(
-                              height: 1,
-                              thickness: 1,
-                              color: AppColors.greyScale200,
-                            ),
+                            const Divider(height: 1, thickness: 1, color: AppColors.greyScale200),
                             const SizedBox(height: 20),
-                            _buildCuisineSection(
-                              context,
-                              cuisineCategories,
-                              tempCuisines,
-                              setModalState,
-                            ),
+                            _buildCuisineSection(context, cuisineCategories, tempCuisines, setModalState),
                             const SizedBox(height: 24),
-                            _buildFilterActionButtons(
-                              context,
-                              viewModel,
-                              tempSort,
-                              tempCuisines,
-                            ),
+                            _buildFilterActionButtons(context, viewModel, tempSort, tempCuisines),
                           ],
                         ),
                       ),
-                      SizedBox(
-                        height: MediaQuery.of(context).viewInsets.bottom + 16,
-                      ),
+                      SizedBox(height: MediaQuery.of(context).viewInsets.bottom + 16),
                     ],
                   ),
                 ),
@@ -635,48 +489,26 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
         margin: const EdgeInsets.only(top: 8, bottom: 8),
         width: _ModalConstants.handleWidth,
         height: _ModalConstants.handleHeight,
-        decoration: BoxDecoration(
-          color: AppColors.greyScale200,
-          borderRadius: BorderRadius.circular(2),
-        ),
+        decoration: BoxDecoration(color: AppColors.greyScale200, borderRadius: BorderRadius.circular(2)),
       ),
     );
   }
 
-  Widget _buildSortSection(
-    BuildContext context,
-    String tempSort,
-    Function(String) onSortChanged,
-  ) {
+  Widget _buildSortSection(BuildContext context, String tempSort, Function(String) onSortChanged) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(strings(context).sort, style: _ModalConstants.sectionTitleStyle),
         const SizedBox(height: 12),
         _buildChipContainer([
-          _buildSortChip(
-            context,
-            strings(context).sortByRating,
-            tempSort,
-            onSortChanged,
-          ),
-          _buildSortChip(
-            context,
-            strings(context).sortByCookTime,
-            tempSort,
-            onSortChanged,
-          ),
+          _buildSortChip(context, strings(context).sortByRating, tempSort, onSortChanged),
+          _buildSortChip(context, strings(context).sortByCookTime, tempSort, onSortChanged),
         ]),
       ],
     );
   }
 
-  Widget _buildSortChip(
-    BuildContext context,
-    String sortOption,
-    String tempSort,
-    Function(String) onSortChanged,
-  ) {
+  Widget _buildSortChip(BuildContext context, String sortOption, String tempSort, Function(String) onSortChanged) {
     return _FilterChip(
       label: sortOption,
       isSelected: tempSort == sortOption,
@@ -688,24 +520,13 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
     );
   }
 
-  Widget _buildCuisineSection(
-    BuildContext context,
-    List<String> cuisineCategories,
-    List<String> tempCuisines,
-    Function setModalState,
-  ) {
+  Widget _buildCuisineSection(BuildContext context, List<String> cuisineCategories, List<String> tempCuisines, Function setModalState) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          strings(context).countryCategory,
-          style: _ModalConstants.sectionTitleStyle,
-        ),
+        Text(strings(context).countryCategory, style: _ModalConstants.sectionTitleStyle),
         const SizedBox(height: 4),
-        Text(
-          strings(context).maxCategorySelectionHint,
-          style: const TextStyle(fontSize: 12, color: AppColors.greyScale500),
-        ),
+        Text(strings(context).maxCategorySelectionHint, style: const TextStyle(fontSize: 12, color: AppColors.greyScale500)),
         const SizedBox(height: 12),
         _buildChipContainer(
           cuisineCategories.map((cuisine) {
@@ -745,12 +566,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
     );
   }
 
-  Widget _buildFilterActionButtons(
-    BuildContext context,
-    SavedRecipesViewModel viewModel,
-    String tempSort,
-    List<String> tempCuisines,
-  ) {
+  Widget _buildFilterActionButtons(BuildContext context, SavedRecipesViewModel viewModel, String tempSort, List<String> tempCuisines) {
     return Row(
       children: [
         Expanded(
@@ -774,9 +590,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             ),
             child: Text(strings(context).apply),
           ),
@@ -785,30 +599,19 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
     );
   }
 
-  void _showSavedRecipeOptionsModal(
-    BuildContext context,
-    Recipe recipe,
-    SavedRecipesViewModel viewModel,
-  ) {
+  void _showSavedRecipeOptionsModal(BuildContext context, Recipe recipe, SavedRecipesViewModel viewModel) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.greyScale50,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
-      ),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(26))),
       builder: (BuildContext context) {
         return Consumer(
           builder: (context, ref, child) {
             final user = ref.read(userGlobalViewModelProvider);
 
             return Padding(
-              padding: const EdgeInsets.only(
-                top: 8,
-                bottom: 30,
-                left: 15,
-                right: 15,
-              ),
+              padding: const EdgeInsets.only(top: 8, bottom: 30, left: 15, right: 15),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -816,10 +619,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                   Container(
                     width: 40,
                     height: 5,
-                    decoration: BoxDecoration(
-                      color: AppColors.greyScale400,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                    decoration: BoxDecoration(color: AppColors.greyScale400, borderRadius: BorderRadius.circular(10)),
                     margin: const EdgeInsets.only(bottom: 12),
                   ),
 
@@ -827,36 +627,20 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                   if (user != null)
                     PhotoModalStyleCard(
                       text: strings(context).removeFromMyRecipes,
-                      customIcon: Icon(
-                        Icons.bookmark_remove,
-                        size: 20,
-                        color: Colors.black87,
-                      ),
+                      customIcon: Icon(Icons.bookmark_remove, size: 20, color: Colors.black87),
                       onTap: () async {
                         try {
-                          final recipeRepository = ref.read(
-                            recipeRepositoryProvider,
-                          );
-                          await recipeRepository.removeFromSavedRecipes(
-                            user.id,
-                            recipe.id,
-                          );
+                          final recipeRepository = ref.read(recipeRepositoryProvider);
+                          await recipeRepository.removeFromSavedRecipes(user.id, recipe.id);
 
                           if (context.mounted) {
-                            SnackbarUtil.showSnackBar(
-                              context,
-                              strings(context).recipeRemovedSuccessfully,
-                              showIcon: true,
-                            );
+                            SnackbarUtil.showSnackBar(context, strings(context).recipeRemovedSuccessfully, showIcon: true);
                             Navigator.pop(context);
                             viewModel.refreshRecipes();
                           }
                         } catch (e) {
                           if (context.mounted) {
-                            SnackbarUtil.showSnackBar(
-                              context,
-                              strings(context).errorOccurred,
-                            );
+                            SnackbarUtil.showSnackBar(context, strings(context).errorOccurred);
                           }
                         }
                       },
@@ -864,27 +648,15 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
 
                   PhotoModalStyleCard(
                     text: strings(context).share,
-                    customIcon: Icon(
-                      Icons.ios_share,
-                      size: 20,
-                      color: Colors.black87,
-                    ),
+                    customIcon: Icon(Icons.ios_share, size: 20, color: Colors.black87),
                     onTap: () async {
-                      await SharingUtil.shareRecipe(
-                        context,
-                        recipe,
-                        ref.read(imageDownloadRepositoryProvider),
-                      );
+                      await SharingUtil.shareRecipe(context, recipe, ref.read(imageDownloadRepositoryProvider));
                       if (!context.mounted) return;
                       Navigator.pop(context);
                     },
                   ),
                   const SizedBox(height: 15),
-                  PhotoModalStyleCard(
-                    text: strings(context).close,
-                    onTap: () => Navigator.pop(context),
-                    isCenter: true,
-                  ),
+                  PhotoModalStyleCard(text: strings(context).close, onTap: () => Navigator.pop(context), isCenter: true),
                 ],
               ),
             );
@@ -901,12 +673,7 @@ class _RecipeCard extends ConsumerWidget {
   final String category;
   final SavedRecipesViewModel viewModel;
 
-  const _RecipeCard({
-    required this.recipe,
-    required this.onOptionsTap,
-    required this.category,
-    required this.viewModel,
-  });
+  const _RecipeCard({required this.recipe, required this.onOptionsTap, required this.category, required this.viewModel});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -920,10 +687,7 @@ class _RecipeCard extends ConsumerWidget {
           if (currentUser != null) {
             if (recipe.userId == currentUser.id) {
               // Recipe belongs to current user
-              displayCategory =
-                  recipe.isPublic
-                      ? strings(context).recipeTabShared
-                      : strings(context).recipeTabCreated;
+              displayCategory = recipe.isPublic ? strings(context).recipeTabShared : strings(context).recipeTabCreated;
             } else {
               // Recipe doesn't belong to current user, so it's saved
               displayCategory = strings(context).recipeTabSaved;
@@ -931,10 +695,7 @@ class _RecipeCard extends ConsumerWidget {
           }
         }
 
-        await NavigationUtil.pushFromBottom<bool>(
-          context,
-          DetailRecipePage(recipe: recipe, category: displayCategory),
-        );
+        await NavigationUtil.pushFromBottom<bool>(context, DetailRecipePage(recipe: recipe, category: displayCategory));
         // Always refresh the recipes when returning from detail page
         if (context.mounted) {
           viewModel.loadRecipes();
@@ -945,106 +706,63 @@ class _RecipeCard extends ConsumerWidget {
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: AppColors.greyScale200),
           color: AppColors.white,
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.black.withValues(alpha: 0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          boxShadow: [BoxShadow(color: AppColors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             SizedBox(
               height: 120,
               child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(6),
-                ),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
                 child:
                     recipe.imageUrl != null
-                        ? Image.network(
-                          recipe.imageUrl!,
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          height: double.infinity,
-                        )
-                        : Image.asset(
-                          'assets/no_image.png',
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          height: double.infinity,
-                        ),
+                        ? Image.network(recipe.imageUrl!, fit: BoxFit.cover, width: double.infinity, height: double.infinity)
+                        : Image.asset('assets/no_image.png', fit: BoxFit.cover, width: double.infinity, height: double.infinity),
               ),
             ),
-            SizedBox(
-              height: 64,
-              child: Padding(
-                padding: const EdgeInsets.only(
-                  left: 12.0,
-                  right: 12.0,
-                  top: 12.0,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            recipe.recipeName,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.greyScale800,
-                              height: 1.2,
-                            ),
-                          ),
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          recipe.recipeName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.greyScale800, height: 1.2),
                         ),
-                        GestureDetector(
-                          onTap: onOptionsTap,
-                          child: const Icon(
-                            Icons.more_vert,
-                            size: 20,
-                            color: AppColors.black,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        // Show user's rating as five-star system
-                        Builder(
-                          builder: (context) {
-                            final userRating = viewModel.getUserRatingForRecipe(
-                              recipe.id,
-                            );
-                            return Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: List.generate(5, (index) {
-                                return Icon(
-                                  index < (userRating ?? 0)
-                                      ? Icons.star
-                                      : Icons.star_border,
-                                  color:
-                                      index < (userRating ?? 0)
-                                          ? AppColors.secondary600
-                                          : AppColors.greyScale400,
-                                  size: 14,
-                                );
-                              }),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                      ),
+                      GestureDetector(onTap: onOptionsTap, child: const Icon(Icons.more_vert, size: 20, color: AppColors.black)),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      // Show user's rating as five-star system
+                      Builder(
+                        builder: (context) {
+                          final userRating = viewModel.getUserRatingForRecipe(recipe.id);
+                          return Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: List.generate(5, (index) {
+                              return Icon(
+                                index < (userRating ?? 0) ? Icons.star : Icons.star_border,
+                                color: index < (userRating ?? 0) ? AppColors.secondary600 : AppColors.greyScale400,
+                                size: 14,
+                              );
+                            }),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],
@@ -1062,14 +780,7 @@ class _FilterChip extends StatelessWidget {
   final bool isModalChip;
   final bool isDisabled;
 
-  const _FilterChip({
-    required this.label,
-    this.onTap,
-    this.onDeleted,
-    this.isSelected = false,
-    this.isModalChip = false,
-    this.isDisabled = false,
-  });
+  const _FilterChip({required this.label, this.onTap, this.onDeleted, this.isSelected = false, this.isModalChip = false, this.isDisabled = false});
 
   @override
   Widget build(BuildContext context) {
@@ -1090,10 +801,7 @@ class _FilterChip extends StatelessWidget {
               isDisabled
                   ? null
                   : isModalChip
-                  ? Border.all(
-                    color: isSelected ? AppColors.primary800 : AppColors.white,
-                    width: 1,
-                  )
+                  ? Border.all(color: isSelected ? AppColors.primary800 : AppColors.white, width: 1)
                   : Border.all(color: AppColors.primary700, width: 1),
         ),
         child: Row(
@@ -1106,12 +814,8 @@ class _FilterChip extends StatelessWidget {
                     isDisabled
                         ? AppColors.greyScale400
                         : isModalChip
-                        ? (isSelected
-                            ? AppColors.white
-                            : AppColors.greyScale800)
-                        : (isSelected
-                            ? AppColors.primary700
-                            : AppColors.primary700),
+                        ? (isSelected ? AppColors.white : AppColors.greyScale800)
+                        : (isSelected ? AppColors.primary700 : AppColors.primary700),
                 fontSize: 12,
                 height: 1.2,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
@@ -1119,14 +823,7 @@ class _FilterChip extends StatelessWidget {
             ),
             if (onDeleted != null) ...[
               const SizedBox(width: 2),
-              GestureDetector(
-                onTap: onDeleted,
-                child: Icon(
-                  Icons.close,
-                  size: 12,
-                  color: isModalChip ? AppColors.white : AppColors.primary700,
-                ),
-              ),
+              GestureDetector(onTap: onDeleted, child: Icon(Icons.close, size: 12, color: isModalChip ? AppColors.white : AppColors.primary700)),
               const SizedBox(width: 2),
             ],
           ],
@@ -1156,14 +853,7 @@ class FilterIconWithDot extends StatelessWidget {
           Positioned(
             right: -2,
             top: 2,
-            child: Container(
-              width: 8,
-              height: 8,
-              decoration: const BoxDecoration(
-                color: AppColors.primary,
-                shape: BoxShape.circle,
-              ),
-            ),
+            child: Container(width: 8, height: 8, decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle)),
           ),
       ],
     );
