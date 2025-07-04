@@ -152,13 +152,6 @@ class SavedRecipesViewModel
 
         if (state.selectedSort == arg.sortByCookTime) {
           recipes.sort((a, b) => a.cookTime.compareTo(b.cookTime));
-        } else if (state.selectedSort == arg.sortByRating) {
-          // Sort by userRating only for shared (public) recipes
-          recipes.sort((a, b) {
-            double aRating = (state.userRatings[a.id] ?? a.userRating ?? 0).toDouble();
-            double bRating = (state.userRatings[b.id] ?? b.userRating ?? 0).toDouble();
-            return bRating.compareTo(aRating);
-          });
         } else {
           // Default to creation date descending
           recipes.sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -195,6 +188,15 @@ class SavedRecipesViewModel
       // Apply cuisine filter
       if (state.selectedCuisines.isNotEmpty) {
         recipes = await _filterRecipesBySelectedCuisines(recipes);
+      }
+
+      // Apply sort by user rating for all tabs, after fetching recipes
+      if (state.selectedSort == arg.sortByRating) {
+        recipes.sort((a, b) {
+          double aRating = (state.userRatings[a.id] ?? a.userRating ?? 0).toDouble();
+          double bRating = (state.userRatings[b.id] ?? b.userRating ?? 0).toDouble();
+          return bRating.compareTo(aRating);
+        });
       }
 
       state = state.copyWith(
