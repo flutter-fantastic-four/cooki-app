@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:cooki/core/utils/logger.dart';
 import 'package:cooki/presentation/pages/reviews/reviews_page.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -112,8 +113,8 @@ class FCMService {
     try {
       _fcmToken = await _firebaseMessaging.getToken();
       log('FCM Token: $_fcmToken');
-    } catch (e) {
-      log('FCM: Error getting token: $e');
+    } catch (e, stack) {
+      logError(e, stack, reason: 'FCM: Error getting token');
     }
   }
 
@@ -185,8 +186,8 @@ class FCMService {
       try {
         final Map<String, dynamic> data = jsonDecode(response.payload!);
         _handleNotificationNavigation(data);
-      } catch (e) {
-        log('FCM: Error parsing notification payload: $e');
+      } catch (e, stack) {
+        logError(e, stack, reason: 'FCM: Error parsing notification payload');
       }
     }
   }
@@ -222,8 +223,8 @@ class FCMService {
           .read(userRepositoryProvider)
           .updateUserFcmToken(userId, _fcmToken!);
       log('FCM: Token updated in Firestore');
-    } catch (e) {
-      log('FCM: Error updating token in Firestore: $e');
+    } catch (e, stack) {
+      logError(e, stack, reason: 'FCM: Error updating token in Firestore');
     }
   }
 }

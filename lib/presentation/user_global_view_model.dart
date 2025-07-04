@@ -50,12 +50,7 @@ class UserGlobalViewModel extends Notifier<AppUser?> {
   }
 
   Future<void> _updateFcmToken(String userId) async {
-    try {
-      await FCMService.updateTokenInFirestore(userId);
-    } catch (e, stack) {
-      // Handle error silently - FCM token update is not critical
-      logError(e, stack, reason: 'Error updating FCM token');
-    }
+    await FCMService.updateTokenInFirestore(userId);
   }
 }
 
