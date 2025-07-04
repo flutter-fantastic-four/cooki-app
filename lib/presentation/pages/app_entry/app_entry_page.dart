@@ -2,14 +2,30 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/services/fcm_service.dart';
 import '../../../core/utils/navigation_util.dart';
 import '../../../data/repository/providers.dart';
 import '../../user_global_view_model.dart';
 import '../login/login_page.dart';
 import 'app_entry_view_model.dart';
 
-class AppEntryPage extends ConsumerWidget {
+class AppEntryPage extends ConsumerStatefulWidget {
   const AppEntryPage({super.key});
+
+  @override
+  ConsumerState<AppEntryPage> createState() => _AppEntryPageState();
+}
+
+class _AppEntryPageState extends ConsumerState<AppEntryPage> {
+  @override
+  void initState() {
+    super.initState();
+    _initializeFCM();
+  }
+
+  Future<void> _initializeFCM() async {
+    await FCMService.initialize(ref);
+  }
 
   void _resolveAuthAndRoute(WidgetRef ref, BuildContext context) {
     ref.listen(authStateChangesProvider, (prev, next) {
@@ -52,7 +68,7 @@ class AppEntryPage extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     _resolveAuthAndRoute(ref, context);
 
     return const Scaffold(

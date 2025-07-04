@@ -10,8 +10,17 @@ class UserDto {
   final String? email;
   final String? profileImage;
   final String signInProvider;
+  final String preferredLanguage;
 
-  UserDto({required this.id, required this.name, required this.createdAt, this.email, this.profileImage, required this.signInProvider});
+  UserDto({
+    required this.id,
+    required this.name,
+    required this.createdAt,
+    this.email,
+    this.profileImage,
+    required this.signInProvider,
+    this.preferredLanguage = 'en',
+  });
 
   factory UserDto.fromMap(String id, Map<String, dynamic> map) {
     return UserDto(
@@ -21,8 +30,10 @@ class UserDto {
       email: map['email'],
       profileImage: map['profileImage'],
       signInProvider: map['signInProvider'],
+      preferredLanguage: map['preferredLanguage'] ?? 'en',
     );
   }
+
   factory UserDto.fromEntity(AppUser user) {
     return UserDto(
       id: user.id,
@@ -31,11 +42,19 @@ class UserDto {
       email: user.email,
       profileImage: user.profileImage,
       signInProvider: user.signInProvider.name,
+      preferredLanguage: user.preferredLanguage,
     );
   }
 
   Map<String, dynamic> toMap() {
-    return {'name': name, 'createdAt': createdAt, 'email': email, 'profileImage': profileImage, 'signInProvider': signInProvider};
+    return {
+      'name': name,
+      'createdAt': createdAt,
+      'email': email,
+      'profileImage': profileImage,
+      'signInProvider': signInProvider,
+      'preferredLanguage': preferredLanguage,
+    };
   }
 
   AppUser toEntity() {
@@ -46,6 +65,7 @@ class UserDto {
       email: email,
       profileImage: profileImage,
       signInProvider: SignInMethod.values.byName(signInProvider),
+      preferredLanguage: preferredLanguage,
     );
   }
 }

@@ -4,8 +4,12 @@ import '../dto/user_dto.dart';
 
 abstract class UserDataSource {
   Future<UserDto?> getUserById(String uid);
+
   Future<void> saveUser(UserDto user);
+
   Future<void> deleteUser(UserDto user);
+
+  Future<void> updateUserFcmToken(String userId, String fcmToken);
 }
 
 class UserFirestoreDataSource implements UserDataSource {
@@ -28,5 +32,12 @@ class UserFirestoreDataSource implements UserDataSource {
   @override
   Future<void> deleteUser(UserDto user) async {
     await _firestore.collection('users').doc(user.id).delete();
+  }
+
+  @override
+  Future<void> updateUserFcmToken(String userId, String fcmToken) async {
+    await _firestore.collection('users').doc(userId).update({
+      'fcmToken': fcmToken,
+    });
   }
 }
