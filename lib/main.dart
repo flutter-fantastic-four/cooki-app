@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:cooki/firebase_options.dart';
 import 'package:cooki/presentation/pages/app_entry/app_entry_page.dart';
 import 'package:cooki/presentation/settings_global_view_model.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -15,6 +17,16 @@ import 'app/theme.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'gen/l10n/app_localizations.dart';
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (_) {}
+  log('FCM: Background message received: ${message.messageId}');
+}
 
 void main() async {
   runZonedGuarded(
@@ -29,6 +41,12 @@ void main() async {
           options: DefaultFirebaseOptions.currentPlatform,
         );
       } catch (_) {} // Firebase가 이미 초기화된 경우 무시
+
+      // Set FCM background message handler
+      FirebaseMessaging.onBackgroundMessage(
+        _firebaseMessagingBackgroundHandler,
+      );
+
       // 카카오 SDK 초기화
       final remoteConfig = FirebaseRemoteConfig.instance;
       await remoteConfig.fetchAndActivate();
