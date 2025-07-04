@@ -129,7 +129,7 @@ class FCMService {
     FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
       log('FCM: Token refreshed: $newToken');
       _fcmToken = newToken;
-      // You might want to update the token in your user's Firestore document here
+      // TODO: Update the FCM token in user's Firestore document here
     });
   }
 
