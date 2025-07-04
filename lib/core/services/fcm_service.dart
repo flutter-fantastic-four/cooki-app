@@ -1,22 +1,23 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:cooki/core/utils/logger.dart';
 import 'package:cooki/presentation/pages/reviews/reviews_page.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../data/repository/providers.dart';
+import '../../data/repository/user_repository.dart';
 
 class FCMService {
   static final _firebaseMessaging = FirebaseMessaging.instance;
   static final _localNotifications = FlutterLocalNotificationsPlugin();
   static String? _fcmToken;
-  static WidgetRef? _ref;
 
-  static Future<void> initialize(WidgetRef ref) async {
-    _ref = ref;
+  static BuildContext? _context;
+
+  static Future<void> initialize(BuildContext context) async {
+    _context = context;
 
     // Request permission for notifications
     await _requestPermission();
@@ -112,8 +113,8 @@ class FCMService {
     try {
       _fcmToken = await _firebaseMessaging.getToken();
       log('FCM Token: $_fcmToken');
-    } catch (e) {
-      log('FCM: Error getting token: $e');
+    } catch (e, stack) {
+      logError(e, stack, reason: 'FCM: Error getting token');
     }
   }
 
@@ -185,21 +186,20 @@ class FCMService {
       try {
         final Map<String, dynamic> data = jsonDecode(response.payload!);
         _handleNotificationNavigation(data);
-      } catch (e) {
-        log('FCM: Error parsing notification payload: $e');
+      } catch (e, stack) {
+        logError(e, stack, reason: 'FCM: Error parsing notification payload');
       }
     }
   }
 
   static void _handleNotificationNavigation(Map<String, dynamic> data) {
-    if (_ref?.context.mounted != true) return;
+    if (_context == null || !_context!.mounted) return;
 
     final String? type = data['type'];
     final String? recipeId = data['recipeId'];
 
     if (type == 'review_added' && recipeId != null) {
-      // Navigate to recipe detail page
-      Navigator.of(_ref!.context).push(
+      Navigator.of(_context!).push(
         MaterialPageRoute(
           builder:
               (context) => ReviewsPage(
@@ -213,17 +213,17 @@ class FCMService {
 
   static String? get fcmToken => _fcmToken;
 
-  static Future<void> updateTokenInFirestore(String userId) async {
-    if (_fcmToken == null || _ref == null) return;
+  static Future<void> updateTokenInFirestore({
+    required String userId,
+    required UserRepository userRepository,
+  }) async {
+    if (_fcmToken == null) return;
 
     try {
-      // Update the user's FCM token in Firestore
-      await _ref!
-          .read(userRepositoryProvider)
-          .updateUserFcmToken(userId, _fcmToken!);
+      await userRepository.updateUserFcmToken(userId, _fcmToken!);
       log('FCM: Token updated in Firestore');
-    } catch (e) {
-      log('FCM: Error updating token in Firestore: $e');
+    } catch (e, stack) {
+      logError(e, stack, reason: 'FCM: Error updating token in Firestore');
     }
   }
 }
