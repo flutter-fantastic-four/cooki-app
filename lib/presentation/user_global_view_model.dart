@@ -50,7 +50,10 @@ class UserGlobalViewModel extends Notifier<AppUser?> {
   }
 
   Future<void> _updateFcmToken(String userId) async {
-    await FCMService.updateTokenInFirestore(userId);
+    await FCMService.updateTokenInFirestore(
+      userId: userId,
+      userRepository: ref.read(userRepositoryProvider),
+    );
   }
 }
 

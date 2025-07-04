@@ -24,7 +24,7 @@ class _AppEntryPageState extends ConsumerState<AppEntryPage> {
   }
 
   Future<void> _initializeFCM() async {
-    await FCMService.initialize(ref);
+    await FCMService.initialize(context);
   }
 
   void _resolveAuthAndRoute(WidgetRef ref, BuildContext context) {
