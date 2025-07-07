@@ -12,6 +12,8 @@ abstract class UserRepository {
   Future<void> saveUserToDatabase(AppUser user);
 
   Future<String> changeProfileImage(AppUser user, File imageFile);
+
+  Future<void> updateUserFcmToken(String userId, String fcmToken);
 }
 
 class UserRepositoryImpl implements UserRepository {
@@ -34,5 +36,10 @@ class UserRepositoryImpl implements UserRepository {
   @override
   Future<String> changeProfileImage(AppUser user, File imageFile) async {
     return await _storageDataSource.uploadImageFile(imageFile, user.id, 'user');
+  }
+
+  @override
+  Future<void> updateUserFcmToken(String userId, String fcmToken) async {
+    await _userDataSource.updateUserFcmToken(userId, fcmToken);
   }
 }
