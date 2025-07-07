@@ -150,7 +150,7 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
                             final isSelected = state.selectedCategory == category;
                             final isLastTab = index == AppConstants.recipeTabCategories(strings(context)).length - 1;
                             return Padding(
-                              padding: EdgeInsets.only(left: index == 0 ? 16 : 0, right: isLastTab ? 16 : 8),
+                              padding: EdgeInsets.only(left: index == 0 ? 12 : 0, right: isLastTab ? 12 : 0),
                               child: GestureDetector(
                                 onTap: () async {
                                   final targetIndex = AppConstants.recipeTabCategories(strings(context)).indexOf(category);
