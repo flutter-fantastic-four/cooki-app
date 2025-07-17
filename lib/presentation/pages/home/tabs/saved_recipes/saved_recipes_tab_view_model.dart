@@ -193,8 +193,10 @@ class SavedRecipesViewModel
       // Apply sort by user rating for all tabs, after fetching recipes
       if (state.selectedSort == arg.sortByRating) {
         recipes.sort((a, b) {
-          double aRating = (state.userRatings[a.id] ?? a.userRating ?? 0).toDouble();
-          double bRating = (state.userRatings[b.id] ?? b.userRating ?? 0).toDouble();
+          double aRating =
+              (state.userRatings[a.id] ?? a.userRating ?? 0).toDouble();
+          double bRating =
+              (state.userRatings[b.id] ?? b.userRating ?? 0).toDouble();
           return bRating.compareTo(aRating);
         });
       }
@@ -416,6 +418,42 @@ class SavedRecipesViewModel
 
   int? getUserRatingForRecipe(String recipeId) {
     return state.userRatings[recipeId];
+  }
+
+  void updateUserRatingForRecipe(String recipeId, int newRating) {
+    final updatedRatings = Map<String, int?>.from(state.userRatings);
+    updatedRatings[recipeId] = newRating;
+    state = state.copyWith(userRatings: updatedRatings);
+  }
+
+  Future<void> refreshUserRatingForRecipe(
+    String recipeId, {
+    required bool isPublic,
+  }) async {
+    try {
+      final currentUser = ref.read(userGlobalViewModelProvider);
+      if (currentUser == null) return;
+      int? newRating;
+      if (isPublic) {
+        final reviewRepository = ref.read(reviewRepositoryProvider);
+        final userReview = await reviewRepository.getUserReviewForRecipe(
+          recipeId: recipeId,
+          userId: currentUser.id,
+        );
+        newRating = userReview?.rating;
+      } else {
+        // For private recipes, fetch the recipe and get userRating
+        final recipeRepository = ref.read(recipeRepositoryProvider);
+        final recipe = await recipeRepository.getRecipeById(recipeId);
+        newRating =
+            (recipe != null && recipe.userRating > 0)
+                ? recipe.userRating
+                : null;
+      }
+      updateUserRatingForRecipe(recipeId, newRating ?? 0);
+    } catch (e) {
+      // Optionally handle error
+    }
   }
 
   /// Get filtered recipes with category translation support

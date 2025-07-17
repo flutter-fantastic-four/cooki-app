@@ -528,6 +528,12 @@ class DetailRecipePage extends ConsumerWidget {
               ref
                   .read(reviewsViewModelProvider(recipe.id).notifier)
                   .refreshReviews();
+              // Get the latest user rating
+              final detailState = ref.read(
+                recipeDetailViewModelProvider(recipe.id),
+              );
+              final userRating = detailState.userRating ?? 0;
+              Navigator.of(context).pop(userRating);
             }
           },
           child: _buildRatingStars(state.userRating),
