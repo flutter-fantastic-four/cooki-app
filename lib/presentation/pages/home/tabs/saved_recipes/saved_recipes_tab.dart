@@ -163,86 +163,81 @@ class _MyRecipesPageState extends ConsumerState<MyRecipesPage> {
           // Category tabs
           SizedBox(
             height: 38,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children:
-                      AppConstants.recipeTabCategories(
-                        strings(context),
-                      ).asMap().entries.map((entry) {
-                        final index = entry.key;
-                        final category = entry.value;
-                        final isSelected = state.selectedCategory == category;
-                        final isLastTab =
-                            index ==
-                            AppConstants.recipeTabCategories(
-                                  strings(context),
-                                ).length -
-                                1;
-                        return Padding(
-                          padding: EdgeInsets.only(
-                            left: index == 0 ? 0 : 20,
-                            right: isLastTab ? 0 : 0,
-                          ),
-                          child: GestureDetector(
-                            onTap: () async {
-                              final targetIndex =
-                                  AppConstants.recipeTabCategories(
-                                    strings(context),
-                                  ).indexOf(category);
-                              viewModel.setSelectedCategory(category);
-                              await viewModel.loadRecipes();
-                              _pageController.jumpToPage(targetIndex);
-                            },
-                            child: Stack(
-                              clipBehavior: Clip.none,
-                              children: [
-                                Container(
-                                  height: 26,
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    category,
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight:
-                                          isSelected
-                                              ? FontWeight.w600
-                                              : FontWeight.w400,
-                                      color:
-                                          isSelected
-                                              ? AppColors.primary700
-                                              : AppColors.greyScale800,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children:
+                  AppConstants.recipeTabCategories(
+                    strings(context),
+                  ).asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final category = entry.value;
+                    final isSelected = state.selectedCategory == category;
+                    final isLastTab =
+                        index ==
+                        AppConstants.recipeTabCategories(
+                              strings(context),
+                            ).length -
+                            1;
+                    return Padding(
+                      padding: EdgeInsets.only(
+                        left: index == 0 ? 0 : 20,
+                        right: isLastTab ? 0 : 0,
+                      ),
+                      child: GestureDetector(
+                        onTap: () async {
+                          final targetIndex = AppConstants.recipeTabCategories(
+                            strings(context),
+                          ).indexOf(category);
+                          viewModel.setSelectedCategory(category);
+                          await viewModel.loadRecipes();
+                          _pageController.jumpToPage(targetIndex);
+                        },
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Container(
+                              height: 26,
+                              alignment: Alignment.center,
+                              child: Text(
+                                category,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight:
+                                      isSelected
+                                          ? FontWeight.w600
+                                          : FontWeight.w400,
+                                  color:
+                                      isSelected
+                                          ? AppColors.primary700
+                                          : AppColors.greyScale800,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (isSelected)
+                              Positioned(
+                                bottom: 0,
+                                left: 0,
+                                right: 0,
+                                child: Container(
+                                  height: 2,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary,
                                   ),
                                 ),
-                                if (isSelected)
-                                  Positioned(
-                                    bottom: 0,
-                                    left: 0,
-                                    right: 0,
-                                    child: Container(
-                                      height: 2,
-                                      decoration: BoxDecoration(
-                                        color: AppColors.primary,
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                ),
-                Container(
-                  width: double.infinity,
-                  height: 1,
-                  color: AppColors.greyScale50,
-                ),
-              ],
+                              ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
             ),
+          ),
+          // Divider below the whole tab bar
+          Container(
+            width: double.infinity,
+            height: 1,
+            color: AppColors.greyScale50,
           ),
           // Active filters
           if (state.hasActiveFilters)
